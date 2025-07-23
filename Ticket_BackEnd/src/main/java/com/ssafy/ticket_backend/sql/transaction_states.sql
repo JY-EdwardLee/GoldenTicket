@@ -1,4 +1,4 @@
-CREATE TABLE transaction_state (
+CREATE TABLE transaction_states (
     id BIGSERIAL PRIMARY KEY,
 
     ticket_id BIGINT NOT NULL,

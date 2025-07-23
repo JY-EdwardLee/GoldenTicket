@@ -1,4 +1,4 @@
-CREATE TABLE group_watch (
+CREATE TABLE group_entry (
     id BIGSERIAL PRIMARY KEY,
     game_id BIGINT NOT NULL,
     user_cnt INTEGER DEFAULT 0,
