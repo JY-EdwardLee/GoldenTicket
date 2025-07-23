@@ -1,6 +1,5 @@
-CREATE TABLE posts
-(
-    id         BIGSERIAL PRIMARY KEY,
+CREATE TABLE posts (
+    id BIGSERIAL PRIMARY KEY,
 
     board_id   BIGINT       NOT NULL, -- FK: board.id
     user_id    BIGINT       NOT NULL, -- FK: users.id
@@ -17,10 +16,10 @@ CREATE TABLE posts
     is_delete  BOOLEAN   DEFAULT FALSE,
 
     CONSTRAINT fk_post_board FOREIGN KEY (board_id)
-        REFERENCES board (id)
+        REFERENCES boards(id)
         ON DELETE CASCADE,
 
     CONSTRAINT fk_post_user FOREIGN KEY (user_id)
-        REFERENCES users (id)
+        REFERENCES users(id)
         ON DELETE CASCADE
 );
