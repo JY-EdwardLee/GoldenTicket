@@ -26,11 +26,11 @@ public class JwtUtil {
     /**
      * 액세스 토큰 생성 메서드
      *
-     * @param userId 토큰에 담길 정보
+     * @param email 토큰에 담길 정보
      * @return 생성된 엑세스 토큰 문자열
      */
-    public String generateAccessToken(String userId) {
-        return Jwts.builder().setSubject(userId) // 토큰의 제목
+    public String generateAccessToken(String email) {
+        return Jwts.builder().setSubject(email) // 토큰의 제목
             .setIssuedAt(new Date()) // 발급 시간
             .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // 만료 시간
             .signWith(SignatureAlgorithm.HS256, SECRET_KEY) // 서명 방식 및 비밀키
@@ -40,11 +40,11 @@ public class JwtUtil {
     /**
      * 리프레시 토큰 생성 메서드
      *
-     * @param userId 토큰에 담길 정보
+     * @param email 토큰에 담길 정보
      * @return 생성된 리프레시 토큰 문자열
      */
-    public String generateRefreshToken(String userId) {
-        return Jwts.builder().setSubject(userId) // 토큰 제목에 userId
+    public String generateRefreshToken(String email) {
+        return Jwts.builder().setSubject(email) // 토큰 제목에 email
             .setIssuedAt(new Date()) // 발급 시간
             .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TIME))
             .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
@@ -52,16 +52,16 @@ public class JwtUtil {
 
 
     /**
-     * JWT에서 userId 가져오기
+     * JWT에서 email 가져오기
      *
      * @param token JWT 문자열
-     * @return userId (subject 필드)
+     * @return email (subject 필드)
      */
     public String getUserId(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY) // 비밀키로 디코딩
             .parseClaimsJws(token) // JWT 파싱
             .getBody() // JWT  내부의 payload(body) 가져옴
-            .getSubject(); // 그 중에서 subject(userId)를 꺼냄
+            .getSubject(); // 그 중에서 subject(email)를 꺼냄
     }
 
     /**
