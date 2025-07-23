@@ -10,17 +10,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 public class HealthCheckController {
-  private final JdbcTemplate jdbcTemplate;
 
-  @GetMapping("/health-check")
-  public ResponseEntity<String> healthCheck() {
-    try {
-      jdbcTemplate.queryForObject("SELECT 1", Integer.class);
+    private final JdbcTemplate jdbcTemplate;
 
-      return ResponseEntity.ok("Database connection is successful!");
-    } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body("Database connection failed: " + e.getMessage());
+    @GetMapping("/health-check")
+    public ResponseEntity<String> healthCheck() {
+        try {
+            jdbcTemplate.queryForObject("SELECT 1", Integer.class);
+
+            return ResponseEntity.ok("Database connection is successful!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Database connection failed: " + e.getMessage());
+        }
     }
-  }
 }
