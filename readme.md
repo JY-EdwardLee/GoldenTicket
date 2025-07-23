@@ -23,23 +23,32 @@
         - 작성 예시
             
             ```
-            <type>(<scope>): <간단한 설명>
+               <type>(<scope>): <간단한 설명>
             feat(auth): 로그인 기능 추가
             fix(login): 로그인 실패 시 예외 처리 누락 수정
             ```
             
-    - Java
+    - Branch
         
-        ```java
-        for () {
-        	괄호는 올려서??? -> 협의 필요
-        }
         
-        if () {
-        	System.out.println("한 줄이어도 반드시 괄호로 묶기");
-        }
-        ```
-        
+        | 브랜치 종류 | 접두사(prefix) | 용도 설명 | 예시 |
+        | --- | --- | --- | --- |
+        | **메인 브랜치** | `main` | 운영 환경에 배포되는 최종 코드 | `main` |
+        | **개발 브랜치** | `develop` | 기능 개발 브랜치가 병합되는 통합 개발 브랜치 | `develop` |
+        | **기능 개발** | `feature/` | 새로운 기능 개발 | `feature/login`, `feature/user-page` |
+        | **버그 수정** | `bugfix/` 또는 `fix/` | 개발 중 발견된 버그 수정 | `bugfix/login-error`, `fix/crash` |
+        | **긴급 수정** | `hotfix/` | 운영 중 긴급 수정 | `hotfix/typo-fix`, `hotfix/payment` |
+        | **코드 리팩토링** | `refactor/` | 기능 변경 없이 코드 구조 개선 | `refactor/user-service` |
+        | **문서 작업** | `docs/` | README, 문서, 위키 수정 | `docs/update-readme` |
+        | **테스트 코드** | `test/` | 테스트 코드 작성 또는 수정 | `test/login-test`, `test/api-call` |
+        | **환경 설정** | `chore/` | 빌드 설정, 패키지 관리 등 잡무성 작업 | `chore/init-project`, `chore/lint` |
+    - [Java(BE)](https://www.notion.so/BE-23915952f338805cb00fea2f797cf5d6?pvs=21)
+        - 링크 참고
+        - Intellij 추천 Plugin
+            - Atom Material Icons
+            - CodeGlance
+            - Key Promoter X
+            - Rainbow Brackets
 - GIT 협업 룰
     - 아침에 pull (프론트/백 각자)
     - 개인 branch 생성
