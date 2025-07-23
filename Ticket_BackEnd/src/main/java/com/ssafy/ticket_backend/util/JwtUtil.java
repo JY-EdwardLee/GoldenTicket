@@ -1,10 +1,14 @@
-package com.ssafy.ticket_backend.jwt;
+package com.ssafy.ticket_backend.util;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.Date;
 
 @Component
 public class JwtUtil {
@@ -27,10 +31,10 @@ public class JwtUtil {
      */
     public String generateAccessToken(String userId) {
         return Jwts.builder().setSubject(userId) // 토큰의 제목
-                .setIssuedAt(new Date()) // 발급 시간
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // 만료 시간
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY) // 서명 방식 및 비밀키
-                .compact();
+            .setIssuedAt(new Date()) // 발급 시간
+            .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // 만료 시간
+            .signWith(SignatureAlgorithm.HS256, SECRET_KEY) // 서명 방식 및 비밀키
+            .compact();
     }
 
     /**
@@ -41,8 +45,9 @@ public class JwtUtil {
      */
     public String generateRefreshToken(String userId) {
         return Jwts.builder().setSubject(userId) // 토큰 제목에 userId
-                .setIssuedAt(new Date()) // 발급 시간
-                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TIME)).signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
+            .setIssuedAt(new Date()) // 발급 시간
+            .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TIME))
+            .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
     }
 
 
@@ -54,9 +59,9 @@ public class JwtUtil {
      */
     public String getUserId(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY) // 비밀키로 디코딩
-                .parseClaimsJws(token) // JWT 파싱
-                .getBody() // JWT  내부의 payload(body) 가져옴
-                .getSubject(); // 그 중에서 subject(userId)를 꺼냄
+            .parseClaimsJws(token) // JWT 파싱
+            .getBody() // JWT  내부의 payload(body) 가져옴
+            .getSubject(); // 그 중에서 subject(userId)를 꺼냄
     }
 
     /**

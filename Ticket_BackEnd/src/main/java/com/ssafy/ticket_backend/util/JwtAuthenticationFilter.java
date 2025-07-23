@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.jwt;
+package com.ssafy.ticket_backend.util;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
