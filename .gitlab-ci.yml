@@ -47,7 +47,7 @@ deploy:
     - echo "🚀 Deploying to EC2..."
     # SSH 키 경로를 명시적으로 ~/.ssh/id_rsa로 사용
     # JAR 파일을 EC2의 지정된 경로로 복사
-    - scp -i ~/.ssh/id_rsa build/libs/$JAR_NAME $EC2_USER@$EC2_HOST:$DEPLOY_PATH/
+    - scp -i ~/.ssh/id_rsa Ticket_BackEnd/build/libs/$JAR_NAME $EC2_USER@$EC2_HOST:$DEPLOY_PATH
     # EC2에서 배포 스크립트 실행 (JAR_NAME을 인자로 전달)
     - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "bash $DEPLOY_PATH/deploy.sh $JAR_NAME"
   only:
