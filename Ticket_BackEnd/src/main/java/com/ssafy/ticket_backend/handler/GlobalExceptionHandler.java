@@ -14,6 +14,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handlePostCreateFailException(PostCreateFailException e) {
         ErrorResponse response = new ErrorResponse("Post_Create_Fail", e.getMessage());
 
-        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

@@ -30,7 +30,7 @@ public class PostController {
      */
     @PostMapping("")
     public ResponseEntity<PostResponse> createPosts(@RequestBody PostRequest postRequest) {
-        // TODO postService.createPost();
+        postService.createPost(postRequest);
 
         return ResponseEntity.ok(new PostResponse(true, "게시글 작성 성공"));
     }
@@ -43,9 +43,9 @@ public class PostController {
      */
     @GetMapping("/{postId}")
     public ResponseEntity<PostDetailResponse> getPostDetail(@PathVariable Long postId) {
-        //TODO
-        PostDetailResponse postDetailResponse = null;
+        postService.getPostDetail(postId);
 
+        PostDetailResponse postDetailResponse = null;
         return ResponseEntity.ok(postDetailResponse);
     }
 

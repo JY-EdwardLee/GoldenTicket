@@ -41,7 +41,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.selectUserByEmail(email);
     }
 
-
     // 회원가입
     @Override
     public JwtTokenResponse signup(User user) {
@@ -114,7 +113,6 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
-
     // 네이버 로그인
     @Override
     public OAuthResponse loginWithNaver(String code) {
@@ -175,6 +173,4 @@ public class UserServiceImpl implements UserService {
         response.setToken(new JwtTokenResponse(accessToken, refreshToken));
         return response;
     }
-
-
 }

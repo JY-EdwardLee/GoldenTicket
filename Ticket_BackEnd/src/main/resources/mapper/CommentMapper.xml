@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ticket_backend.mapper.CommentMapper">
+
+  <insert id="insertComment" parameterType="CommentRequest">
+    INSERT INTO comments (post_id, user_id, content)
+    VALUES (#{postId}, #{userId}, #{content})
+  </insert>
+
+</mapper>
+
+

@@ -1,6 +1,6 @@
 package com.ssafy.ticket_backend.dto.response;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -8,14 +8,21 @@ import lombok.Data;
 @AllArgsConstructor
 public class PostDetailResponse {
 
-    int id;  // 게시글 id
+    private Long id;            // 게시글 ID (PK)
+    private String boardId;     // 게시판 종류 (FREE, NOTICE, 등)
+    private Long userId;        // 작성자 ID
+
+    private LocalDateTime createdAt;   // 생성일
+    private LocalDateTime updatedAt;   // 수정일
+
+    private int viewCount;     // 조회수
+    private String title;      // 제목
+    private String content;    // 내용
+    private String imageUrl;   // 이미지 URL
+
+    private int likeCount;     // 좋아요 수
+    private boolean isDelete;  // 삭제 여부
+
     // TODO UserResponse user;  // 작성자
-    String title;  // 제목
-    String content;  // 내용
-    String imageUrl;  // 이미지 url
-    Date createDate;  // 작성 시간
-    Date updateDate;  // 수정 시간
-    int view;  // 조회수
-    int like;  // 좋아요
     // TODO List<Comments> comments  // 댓글 목록
 }

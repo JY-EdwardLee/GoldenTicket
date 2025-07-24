@@ -1,4 +1,4 @@
-CREATE TABLE boards (
-    id BIGSERIAL PRIMARY KEY,
-    type VARCHAR(50) NOT NULL -- 예: 공지사항, 자유게시판, 후기 등
+CREATE TABLE boards
+(
+    type VARCHAR(50) PRIMARY KEY -- 공지사항, 자유게시판 등 고유하게 사용
 );
