@@ -1,6 +1,6 @@
 CREATE TABLE accounts
 (
-    id             BIGSERIAL PRIMARY KEY,
+    account_id     BIGSERIAL PRIMARY KEY,
 
     user_id        BIGINT UNIQUE, -- 계정당 계좌 1개
     bank_code      VARCHAR(20),
@@ -8,6 +8,6 @@ CREATE TABLE accounts
     account_owner  VARCHAR(100),
 
     CONSTRAINT fk_accounts_user FOREIGN KEY (user_id)
-        REFERENCES users (id)
+        REFERENCES users (user_id)
         ON DELETE CASCADE
 );

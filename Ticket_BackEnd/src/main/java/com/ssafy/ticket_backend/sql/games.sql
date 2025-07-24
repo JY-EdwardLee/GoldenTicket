@@ -1,6 +1,6 @@
 CREATE TABLE games
 (
-    id            BIGSERIAL PRIMARY KEY,
+    game_id       BIGSERIAL PRIMARY KEY,
 
     game_datetime TIMESTAMP   NOT NULL, -- 경기 일시 (더블헤더 포함)
     home_team     VARCHAR(50) NOT NULL, -- 홈팀

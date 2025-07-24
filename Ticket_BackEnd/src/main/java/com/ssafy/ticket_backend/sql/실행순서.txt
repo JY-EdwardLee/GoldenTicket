@@ -2,12 +2,13 @@ users
 accounts
 games
 tickets
-waitlist 
-transaction_state
-board
-post
-post_like
-comment_like
-group_watch
-group_member
+waitlists
+transaction_states
+board_types
+posts
+posts_like
+comments
+comments_like
+group_entry
+group_users
 
