@@ -1,0 +1,53 @@
+image: gradle:7-jdk17
+
+stages:
+  - build
+  - deploy
+
+variables:
+  JAR_NAME: goldenticketBE.jar
+  EC2_USER: ubuntu
+  EC2_HOST: i13a109.p.ssafy.io
+  DEPLOY_PATH: /home/ubuntu/app
+  # SSH_KEY_PATH는 before_script에서 동적으로 설정되므로, 여기서는 제거하거나 주석 처리해도 무방합니다.
+
+before_script:
+  - echo "🔐 Setting up SSH key"
+  - mkdir -p ~/.ssh
+  # GitLab CI/CD 변수 SSH_PRIVATE_KEY를 사용하여 키 파일 생성
+  # CR/LF 문제 방지를 위해 tr -d '\r' 사용
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+  - chmod 600 ~/.ssh/id_rsa
+  # ssh-keyscan은 초기 연결 시 Known Hosts 파일에 서버 호스트 키를 추가하여
+  # 'Are you sure you want to continue connecting (yes/no)?' 메시지를 방지합니다.
+  # 이미 알려진 호스트인 경우 불필요하지만, 자동화된 환경에서는 추가하는 것이 좋습니다.
+  - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+
+build:
+  stage: build
+  script:
+    - echo "🏗️ Building project..."
+    # Gradle Wrapper 권한 부여 및 빌드 (테스트 제외)
+    - chmod +x ./gradlew
+    - ./gradlew clean build -x test
+    # 빌드된 JAR 파일 목록 확인
+    - ls build/libs/
+    # 정확히 하나의 JAR 파일만 있고 그 이름을 고정하고 싶을 때 유용합니다.
+    # 만약 여러 개의 JAR 파일이 생성될 가능성이 있다면, 특정 패턴으로 찾거나 더 견고한 방법 필요
+    - cp build/libs/*.jar build/libs/$JAR_NAME
+  artifacts:
+    paths:
+      - build/libs/$JAR_NAME
+    expire_in: 1 hour
+
+deploy:
+  stage: deploy
+  script:
+    - echo "🚀 Deploying to EC2..."
+    # SSH 키 경로를 명시적으로 ~/.ssh/id_rsa로 사용
+    # JAR 파일을 EC2의 지정된 경로로 복사
+    - scp -i ~/.ssh/id_rsa build/libs/$JAR_NAME $EC2_USER@$EC2_HOST:$DEPLOY_PATH/
+    # EC2에서 배포 스크립트 실행 (JAR_NAME을 인자로 전달)
+    - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "bash $DEPLOY_PATH/deploy.sh $JAR_NAME"
+  only:
+    - main # main 브랜치에 푸시될 때만 배포 실행
