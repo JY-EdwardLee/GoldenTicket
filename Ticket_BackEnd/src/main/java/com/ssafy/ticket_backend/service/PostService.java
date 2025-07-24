@@ -5,7 +5,7 @@ import com.ssafy.ticket_backend.dto.response.PostDetailResponse;
 
 public interface PostService {
 
-    boolean createPost(PostRequest postRequest);
+    public boolean createPost(PostRequest postRequest);
 
     PostDetailResponse getPostDetail(Long postId);
 }

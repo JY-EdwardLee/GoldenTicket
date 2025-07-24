@@ -1,21 +1,22 @@
-CREATE TABLE transaction_states (
-    id BIGSERIAL PRIMARY KEY,
+CREATE TABLE transaction_states
+(
+    transaction_id     BIGSERIAL PRIMARY KEY,
 
-    ticket_id BIGINT NOT NULL,
-    seller_id BIGINT NOT NULL,
-    buyer_id BIGINT,
+    ticket_id          BIGINT      NOT NULL,
+    seller_id          BIGINT      NOT NULL,
+    buyer_id           BIGINT,
 
-    status VARCHAR(50) NOT NULL,  -- 결제 전, 결제 완료, 관람완료, 결제 취소, 보류
+    transaction_status VARCHAR(50) NOT NULL, -- 결제 전, 결제 완료, 관람완료, 결제 취소, 보류
 
     CONSTRAINT fk_transaction_ticket FOREIGN KEY (ticket_id)
-        REFERENCES tickets(id)
+        REFERENCES tickets (ticket_id)
         ON DELETE CASCADE,
 
     CONSTRAINT fk_transaction_seller FOREIGN KEY (seller_id)
-        REFERENCES users(id)
+        REFERENCES users (user_id)
         ON DELETE CASCADE,
 
     CONSTRAINT fk_transaction_buyer FOREIGN KEY (buyer_id)
-        REFERENCES users(id)
+        REFERENCES users (user_id)
         ON DELETE CASCADE
 );
