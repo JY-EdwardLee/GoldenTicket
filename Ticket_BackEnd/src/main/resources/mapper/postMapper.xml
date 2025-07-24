@@ -3,41 +3,33 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.ticket_backend.mapper.PostMapper">
 
-  <resultMap id="postDetailMap" type="com.ssafy.ticket_backend.dto.response.PostDetailResponse">
-    <id property="id" column="post_id"/>
-    <result property="title" column="title"/>
-    <result property="content" column="content"/>
-    <result property="imageUrl" column="image_url"/>
-    <result property="createDate" column="created_at"/>
-    <result property="updateDate" column="updated_at"/>
-    <result property="view" column="view_count"/>
-    <result property="like" column="like_count"/>
-  </resultMap>
-
-  <insert id="insertPost" parameterType="com.ssafy.ticket_backend.dto.request.PostRequest">
-    INSERT INTO posts (title, content, board_type, image_url)
-    VALUES (#{title}, #{content}, #{boardType}, #{imageUrl})
+  <insert id="insertPost" parameterType="PostRequest">
+    INSERT INTO posts (user_id, title, content, board_id, image_url)
+    VALUES (#{userId}, #{title}, #{content}, #{boardType}, #{imageUrl})
   </insert>
 
-  <select id="findAllPosts" resultMap="postDetailMap">
+
+  <select id="findPostById" parameterType="Long" resultType="PostDetailResponse">
+    SELECT id, board_id, user_id, created_at, updated_at, view_count, title, content, image_url,
+    like_count, is_delete
+    FROM posts
+    WHERE id = #{id}
+  </select>
+
+  <select id="findAllPosts" parameterType="int" resultType="PostDetailResponse">
     SELECT post_id, title, content, image_url, created_at, updated_at, view_count, like_count
     FROM posts
     ORDER BY created_at DESC
   </select>
 
-  <select id="findPostById" parameterType="int" resultMap="postDetailMap">
-    SELECT post_id, title, content, image_url, created_at, updated_at, view_count, like_count
-    FROM posts
-    WHERE post_id = #{postId}
-  </select>
 
-  <update id="updatePost" parameterType="com.ssafy.ticket_backend.dto.request.PostRequest">
+  <update id="updatePost" parameterType="PostRequest">
     UPDATE posts
     SET
-      title = #{title},
-      content = #{content},
-      image_url = #{imageUrl},
-      updated_at = NOW()
+    title = #{title},
+    content = #{content},
+    image_url = #{imageUrl},
+    updated_at = NOW()
     WHERE post_id = #{postId}
   </update>
 
