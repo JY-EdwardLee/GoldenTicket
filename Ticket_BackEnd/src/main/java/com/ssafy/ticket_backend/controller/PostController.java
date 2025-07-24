@@ -58,7 +58,7 @@ public class PostController {
     @PatchMapping("/{postId}")
     public ResponseEntity<PostResponse> editPosts(@PathVariable Long postId) {
         // TODO
-
+        // ㅇㅇㅇ
         return ResponseEntity.ok(new PostResponse(true, "게시글 수정 성공"));
     }
 
