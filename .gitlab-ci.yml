@@ -35,7 +35,7 @@ build:
     - ls build/libs/
     # 정확히 하나의 JAR 파일만 있고 그 이름을 고정하고 싶을 때 유용합니다.
     # 만약 여러 개의 JAR 파일이 생성될 가능성이 있다면, 특정 패턴으로 찾거나 더 견고한 방법 필요
-    - cp build/libs/*.jar build/libs/$JAR_NAME
+    - cp build/libs/Ticket_BackEnd-0.0.1-SNAPSHOT.jar build/libs/$JAR_NAME
   artifacts:
     paths:
       - Ticket_BackEnd/build/libs/$JAR_NAME
