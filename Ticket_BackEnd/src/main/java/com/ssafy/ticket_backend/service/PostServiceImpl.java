@@ -16,7 +16,7 @@ public class PostServiceImpl implements PostService {
 
     public boolean createPost(PostRequest postRequest) {
         // 추후 사용자 정보 포함 (임시정보)
-        postRequest.setUserId(999);
+        postRequest.setUserId(1);  // 테스트 코드 TODO 삭제
 
         try {
             if (postRequest.getBoardType() == null) {
