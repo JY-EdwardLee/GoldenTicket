@@ -29,6 +29,13 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    // 네이버 로그인
+    @GetMapping("/auth/naver/callback")
+    public ResponseEntity<OAuthResponse> naverCallback(@RequestParam String code) {
+        OAuthResponse response = userService.loginWithNaver(code);
+        return ResponseEntity.ok(response);
+    }
+
     // 회원가입 - 유저 객체 받고 토큰 발급 후 반환
     @PostMapping("/signup")
     public ResponseEntity<JwtTokenResponse> signup(@RequestBody User user) {

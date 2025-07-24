@@ -15,4 +15,7 @@ public interface UserService {
 
     // 카카오 로그인
     OAuthResponse loginWithKakao(String code);
+
+    // 네이버 로그인
+    OAuthResponse loginWithNaver(String code);
 }
