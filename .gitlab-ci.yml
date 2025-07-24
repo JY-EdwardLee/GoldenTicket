@@ -51,4 +51,4 @@ deploy:
     # EC2에서 배포 스크립트 실행 (JAR_NAME을 인자로 전달)
     - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "bash $DEPLOY_PATH/deploy.sh $JAR_NAME"
   only:
-    - main # main 브랜치에 푸시될 때만 배포 실행
+    - master # master 브랜치에 푸시될 때만 배포 실행
