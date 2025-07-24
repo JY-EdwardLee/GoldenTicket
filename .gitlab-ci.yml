@@ -27,6 +27,7 @@ build:
   stage: build
   script:
     - echo "🏗️ Building project..."
+    - cd Ticket_BackEnd/
     # Gradle Wrapper 권한 부여 및 빌드 (테스트 제외)
     - chmod +x ./gradlew
     - ./gradlew clean build -x test
@@ -37,7 +38,7 @@ build:
     - cp build/libs/*.jar build/libs/$JAR_NAME
   artifacts:
     paths:
-      - build/libs/$JAR_NAME
+      - Ticket_BackEnd/build/libs/$JAR_NAME
     expire_in: 1 hour
 
 deploy:
