@@ -9,6 +9,47 @@
     FROM users
     WHERE email = #{email}
   </select>
-  
+
+  <!-- 유저 정보 삽입 -->
+  <insert id="insertUser" parameterType="com.ssafy.ticket_backend.model.User"
+    useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO users (
+    email,
+    password,
+    gender,
+    userName,
+    userRole,
+    nickname,
+    birthDate,
+    profilePhotoUrl,
+    phoneNumber,
+    myTeam,
+    socialProvider,
+    weight,
+    transferNumber,
+    receiveNumber,
+    paneltyPoint,
+    isBlock,
+    isDelete
+    ) VALUES (
+    #{email},
+    #{password},
+    #{gender},
+    #{userName},
+    #{userRole},
+    #{nickname},
+    #{birthDate},
+    #{profilePhotoUrl},
+    #{phoneNumber},
+    #{myTeam},
+    #{socialProvider},
+    #{weight},
+    #{transferNumber},
+    #{receiveNumber},
+    #{paneltyPoint},
+    #{isBlock},
+    #{isDelete}
+    )
+  </insert>
 
 </mapper>

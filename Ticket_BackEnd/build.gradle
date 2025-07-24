@@ -42,6 +42,8 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // JSON 파싱을 위한 Jackson 연동
+    // 카카오 서버에서 받은 JSON 응답을 자바객체로 변환 위함
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 }
 
