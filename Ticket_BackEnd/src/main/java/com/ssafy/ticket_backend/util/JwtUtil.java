@@ -50,7 +50,6 @@ public class JwtUtil {
             .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
     }
 
-
     /**
      * JWT에서 email 가져오기
      *
@@ -74,6 +73,7 @@ public class JwtUtil {
         try {
             // 토큰을 파싱해보고 문제가 없으면 유효하다고 판단
             Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
+
             return true;
         } catch (ExpiredJwtException e) {
             System.out.println("토큰이 만료됨: " + e.getMessage());
@@ -86,8 +86,7 @@ public class JwtUtil {
         } catch (IllegalArgumentException e) {
             System.out.println("잘못된 인자: " + e.getMessage());
         }
+
         return false;
     }
-
-
 }

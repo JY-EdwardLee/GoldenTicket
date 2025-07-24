@@ -1,14 +1,48 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.ssafy.live.model.dao.AddressDao">
-  <resultMap id="addressMap" type="com.ssafy.live.model.dto.Address">
-    <id property="ano" column="ano"/>
-    <result property="mno" column="mno"/>
+<mapper namespace="com.ssafy.ticket_backend.mapper.PostMapper">
+
+  <resultMap id="postDetailMap" type="com.ssafy.ticket_backend.dto.response.PostDetailResponse">
+    <id property="id" column="post_id"/>
     <result property="title" column="title"/>
-    <result property="address" column="address"/>
-    <result property="detailAddress" column="detail_address"/>
-    <result property="x" column="x"/>
-    <result property="y" column="y"/>
+    <result property="content" column="content"/>
+    <result property="imageUrl" column="image_url"/>
+    <result property="createDate" column="created_at"/>
+    <result property="updateDate" column="updated_at"/>
+    <result property="view" column="view_count"/>
+    <result property="like" column="like_count"/>
   </resultMap>
+
+  <insert id="insertPost" parameterType="com.ssafy.ticket_backend.dto.request.PostRequest">
+    INSERT INTO posts (title, content, board_type, image_url)
+    VALUES (#{title}, #{content}, #{boardType}, #{imageUrl})
+  </insert>
+
+  <select id="findAllPosts" resultMap="postDetailMap">
+    SELECT post_id, title, content, image_url, created_at, updated_at, view_count, like_count
+    FROM posts
+    ORDER BY created_at DESC
+  </select>
+
+  <select id="findPostById" parameterType="int" resultMap="postDetailMap">
+    SELECT post_id, title, content, image_url, created_at, updated_at, view_count, like_count
+    FROM posts
+    WHERE post_id = #{postId}
+  </select>
+
+  <update id="updatePost" parameterType="com.ssafy.ticket_backend.dto.request.PostRequest">
+    UPDATE posts
+    SET
+      title = #{title},
+      content = #{content},
+      image_url = #{imageUrl},
+      updated_at = NOW()
+    WHERE post_id = #{postId}
+  </update>
+
+  <delete id="deletePost" parameterType="int">
+    DELETE FROM posts WHERE post_id = #{postId}
+  </delete>
+
 </mapper>

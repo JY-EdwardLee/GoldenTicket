@@ -1,6 +1,7 @@
 package com.ssafy.ticket_backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HealthCheckController {
 
     private final JdbcTemplate jdbcTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @GetMapping("/health-check")
     public ResponseEntity<String> healthCheck() {
@@ -25,6 +27,18 @@ public class HealthCheckController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Database connection failed: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/health-check/redis")
+    public ResponseEntity<String> redisHealthCheck() {
+        try {
+            redisTemplate.getConnectionFactory().getConnection().ping();
+
+            return ResponseEntity.ok("Redis connection is successful!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Redis connection failed: " + e.getMessage());
         }
     }
 }
