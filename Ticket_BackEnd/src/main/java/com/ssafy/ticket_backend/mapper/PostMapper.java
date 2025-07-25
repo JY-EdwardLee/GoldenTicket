@@ -1,6 +1,7 @@
 package com.ssafy.ticket_backend.mapper;
 
 import com.ssafy.ticket_backend.dto.request.PostRequest;
+import com.ssafy.ticket_backend.dto.request.PostUpdateRequest;
 import com.ssafy.ticket_backend.dto.response.PostDetailResponse;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -11,9 +12,11 @@ public interface PostMapper {
 
     PostDetailResponse findPostById(Long postId);
 
+    int plusView(String post_id);
+
+    int deletePost(Long postId);
+
+    int updatePost(PostUpdateRequest postUpdateRequest);
+
 //    List<PostDetailResponse> findAllPosts();
-//
-//    void updatePost(PostRequest postRequest);
-//
-//    void deletePost(int postId);
 }

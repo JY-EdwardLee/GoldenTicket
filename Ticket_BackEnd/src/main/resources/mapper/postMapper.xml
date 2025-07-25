@@ -8,7 +8,6 @@
     VALUES (#{userId}, #{title}, #{content}, #{boardType}, #{imageUrl})
   </insert>
 
-
   <select id="findPostById" parameterType="Long" resultType="PostDetailResponse">
     SELECT id, board_id, user_id, created_at, updated_at, view_count, title, content, image_url,
     like_count, is_delete
@@ -16,14 +15,17 @@
     WHERE id = #{id}
   </select>
 
-  <select id="findAllPosts" parameterType="int" resultType="PostDetailResponse">
-    SELECT post_id, title, content, image_url, created_at, updated_at, view_count, like_count
-    FROM posts
-    ORDER BY created_at DESC
-  </select>
+  <delete id="deletePost" parameterType="Long">
+    DELETE FROM posts WHERE post_id = #{postId}
+  </delete>
 
+  <update id="plusView" parameterType="Long">
+    UPDATE posts
+    SET view_count = view_count + 1
+    WHERE post_id = #{postId}
+  </update>
 
-  <update id="updatePost" parameterType="PostRequest">
+  <update id="updatePost" parameterType="PostUpdateRequest">
     UPDATE posts
     SET
     title = #{title},
@@ -33,8 +35,11 @@
     WHERE post_id = #{postId}
   </update>
 
-  <delete id="deletePost" parameterType="int">
-    DELETE FROM posts WHERE post_id = #{postId}
-  </delete>
+  <!--  <select id="findAllPosts" parameterType="int" resultType="PostDetailResponse">-->
+  <!--    SELECT post_id, title, content, image_url, created_at, updated_at, view_count, like_count-->
+  <!--    FROM posts-->
+  <!--    ORDER BY created_at DESC-->
+  <!--  </select>-->
+
 
 </mapper>

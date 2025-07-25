@@ -6,9 +6,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PostRequest {
+public class PostUpdateRequest {
 
-    int userId;    // TODO 시큐리티
+    Long postId;
     String title;
     String content;
     BoardType boardType;
