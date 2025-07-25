@@ -27,7 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String authorizationHeader = request.getHeader("Authorization");
         String jwt = null;
-        String userId = null;
+        String userEmail = null;
 
         // Authorization 헤더가 있고 Bearer로 시작하면 토큰 추출
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -35,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             try {
                 // 토큰에서 유저 ID 추출
-                userId = jwtUtil.getUserId(jwt);
+                userEmail = jwtUtil.getUserEmail(jwt);
             } catch (Exception e) {
                 // 토큰 파싱 에러 처리
                 System.out.printf("JWT 파싱 에러: " + e.getMessage());
@@ -43,9 +43,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // 인증정보가 없고 userId가 존재하면 인증처리 진행
-        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // UserDetailsService에서 유저 정보 로드 (여기선 userId가 PK로 사용된다고 가정)
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(userId);
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(userEmail);
 
             // 토큰이 유효한지 확인
             if (jwtUtil.validateToken(jwt)) {

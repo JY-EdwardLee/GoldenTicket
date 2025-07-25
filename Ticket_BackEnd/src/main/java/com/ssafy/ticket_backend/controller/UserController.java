@@ -36,6 +36,12 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    // 로그아웃
+//    @PostMapping("/logout")
+//    public ResponseEntity<Void> logout(@RequestParam String token) {
+//
+//    }
+
     // 회원가입 - 유저 객체 받고 토큰 발급 후 반환
     @PostMapping("/signup")
     public ResponseEntity<JwtTokenResponse> signup(@RequestBody User user) {

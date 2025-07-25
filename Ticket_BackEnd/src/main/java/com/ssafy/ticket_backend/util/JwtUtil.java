@@ -7,15 +7,21 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import java.util.Date;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
 
     // JWT 서명에 사용 할 비밀 키
     @Value("${jwt.secret}")
     private String SECRET_KEY;
+
+    // Redis와 통신하기 위한 객체
+    private final RedisTemplate<String, String> redisTemplate;
 
     // 엑세스 토큰 만료 시간: 1시간
     private final long EXPIRATION_TIME = 1000 * 60 * 60;
@@ -26,7 +32,7 @@ public class JwtUtil {
     /**
      * 액세스 토큰 생성 메서드
      *
-     * @param email 토큰에 담길 정보
+     * @param email 토큰에 담길 정보 (이메일로 식별)
      * @return 생성된 엑세스 토큰 문자열
      */
     public String generateAccessToken(String email) {
@@ -44,10 +50,15 @@ public class JwtUtil {
      * @return 생성된 리프레시 토큰 문자열
      */
     public String generateRefreshToken(String email) {
-        return Jwts.builder().setSubject(email) // 토큰 제목에 email
+        // refresh 토큰 생성
+        String refreshToken = Jwts.builder().setSubject(email) // 토큰 제목에 email
             .setIssuedAt(new Date()) // 발급 시간
             .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TIME))
             .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
+
+        // Redis에 refresh 토큰 저장 (key: refresh
+
+        return refreshToken;
     }
 
     /**
@@ -56,7 +67,7 @@ public class JwtUtil {
      * @param token JWT 문자열
      * @return email (subject 필드)
      */
-    public String getUserId(String token) {
+    public String getUserEmail(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY) // 비밀키로 디코딩
             .parseClaimsJws(token) // JWT 파싱
             .getBody() // JWT  내부의 payload(body) 가져옴
