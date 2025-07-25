@@ -47,6 +47,7 @@ public class UserServiceImpl implements UserService {
         userMapper.insertUser(user);
         String accessToken = jwtUtil.generateAccessToken(user.getEmail());
         String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+
         return new JwtTokenResponse(accessToken, refreshToken);
     }
 
@@ -172,5 +173,13 @@ public class UserServiceImpl implements UserService {
         response.setRegistered(true);
         response.setToken(new JwtTokenResponse(accessToken, refreshToken));
         return response;
+    }
+
+    @Override
+    public JwtTokenResponse testUser() {
+        String accessToken = jwtUtil.generateAccessToken("user1@example.com");
+        String refreshToken = jwtUtil.generateRefreshToken("user1@example.com");
+
+        return new JwtTokenResponse(accessToken, refreshToken);
     }
 }

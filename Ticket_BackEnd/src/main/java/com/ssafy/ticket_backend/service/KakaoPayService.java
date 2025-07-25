@@ -48,7 +48,7 @@ public class KakaoPayService {
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
         // The success_url needs to include the partner_order_id to retrieve context later
-        String successUrl = baseUrl + "/api/v1/payment/success?partner_order_id=" + partnerOrderId;
+        String successUrl = baseUrl + "/payment/success?partner_order_id=" + partnerOrderId;
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("cid", cid);

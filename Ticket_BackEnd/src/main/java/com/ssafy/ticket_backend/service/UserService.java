@@ -18,4 +18,7 @@ public interface UserService {
 
     // 네이버 로그인
     OAuthResponse loginWithNaver(String code);
+
+    // 테스트 용도
+    JwtTokenResponse testUser();
 }
