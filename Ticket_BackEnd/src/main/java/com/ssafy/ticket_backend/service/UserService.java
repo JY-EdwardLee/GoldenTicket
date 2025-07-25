@@ -1,6 +1,7 @@
 package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
+import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthResponse;
 import com.ssafy.ticket_backend.model.User;
 
@@ -21,6 +22,9 @@ public interface UserService {
 
     // 로그아웃
     void logout(String token);
+
+    // 마이페이지
+    MyPageResponse getMyPage(String email);
 
     // 테스트 용도
     JwtTokenResponse testUser();

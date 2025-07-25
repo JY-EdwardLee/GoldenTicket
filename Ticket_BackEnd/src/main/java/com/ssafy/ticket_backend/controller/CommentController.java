@@ -59,6 +59,4 @@ public class CommentController {
 
         return ResponseEntity.ok(new CommentResponse(true, "댓글 수정 성공"));
     }
-
-
 }

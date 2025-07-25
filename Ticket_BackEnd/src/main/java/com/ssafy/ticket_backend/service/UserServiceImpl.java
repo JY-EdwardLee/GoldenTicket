@@ -1,6 +1,7 @@
 package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
+import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthResponse;
 import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.User;
@@ -186,6 +187,16 @@ public class UserServiceImpl implements UserService {
 
         jwtUtil.addToBlackList(token);
         jwtUtil.deleteRefreshToken(email);
+    }
+
+    /**
+     * 마이페이지 정보
+     *
+     * @param email
+     */
+    @Override
+    public MyPageResponse getMyPage(String email) {
+        return userMapper.getMyPageByEmail(email);
     }
 
     /**

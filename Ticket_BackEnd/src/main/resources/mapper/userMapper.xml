@@ -52,4 +52,22 @@
     )
   </insert>
 
+  <select id="getMyPageByEmail" resultType="com.ssafy.ticket_backend.dto.response.MyPageResponse">
+    SELECT
+    email,
+    user_name,
+    nickname,
+    gender,
+    profile_photo_url,
+    my_team,
+    phone_number,
+    user_role,
+    birth_date,
+    transfer_number,
+    receive_number,
+    panelty_point
+    FROM users
+    WHERE email = #{email}
+  </select>
+
 </mapper>
