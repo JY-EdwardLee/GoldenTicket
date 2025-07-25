@@ -1,8 +1,11 @@
 package com.ssafy.ticket_backend.controller;
 
+import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
+import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthResponse;
 import com.ssafy.ticket_backend.model.User;
+import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.UserService;
 import com.ssafy.ticket_backend.util.JwtUtil;
 import java.util.Map;
@@ -10,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -92,7 +97,35 @@ public class UserController {
                 .body(Map.of("message", e.getMessage()));
         }
     }
-    
+
+    /**
+     * 마이페이지의 정보를 반환
+     *
+     * @return
+     */
+    @GetMapping("/me")
+    public ResponseEntity<MyPageResponse> getMyPage(
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        MyPageResponse myPage = userService.getMyPage(userDetails.getUsername());
+
+        return ResponseEntity.ok().body(myPage);
+    }
+
+    /**
+     * 내 정보 수정
+     *
+     * @param userDetails      JWT를 받아와서 사용
+     * @param userPatchRequest 변경하려는 정보
+     * @return 성공여부
+     */
+    @PatchMapping("/me")
+    public ResponseEntity<Void> updateMyPage(@AuthenticationPrincipal CustomUserDetails userDetails,
+        @RequestBody UserPatchRequest userPatchRequest) {
+        userService.patchMyPage(userDetails.getUsername(), userPatchRequest);
+
+        return ResponseEntity.accepted().build();
+    }
+
     // 로그인 - 테스트 용 로그인이므로 실제 서비스에서는 사용 금지
     @PostMapping("/testlogin")
     public ResponseEntity<JwtTokenResponse> testLogin() {
