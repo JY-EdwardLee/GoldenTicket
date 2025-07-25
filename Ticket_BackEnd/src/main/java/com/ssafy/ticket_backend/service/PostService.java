@@ -6,11 +6,17 @@ import com.ssafy.ticket_backend.dto.response.PostDetailResponse;
 
 public interface PostService {
 
-    boolean createPost(PostRequest postRequest);
+    // 게시글 작성
+    void createPost(String email, PostRequest postRequest);
 
+    // 게시글 상세보기
     PostDetailResponse getPostDetail(Long postId);
 
-    boolean deletePost(Long postId);
+    // 게시글 수정
+    boolean updatePost(String email, PostUpdateRequest postUpdateRequest);
 
-    boolean updatePost(PostUpdateRequest postUpdateRequest);
+    // 게시글 삭제
+    boolean deletePost(String email, Long postId);
+
+    void likePost(String email, Long postId);
 }

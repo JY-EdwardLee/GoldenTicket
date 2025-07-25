@@ -20,7 +20,7 @@ public class User {
     private String password;
     private String gender;
     private String userName;
-    private BoardType userRole;
+    private UserRole userRole;
     private String nickname;
     private LocalDate birthDate;
     private String profilePhotoUrl;

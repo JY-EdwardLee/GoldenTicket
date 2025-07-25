@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class PostRequest {
 
-    int userId;    // TODO 시큐리티
+    Long userId;
     String title;
     String content;
     BoardType boardType;
