@@ -18,4 +18,7 @@ public interface UserService {
 
     // 네이버 로그인
     OAuthResponse loginWithNaver(String code);
+
+    // 로그아웃
+    void logout(String token);
 }

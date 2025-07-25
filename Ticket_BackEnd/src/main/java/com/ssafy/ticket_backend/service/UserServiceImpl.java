@@ -175,4 +175,18 @@ public class UserServiceImpl implements UserService {
     }
 
 
+    // 로그아웃
+    @Override
+    public void logout(String token) {
+        if (!jwtUtil.validateToken(token)) {
+            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+        }
+
+        String email = jwtUtil.getUserEmail(token);
+
+        jwtUtil.addToBlackList(token);
+        jwtUtil.deleteRefreshToken(email);
+    }
+
+
 }
