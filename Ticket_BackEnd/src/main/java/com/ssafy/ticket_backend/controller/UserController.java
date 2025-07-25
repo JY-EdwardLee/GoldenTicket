@@ -5,11 +5,15 @@ import com.ssafy.ticket_backend.dto.response.OAuthResponse;
 import com.ssafy.ticket_backend.model.User;
 import com.ssafy.ticket_backend.service.UserService;
 import com.ssafy.ticket_backend.util.JwtUtil;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +25,7 @@ public class UserController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
+    private final RedisTemplate<String, String> redisTemplate;
 
     // 카카오 로그인 인가 코드 받아서 회원가입 유무에 따라 응답 반환
     @GetMapping("/auth/oauth/callback")
@@ -36,11 +41,27 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    // 로그아웃
-//    @PostMapping("/logout")
-//    public ResponseEntity<Void> logout(@RequestParam String token) {
-//
-//    }
+    // 액세스 토큰 만료 시, 리프레시 토큰으로 새 토큰 재발급 요청
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+
+        if (!jwtUtil.validateToken(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token invalid");
+        }
+
+        String email = jwtUtil.getUserEmail(refreshToken);
+
+        // Redis에 저장된 refresh 토큰과 일치하는지 확인
+        String storedRefreshToken = redisTemplate.opsForValue().get("refresh:" + email);
+        if (!refreshToken.equals(storedRefreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token mismatch");
+        }
+
+        String newAccessToken = jwtUtil.generateAccessToken(email);
+        return ResponseEntity.ok(new JwtTokenResponse(newAccessToken, refreshToken));
+    }
+
 
     // 회원가입 - 유저 객체 받고 토큰 발급 후 반환
     @PostMapping("/signup")
@@ -50,5 +71,26 @@ public class UserController {
 
     }
 
+    // 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(
+        @RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body(Map.of("message", "토큰이 없습니다."));
+        }
+
+        String token = authHeader.replace("Bearer ", "");
+
+        if (!jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", " 유효하지 않은 토큰입니다."));
+        }
+
+        String email = jwtUtil.getUserEmail(token);
+        jwtUtil.addToBlackList(token); // Access Token 블랙리스트 등록
+        jwtUtil.deleteRefreshToken(email); // Redis에서 리프레시 토큰 삭제
+
+        return ResponseEntity.ok(Map.of("message", "성공적으로 로그아웃 되었습니다."));
+    }
 
 }

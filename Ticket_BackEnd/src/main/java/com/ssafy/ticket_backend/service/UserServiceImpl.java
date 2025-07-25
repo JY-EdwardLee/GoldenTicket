@@ -11,14 +11,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -177,25 +174,5 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
-    // 로그아웃
-    @PostMapping("/logout")
-    public ResponseEntity<Map<String, String>> logout(
-        @RequestHeader("Authorization") String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().body(Map.of("message", "토큰이 없습니다."));
-        }
 
-        String token = authHeader.replace("Bearer ", "");
-
-        if (!jwtUtil.validateToken(token)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", " 유효하지 않은 토큰입니다."));
-        }
-
-        String email = jwtUtil.getUserEmail(token);
-        jwtUtil.addToBlackList(token); // Access Token 블랙리스트 등록
-        jwtUtil.deleteRefreshToken(email); // Redis에서 리프레시 토큰 삭제
-
-        return ResponseEntity.ok(Map.of("message", "성공적으로 로그아웃 되었습니다."));
-    }
 }
