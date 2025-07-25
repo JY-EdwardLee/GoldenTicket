@@ -60,5 +60,18 @@ public class CommentController {
         return ResponseEntity.ok(new CommentResponse(true, "댓글 수정 성공"));
     }
 
+    /**
+     * 댓글 좋아요 누르기
+     *
+     * @param commentId
+     * @return
+     */
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<CommentResponse> addLike(@PathVariable Long commentId) {
+        // 사용자 정보 시큐리티
+
+        return ResponseEntity.ok(new CommentResponse(true, "댓글 좋아요 성공"));
+    }
+
 
 }

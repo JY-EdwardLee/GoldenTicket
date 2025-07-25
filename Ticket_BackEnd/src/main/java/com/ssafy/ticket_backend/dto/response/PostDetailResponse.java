@@ -26,6 +26,6 @@ public class PostDetailResponse {
 
     List<CommentDetailResponse> comments;  // 댓글 목록
 
-    // TODO UserResponse user;  // 작성자
+    // TODO UserResponse user;  // 작성자정보 (민감정보 포함x)
 
 }

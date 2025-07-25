@@ -13,5 +13,4 @@ public interface PostService {
     boolean deletePost(Long postId);
 
     boolean updatePost(PostUpdateRequest postUpdateRequest);
-
 }

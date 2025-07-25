@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ticket_backend.mapper.BoardMapper">
+
+  <select id="getPostsByCategory" parameterType="String" resultType="PostAllResponse">
+    SELECT
+    p.post_id,
+    p.user_id,
+    p.board_id,
+    u.nickname, -- users 테이블의 닉네임
+    p.title,
+    p.content,
+    p.image_url,
+    p.created_at,
+    p.updated_at,
+    p.view_count,
+    p.like_count
+    FROM posts p
+    JOIN users u ON p.user_id = u.user_id
+    WHERE p.board_id = #{category}
+    ORDER BY p.created_at DESC
+  </select>
+  
+</mapper>

@@ -39,12 +39,11 @@ public class PostController {
      * 게시글 상세보기
      *
      * @param postId
-     * @return
+     * @return PostDetailResponse
      */
     @GetMapping("/{postId}")
     public ResponseEntity<PostDetailResponse> getPostDetail(@PathVariable Long postId) {
-        postService.getPostDetail(postId);
-        PostDetailResponse postDetailResponse = null;
+        PostDetailResponse postDetailResponse = postService.getPostDetail(postId);
         return ResponseEntity.ok(postDetailResponse);
     }
 
@@ -73,12 +72,19 @@ public class PostController {
         return ResponseEntity.ok(new PostResponse(true, "게시글 삭제 성공"));
     }
 
+
     /**
-     * 게시글물 모두 가져오기
+     * 좋아요 누르기
      *
      * @param postId
      * @return
      */
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<PostResponse> post(@PathVariable Long postId) {
+        // 사용자 정보 시큐리티로 가져오기.
+
+        return ResponseEntity.ok(new PostResponse(true, "좋아요 누르기 성공"));
+    }
 
 
 }
