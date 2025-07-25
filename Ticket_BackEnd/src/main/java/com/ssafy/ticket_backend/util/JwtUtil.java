@@ -61,6 +61,8 @@ public class JwtUtil {
         redisTemplate.opsForValue()
             .set("refresh:" + email, refreshToken, REFRESH_TIME, TimeUnit.MILLISECONDS);
 
+//        System.out.println("[리프레시 토큰 저장됨] 이메일: " + email + ", 토큰: " + refreshToken);
+
         return refreshToken;
     }
 
@@ -70,7 +72,9 @@ public class JwtUtil {
      * @param email 사용자 이메일
      */
     public void deleteRefreshToken(String email) {
-        redisTemplate.delete("refresh:" + email);
+        Boolean deleted = redisTemplate.delete("refresh:" + email);
+//        System.out.println("[리프레시 토큰 삭제] 이메일: " + email + ", 삭제 성공: " + deleted);
+
     }
 
     /**
@@ -84,6 +88,9 @@ public class JwtUtil {
 
         // Redis 블랙리스트에 저장 (key: blacklist:{token}, TTL: 남은 만료시간)
         redisTemplate.opsForValue().set("blacklist:" + token, "logout", ttl, TimeUnit.MILLISECONDS);
+
+//        System.out.println("[블랙리스트 등록] 엑세스 토큰: " + token + ", TTL(ms): " + ttl);
+
     }
 
     /**
@@ -93,7 +100,9 @@ public class JwtUtil {
      * @return 블랙 리스트에 있으면 true, 없으면 false
      */
     public boolean isBlacklisted(String token) {
-        return Boolean.TRUE.equals(redisTemplate.hasKey("blacklist:" + token));
+        boolean isBlack = Boolean.TRUE.equals(redisTemplate.hasKey("blacklist:" + token));
+//        System.out.println("[블랙리스트 조회] 토큰: " + token + ", 블랙리스트 여부: " + isBlack);
+        return isBlack;
     }
 
 

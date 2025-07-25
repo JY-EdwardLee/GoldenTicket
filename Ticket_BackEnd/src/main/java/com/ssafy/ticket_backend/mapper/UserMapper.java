@@ -1,5 +1,6 @@
 package com.ssafy.ticket_backend.mapper;
 
+import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.model.User;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -10,5 +11,5 @@ public interface UserMapper {
     User selectUserByEmail(String email);
 
     // 유저 회원가입 등록
-    void insertUser(User user);
+    void insertUser(UserSignupRequest userSignupRequest);
 }

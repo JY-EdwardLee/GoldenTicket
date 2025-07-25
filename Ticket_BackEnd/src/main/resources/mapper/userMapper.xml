@@ -10,45 +10,37 @@
     WHERE email = #{email}
   </select>
 
-  <!-- 유저 정보 삽입 -->
-  <insert id="insertUser" parameterType="com.ssafy.ticket_backend.model.User"
-    useGeneratedKeys="true" keyProperty="id">
+  <!--  private String email;-->
+  <!--  private String gender;-->
+  <!--  private String userName;-->
+  <!--  private String nickName;-->
+  <!--  private String birthDate;      // String으로 받고, LocalDate로 변환해도 됨-->
+  <!--  private String phoneNumber;-->
+  <!--  private String myTeam;-->
+  <!--  private String socialProvider; // 예: "naver", "kakao"-->
+
+
+  <!-- 유저 회원가입 -->
+  <insert id="insertUser" parameterType="com.ssafy.ticket_backend.dto.request.UserSignupRequest"
+    useGeneratedKeys="true" keyProperty="userId">
     INSERT INTO users (
     email,
-    password,
-    gender,
-    userName,
-    userRole,
+    user_name,
+    user_role,
     nickname,
-    birthDate,
-    profilePhotoUrl,
-    phoneNumber,
-    myTeam,
-    socialProvider,
-    weight,
-    transferNumber,
-    receiveNumber,
-    paneltyPoint,
-    isBlock,
-    isDelete
+    birth_date,
+    phone_number,
+    my_team,
+    social_provider
     ) VALUES (
     #{email},
-    #{password},
-    #{gender},
     #{userName},
     #{userRole},
     #{nickname},
     #{birthDate},
-    #{profilePhotoUrl},
     #{phoneNumber},
     #{myTeam},
-    #{socialProvider},
-    #{weight},
-    #{transferNumber},
-    #{receiveNumber},
-    #{paneltyPoint},
-    #{isBlock},
-    #{isDelete}
+    #{socialProvider}
     )
   </insert>
 

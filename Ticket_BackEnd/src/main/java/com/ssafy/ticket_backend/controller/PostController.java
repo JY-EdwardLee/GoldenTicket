@@ -5,6 +5,7 @@ import com.ssafy.ticket_backend.dto.request.PostUpdateRequest;
 import com.ssafy.ticket_backend.dto.response.PostDetailResponse;
 import com.ssafy.ticket_backend.dto.response.PostResponse;
 import com.ssafy.ticket_backend.service.PostService;
+import com.ssafy.ticket_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class PostController {
 
     private final PostService postService;
+    private final JwtUtil jwtUtil;
+
 
     /**
      * 게시글 작성 함수
@@ -30,8 +34,20 @@ public class PostController {
      * @return
      */
     @PostMapping("")
-    public ResponseEntity<PostResponse> createPosts(@RequestBody PostRequest postRequest) {
+    public ResponseEntity<PostResponse> createPosts(@RequestBody PostRequest postRequest,
+        @RequestHeader("Authorization") String authHeader) {
+        // 1. Bearer 제거
+        String token = authHeader.replace("Bearer ", "");
+
+        // 2. 이메일 추출
+//        String email = jwtUtil.getUserEmail(token);
+
+        // 3. 확인용 출력
+//        System.out.println("요청한 사용자 이메일: " + email);
+
+        // 4. 게시글 작성 로직
         postService.createPost(postRequest);
+
         return ResponseEntity.ok(new PostResponse(true, "게시글 작성 성공"));
     }
 

@@ -1,7 +1,8 @@
 package com.ssafy.ticket_backend.service;
 
+import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
-import com.ssafy.ticket_backend.dto.response.OAuthResponse;
+import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.User;
 import com.ssafy.ticket_backend.util.JwtUtil;
@@ -43,17 +44,17 @@ public class UserServiceImpl implements UserService {
 
     // 회원가입
     @Override
-    public JwtTokenResponse signup(User user) {
-        userMapper.insertUser(user);
-        String accessToken = jwtUtil.generateAccessToken(user.getEmail());
-        String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
+    public JwtTokenResponse signup(UserSignupRequest userSignupRequest) {
+        userMapper.insertUser(userSignupRequest);
+        String accessToken = jwtUtil.generateAccessToken(userSignupRequest.getEmail());
+        String refreshToken = jwtUtil.generateRefreshToken(userSignupRequest.getEmail());
 
         return new JwtTokenResponse(accessToken, refreshToken);
     }
 
     // 카카오 로그인, 유저 회원가입 안되어 있으면 카카오 정보 반환
     @Override
-    public OAuthResponse loginWithKakao(String code) {
+    public OAuthUserResponse loginWithKakao(String code) {
         RestTemplate restTemplate = new RestTemplate();
 
         // 1. 인가 코드로 Access Token 요청
@@ -93,30 +94,33 @@ public class UserServiceImpl implements UserService {
 
         // 3. DB에 유저 존재 확인 또는 저장
         User user = userMapper.selectUserByEmail(email);
-        OAuthResponse response = new OAuthResponse();
+        OAuthUserResponse oauthUserResponse;
 
         if (user == null) {
             // 회원가입 창에 필요한 데이터(카카오에서 받아온) 전달
-            User tempUser = User.builder().email(email).nickname(nickname).socialProvider("KAKAO")
+            oauthUserResponse = OAuthUserResponse.builder()
+                .isRegistered(false)
+                .email(email)
+                .nickname(nickname)
+                .socialProvider("KAKAO")
                 .build();
-
-            response.setRegistered(false);
-            response.setUser(tempUser);
-            return response;
+            return oauthUserResponse;
         }
 
         // 4. 이미 가입된 유저 -> JWT 발급
         String accessToken = jwtUtil.generateAccessToken(user.getEmail());
         String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
 
-        response.setRegistered(true);
-        response.setToken(new JwtTokenResponse(accessToken, refreshToken));
-        return response;
+        oauthUserResponse = OAuthUserResponse.builder()
+            .isRegistered(true)
+            .token(new JwtTokenResponse(accessToken, refreshToken))
+            .build();
+        return oauthUserResponse;
     }
 
     // 네이버 로그인
     @Override
-    public OAuthResponse loginWithNaver(String code) {
+    public OAuthUserResponse loginWithNaver(String code) {
         RestTemplate restTemplate = new RestTemplate();
 
         // 1. 인가 코드로 Access Token 요청
@@ -149,30 +153,36 @@ public class UserServiceImpl implements UserService {
         ResponseEntity<Map> userInfoResponse = restTemplate.exchange(userInfoUrl, HttpMethod.GET,
             userInfoRequest, Map.class);
 
-        Map<String, Object> respose = (Map<String, Object>) userInfoResponse.getBody();
-        String email = (String) respose.get("email");
-        String nickname = (String) respose.get("nickname");
+        Map<String, Object> responseBody = userInfoResponse.getBody();
+        Map<String, Object> responseMap = (Map<String, Object>) responseBody.get("response");
+
+        String email = (String) responseMap.get("email");
+        String nickname = (String) responseMap.get("nickname");
 
         // 3. 유저 DB 조회
         User user = userMapper.selectUserByEmail(email);
-        OAuthResponse response = new OAuthResponse();
+        OAuthUserResponse oauthUserResponse;
 
         if (user == null) {
-            User tempUser = User.builder().email(email).nickname(nickname).socialProvider("NAVER")
+            // 회원가입 창에 필요한 데이터(카카오에서 받아온) 전달
+            oauthUserResponse = OAuthUserResponse.builder()
+                .isRegistered(false)
+                .email(email)
+                .nickname(nickname)
+                .socialProvider("NAVER")
                 .build();
-
-            response.setRegistered(false);
-            response.setUser(tempUser);
-            return response;
+            return oauthUserResponse;
         }
 
         // 4. 유저가 회원가입 되어있으면 JWT 발급
         String accessToken = jwtUtil.generateAccessToken(user.getEmail());
         String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
 
-        response.setRegistered(true);
-        response.setToken(new JwtTokenResponse(accessToken, refreshToken));
-        return response;
+        oauthUserResponse = OAuthUserResponse.builder()
+            .isRegistered(true)
+            .token(new JwtTokenResponse(accessToken, refreshToken))
+            .build();
+        return oauthUserResponse;
     }
 
     // 로그아웃
