@@ -63,7 +63,6 @@ public class PaymentController {
             // 프론트엔드의 결제 완료 페이지로 리다이렉트 하거나, JSON 응답을 할 수 있습니다.
             // 예: return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("http://frontend-host/payment/complete")).build();
             return ResponseEntity.ok(approveResponse);
-
         } catch (IllegalStateException e) {
             // Redis에서 데이터를 찾지 못한 경우 (만료 또는 잘못된 요청)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

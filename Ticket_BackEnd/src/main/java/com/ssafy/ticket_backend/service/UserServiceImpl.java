@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
     // 회원가입
     @Override
     public JwtTokenResponse signup(User user) {
-        userMapper.insertUser(user);
+        userMapper.insertUser(user);  // TODO 유저 검증하는 로직 필요
         String accessToken = jwtUtil.generateAccessToken(user.getEmail());
         String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
 

@@ -32,6 +32,7 @@ public class PostController {
     @PostMapping("")
     public ResponseEntity<PostResponse> createPosts(@RequestBody PostRequest postRequest) {
         postService.createPost(postRequest);
+
         return ResponseEntity.ok(new PostResponse(true, "게시글 작성 성공"));
     }
 
@@ -45,6 +46,7 @@ public class PostController {
     public ResponseEntity<PostDetailResponse> getPostDetail(@PathVariable Long postId) {
         postService.getPostDetail(postId);
         PostDetailResponse postDetailResponse = null;
+
         return ResponseEntity.ok(postDetailResponse);
     }
 
@@ -58,6 +60,7 @@ public class PostController {
     public ResponseEntity<PostResponse> editPosts(
         @RequestBody PostUpdateRequest postUpdateRequest) {
         postService.updatePost(postUpdateRequest);
+
         return ResponseEntity.ok(new PostResponse(true, "게시글 수정 성공"));
     }
 
@@ -70,6 +73,7 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<PostResponse> deletePost(@PathVariable Long postId) {
         postService.deletePost(postId);
+
         return ResponseEntity.ok(new PostResponse(true, "게시글 삭제 성공"));
     }
 
@@ -79,6 +83,4 @@ public class PostController {
      * @param postId
      * @return
      */
-
-
 }
