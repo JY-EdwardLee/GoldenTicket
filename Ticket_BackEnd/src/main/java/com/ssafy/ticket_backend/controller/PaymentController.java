@@ -2,8 +2,11 @@ package com.ssafy.ticket_backend.controller;
 
 import com.ssafy.ticket_backend.dto.response.KakaoPayApproveResponse;
 import com.ssafy.ticket_backend.dto.response.KakaoPayReadyResponse;
+import com.ssafy.ticket_backend.dto.response.TossPayReadyResponse;
+import com.ssafy.ticket_backend.dto.response.TossPayResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.KakaoPayService;
+import com.ssafy.ticket_backend.service.TossPayService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,12 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class PaymentController {
 
     private final KakaoPayService kakaoPayService;
+    private final TossPayService tossPayService;
 
     /**
      * 결제 준비 요청
      */
-    @PostMapping("/ready")
-    public ResponseEntity<KakaoPayReadyResponse> readyToPay(
+    @PostMapping("/kakao/ready")
+    public ResponseEntity<KakaoPayReadyResponse> kakaoReadyToPay(
         @AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam String itemName,
         @RequestParam Integer quantity, @RequestParam Integer totalAmount) {
 
@@ -46,8 +50,8 @@ public class PaymentController {
     /**
      * 결제 성공 카카오페이에서 리다이렉트되어 호출되는 엔드포인트
      */
-    @GetMapping("/success")
-    public ResponseEntity<KakaoPayApproveResponse> afterPayRequest(
+    @GetMapping("/kakao/success")
+    public ResponseEntity<KakaoPayApproveResponse> kakaoAfterPayRequest(
         @RequestParam("pg_token") String pgToken,
         @RequestParam("partner_order_id") String partnerOrderId) {
 
@@ -63,7 +67,6 @@ public class PaymentController {
             // 프론트엔드의 결제 완료 페이지로 리다이렉트 하거나, JSON 응답을 할 수 있습니다.
             // 예: return ResponseEntity.status(HttpStatus.FOUND).location(URI.create("http://frontend-host/payment/complete")).build();
             return ResponseEntity.ok(approveResponse);
-
         } catch (IllegalStateException e) {
             // Redis에서 데이터를 찾지 못한 경우 (만료 또는 잘못된 요청)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -74,8 +77,8 @@ public class PaymentController {
     /**
      * 결제 취소
      */
-    @GetMapping("/cancel")
-    public ResponseEntity<String> cancel() {
+    @GetMapping("/kakao/cancel")
+    public ResponseEntity<String> kakaoCancel() {
         // TODO: 결제 취소 시 처리할 비즈니스 로직 (예: DB 주문 상태 변경)
         // 프론트엔드의 결제 취소 페이지로 리다이렉트
         return ResponseEntity.status(HttpStatus.OK).body("Payment canceled.");
@@ -84,10 +87,34 @@ public class PaymentController {
     /**
      * 결제 실패
      */
-    @GetMapping("/fail")
-    public ResponseEntity<String> fail() {
+    @GetMapping("/kakao/fail")
+    public ResponseEntity<String> kakaoFail() {
         // TODO: 결제 실패 시 처리할 비즈니스 로직 (예: DB 주문 상태 변경)
         // 프론트엔드의 결제 실패 페이지로 리다이렉트
         return ResponseEntity.status(HttpStatus.OK).body("Payment failed.");
+    }
+
+    @PostMapping("/toss/ready")
+    public ResponseEntity<TossPayReadyResponse> readyTossPayment() {
+        String orderId = "toss-" + UUID.randomUUID().toString();
+
+        // TODO: request에서 받은 상품 정보로 금액(amount) 및 주문명(orderName) 설정
+        // TODO: 현재 로그인한 사용자 정보로 고객명(customerName) 설정
+
+        TossPayReadyResponse readyResponse = tossPayService.readyPayment(orderId, "샘플 주문", 0,
+            "SSAFY");
+
+        return ResponseEntity.ok(readyResponse);
+    }
+
+    @PostMapping("/toss/confirm")
+    public ResponseEntity<TossPayResponse> confirmTossPayment(
+        @RequestParam("paymentKey") String paymentKey, @RequestParam("orderId") String orderId,
+        @RequestParam("amount") int amount) {
+
+        TossPayResponse approvalResponse = tossPayService.confirmPayment(paymentKey, orderId,
+            amount);
+
+        return ResponseEntity.ok(approvalResponse);
     }
 }

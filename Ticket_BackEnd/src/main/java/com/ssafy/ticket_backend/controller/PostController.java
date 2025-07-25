@@ -32,6 +32,7 @@ public class PostController {
     @PostMapping("")
     public ResponseEntity<PostResponse> createPosts(@RequestBody PostRequest postRequest) {
         postService.createPost(postRequest);
+
         return ResponseEntity.ok(new PostResponse(true, "게시글 작성 성공"));
     }
 
@@ -57,6 +58,7 @@ public class PostController {
     public ResponseEntity<PostResponse> editPosts(
         @RequestBody PostUpdateRequest postUpdateRequest) {
         postService.updatePost(postUpdateRequest);
+
         return ResponseEntity.ok(new PostResponse(true, "게시글 수정 성공"));
     }
 
@@ -69,9 +71,9 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<PostResponse> deletePost(@PathVariable Long postId) {
         postService.deletePost(postId);
+
         return ResponseEntity.ok(new PostResponse(true, "게시글 삭제 성공"));
     }
-
 
     /**
      * 좋아요 누르기
