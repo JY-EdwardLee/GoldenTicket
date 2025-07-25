@@ -7,4 +7,5 @@ import java.util.List;
 public interface BoardService {
 
     List<PostAllResponse> getPostsByCategory(String category);
+    List<PostAllResponse> searchPosts(String type, String title, String content, String writer);
 }

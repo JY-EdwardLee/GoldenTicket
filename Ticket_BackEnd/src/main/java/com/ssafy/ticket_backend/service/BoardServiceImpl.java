@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class BoardServiceImpl {
+public class BoardServiceImpl implements BoardService {
 
     private final BoardMapper boardMapper;
 
@@ -21,5 +21,13 @@ public class BoardServiceImpl {
         return list;
     }
 
+    public List<PostAllResponse> searchPosts(String type, String title, String content,
+        String writer) {
+        List<PostAllResponse> list = boardMapper.searchPosts(type, title, content, writer);
+        if (list == null || list.isEmpty()) {
+            throw new DatabaseOperationException("검색 결과가 없습니다.");
+        }
+        return list;
+    }
 
 }
