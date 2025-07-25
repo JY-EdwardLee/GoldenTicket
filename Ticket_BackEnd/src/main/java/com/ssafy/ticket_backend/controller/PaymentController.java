@@ -25,8 +25,8 @@ public class PaymentController {
     /**
      * 결제 준비 요청
      */
-    @PostMapping("/ready")
-    public ResponseEntity<KakaoPayReadyResponse> readyToPay(
+    @PostMapping("/kakao/ready")
+    public ResponseEntity<KakaoPayReadyResponse> kakaoReadyToPay(
         @AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam String itemName,
         @RequestParam Integer quantity, @RequestParam Integer totalAmount) {
 
@@ -46,8 +46,8 @@ public class PaymentController {
     /**
      * 결제 성공 카카오페이에서 리다이렉트되어 호출되는 엔드포인트
      */
-    @GetMapping("/success")
-    public ResponseEntity<KakaoPayApproveResponse> afterPayRequest(
+    @GetMapping("/kakao/success")
+    public ResponseEntity<KakaoPayApproveResponse> kakaoAfterPayRequest(
         @RequestParam("pg_token") String pgToken,
         @RequestParam("partner_order_id") String partnerOrderId) {
 
@@ -73,8 +73,8 @@ public class PaymentController {
     /**
      * 결제 취소
      */
-    @GetMapping("/cancel")
-    public ResponseEntity<String> cancel() {
+    @GetMapping("/kakao/cancel")
+    public ResponseEntity<String> kakaoCancel() {
         // TODO: 결제 취소 시 처리할 비즈니스 로직 (예: DB 주문 상태 변경)
         // 프론트엔드의 결제 취소 페이지로 리다이렉트
         return ResponseEntity.status(HttpStatus.OK).body("Payment canceled.");
@@ -83,8 +83,8 @@ public class PaymentController {
     /**
      * 결제 실패
      */
-    @GetMapping("/fail")
-    public ResponseEntity<String> fail() {
+    @GetMapping("/kakao/fail")
+    public ResponseEntity<String> kakaoFail() {
         // TODO: 결제 실패 시 처리할 비즈니스 로직 (예: DB 주문 상태 변경)
         // 프론트엔드의 결제 실패 페이지로 리다이렉트
         return ResponseEntity.status(HttpStatus.OK).body("Payment failed.");
