@@ -188,6 +188,11 @@ public class UserServiceImpl implements UserService {
         jwtUtil.deleteRefreshToken(email);
     }
 
+    /**
+     * 테스트 용도. 실제 서비스에서 사용 금지
+     *
+     * @return
+     */
     @Override
     public JwtTokenResponse testUser() {
         String accessToken = jwtUtil.generateAccessToken("user1@example.com");
