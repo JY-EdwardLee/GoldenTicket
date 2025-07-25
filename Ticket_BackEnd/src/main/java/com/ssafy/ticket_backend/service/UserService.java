@@ -1,9 +1,10 @@
 package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
+import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
-import com.ssafy.ticket_backend.dto.response.OAuthResponse;
+import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.model.User;
 
 
@@ -13,13 +14,13 @@ public interface UserService {
     User selectUserByEmail(String email);
 
     // 회원가입
-    JwtTokenResponse signup(User user);
+    JwtTokenResponse signup(UserSignupRequest userSignupRequest);
 
     // 카카오 로그인
-    OAuthResponse loginWithKakao(String code);
+    OAuthUserResponse loginWithKakao(String code);
 
     // 네이버 로그인
-    OAuthResponse loginWithNaver(String code);
+    OAuthUserResponse loginWithNaver(String code);
 
     // 로그아웃
     void logout(String token);

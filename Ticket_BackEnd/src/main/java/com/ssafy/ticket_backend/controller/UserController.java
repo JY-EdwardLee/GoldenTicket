@@ -1,10 +1,10 @@
 package com.ssafy.ticket_backend.controller;
 
 import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
+import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
-import com.ssafy.ticket_backend.dto.response.OAuthResponse;
-import com.ssafy.ticket_backend.model.User;
+import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.UserService;
 import com.ssafy.ticket_backend.util.JwtUtil;
@@ -34,16 +34,16 @@ public class UserController {
 
     // 카카오 로그인 인가 코드 받아서 회원가입 유무에 따라 응답 반환
     @GetMapping("/auth/oauth/callback")
-    public ResponseEntity<OAuthResponse> kakaoCallback(@RequestParam String code) {
-        OAuthResponse response = userService.loginWithKakao(code);
+    public ResponseEntity<OAuthUserResponse> kakaoCallback(@RequestParam String code) {
+        OAuthUserResponse response = userService.loginWithKakao(code);
 
         return ResponseEntity.ok(response);
     }
 
     // 네이버 로그인
     @GetMapping("/auth/naver/callback")
-    public ResponseEntity<OAuthResponse> naverCallback(@RequestParam String code) {
-        OAuthResponse response = userService.loginWithNaver(code);
+    public ResponseEntity<OAuthUserResponse> naverCallback(@RequestParam String code) {
+        OAuthUserResponse response = userService.loginWithNaver(code);
 
         return ResponseEntity.ok(response);
     }
@@ -71,8 +71,9 @@ public class UserController {
 
     // 회원가입 - 유저 객체 받고 토큰 발급 후 반환
     @PostMapping("/signup")
-    public ResponseEntity<JwtTokenResponse> signup(@RequestBody User user) {
-        JwtTokenResponse tokens = userService.signup(user);
+    public ResponseEntity<JwtTokenResponse> signup(
+        @RequestBody UserSignupRequest userSignupRequest) {
+        JwtTokenResponse tokens = userService.signup(userSignupRequest);
 
         return ResponseEntity.ok(tokens);
     }
