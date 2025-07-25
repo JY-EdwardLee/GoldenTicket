@@ -7,6 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -44,7 +45,7 @@ public class JwtUtil {
     }
 
     /**
-     * 리프레시 토큰 생성 메서드
+     * 리프레시 토큰 생성 및 Redis 저장 메서드
      *
      * @param email 토큰에 담길 정보
      * @return 생성된 리프레시 토큰 문자열
@@ -56,13 +57,48 @@ public class JwtUtil {
             .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TIME))
             .signWith(SignatureAlgorithm.HS256, SECRET_KEY).compact();
 
-        // Redis에 refresh 토큰 저장 (key: refresh
+        // Redis에 refresh 토큰 저장 (key: refresh:{email}, TTL: 7일)
+        redisTemplate.opsForValue()
+            .set("refresh:" + email, refreshToken, REFRESH_TIME, TimeUnit.MILLISECONDS);
 
         return refreshToken;
     }
 
     /**
-     * JWT에서 email 가져오기
+     * Redis에 저장된 리프레시 토큰 삭제 (로그아웃 시 호출)
+     *
+     * @param email 사용자 이메일
+     */
+    public void deleteRefreshToken(String email) {
+        redisTemplate.delete("refresh:" + email);
+    }
+
+    /**
+     * 엑세스 토큰을 블랙리스트에 등록 (로그아웃 시 호출)
+     *
+     * @param 토큰 로그아웃 처리핳 엑세스 토큰 문자열
+     */
+    public void addToBlackList(String token) {
+        // 토큰 만료까지 남은 시간 계산
+        long ttl = getRemainingTime(token);
+
+        // Redis 블랙리스트에 저장 (key: blacklist:{token}, TTL: 남은 만료시간)
+        redisTemplate.opsForValue().set("blacklist:" + token, "logout", ttl, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * 해당 토큰이 블랙리스트에 존재하는지 확인
+     *
+     * @param token 검사할 Access Token 문자열
+     * @return 블랙 리스트에 있으면 true, 없으면 false
+     */
+    public boolean isBlacklisted(String token) {
+        return Boolean.TRUE.equals(redisTemplate.hasKey("blacklist:" + token));
+    }
+
+
+    /**
+     * JWT에서 사용자 email 가져오기
      *
      * @param token JWT 문자열
      * @return email (subject 필드)
@@ -99,5 +135,18 @@ public class JwtUtil {
         }
 
         return false;
+    }
+
+    /**
+     * 토큰의 남은 만료 시간(ms) 계산
+     *
+     * @param token JWT 문자열
+     * @return 만료까지 남은 시간 (밀리초 단위)
+     */
+    public long getRemainingTime(String token) {
+        Date expiration = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody()
+            .getExpiration();
+
+        return expiration.getTime() - System.currentTimeMillis();
     }
 }
