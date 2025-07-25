@@ -211,8 +211,8 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public JwtTokenResponse testUser() {
-        String accessToken = jwtUtil.generateAccessToken("user1@example.com");
-        String refreshToken = jwtUtil.generateRefreshToken("user1@example.com");
+        String accessToken = jwtUtil.generateAccessToken("honggildong@example.com");
+        String refreshToken = jwtUtil.generateRefreshToken("honggildong@example.com");
 
         return new JwtTokenResponse(accessToken, refreshToken);
     }

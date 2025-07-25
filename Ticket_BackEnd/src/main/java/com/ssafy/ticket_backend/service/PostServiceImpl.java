@@ -32,8 +32,9 @@ public class PostServiceImpl implements PostService {
     public void createPost(String email, PostRequest postRequest) {
         try {
             User user = userMapper.selectUserByEmail(email);
-
             postRequest.setUserId(user.getId());
+
+            // TODO user테이블 user_id를 id로 바꿔야함!!!!!!!
 
             int result = postMapper.insertPost(postRequest);
 
@@ -45,6 +46,7 @@ public class PostServiceImpl implements PostService {
 
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new PostCreateFailException("게시글 등록중 오류");
         }
     }
