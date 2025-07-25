@@ -94,6 +94,8 @@ public class UserServiceImpl implements UserService {
         String email = (String) kakaoAccount.get("email");
         String nickname = (String) ((Map) userInfoRespose.getBody().get("properties")).get(
             "nickname");
+        String profilePhotoUrl = (String) ((Map) userInfoRespose.getBody().get("properties")).get(
+            "profile_image");
 
         // 3. DB에 유저 존재 확인 또는 저장
         User user = userMapper.selectUserByEmail(email);
@@ -102,7 +104,8 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             // 회원가입 창에 필요한 데이터(카카오에서 받아온) 전달
             oauthUserResponse = OAuthUserResponse.builder().isRegistered(false).email(email)
-                .nickname(nickname).socialProvider("KAKAO").build();
+                .nickname(nickname).socialProvider("KAKAO").profilePhotoUrl(profilePhotoUrl)
+                .build();
             return oauthUserResponse;
         }
 
@@ -155,6 +158,11 @@ public class UserServiceImpl implements UserService {
 
         String email = (String) responseMap.get("email");
         String nickname = (String) responseMap.get("nickname");
+        String name = (String) responseMap.get("name");
+        String gender = (String) responseMap.get("gender");
+        String birthday = (String) responseMap.get("birthday");
+        String birthyear = (String) responseMap.get("birthyear");
+        String profilePhotoUrl = (String) responseMap.get("profile_image");
 
         // 3. 유저 DB 조회
         User user = userMapper.selectUserByEmail(email);
@@ -163,7 +171,8 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             // 회원가입 창에 필요한 데이터(카카오에서 받아온) 전달
             oauthUserResponse = OAuthUserResponse.builder().isRegistered(false).email(email)
-                .nickname(nickname).socialProvider("NAVER").build();
+                .nickname(nickname).socialProvider("NAVER").gender(gender).birthday(birthday)
+                .birthyear(birthyear).profilePhotoUrl(profilePhotoUrl).name(name).build();
             return oauthUserResponse;
         }
 
