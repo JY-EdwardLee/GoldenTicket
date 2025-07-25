@@ -2,8 +2,11 @@ package com.ssafy.ticket_backend.controller;
 
 import com.ssafy.ticket_backend.dto.response.KakaoPayApproveResponse;
 import com.ssafy.ticket_backend.dto.response.KakaoPayReadyResponse;
+import com.ssafy.ticket_backend.dto.response.TossPayReadyResponse;
+import com.ssafy.ticket_backend.dto.response.TossPayResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.KakaoPayService;
+import com.ssafy.ticket_backend.service.TossPayService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PaymentController {
 
     private final KakaoPayService kakaoPayService;
+    private final TossPayService tossPayService;
 
     /**
      * 결제 준비 요청
@@ -88,5 +92,29 @@ public class PaymentController {
         // TODO: 결제 실패 시 처리할 비즈니스 로직 (예: DB 주문 상태 변경)
         // 프론트엔드의 결제 실패 페이지로 리다이렉트
         return ResponseEntity.status(HttpStatus.OK).body("Payment failed.");
+    }
+
+    @PostMapping("/toss/ready")
+    public ResponseEntity<TossPayReadyResponse> readyTossPayment() {
+        String orderId = "toss-" + UUID.randomUUID().toString();
+
+        // TODO: request에서 받은 상품 정보로 금액(amount) 및 주문명(orderName) 설정
+        // TODO: 현재 로그인한 사용자 정보로 고객명(customerName) 설정
+
+        TossPayReadyResponse readyResponse = tossPayService.readyPayment(orderId, "샘플 주문", 0,
+            "SSAFY");
+
+        return ResponseEntity.ok(readyResponse);
+    }
+
+    @PostMapping("/toss/confirm")
+    public ResponseEntity<TossPayResponse> confirmTossPayment(
+        @RequestParam("paymentKey") String paymentKey, @RequestParam("orderId") String orderId,
+        @RequestParam("amount") int amount) {
+
+        TossPayResponse approvalResponse = tossPayService.confirmPayment(paymentKey, orderId,
+            amount);
+
+        return ResponseEntity.ok(approvalResponse);
     }
 }
