@@ -1,5 +1,6 @@
 package com.ssafy.ticket_backend.service;
 
+import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthResponse;
@@ -197,6 +198,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public MyPageResponse getMyPage(String email) {
         return userMapper.getMyPageByEmail(email);
+    }
+
+    @Override
+    public void patchMyPage(String email, UserPatchRequest userPatchRequest) {
+        userMapper.updateUser(email, userPatchRequest);
     }
 
     /**

@@ -52,6 +52,7 @@
     )
   </insert>
 
+  <!-- 마이페이지 -->
   <select id="getMyPageByEmail" resultType="com.ssafy.ticket_backend.dto.response.MyPageResponse">
     SELECT
     email,
@@ -70,4 +71,14 @@
     WHERE email = #{email}
   </select>
 
+  <!-- 유저 정보 수정 -->
+  <update id="updateUser" parameterType="map">
+    UPDATE users
+    SET
+    nickname = #{userPatchRequest.nickName},
+    profile_photo_url = #{userPatchRequest.profileImageUrl},
+    my_team = #{userPatchRequest.myTeam},
+    gender = #{userPatchRequest.gender}
+    WHERE email = #{email}
+  </update>
 </mapper>
