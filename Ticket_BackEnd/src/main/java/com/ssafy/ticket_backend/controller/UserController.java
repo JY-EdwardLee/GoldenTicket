@@ -5,15 +5,11 @@ import com.ssafy.ticket_backend.dto.response.OAuthResponse;
 import com.ssafy.ticket_backend.model.User;
 import com.ssafy.ticket_backend.service.UserService;
 import com.ssafy.ticket_backend.util.JwtUtil;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,6 +27,7 @@ public class UserController {
     @GetMapping("/auth/oauth/callback")
     public ResponseEntity<OAuthResponse> kakaoCallback(@RequestParam String code) {
         OAuthResponse response = userService.loginWithKakao(code);
+
         return ResponseEntity.ok(response);
     }
 
@@ -38,6 +35,7 @@ public class UserController {
     @GetMapping("/auth/naver/callback")
     public ResponseEntity<OAuthResponse> naverCallback(@RequestParam String code) {
         OAuthResponse response = userService.loginWithNaver(code);
+
         return ResponseEntity.ok(response);
     }
 
@@ -67,6 +65,15 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<JwtTokenResponse> signup(@RequestBody User user) {
         JwtTokenResponse tokens = userService.signup(user);
+
+        return ResponseEntity.ok(tokens);
+    }
+
+    // 로그인 - 테스트 용 로그인이므로 실제 서비스에서는 사용 금지
+    @PostMapping("/testlogin")
+    public ResponseEntity<JwtTokenResponse> testLogin() {
+        JwtTokenResponse tokens = userService.testUser();
+
         return ResponseEntity.ok(tokens);
 
     }

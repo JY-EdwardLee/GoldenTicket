@@ -21,4 +21,7 @@ public interface UserService {
 
     // 로그아웃
     void logout(String token);
+
+    // 테스트 용도
+    JwtTokenResponse testUser();
 }
