@@ -1,6 +1,7 @@
 package com.ssafy.ticket_backend.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -23,6 +24,8 @@ public class PostDetailResponse {
     private int likeCount;     // 좋아요 수
     private boolean isDelete;  // 삭제 여부
 
+    List<CommentDetailResponse> comments;  // 댓글 목록
+
     // TODO UserResponse user;  // 작성자
-    // TODO List<Comments> comments  // 댓글 목록
+
 }

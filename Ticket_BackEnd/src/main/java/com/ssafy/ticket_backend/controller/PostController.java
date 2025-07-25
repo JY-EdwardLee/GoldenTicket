@@ -1,6 +1,7 @@
 package com.ssafy.ticket_backend.controller;
 
 import com.ssafy.ticket_backend.dto.request.PostRequest;
+import com.ssafy.ticket_backend.dto.request.PostUpdateRequest;
 import com.ssafy.ticket_backend.dto.response.PostDetailResponse;
 import com.ssafy.ticket_backend.dto.response.PostResponse;
 import com.ssafy.ticket_backend.service.PostService;
@@ -31,7 +32,6 @@ public class PostController {
     @PostMapping("")
     public ResponseEntity<PostResponse> createPosts(@RequestBody PostRequest postRequest) {
         postService.createPost(postRequest);
-
         return ResponseEntity.ok(new PostResponse(true, "게시글 작성 성공"));
     }
 
@@ -44,7 +44,6 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<PostDetailResponse> getPostDetail(@PathVariable Long postId) {
         postService.getPostDetail(postId);
-
         PostDetailResponse postDetailResponse = null;
         return ResponseEntity.ok(postDetailResponse);
     }
@@ -52,13 +51,13 @@ public class PostController {
     /**
      * 게시글 수정
      *
-     * @param postId
+     * @param postUpdateRequest
      * @return
      */
     @PatchMapping("/{postId}")
-    public ResponseEntity<PostResponse> editPosts(@PathVariable Long postId) {
-        // TODO
-        // ㅇㅇㅇ
+    public ResponseEntity<PostResponse> editPosts(
+        @RequestBody PostUpdateRequest postUpdateRequest) {
+        postService.updatePost(postUpdateRequest);
         return ResponseEntity.ok(new PostResponse(true, "게시글 수정 성공"));
     }
 
@@ -70,7 +69,16 @@ public class PostController {
      */
     @DeleteMapping("/{postId}")
     public ResponseEntity<PostResponse> deletePost(@PathVariable Long postId) {
-        // TODO
+        postService.deletePost(postId);
         return ResponseEntity.ok(new PostResponse(true, "게시글 삭제 성공"));
     }
+
+    /**
+     * 게시글물 모두 가져오기
+     *
+     * @param postId
+     * @return
+     */
+
+
 }

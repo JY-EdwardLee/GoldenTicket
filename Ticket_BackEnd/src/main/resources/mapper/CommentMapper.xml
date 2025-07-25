@@ -8,6 +8,23 @@
     VALUES (#{postId}, #{userId}, #{content})
   </insert>
 
+  <delete id="deleteComment" parameterType="Long">
+    DELETE FROM comments WHERE comment_id = #{comment_id}
+  </delete>
+
+  <update id="updateComment" parameterType="CommentUpdateRequest">
+    UPDATE comments
+    SET content = #{content}
+    WHERE comment_id = #{commentId}
+  </update>
+
+
+  <select id="getComments" parameterType="int" resultType="CommentDetailResponse">
+    SELECT FROM comments
+    where (post_id = #{post_id})
+  </select>
+
+
 </mapper>
 
 

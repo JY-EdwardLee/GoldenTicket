@@ -35,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             try {
                 // 토큰에서 유저 ID 추출
-                userId = jwtUtil.getUserId(jwt);
+                userId = jwtUtil.getUserEmail(jwt);
             } catch (Exception e) {
                 // 토큰 파싱 에러 처리
                 System.out.printf("JWT 파싱 에러: " + e.getMessage());

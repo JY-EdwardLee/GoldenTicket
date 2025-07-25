@@ -56,7 +56,7 @@ public class JwtUtil {
      * @param token JWT 문자열
      * @return email (subject 필드)
      */
-    public String getUserId(String token) {
+    public String getUserEmail(String token) {
         return Jwts.parser().setSigningKey(SECRET_KEY) // 비밀키로 디코딩
             .parseClaimsJws(token) // JWT 파싱
             .getBody() // JWT  내부의 payload(body) 가져옴
