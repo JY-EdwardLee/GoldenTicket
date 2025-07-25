@@ -35,11 +35,5 @@
     WHERE post_id = #{postId}
   </update>
 
-  <!--  <select id="findAllPosts" parameterType="int" resultType="PostDetailResponse">-->
-  <!--    SELECT post_id, title, content, image_url, created_at, updated_at, view_count, like_count-->
-  <!--    FROM posts-->
-  <!--    ORDER BY created_at DESC-->
-  <!--  </select>-->
-
 
 </mapper>

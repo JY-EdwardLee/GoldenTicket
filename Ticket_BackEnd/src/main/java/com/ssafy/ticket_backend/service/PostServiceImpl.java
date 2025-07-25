@@ -25,7 +25,6 @@ public class PostServiceImpl implements PostService {
             // TODO: 실제 로그인 사용자 ID로 대체
             postRequest.setUserId(1);
 
-            // DB 처리
             int result = postMapper.insertPost(postRequest);
 
             if (result != 1) {

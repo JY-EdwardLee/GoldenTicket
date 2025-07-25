@@ -17,6 +17,4 @@ public interface PostMapper {
     int deletePost(Long postId);
 
     int updatePost(PostUpdateRequest postUpdateRequest);
-
-//    List<PostDetailResponse> findAllPosts();
 }
