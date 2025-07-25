@@ -189,13 +189,13 @@ public class UserServiceImpl implements UserService {
 
         if (!jwtUtil.validateToken(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", " 유효하지 않은 토큰입니다."))
+                .body(Map.of("message", " 유효하지 않은 토큰입니다."));
         }
 
         String email = jwtUtil.getUserEmail(token);
         jwtUtil.addToBlackList(token); // Access Token 블랙리스트 등록
         jwtUtil.deleteRefreshToken(email); // Redis에서 리프레시 토큰 삭제
 
-        return ResponseEntity.ok(Map.of("message", "성공적으로 로그아웃 되었습니다."))
+        return ResponseEntity.ok(Map.of("message", "성공적으로 로그아웃 되었습니다."));
     }
 }

@@ -1,5 +1,6 @@
 package com.ssafy.ticket_backend.util;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,30 +34,36 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
 
+            // 블랙 리스트 확인
+            if (jwtUtil.isBlacklisted(jwt)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Access token is blacklisted.");
+                return;
+            }
+
+            // 토큰 유효성 검증 및 사용자 정보 추출
             try {
-                // 토큰에서 유저 이메일 추출
-                userEmail = jwtUtil.getUserEmail(jwt);
-            } catch (Exception e) {
-                // 토큰 파싱 에러 처리
-                System.out.printf("JWT 파싱 에러: " + e.getMessage());
+                if (jwtUtil.validateToken(jwt)) {
+                    userEmail = jwtUtil.getUserEmail(jwt);
+                }
+            } catch (ExpiredJwtException e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Token is expired.");
+                return;
             }
         }
 
-        // 인증정보가 없고 userId가 존재하면 인증처리 진행
+        // 인증정보가 없고 userEmail 존재하면 인증처리 진행
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // UserDetailsService에서 유저 정보 로드 (여기선 userId가 PK로 사용된다고 가정)
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(userEmail);
 
-            // 토큰이 유효한지 확인
-            if (jwtUtil.validateToken(jwt)) {
-                // 인증 토큰 생성 (권한 포함)
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            UsernamePasswordAuthenticationToken authToken =
+                new UsernamePasswordAuthenticationToken(userDetails, null,
+                    userDetails.getAuthorities());
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // SecurityContext에 인증 정보 넣기
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
+            SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 
         // 다음 필터 체인 계속 진행
