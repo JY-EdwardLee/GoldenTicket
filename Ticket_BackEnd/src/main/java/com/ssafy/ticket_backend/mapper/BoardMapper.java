@@ -8,4 +8,5 @@ import org.apache.ibatis.annotations.Mapper;
 public interface BoardMapper {
 
     List<PostAllResponse> getPostsByCategory(String category);
+    List<PostAllResponse> searchPosts(String type, String title, String content, String writer);
 }

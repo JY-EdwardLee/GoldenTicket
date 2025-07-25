@@ -22,4 +22,32 @@
     ORDER BY p.created_at DESC
   </select>
   
+  <select id="searchPosts" resultType="PostAllResponse">
+    SELECT
+      p.post_id,
+      p.user_id,
+      p.board_id,
+      u.nickname,
+      p.title,
+      p.content,
+      p.image_url,
+      p.created_at,
+      p.updated_at,
+      p.view_count,
+      p.like_count
+    FROM posts p
+    JOIN users u ON p.user_id = u.user_id
+    WHERE p.board_id = #{type}
+    <if test="title != null and title != ''">
+      AND p.title LIKE CONCAT('%', #{title}, '%')
+    </if>
+    <if test="content != null and content != ''">
+      AND p.content LIKE CONCAT('%', #{content}, '%')
+    </if>
+    <if test="writer != null and writer != ''">
+      AND u.nickname LIKE CONCAT('%', #{writer}, '%')
+    </if>
+    ORDER BY p.created_at DESC
+  </select>
+  
 </mapper>
