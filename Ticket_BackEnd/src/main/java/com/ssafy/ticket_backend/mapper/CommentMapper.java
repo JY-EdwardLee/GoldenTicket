@@ -17,4 +17,6 @@ public interface CommentMapper {
 
     List<CommentDetailResponse> getComments(Long post_id);
 
+    Long selectUserIdByCommentId(Long postId);
+
 }

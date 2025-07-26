@@ -19,9 +19,16 @@
   </update>
 
 
-  <select id="getComments" parameterType="int" resultType="CommentDetailResponse">
-    SELECT FROM comments
-    where (post_id = #{post_id})
+  <select id="getComments" parameterType="Long" resultType="CommentDetailResponse">
+    SELECT comment_id, post_id, user_id, content, created_at, updated_at
+    FROM comments
+    WHERE post_id = #{postId}
+  </select>
+
+  <select id="selectUserIdByCommentId" parameterType="Long" resultType="Long">
+    SELECT user_id
+    FROM comments
+    WHERE comment_id = #{commentId}
   </select>
 
 
