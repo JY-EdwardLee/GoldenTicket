@@ -14,6 +14,7 @@ import com.ssafy.ticket_backend.model.UserRole;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +30,8 @@ public class CommentServiceImpl implements CommentService {
      * @param commentRequest 댓글 내용
      * @return true
      */
+    @Transactional
+    @Override
     public boolean createComment(String email, CommentRequest commentRequest) {
         User user = userMapper.selectUserByEmail(email);
 
@@ -53,6 +56,7 @@ public class CommentServiceImpl implements CommentService {
      * @param postId 게시물 기본키
      * @return List<CommentDetailResponse> 댓글목록
      */
+    @Override
     public List<CommentDetailResponse> getComments(Long postId) {
         List<CommentDetailResponse> result = commentMapper.getComments(postId);
         return result;
@@ -65,6 +69,8 @@ public class CommentServiceImpl implements CommentService {
      * @param commentId 댓글 기본키
      * @return true
      */
+    @Transactional
+    @Override
     public boolean deleteComment(String email, Long commentId) {
         User user = userMapper.selectUserByEmail(email);
 
@@ -88,6 +94,8 @@ public class CommentServiceImpl implements CommentService {
      * @param commentUpdateRequest 수정 내용
      * @return true
      */
+    @Transactional
+    @Override
     public boolean updateComment(String email, CommentUpdateRequest commentUpdateRequest) {
         User user = userMapper.selectUserByEmail(email);
 
