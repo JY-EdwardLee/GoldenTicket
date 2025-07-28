@@ -30,11 +30,10 @@ public class CommentController {
      * @param commentRequest 댓글 내용
      * @return 성공/실패 메세지
      */
-    @PostMapping()
-    public ResponseEntity<CommentResponse> createPosts(
+    @PostMapping("")
+    public ResponseEntity<CommentResponse> createComment(
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody CommentRequest commentRequest) {
-
         commentService.createComment(userDetails.getUsername(), commentRequest);
 
         return ResponseEntity.ok(new CommentResponse(true, "댓글 작성 성공"));
@@ -48,10 +47,10 @@ public class CommentController {
      * @return 성공/실패 메세지
      */
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<CommentResponse> deleteComments(
-        @AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable Long commentId) {
+    public ResponseEntity<CommentResponse> deleteComment(
+        @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long commentId) {
         commentService.deleteComment(userDetails.getUsername(), commentId);
+
         return ResponseEntity.ok(new CommentResponse(true, "댓글 삭제 성공"));
     }
 
@@ -62,11 +61,11 @@ public class CommentController {
      * @param commentUpdateRequest 수정 내용
      * @return 성공/실패 메세지
      */
-    @PatchMapping()
+    @PatchMapping("/{commentId}")
     public ResponseEntity<CommentResponse> editComments(
-        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long commentId,
         @RequestBody CommentUpdateRequest commentUpdateRequest) {
-        commentService.updateComment(userDetails.getUsername(), commentUpdateRequest);
+        commentService.updateComment(userDetails.getUsername(), commentId, commentUpdateRequest);
 
         return ResponseEntity.ok(new CommentResponse(true, "댓글 수정 성공"));
     }
@@ -77,12 +76,11 @@ public class CommentController {
      * @param commentId 댓글 기본키
      * @return 성공/실패 메세지
      */
-    @PostMapping("/{postId}/like")
-    public ResponseEntity<CommentResponse> addLike(@PathVariable Long commentId) {
-        // 사용자 정보 시큐리티
+    @PostMapping("/{commentId}/like")
+    public ResponseEntity<CommentResponse> addLike(
+        @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long commentId) {
+        commentService.likeComment(userDetails.getUsername(), commentId);
 
         return ResponseEntity.ok(new CommentResponse(true, "댓글 좋아요 성공"));
     }
-
-
 }

@@ -4,6 +4,7 @@ import com.ssafy.ticket_backend.dto.response.ErrorResponse;
 import com.ssafy.ticket_backend.exception.BlockedUserException;
 import com.ssafy.ticket_backend.exception.CommentCreateFailException;
 import com.ssafy.ticket_backend.exception.CommentDeleteFailException;
+import com.ssafy.ticket_backend.exception.CommentLikeFailException;
 import com.ssafy.ticket_backend.exception.CommentUpdateFailException;
 import com.ssafy.ticket_backend.exception.DatabaseOperationException;
 import com.ssafy.ticket_backend.exception.PostDeleteFailException;
@@ -22,6 +23,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DatabaseOperationException.class)
     public ResponseEntity<ErrorResponse> handleDb(DatabaseOperationException e) {
         ErrorResponse response = new ErrorResponse("DB_ERROR", e.getMessage());
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
@@ -29,12 +31,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BlockedUserException.class)
     public ResponseEntity<ErrorResponse> handleBlockedUserException(BlockedUserException e) {
         ErrorResponse response = new ErrorResponse("BLOCKED_USER", e.getMessage());
+
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     @ExceptionHandler(PostNotFoundException.class)
     public ResponseEntity<ErrorResponse> handlePostNotFoundException(PostNotFoundException e) {
         ErrorResponse response = new ErrorResponse("POST_NOT_FOUND", e.getMessage());
+
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
@@ -42,6 +46,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handlePostUserNotFoundException(
         PostUserNotFoundException e) {
         ErrorResponse response = new ErrorResponse("POST_USER_NOT_FOUND", e.getMessage());
+        
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
@@ -71,6 +76,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCommentCreateFailException(
         CommentCreateFailException e) {
         ErrorResponse response = new ErrorResponse("Comment_Create_Fail", e.getMessage());
+
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
@@ -78,6 +84,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCommentDeleteFailException(
         CommentDeleteFailException e) {
         ErrorResponse response = new ErrorResponse("Comment_Delete_Fail", e.getMessage());
+
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
@@ -85,8 +92,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCommentUpdateFailException(
         CommentUpdateFailException e) {
         ErrorResponse response = new ErrorResponse("Comment_Update_Fail", e.getMessage());
+
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
+    @ExceptionHandler(CommentLikeFailException.class)
+    public ResponseEntity<ErrorResponse> handleCommentLikeFailException(
+        CommentLikeFailException e) {
+        ErrorResponse response = new ErrorResponse("Comment_Like_Fail", e.getMessage());
 
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
 }

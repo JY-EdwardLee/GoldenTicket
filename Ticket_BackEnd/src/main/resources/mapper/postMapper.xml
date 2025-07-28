@@ -9,7 +9,8 @@
   </insert>
 
   <select id="selectPostById" parameterType="Long" resultType="Long">
-    SELECT user_id
+    SELECT *
+    FROM posts
     WHERE post_id = #{postId}
   </select>
 

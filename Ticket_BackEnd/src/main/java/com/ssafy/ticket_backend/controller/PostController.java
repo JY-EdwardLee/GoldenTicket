@@ -33,10 +33,9 @@ public class PostController {
      * @return 성공/실패 메세지
      */
     @PostMapping("")
-    public ResponseEntity<PostResponse> createPosts(
+    public ResponseEntity<PostResponse> createPost(
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody PostRequest postRequest) {
-
         postService.createPost(userDetails.getUsername(), postRequest);
 
         return ResponseEntity.ok(new PostResponse(true, "게시글 작성 성공"));
