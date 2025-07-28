@@ -7,7 +7,7 @@ import com.ssafy.ticket_backend.dto.response.PostDetailResponse;
 public interface PostService {
 
     // 게시글 작성
-    void createPost(String email, PostRequest postRequest);
+    boolean createPost(String email, PostRequest postRequest);
 
     // 게시글 상세보기
     PostDetailResponse getPostDetail(Long postId);
