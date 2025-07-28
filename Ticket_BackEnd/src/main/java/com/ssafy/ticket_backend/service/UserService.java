@@ -22,8 +22,17 @@ public interface UserService {
     // 네이버 로그인
     OAuthUserResponse loginWithNaver(String code);
 
+    //  OAuthUserResponse를 임시 저장하고 임의 ID 반환
+    String storeTempUserInfo(OAuthUserResponse userResponse);
+
+    // Redis에 임시 저장된 유저 정보 조회
+    OAuthUserResponse getTempUserInfo(String tempUserId);
+
     // 로그아웃
     void logout(String token);
+
+    // 액세스 토큰 만료 시, 리프레시 토큰으로 새 토큰 재발급 요청
+    JwtTokenResponse refreshToken(String refreshToken);
 
     // 마이페이지
     MyPageResponse getMyPage(String email);

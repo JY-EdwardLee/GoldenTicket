@@ -21,6 +21,5 @@ public class PostAllResponse {
     private boolean isDelete;
 
     // 사용자 닉네임
-    private String nickname;
-
+    private String nickName;
 }

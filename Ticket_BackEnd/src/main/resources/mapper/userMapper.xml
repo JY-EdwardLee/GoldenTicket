@@ -3,11 +3,19 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.ticket_backend.mapper.UserMapper">
 
-  <!-- 이메일로 유저 조회-->
+  <!-- 이메일로 유저 조회 (커뮤니티 용) -->
   <select id="selectUserByEmail" resultType="com.ssafy.ticket_backend.model.User">
     SELECT *
     FROM users
     WHERE email = #{email}
+  </select>
+
+  <!-- 게시판번호로 유저 조회 (커뮤니티 용)-->
+  <select id="selectUserByPostId" parameterType="Long"
+    resultType="PostUserResponse">
+    SELECT user_id, nickname
+    FROM users
+    WHERE user_id = #{userId}
   </select>
 
   <!--  private String email;-->
@@ -19,7 +27,6 @@
   <!--  private String myTeam;-->
   <!--  private String socialProvider; // 예: "naver", "kakao"-->
 
-
   <!-- 유저 회원가입 -->
   <insert id="insertUser" parameterType="com.ssafy.ticket_backend.dto.request.UserSignupRequest"
     useGeneratedKeys="true" keyProperty="userId">
@@ -27,22 +34,25 @@
     email,
     user_name,
     user_role,
-    nickname,
+    nick_name,
     birth_date,
     phone_number,
     my_team,
-    social_provider
+    social_provider,
+    gender
     ) VALUES (
     #{email},
     #{userName},
-    #{userRole},
-    #{nickname},
-    #{birthDate},
+    #{userRole, typeHandler=com.ssafy.ticket_backend.handler.UserRoleTypeHandler},
+    #{nickName},
+    #{birthDate}::date,
     #{phoneNumber},
-    #{myTeam},
-    #{socialProvider}
+    #{myTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler},
+    #{socialProvider},
+    #{gender, typeHandler=com.ssafy.ticket_backend.handler.UserGenderTypeHandler}
     )
   </insert>
+
 
   <!-- 마이페이지 -->
   <select id="getMyPageByEmail" resultType="com.ssafy.ticket_backend.dto.response.MyPageResponse">
