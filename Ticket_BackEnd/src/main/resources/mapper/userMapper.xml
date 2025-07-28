@@ -44,7 +44,7 @@
     #{email},
     #{userName},
     #{userRole, typeHandler=com.ssafy.ticket_backend.handler.UserRoleTypeHandler},
-    #{nickname},
+    #{nickName},
     #{birthDate}::date,
     #{phoneNumber},
     #{myTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler},

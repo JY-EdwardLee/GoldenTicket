@@ -8,7 +8,7 @@
     p.post_id,
     p.user_id,
     p.board_id,
-    u.nickname, -- users 테이블의 닉네임
+    u.nick_name,
     p.title,
     p.content,
     p.image_url,
@@ -18,23 +18,23 @@
     p.like_count
     FROM posts p
     JOIN users u ON p.user_id = u.user_id
-    WHERE p.board_id = #{category}
+    WHERE p.board_id = #{category, typeHandler=com.ssafy.ticket_backend.handler.BoardTypeHandler}
     ORDER BY p.created_at DESC
   </select>
-  
+
   <select id="searchPosts" resultType="PostAllResponse">
     SELECT
-      p.post_id,
-      p.user_id,
-      p.board_id,
-      u.nickname,
-      p.title,
-      p.content,
-      p.image_url,
-      p.created_at,
-      p.updated_at,
-      p.view_count,
-      p.like_count
+    p.post_id,
+    p.user_id,
+    p.board_id,
+    u.nick_name,
+    p.title,
+    p.content,
+    p.image_url,
+    p.created_at,
+    p.updated_at,
+    p.view_count,
+    p.like_count
     FROM posts p
     JOIN users u ON p.user_id = u.user_id
     WHERE p.board_id = #{type}
@@ -45,9 +45,9 @@
       AND p.content LIKE CONCAT('%', #{content}, '%')
     </if>
     <if test="writer != null and writer != ''">
-      AND u.nickname LIKE CONCAT('%', #{writer}, '%')
+      AND u.nick_name LIKE CONCAT('%', #{writer}, '%')
     </if>
     ORDER BY p.created_at DESC
   </select>
-  
+
 </mapper>

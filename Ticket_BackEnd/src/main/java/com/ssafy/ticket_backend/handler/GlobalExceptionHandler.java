@@ -13,10 +13,12 @@ import com.ssafy.ticket_backend.exception.PostNotFoundException;
 import com.ssafy.ticket_backend.exception.PostUpdateFailException;
 import com.ssafy.ticket_backend.exception.PostUserNotFoundException;
 import com.ssafy.ticket_backend.exception.UserSignupException;
+import com.ssafy.ticket_backend.model.BoardType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -33,6 +35,17 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse("DB_ERROR", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    // Board
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<String> handleEnumBindingException(
+        MethodArgumentTypeMismatchException ex) {
+        if (ex.getRequiredType() == BoardType.class) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 게시판입니다.");
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("요청 파라미터 오류");
     }
 
     // Post
@@ -111,6 +124,4 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
-
-
 }
