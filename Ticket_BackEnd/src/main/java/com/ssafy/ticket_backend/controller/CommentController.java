@@ -72,10 +72,10 @@ public class CommentController {
   }
 
   /**
-   * 댓글 좋아요 누르기
+   * 댓글 좋아요
    *
    * @param commentId 댓글 기본키
-   * @return 성공/실패 메세지
+   * @return CommentLikeResponse
    */
   @PostMapping("/{commentId}/like")
   public ResponseEntity<CommentLikeResponse> addLike(

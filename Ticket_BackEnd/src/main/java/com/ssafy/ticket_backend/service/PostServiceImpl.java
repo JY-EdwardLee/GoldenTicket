@@ -42,7 +42,6 @@ public class PostServiceImpl implements PostService {
    *
    * @param email       작성자 정보
    * @param postRequest 게시글 내용
-   * @return true
    */
   @Transactional
   @Override
@@ -121,7 +120,6 @@ public class PostServiceImpl implements PostService {
    *
    * @param email             수정을 시도하려는 사람의 이메일
    * @param postUpdateRequest 수정 내용
-   * @return true
    */
   @Transactional
   @Override
@@ -158,7 +156,6 @@ public class PostServiceImpl implements PostService {
    *
    * @param email  삭제를 시도하려는 사람의 이메일
    * @param PostId 삭제하려는 게시글
-   * @return true
    */
   @Transactional
   @Override

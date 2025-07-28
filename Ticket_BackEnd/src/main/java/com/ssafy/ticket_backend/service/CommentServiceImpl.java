@@ -114,6 +114,14 @@ public class CommentServiceImpl implements CommentService {
     }
   }
 
+
+  /**
+   * 댓글 좋아요
+   *
+   * @param email     작성자 정보
+   * @param commentId 댓글 기본키
+   * @return CommentLikeResponse
+   */
   @Override
   public CommentLikeResponse likeComment(String email, Long commentId) {
     User user = userMapper.selectUserByEmail(email);
