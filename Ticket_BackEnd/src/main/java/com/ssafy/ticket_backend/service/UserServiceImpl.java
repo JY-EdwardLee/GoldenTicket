@@ -37,6 +37,8 @@ public class UserServiceImpl implements UserService {
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
     private ObjectMapper objectMapper;
+    private static final String TEMP_USER_KEY_PREFIX = "tempUser:";
+
 
     // 카카오 api 키
     @Value("${kakao.rest.api.key}")
@@ -48,15 +50,22 @@ public class UserServiceImpl implements UserService {
     @Value("${naver.client.secret}")
     private String naverClientSecret;
 
-    // 유저 정보 조회
+    /**
+     * 이메일로 사용자 정보 조회
+     *
+     * @param email 조회할 사용자의 이메일
+     * @return User 객체 (존재하지 않으면 null)
+     */
     @Override
     public User selectUserByEmail(String email) {
         return userMapper.selectUserByEmail(email);
     }
 
     /**
-     * @param userSignupRequest
-     * @return
+     * 일반 회원가입 처리
+     *
+     * @param userSignupRequest 회원가입 요청 정보
+     * @return JWT 토큰(access, refresh)
      */
     @Transactional
     @Override
@@ -76,7 +85,12 @@ public class UserServiceImpl implements UserService {
         return new JwtTokenResponse(accessToken, refreshToken);
     }
 
-    // 카카오 로그인, 유저 회원가입 안되어 있으면 카카오 정보 반환
+    /**
+     * 카카오 로그인 처리
+     *
+     * @param code 카카오 인가 코드
+     * @return OAuthUserResponse (회원 가입 여부 및 사용자 정보/JWT 포함)
+     */
     @Override
     public OAuthUserResponse loginWithKakao(String code) {
         RestTemplate restTemplate = new RestTemplate();
@@ -127,9 +141,7 @@ public class UserServiceImpl implements UserService {
             // 시연을 위해 더미데이터 강제 추가
             oauthUserResponse = OAuthUserResponse.builder().isRegistered(false).email(email)
                 .name("시니어 이름").nickname(nickname).birthday("05-22").birthyear("1960").gender("M")
-                .socialProvider("KAKAO")
-                .profilePhotoUrl(profilePhotoUrl)
-                .build();
+                .socialProvider("KAKAO").profilePhotoUrl(profilePhotoUrl).build();
             return oauthUserResponse;
         }
 
@@ -142,7 +154,12 @@ public class UserServiceImpl implements UserService {
         return oauthUserResponse;
     }
 
-    // 네이버 로그인
+    /**
+     * 네이버 로그인 처리
+     *
+     * @param code 네이버 인가 코드
+     * @return OAuthUserResponse (회원 가입 여부 및 사용자 정보/JWT 포함)
+     */
     @Override
     public OAuthUserResponse loginWithNaver(String code) {
         RestTemplate restTemplate = new RestTemplate();
@@ -209,8 +226,12 @@ public class UserServiceImpl implements UserService {
         return oauthUserResponse;
     }
 
-    // OAuthUserResponse를 임시 저장하고 임의 ID 반환
-    private static final String TEMP_USER_KEY_PREFIX = "tempUser:";
+    /**
+     * OAuth 로그인 중 수집된 사용자 정보를 Redis에 임시 저장
+     *
+     * @param userResponse OAuth 로그인으로 받은 사용자 정보
+     * @return Redis에 저장된 임시 사용자 ID
+     */
 
     @Override
     public String storeTempUserInfo(OAuthUserResponse userResponse) {
@@ -231,7 +252,12 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    // Redis에 임시 저장된 유저 정보 조회
+    /**
+     * 임시 사용자 ID로 Redis에서 OAuthUserResponse 조회
+     *
+     * @param tempUserId Redis에 저장된 임시 사용자 ID
+     * @return OAuthUserResponse
+     */
     public OAuthUserResponse getTempUserInfo(String tempUserId) {
         String redisKey = TEMP_USER_KEY_PREFIX + tempUserId;
         String json = redisTemplate.opsForValue().get(redisKey);
@@ -247,7 +273,11 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    // 로그아웃
+    /**
+     * 로그아웃 처리 (액세스 토큰 블랙리스트 등록 및 리프레시 토큰 제거)
+     *
+     * @param token 액세스 토큰
+     */
     @Override
     public void logout(String token) {
         if (!jwtUtil.validateToken(token)) {
@@ -260,7 +290,12 @@ public class UserServiceImpl implements UserService {
         jwtUtil.deleteRefreshToken(email);
     }
 
-    // 리프레시 토큰으로 새 토큰 재발급
+    /**
+     * 리프레시 토큰으로 액세스 토큰 재발급
+     *
+     * @param refreshToken 유효한 리프레시 토큰
+     * @return 새로 발급된 액세스 토큰과 기존 리프레시 토큰
+     */
     @Override
     public JwtTokenResponse refreshToken(String refreshToken) {
         if (!jwtUtil.validateToken(refreshToken)) {

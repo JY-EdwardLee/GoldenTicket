@@ -39,7 +39,11 @@ public class UserController {
     @Value("${naver.client.id}")
     private String NaverClientId;
 
-    // 카카오 로그인 페이지 호출
+    /**
+     * 카카오 로그인 페이지로 리다이렉트
+     *
+     * @return RedirectView 카카오 인증 URL로 리다이렉션
+     */
     @GetMapping("/auth/kakao")
     public RedirectView redirectToKakaoLogin() {
         String kakaoAuthUrl =
@@ -50,7 +54,11 @@ public class UserController {
         return new RedirectView(kakaoAuthUrl);
     }
 
-    // 네이버 로그인 페이지 호출
+    /**
+     * 네이버 로그인 페이지로 리다이렉트
+     *
+     * @return RedirectView 네이버 인증 URL로 리다이렉션
+     */
     @GetMapping("/auth/naver")
     public RedirectView redirectToNaverLogin() {
         String state = "random_state_string"; // CSRF 방지용 (랜덤 문자열 생성 권장)
@@ -63,7 +71,13 @@ public class UserController {
         return new RedirectView(naverAuthUrl);
     }
 
-    // 카카오 로그인 인가 코드 받아서 회원가입 유무에 따라 응답 반환
+    /**
+     * 카카오 로그인 콜백 처리
+     *
+     * @param code     카카오에서 발급한 인가 코드
+     * @param response HttpServletResponse (JWT 쿠키 저장용)
+     * @return OAuthUserResponse 또는 리다이렉션 응답
+     */
     @GetMapping("/auth/kakao/callback")
     public ResponseEntity<OAuthUserResponse> kakaoCallback(@RequestParam String code,
         HttpServletResponse response) {
@@ -100,7 +114,13 @@ public class UserController {
             .header("Location", "http://localhost:5173/oauth/callback").build();
     }
 
-    // 네이버 로그인
+    /**
+     * 네이버 로그인 콜백 처리
+     *
+     * @param code     네이버에서 발급한 인가 코드
+     * @param response HttpServletResponse (JWT 쿠키 저장용)
+     * @return OAuthUserResponse 또는 리다이렉션 응답
+     */
     @GetMapping("/auth/naver/callback")
     public ResponseEntity<OAuthUserResponse> naverCallback(@RequestParam String code,
         HttpServletResponse response) {
@@ -121,19 +141,12 @@ public class UserController {
         JwtTokenResponse tokens = userResponse.getToken();
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
-            .httpOnly(true)
-            .secure(false) // 배포 시 true
-            .path("/")
-            .sameSite("Lax")
-            .maxAge(60 * 60) // 1시간
+            .httpOnly(true).secure(false) // 배포 시 true
+            .path("/").sameSite("Lax").maxAge(60 * 60) // 1시간
             .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token",
-                tokens.getRefreshToken())
-            .httpOnly(true)
-            .secure(false)
-            .path("/")
-            .sameSite("Lax")
+                tokens.getRefreshToken()).httpOnly(true).secure(false).path("/").sameSite("Lax")
             .maxAge(7 * 24 * 60 * 60) // 7일
             .build();
 
@@ -142,11 +155,30 @@ public class UserController {
 
         // 로그인 성공 후 프론트엔드로 리다이렉트
         return ResponseEntity.status(HttpStatus.FOUND)
-            .header("Location", "http://localhost:5173/oauth/callback")
-            .build();
+            .header("Location", "http://localhost:5173/oauth/callback").build();
     }
 
-    // 액세스 토큰 만료 시, 리프레시 토큰으로 새 토큰 재발급 요청
+
+    /**
+     * tempUserId로 Redis에 저장된 임시 사용자 정보 조회
+     *
+     * @param tempUserId 임시 사용자 ID
+     * @return OAuthUserResponse 사용자 정보
+     */
+    @GetMapping("/auth/temp-user")
+    public ResponseEntity<OAuthUserResponse> getTempUserInfo(@RequestParam String tempUserId) {
+        OAuthUserResponse oAuthUserResponse = userService.getTempUserInfo(tempUserId);
+        
+        return ResponseEntity.ok(oAuthUserResponse);
+    }
+
+
+    /**
+     * 리프레시 토큰으로 JWT 재발급
+     *
+     * @param request refreshToken 포함한 요청 body
+     * @return 새롭게 발급된 JwtTokenResponse
+     */
     @PostMapping("/auth/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
@@ -154,7 +186,12 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    // 회원가입 - 유저 객체 받고 토큰 발급 후 반환
+    /**
+     * 회원가입 처리
+     *
+     * @param userSignupRequest 회원가입 요청 정보
+     * @return JwtTokenResponse 토큰 응답
+     */
     @PostMapping("/signup")
     public ResponseEntity<JwtTokenResponse> signup(
         @RequestBody UserSignupRequest userSignupRequest) {
@@ -163,7 +200,12 @@ public class UserController {
         return ResponseEntity.ok(tokens);
     }
 
-    // 로그아웃
+    /**
+     * 로그아웃 처리
+     *
+     * @param authHeader Authorization 헤더 (Bearer 토큰)
+     * @return 로그아웃 성공/실패 메시지
+     */
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(
         @RequestHeader("Authorization") String authHeader) {
@@ -178,18 +220,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("message", e.getMessage()));
         }
-    }
-
-    // 프론트가 tempUserId로 Redis에서 임시 사용자 정보를 조회
-    @GetMapping("/auth/temp-user")
-    public ResponseEntity<OAuthUserResponse> getTempUserInfo(@RequestParam String tempUserId) {
-        OAuthUserResponse oAuthUserResponse = userService.getTempUserInfo(tempUserId);
-
-        if (oAuthUserResponse == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        return ResponseEntity.ok(oAuthUserResponse);
     }
 
     /**
