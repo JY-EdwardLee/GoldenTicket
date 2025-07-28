@@ -47,8 +47,7 @@ public class BoardController {
         @RequestParam(required = false) String content,
         @RequestParam(required = false) String writer) {
         List<PostAllResponse> list = boardService.searchPosts(type, title, content, writer);
+        
         return ResponseEntity.status(HttpStatus.OK).body(list);
     }
-
-
 }
