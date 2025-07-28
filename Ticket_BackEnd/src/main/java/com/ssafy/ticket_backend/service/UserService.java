@@ -25,6 +25,9 @@ public interface UserService {
     // 로그아웃
     void logout(String token);
 
+    // 액세스 토큰 만료 시, 리프레시 토큰으로 새 토큰 재발급 요청
+    JwtTokenResponse refreshToken(String refreshToken);
+
     // 마이페이지
     MyPageResponse getMyPage(String email);
 

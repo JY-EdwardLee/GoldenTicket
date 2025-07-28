@@ -13,6 +13,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final JwtUtil jwtUtil;
+    private final RedisTemplate<String, String> redisTemplate;
 
     // 카카오 api 키
     @Value("${kakao.rest.api.key}")
@@ -83,7 +85,7 @@ public class UserServiceImpl implements UserService {
         MultiValueMap<String, String> tokenParams = new LinkedMultiValueMap<>();
         tokenParams.add("grant_type", "authorization_code");
         tokenParams.add("client_id", kakaoApiKey);
-        tokenParams.add("redirect_uri", "http://localhost:8080/users/auth/oauth/callback");
+        tokenParams.add("redirect_uri", "http://localhost:8080/users/auth/kakao/callback");
         tokenParams.add("code", code);
 
         HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(tokenParams,
@@ -117,8 +119,11 @@ public class UserServiceImpl implements UserService {
 
         if (user == null) {
             // 회원가입 창에 필요한 데이터(카카오에서 받아온) 전달
+            // 시연을 위해 더미데이터 강제 추가
             oauthUserResponse = OAuthUserResponse.builder().isRegistered(false).email(email)
-                .nickname(nickname).socialProvider("KAKAO").profilePhotoUrl(profilePhotoUrl)
+                .name("시니어 이름").nickname(nickname).birthday("05-22").birthyear("1960").gender("M")
+                .socialProvider("KAKAO")
+                .profilePhotoUrl(profilePhotoUrl)
                 .build();
             return oauthUserResponse;
         }
@@ -210,6 +215,26 @@ public class UserServiceImpl implements UserService {
 
         jwtUtil.addToBlackList(token);
         jwtUtil.deleteRefreshToken(email);
+    }
+
+    // 리프레시 토큰으로 새 토큰 재발급
+    @Override
+    public JwtTokenResponse refreshToken(String refreshToken) {
+        if (!jwtUtil.validateToken(refreshToken)) {
+            throw new IllegalArgumentException("Refresh token invalid");
+        }
+
+        String email = jwtUtil.getUserEmail(refreshToken);
+
+        // Redis에 저장된 refresh 토큰과 일치하는지 확인
+        String storedRefreshToken = redisTemplate.opsForValue().get("refresh:" + email);
+
+        if (!refreshToken.equals(storedRefreshToken)) {
+            throw new IllegalArgumentException("Refresh token mismatch");
+        }
+
+        String newAccessToken = jwtUtil.generateAccessToken(email);
+        return new JwtTokenResponse(newAccessToken, refreshToken);
     }
 
     /**

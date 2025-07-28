@@ -24,19 +24,16 @@ public class SecurityConfig {
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 //        http
-//            .csrf(csrf -> csrf.disable()) // CSRF 보호 비활성화 (JWT 기반 인증에서는 불필요함)
+//            .csrf(AbstractHttpConfigurer::disable)
+//            .cors(cors -> {}) // CORS 활성화
 //            .authorizeHttpRequests(auth -> auth
-//                // JWT 없이 접근 가능한 경로들
+//                .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
 //                .requestMatchers(HttpMethod.POST, "/users/signup").permitAll()
-//                .requestMatchers(HttpMethod.GET, "/users/auth/oauth/callback").permitAll()
-//                .requestMatchers(HttpMethod.GET, "/users/auth/naver/callback").permitAll()
+//                .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
 //                .requestMatchers(HttpMethod.GET, "/games/**").permitAll()
-//                .requestMatchers(HttpMethod.GET, "/boards/**").permitAll()
-//                .requestMatchers(HttpMethod.GET, "/posts/*").permitAll()
-//                // 그 외 요청들은 인증 필요
+//                // 이 외에는 인증 필요
 //                .anyRequest().authenticated()
 //            )
-//            // JWT 필터 등록
 //            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
