@@ -69,20 +69,4 @@
     INSERT INTO posts_like (user_id, post_id)
     VALUES (#{userId}, #{postId})
   </insert>
-
-  <update id="minusLike">
-    UPDATE posts
-    SET like_count = like_count - 1
-    WHERE post_id = #{postId}
-  </update>
-
-  <delete id="deletePostLike">
-    DELETE FROM posts_like
-    WHERE user_id = #{userId} AND post_id = #{postId}
-  </delete>
-
-  <select id="selectPostLike" parameterType="Long" resultType="Long">
-    SELECT like_count FROM posts
-    WHERE post_id = #{postId}
-  </select>
 </mapper>
