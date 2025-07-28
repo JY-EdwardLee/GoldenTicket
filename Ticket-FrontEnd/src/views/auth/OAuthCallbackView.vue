@@ -16,6 +16,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import axios from 'axios';
+import { API_CONFIG } from '@/config/api.config';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -40,7 +41,7 @@ const handleOAuthCallback = async () => {
       // HTTP-only 쿠키에 토큰이 저장되어 있으므로, 사용자 정보를 가져옴
       try {
         // 백엔드에서 사용자 정보 요청 (withCredentials로 쿠키 포함)
-        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, {
+        const response = await axios.get(`${API_CONFIG.USER.PROFILE}`, {
           withCredentials: true
         });
 
