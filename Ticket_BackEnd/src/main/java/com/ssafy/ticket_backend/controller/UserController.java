@@ -10,7 +10,7 @@ import com.ssafy.ticket_backend.service.UserService;
 import com.ssafy.ticket_backend.util.JwtUtil;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,10 +31,42 @@ public class UserController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
-    private final RedisTemplate<String, String> redisTemplate;
+
+
+    @Value("${kakao.rest.api.key}")
+    private String KakaoRestApiKey;
+
+    @Value("${naver.client.id}")
+    private String NaverClientId;
+
+
+    // 카카오 로그인 페이지 호출
+    @GetMapping("/auth/kakao")
+    public RedirectView redirectToKakaoLogin() {
+        String kakaoAuthUrl = "https://kauth.kakao.com/oauth/authorize" +
+            "?client_id=" + KakaoRestApiKey +
+            "&redirect_uri=" + "http://localhost:8080/users/auth/kakao/callback" +
+            "&response_type=code";
+
+        return new RedirectView(kakaoAuthUrl);
+    }
+
+    // 네이버 로그인 페이지 호출
+    @GetMapping("/auth/naver")
+    public RedirectView redirectToNaverLogin() {
+        String state = "random_state_string"; // CSRF 방지용 (랜덤 문자열 생성 권장)
+
+        String naverAuthUrl = "https://nid.naver.com/oauth2.0/authorize" +
+            "?response_type=code" +
+            "&client_id=" + NaverClientId +
+            "&redirect_uri=" + "http://localhost:8080/users/auth/naver/callback" +
+            "&state=" + state;
+
+        return new RedirectView(naverAuthUrl);
+    }
 
     // 카카오 로그인 인가 코드 받아서 회원가입 유무에 따라 응답 반환
-    @GetMapping("/auth/oauth/callback")
+    @GetMapping("/auth/kakao/callback")
     public ResponseEntity<OAuthUserResponse> kakaoCallback(@RequestParam String code) {
         OAuthUserResponse response = userService.loginWithKakao(code);
 
@@ -52,21 +85,8 @@ public class UserController {
     @PostMapping("/auth/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
-
-        if (!jwtUtil.validateToken(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token invalid");
-        }
-
-        String email = jwtUtil.getUserEmail(refreshToken);
-
-        // Redis에 저장된 refresh 토큰과 일치하는지 확인
-        String storedRefreshToken = redisTemplate.opsForValue().get("refresh:" + email);
-        if (!refreshToken.equals(storedRefreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token mismatch");
-        }
-
-        String newAccessToken = jwtUtil.generateAccessToken(email);
-        return ResponseEntity.ok(new JwtTokenResponse(newAccessToken, refreshToken));
+        JwtTokenResponse response = userService.refreshToken(refreshToken);
+        return ResponseEntity.ok(response);
     }
 
     // 회원가입 - 유저 객체 받고 토큰 발급 후 반환
@@ -83,15 +103,10 @@ public class UserController {
     public ResponseEntity<Map<String, String>> logout(
         @RequestHeader("Authorization") String authHeader) {
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().body(Map.of("message", "토큰이 없습니다."));
-        }
-
         String token = authHeader.substring(7);
 
         try {
             userService.logout(token);
-
             return ResponseEntity.ok(Map.of("message", "성공적으로 로그아웃 되었습니다."));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
