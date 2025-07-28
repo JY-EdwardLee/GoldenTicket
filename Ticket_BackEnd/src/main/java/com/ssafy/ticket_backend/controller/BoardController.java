@@ -35,19 +35,22 @@ public class BoardController {
     }
 
     /**
-     * 게시판별 게시글 검색
-     * TODO 로직 수정 필요
+     * 게시판별 게시글 검색 title : 제목 content : 게시글 내용 writer : 작성자
      *
-     * @param type
+     * @param boardType
      * @return List<PostAllResponse>
      */
-    @GetMapping("/{type}")
-    public ResponseEntity<List<PostAllResponse>> searchPosts(@PathVariable String type,
+    @GetMapping("/{boardType}")
+    public ResponseEntity<List<PostAllResponse>> searchPosts(@PathVariable BoardType boardType,
         @RequestParam(required = false) String title,
         @RequestParam(required = false) String content,
         @RequestParam(required = false) String writer) {
-        List<PostAllResponse> list = boardService.searchPosts(type, title, content, writer);
-        
+        System.out.println("boardType = " + boardType);
+        System.out.println("title = " + title);
+        System.out.println("content = " + content);
+        System.out.println("writer = " + writer);
+        List<PostAllResponse> list = boardService.searchPostBy(boardType, title, content, writer);
+
         return ResponseEntity.status(HttpStatus.OK).body(list);
     }
 }

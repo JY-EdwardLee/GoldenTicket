@@ -18,7 +18,7 @@
     p.like_count
     FROM posts p
     JOIN users u ON p.user_id = u.user_id
-    WHERE p.board_id = #{category, typeHandler=com.ssafy.ticket_backend.handler.BoardTypeHandler}
+    WHERE p.board_id = #{boardType, typeHandler=com.ssafy.ticket_backend.handler.BoardTypeHandler}
     ORDER BY p.created_at DESC
   </select>
 
@@ -37,7 +37,7 @@
     p.like_count
     FROM posts p
     JOIN users u ON p.user_id = u.user_id
-    WHERE p.board_id = #{type}
+    WHERE p.board_id = #{boardType, typeHandler=com.ssafy.ticket_backend.handler.BoardTypeHandler}
     <if test="title != null and title != ''">
       AND p.title LIKE CONCAT('%', #{title}, '%')
     </if>

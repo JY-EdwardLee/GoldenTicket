@@ -8,5 +8,6 @@ public interface BoardService {
 
     List<PostAllResponse> getPostsByCategory(BoardType category);
 
-    List<PostAllResponse> searchPosts(String type, String title, String content, String writer);
+    List<PostAllResponse> searchPostBy(BoardType boardType, String title, String content,
+        String writer);
 }

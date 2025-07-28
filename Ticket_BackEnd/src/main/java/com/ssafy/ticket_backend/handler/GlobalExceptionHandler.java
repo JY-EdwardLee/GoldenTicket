@@ -2,6 +2,7 @@ package com.ssafy.ticket_backend.handler;
 
 import com.ssafy.ticket_backend.dto.response.ErrorResponse;
 import com.ssafy.ticket_backend.exception.BlockedUserException;
+import com.ssafy.ticket_backend.exception.BoardException;
 import com.ssafy.ticket_backend.exception.CommentCreateFailException;
 import com.ssafy.ticket_backend.exception.CommentDeleteFailException;
 import com.ssafy.ticket_backend.exception.CommentLikeFailException;
@@ -38,6 +39,13 @@ public class GlobalExceptionHandler {
     }
 
     // Board
+
+    /**
+     * 검색 중 Enum타입에 있는 값이 아닌 다른 값을 검색하였을 경우
+     *
+     * @param ex
+     * @return
+     */
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<String> handleEnumBindingException(
         MethodArgumentTypeMismatchException ex) {
@@ -46,6 +54,13 @@ public class GlobalExceptionHandler {
         }
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("요청 파라미터 오류");
+    }
+
+    @ExceptionHandler(BoardException.class)
+    public ResponseEntity<ErrorResponse> handleBoardException(BoardException e) {
+        ErrorResponse response = new ErrorResponse("BOARD_ERROR", e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     // Post
