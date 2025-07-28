@@ -7,10 +7,13 @@ import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.UserService;
+import com.ssafy.ticket_backend.util.JwtUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +32,7 @@ import org.springframework.web.servlet.view.RedirectView;
 public class UserController {
 
     private final UserService userService;
+    private final JwtUtil jwtUtil;
 
     @Value("${kakao.rest.api.key}")
     private String KakaoRestApiKey;
@@ -61,18 +65,85 @@ public class UserController {
 
     // 카카오 로그인 인가 코드 받아서 회원가입 유무에 따라 응답 반환
     @GetMapping("/auth/kakao/callback")
-    public ResponseEntity<OAuthUserResponse> kakaoCallback(@RequestParam String code) {
-        OAuthUserResponse response = userService.loginWithKakao(code);
+    public ResponseEntity<OAuthUserResponse> kakaoCallback(@RequestParam String code,
+        HttpServletResponse response) {
+        OAuthUserResponse userResponse = userService.loginWithKakao(code);
 
-        return ResponseEntity.ok(response);
+        if (!userResponse.isRegistered()) {
+            // 1) 비회원인 경우, 임시 사용자 정보 저장하고 식별자 반환
+            String tempUserId = userService.storeTempUserInfo(userResponse);
+
+            // 2) 회원가입 페이지로 리다이렉트하면서 tempUserId 전달
+            return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", "http://localhost:5173/signup?tempUserId=" + tempUserId)
+                .build();
+        }
+
+        // 이미 가입된 유저라면 JWT를 HttpOnly 쿠키에 저장
+        JwtTokenResponse tokens = userResponse.getToken();
+
+        ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
+            .httpOnly(true).secure(false) // 배포시 true로 변경
+            .path("/").sameSite("Lax").maxAge(60 * 60) // 1시간
+            .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token",
+                tokens.getRefreshToken()).httpOnly(true).secure(false).path("/").sameSite("Lax")
+            .maxAge(7 * 24 * 60 * 60) // 7일
+            .build();
+
+        response.addHeader("Set-Cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
+
+        // 로그인 완료 후 프론트 리다이렉트 (인증 상태 확인 페이지)
+        return ResponseEntity.status(HttpStatus.FOUND)
+            .header("Location", "http://localhost:5173/oauth/callback").build();
     }
 
     // 네이버 로그인
     @GetMapping("/auth/naver/callback")
-    public ResponseEntity<OAuthUserResponse> naverCallback(@RequestParam String code) {
-        OAuthUserResponse response = userService.loginWithNaver(code);
+    public ResponseEntity<OAuthUserResponse> naverCallback(@RequestParam String code,
+        HttpServletResponse response) {
 
-        return ResponseEntity.ok(response);
+        OAuthUserResponse userResponse = userService.loginWithNaver(code);
+
+        if (!userResponse.isRegistered()) {
+            // 1. 비회원인 경우, Redis에 임시 유저 정보 저장
+            String tempUserId = userService.storeTempUserInfo(userResponse);
+
+            // 2. 회원가입 페이지로 리다이렉트 + tempUserId 쿼리파라미터로 전달
+            return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", "http://localhost:5173/signup?tempUserId=" + tempUserId)
+                .build();
+        }
+
+        // 이미 가입된 회원이라면 토큰을 쿠키에 저장
+        JwtTokenResponse tokens = userResponse.getToken();
+
+        ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
+            .httpOnly(true)
+            .secure(false) // 배포 시 true
+            .path("/")
+            .sameSite("Lax")
+            .maxAge(60 * 60) // 1시간
+            .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refresh_token",
+                tokens.getRefreshToken())
+            .httpOnly(true)
+            .secure(false)
+            .path("/")
+            .sameSite("Lax")
+            .maxAge(7 * 24 * 60 * 60) // 7일
+            .build();
+
+        response.addHeader("Set-Cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
+
+        // 로그인 성공 후 프론트엔드로 리다이렉트
+        return ResponseEntity.status(HttpStatus.FOUND)
+            .header("Location", "http://localhost:5173/oauth/callback")
+            .build();
     }
 
     // 액세스 토큰 만료 시, 리프레시 토큰으로 새 토큰 재발급 요청
@@ -88,7 +159,7 @@ public class UserController {
     public ResponseEntity<JwtTokenResponse> signup(
         @RequestBody UserSignupRequest userSignupRequest) {
         JwtTokenResponse tokens = userService.signup(userSignupRequest);
-
+        // 유저 아이디도
         return ResponseEntity.ok(tokens);
     }
 
@@ -107,6 +178,18 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("message", e.getMessage()));
         }
+    }
+
+    // 프론트가 tempUserId로 Redis에서 임시 사용자 정보를 조회
+    @GetMapping("/auth/temp-user")
+    public ResponseEntity<OAuthUserResponse> getTempUserInfo(@RequestParam String tempUserId) {
+        OAuthUserResponse oAuthUserResponse = userService.getTempUserInfo(tempUserId);
+
+        if (oAuthUserResponse == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(oAuthUserResponse);
     }
 
     /**

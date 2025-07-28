@@ -16,13 +16,11 @@ public class OAuthUserResponse {
     private JwtTokenResponse token; // 로그인 시
 
     // 미등록 시 사용자 정보
-    // 카카오, 네이버 공통 정보
+
     private String email;
     private String nickname;
     private String socialProvider;
     private String profilePhotoUrl;
-
-    // 네이버 로그인 시 추가 정보
     private String name;
     private String gender;
     private String birthday;

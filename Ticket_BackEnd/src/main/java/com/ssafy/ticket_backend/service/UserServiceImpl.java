@@ -1,5 +1,7 @@
 package com.ssafy.ticket_backend.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
@@ -10,6 +12,8 @@ import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.User;
 import com.ssafy.ticket_backend.util.JwtUtil;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
@@ -32,6 +36,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
+    private ObjectMapper objectMapper;
 
     // 카카오 api 키
     @Value("${kakao.rest.api.key}")
@@ -202,6 +207,44 @@ public class UserServiceImpl implements UserService {
         oauthUserResponse = OAuthUserResponse.builder().isRegistered(true)
             .token(new JwtTokenResponse(accessToken, refreshToken)).build();
         return oauthUserResponse;
+    }
+
+    // OAuthUserResponse를 임시 저장하고 임의 ID 반환
+    private static final String TEMP_USER_KEY_PREFIX = "tempUser:";
+
+    @Override
+    public String storeTempUserInfo(OAuthUserResponse userResponse) {
+        String tempUserId = UUID.randomUUID().toString(); // 고유한 임시 ID 생성
+        String redisKey = TEMP_USER_KEY_PREFIX + tempUserId; // 키에 접두사 붙임
+
+        try {
+            // DTO를 JSON 문자열로 직렬화
+            String json = objectMapper.writeValueAsString(userResponse);
+
+            // Redis에 저장 (10분 TTL)
+            redisTemplate.opsForValue().set(redisKey, json, 10, TimeUnit.MINUTES);
+
+            return tempUserId;
+        } catch (JsonProcessingException e) {
+            // 예외 처리 로직
+            throw new RuntimeException("OAuthUserResponse 직렬화 실패", e);
+        }
+    }
+
+    // Redis에 임시 저장된 유저 정보 조회
+    public OAuthUserResponse getTempUserInfo(String tempUserId) {
+        String redisKey = TEMP_USER_KEY_PREFIX + tempUserId;
+        String json = redisTemplate.opsForValue().get(redisKey);
+
+        if (json == null) {
+            throw new RuntimeException("임시 사용자 정보가 Redis에 존재하지 않습니다.");
+        }
+
+        try {
+            return objectMapper.readValue(json, OAuthUserResponse.class); // JSON → DTO
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("OAuthUserResponse 역직렬화 실패", e);
+        }
     }
 
     // 로그아웃
