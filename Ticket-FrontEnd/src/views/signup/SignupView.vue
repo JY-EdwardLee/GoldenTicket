@@ -2,7 +2,7 @@
   <div class="signup-container">
     <div class="signup-header">
       <h1>회원가입</h1>
-      <p>티켓 예매 서비스를 이용하시려면<br />회원가입이 필요해요</p>
+      <p>티켓 예매 서비스를 이용하시려면<br>회원가입이 필요해요</p>
     </div>
 
     <form @submit.prevent="handleSubmit" class="signup-form">
@@ -14,7 +14,7 @@
           v-model="formData.userName"
           placeholder="이름을 입력해주세요"
           required
-        />
+        >
       </div>
 
       <div class="form-group">
@@ -25,7 +25,7 @@
           v-model="formData.email"
           placeholder="이메일을 입력해주세요"
           required
-        />
+        >
       </div>
 
       <div class="form-group">
@@ -36,7 +36,7 @@
           v-model="formData.phone"
           placeholder="전화번호를 입력해주세요 (예: 010-1234-5678)"
           required
-        />
+        >
       </div>
 
       <div class="form-group">
@@ -46,7 +46,7 @@
           id="birthdate"
           v-model="formData.birthdate"
           required
-        />
+        >
       </div>
 
       <div class="form-group">
@@ -57,15 +57,13 @@
           v-model="formData.nickName"
           placeholder="닉네임을 입력해주세요"
           required
-        />
+        >
       </div>
 
       <div class="form-group">
         <label for="favoriteTeam">선호구단</label>
         <select id="favoriteTeam" v-model="formData.favoriteTeam" required>
-          <option value="" disabled selected>
-            선호하는 구단을 선택해주세요
-          </option>
+          <option value="" disabled selected>선호하는 구단을 선택해주세요</option>
           <option value="LG">LG 트윈스</option>
           <option value="KT">KT 위즈</option>
           <option value="SSG">SSG 랜더스</option>
@@ -81,9 +79,7 @@
 
       <div class="form-footer">
         <button type="submit" class="submit-btn">가입하기</button>
-        <p class="login-link">
-          이미 계정이 있으신가요? <router-link to="/login">로그인</router-link>
-        </p>
+        <p class="login-link">이미 계정이 있으신가요? <router-link to="/login">로그인</router-link></p>
       </div>
     </form>
   </div>
@@ -101,7 +97,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const isSocialSignup = reactive(false);
-const socialProvider = reactive("");
+const socialProvider = reactive('');
 
 const formData = reactive({
   email: "",
@@ -116,48 +112,45 @@ const formData = reactive({
 const handleSubmit = async () => {
   try {
     const userData = { ...formData };
-
+    
     // 소셜 가입인 경우 provider 정보 추가
     if (isSocialSignup.value && socialProvider.value) {
       userData.socialProvider = socialProvider.value;
     }
 
     // 회원가입 API 호출
-    const response = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/auth/signup`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-        credentials: "include", // 쿠키 전송을 위해 필요
-      }
-    );
+    const response = await fetch(`${API_CONFIG.API_BASE_URL}/auth/signup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userData),
+      credentials: 'include' // 쿠키 전송을 위해 필요
+    });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || "회원가입에 실패했습니다.");
+      throw new Error(errorData.message || '회원가입에 실패했습니다.');
     }
 
     const data = await response.json();
-
+    
     // 회원가입 성공 시 토큰 저장 및 메인 페이지로 이동
     if (data.accessToken) {
       authStore.setToken(data.accessToken);
-
+      
       // 사용자 정보 저장 (있는 경우)
       if (data.user) {
         authStore.setUser(data.user);
       }
-
+      
       // 리다이렉트 처리
-      const redirectPath = route.query.redirect || "/";
+      const redirectPath = route.query.redirect || '/';
       await router.push(redirectPath);
     }
   } catch (error) {
-    console.error("회원가입 오류:", error);
-    alert(error.message || "회원가입 중 오류가 발생했습니다.");
+    console.error('회원가입 오류:', error);
+    alert(error.message || '회원가입 중 오류가 발생했습니다.');
   }
 };
 
@@ -172,7 +165,6 @@ const fetchUserData = async (userId) => {
     );
     console.log(response);
     if (response.data) {
-      console.log(response.data);
       const userData = response.data;
       formData.userName = userData.userName || "";
       formData.email = userData.email || "";
@@ -182,16 +174,15 @@ const fetchUserData = async (userId) => {
       formData.favoriteTeam = userData.favoriteTeam || "";
     }
   } catch (error) {
-    console.error("사용자 데이터를 불러오는 중 오류가 발생했습니다:", error);
+    console.error('사용자 데이터를 불러오는 중 오류가 발생했습니다:', error);
   }
 };
 
 // 컴포넌트 마운트 시 쿼리 파라미터 확인 및 소셜 데이터로 폼 채우기
 onMounted(() => {
   // URL에서 user_id 파라미터 확인
-  const userId = route.query.tempUserId;
+  const userId = route.query.temp_user_id;
   if (userId) {
-    console.log(userId);
     fetchUserData(userId);
   }
 });
@@ -202,8 +193,7 @@ onMounted(() => {
   max-width: 400px;
   margin: 0 auto;
   padding: 40px 20px;
-  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, sans-serif;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .signup-header {

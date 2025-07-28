@@ -7,8 +7,8 @@ const AUTH = {
   KAKAO: `${API_BASE_URL}/users/auth/kakao`,
   NAVER: `${API_BASE_URL}/users/auth/naver`,
   SIGNUP: `${API_BASE_URL}/users/signup`,
-  REFRESH: `${API_BASE_URL}/auth/refresh`,
-  LOGOUT: `${API_BASE_URL}/auth/logout`,
+  REFRESH: `${API_BASE_URL}/users/auth/refresh`,
+  LOGOUT: `${API_BASE_URL}/users/logout`,
 };
 
 // 사용자 관련 엔드포인트
