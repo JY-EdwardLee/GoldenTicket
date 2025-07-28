@@ -11,7 +11,6 @@ import com.ssafy.ticket_backend.exception.DatabaseOperationException;
 import com.ssafy.ticket_backend.exception.PostCreateFailException;
 import com.ssafy.ticket_backend.exception.PostDeleteException;
 import com.ssafy.ticket_backend.exception.PostDeleteFailException;
-import com.ssafy.ticket_backend.exception.PostLikeException;
 import com.ssafy.ticket_backend.exception.PostNotFoundException;
 import com.ssafy.ticket_backend.exception.PostRetrievalException;
 import com.ssafy.ticket_backend.exception.PostUpdateException;
@@ -107,6 +106,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PostCreateFailException.class)
     public ResponseEntity<ErrorResponse> handlePostCreateFailException(PostCreateFailException e) {
         ErrorResponse response = new ErrorResponse("POST_Create_Fail", e.getMessage());
+
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
@@ -122,25 +122,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(PostRetrievalException.class)
     public ResponseEntity<ErrorResponse> handlePostRetrievalException(PostRetrievalException e) {
         ErrorResponse response = new ErrorResponse("POST_RETRIEVAL_FAIL", e.getMessage());
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
     @ExceptionHandler(PostUpdateException.class)
     public ResponseEntity<ErrorResponse> handlePostUpdateException(PostUpdateException e) {
         ErrorResponse response = new ErrorResponse("POST_UPDATE_FAIL", e.getMessage());
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
     @ExceptionHandler(PostDeleteException.class)
     public ResponseEntity<ErrorResponse> handlePostDeleteException(PostDeleteException e) {
         ErrorResponse response = new ErrorResponse("POST_DELETE_FAIL", e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
 
-
-    @ExceptionHandler(PostLikeException.class)
-    public ResponseEntity<ErrorResponse> handlePostLikeException(PostLikeException e) {
-        ErrorResponse response = new ErrorResponse("POST_LIKE_FAIL", e.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
