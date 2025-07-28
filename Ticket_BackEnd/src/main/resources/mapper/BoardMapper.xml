@@ -21,7 +21,7 @@
     WHERE p.board_id = #{boardType, typeHandler=com.ssafy.ticket_backend.handler.BoardTypeHandler}
     ORDER BY p.created_at DESC
   </select>
-
+  
   <select id="searchPosts" resultType="PostAllResponse">
     SELECT
     p.post_id,

@@ -22,8 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
-    private final UserMapper userMapper;
-    private final CommentMapper commentMapper;
+  private final UserMapper userMapper;
+  private final CommentMapper commentMapper;
 
     /**
      * 댓글 작성

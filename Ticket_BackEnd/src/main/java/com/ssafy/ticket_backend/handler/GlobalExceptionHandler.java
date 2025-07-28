@@ -8,9 +8,13 @@ import com.ssafy.ticket_backend.exception.CommentDeleteFailException;
 import com.ssafy.ticket_backend.exception.CommentLikeFailException;
 import com.ssafy.ticket_backend.exception.CommentUpdateFailException;
 import com.ssafy.ticket_backend.exception.DatabaseOperationException;
+import com.ssafy.ticket_backend.exception.PostCreateFailException;
+import com.ssafy.ticket_backend.exception.PostDeleteException;
 import com.ssafy.ticket_backend.exception.PostDeleteFailException;
-import com.ssafy.ticket_backend.exception.PostLikeFailException;
+import com.ssafy.ticket_backend.exception.PostLikeException;
 import com.ssafy.ticket_backend.exception.PostNotFoundException;
+import com.ssafy.ticket_backend.exception.PostRetrievalException;
+import com.ssafy.ticket_backend.exception.PostUpdateException;
 import com.ssafy.ticket_backend.exception.PostUpdateFailException;
 import com.ssafy.ticket_backend.exception.PostUserNotFoundException;
 import com.ssafy.ticket_backend.exception.UserSignupException;
@@ -100,10 +104,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
-    @ExceptionHandler(PostLikeFailException.class)
-    public ResponseEntity<ErrorResponse> handlePostLikeFailException(PostLikeFailException e) {
-        ErrorResponse response = new ErrorResponse("Post_Like_Fail", e.getMessage());
-
+    @ExceptionHandler(PostCreateFailException.class)
+    public ResponseEntity<ErrorResponse> handlePostCreateFailException(PostCreateFailException e) {
+        ErrorResponse response = new ErrorResponse("POST_Create_Fail", e.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
@@ -114,6 +117,31 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse("Comment_Create_Fail", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(PostRetrievalException.class)
+    public ResponseEntity<ErrorResponse> handlePostRetrievalException(PostRetrievalException e) {
+        ErrorResponse response = new ErrorResponse("POST_RETRIEVAL_FAIL", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(PostUpdateException.class)
+    public ResponseEntity<ErrorResponse> handlePostUpdateException(PostUpdateException e) {
+        ErrorResponse response = new ErrorResponse("POST_UPDATE_FAIL", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(PostDeleteException.class)
+    public ResponseEntity<ErrorResponse> handlePostDeleteException(PostDeleteException e) {
+        ErrorResponse response = new ErrorResponse("POST_DELETE_FAIL", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+
+    @ExceptionHandler(PostLikeException.class)
+    public ResponseEntity<ErrorResponse> handlePostLikeException(PostLikeException e) {
+        ErrorResponse response = new ErrorResponse("POST_LIKE_FAIL", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
     @ExceptionHandler(CommentDeleteFailException.class)

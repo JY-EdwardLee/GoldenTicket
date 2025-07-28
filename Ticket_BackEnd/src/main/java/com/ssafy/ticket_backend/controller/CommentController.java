@@ -36,8 +36,8 @@ public class CommentController {
         @RequestBody CommentRequest commentRequest) {
         commentService.createComment(userDetails.getUsername(), commentRequest);
 
-        return ResponseEntity.ok(new CommentResponse(true, "댓글 작성 성공"));
-    }
+    return ResponseEntity.ok(new CommentResponse(true, "댓글 작성 성공"));
+  }
 
     /**
      * 댓글 삭제
@@ -67,8 +67,8 @@ public class CommentController {
         @RequestBody CommentUpdateRequest commentUpdateRequest) {
         commentService.updateComment(userDetails.getUsername(), commentId, commentUpdateRequest);
 
-        return ResponseEntity.ok(new CommentResponse(true, "댓글 수정 성공"));
-    }
+    return ResponseEntity.ok(new CommentResponse(true, "댓글 수정 성공"));
+  }
 
     /**
      * 댓글 좋아요 누르기

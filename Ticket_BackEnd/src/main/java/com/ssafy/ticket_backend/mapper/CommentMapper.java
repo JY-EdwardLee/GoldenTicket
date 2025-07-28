@@ -10,14 +10,14 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface CommentMapper {
 
-    int insertComment(CommentRequest commentRequest);
+  int insertComment(CommentRequest commentRequest);
 
-    int deleteComment(Long commentId);
+  int deleteComment(Long commentId);
 
     int updateComment(@Param("commentId") Long commentId,
         CommentUpdateRequest commentUpdateRequest);
 
-    List<CommentDetailResponse> getComments(Long post_id);
+  List<CommentDetailResponse> getComments(Long post_id);
 
     Long selectUserIdByCommentId(Long postId);
 
