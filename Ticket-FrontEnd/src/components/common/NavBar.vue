@@ -13,28 +13,28 @@
       <a href="#" @click.prevent="openLoginModal">로그인 또는 회원가입</a>
     </div>
   </nav>
-  
+
   <!-- 로그인 모달 -->
   <LoginModal :isVisible="isLoginModalVisible" @close="closeLoginModal" />
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import LoginModal from './LoginModal.vue'
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import LoginModal from "./LoginModal.vue";
 
 // 로그인 모달 상태 관리
-const isLoginModalVisible = ref(false)
-const router = useRouter()
+const isLoginModalVisible = ref(false);
+const router = useRouter();
 // 로그인 모달 열기
 const openLoginModal = () => {
-  isLoginModalVisible.value = true
-}
+  isLoginModalVisible.value = true;
+};
 
 // 로그인 모달 닫기
 const closeLoginModal = () => {
-  isLoginModalVisible.value = false
-}
+  isLoginModalVisible.value = false;
+};
 </script>
 
 <style scoped>

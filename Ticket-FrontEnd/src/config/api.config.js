@@ -5,8 +5,8 @@ const API_BASE_URL =
 // 인증 관련 엔드포인트
 const AUTH = {
   KAKAO: `${API_BASE_URL}/users/auth/kakao`,
-  NAVER: `${API_BASE_URL}/auth/naver`,
-  SIGNUP: `${API_BASE_URL}/auth/signup`,
+  NAVER: `${API_BASE_URL}/users/auth/naver`,
+  SIGNUP: `${API_BASE_URL}/users/signup`,
   REFRESH: `${API_BASE_URL}/auth/refresh`,
   LOGOUT: `${API_BASE_URL}/auth/logout`,
 };

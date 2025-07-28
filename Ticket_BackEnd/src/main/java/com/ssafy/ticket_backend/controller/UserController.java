@@ -168,7 +168,7 @@ public class UserController {
     @GetMapping("/auth/temp-user")
     public ResponseEntity<OAuthUserResponse> getTempUserInfo(@RequestParam String tempUserId) {
         OAuthUserResponse oAuthUserResponse = userService.getTempUserInfo(tempUserId);
-        
+
         return ResponseEntity.ok(oAuthUserResponse);
     }
 

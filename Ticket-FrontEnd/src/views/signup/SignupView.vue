@@ -11,7 +11,7 @@
         <input
           type="text"
           id="name"
-          v-model="formData.name"
+          v-model="formData.userName"
           placeholder="이름을 입력해주세요"
           required
         />
@@ -54,7 +54,7 @@
         <input
           type="text"
           id="nickname"
-          v-model="formData.nickname"
+          v-model="formData.nickName"
           placeholder="닉네임을 입력해주세요"
           required
         />
@@ -93,6 +93,7 @@
 import { reactive, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { API_CONFIG } from "@/config/api.config.js";
 import axios from "axios";
 
 const route = useRoute();
@@ -104,13 +105,12 @@ const socialProvider = reactive("");
 
 const formData = reactive({
   email: "",
-  nickname: "",
+  nickName: "",
   socialProvider: "",
   profilePhotoUrl: "",
-  name: "",
+  userName: "",
   gender: "",
-  birthday: "",
-  birthyear: "",
+  birthDate: "",
 });
 
 const handleSubmit = async () => {
@@ -164,18 +164,21 @@ const handleSubmit = async () => {
 // 사용자 데이터 가져오기
 const fetchUserData = async (userId) => {
   try {
-    const response = await axios.get(`/users/auth/temp-user`, {
-      params: { tempUserId: userId },
-    });
+    const response = await axios.get(
+      API_CONFIG.BASE_URL + `/users/auth/temp-user`,
+      {
+        params: { tempUserId: userId },
+      }
+    );
     console.log(response);
     if (response.data) {
       console.log(response.data);
       const userData = response.data;
-      formData.name = userData.name || "";
+      formData.userName = userData.userName || "";
       formData.email = userData.email || "";
       formData.phone = userData.phone || "";
-      formData.birthdate = userData.birthdate || "";
-      formData.nickname = userData.nickname || "";
+      formData.birthDate = userData.birthYear + "-" + userData.birthDay || "";
+      formData.nickName = userData.nickName || "";
       formData.favoriteTeam = userData.favoriteTeam || "";
     }
   } catch (error) {

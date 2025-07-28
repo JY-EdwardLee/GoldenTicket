@@ -18,11 +18,11 @@ public class OAuthUserResponse {
     // 미등록 시 사용자 정보
 
     private String email;
-    private String nickname;
+    private String nickName;
     private String socialProvider;
     private String profilePhotoUrl;
-    private String name;
+    private String userName;
     private String gender;
-    private String birthday;
-    private String birthyear;
+    private String birthDay;
+    private String birthYear;
 }
