@@ -53,7 +53,6 @@ public class CommentServiceImpl implements CommentService {
         } catch (Exception e) {
             throw new CommentCreateFailException("댓글 저장 중 오류가 발생하였습니다.");
         }
-
     }
 
     /**
