@@ -30,7 +30,7 @@
     FROM comments
     WHERE comment_id = #{commentId}
   </select>
-
+  
 
 </mapper>
 
