@@ -104,6 +104,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 // 공통 컴포넌트 import
 import HeroCard from '../../components/ui/HeroCard.vue';
@@ -112,15 +113,18 @@ import ReviewCard from '../../components/ui/ReviewCard.vue';
 import ServiceCard from '../../components/ui/ServiceCard.vue';
 import SectionHeader from '../../components/ui/SectionHeader.vue';
 
+// 라우터 설정
+const router = useRouter();
+
 // 메인 페이지 로직
 const goToApply = () => {
   // 응모 페이지로 이동
-  console.log('응모 페이지로 이동');
+  router.push('/application');
 };
 
 const goToTransfer = () => {
   // 양도 페이지로 이동
-  console.log('양도 페이지로 이동');
+  router.push('/transfer');
 };
 
 // 사용자 랭킹 데이터
