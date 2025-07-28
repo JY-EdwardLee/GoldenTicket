@@ -3,7 +3,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080
 
 // 인증 관련 엔드포인트
 const AUTH = {
-  LOGIN: `${API_BASE_URL}/auth/login`,
+  KAKAO: `${API_BASE_URL}/auth/kakao`,
+  NAVER: `${API_BASE_URL}/auth/naver`,
   SIGNUP: `${API_BASE_URL}/auth/signup`,
   REFRESH: `${API_BASE_URL}/auth/refresh`,
   LOGOUT: `${API_BASE_URL}/auth/logout`,
@@ -36,7 +37,8 @@ const BOARD = {
   COMMENTS: (boardId) => `${API_BASE_URL}/boards/${boardId}/comments`,
 };
 
-const API_CONFIG = {
+// API 설정 내보내기
+export const API_CONFIG = {
   BASE_URL: API_BASE_URL,
   AUTH,
   USER,
