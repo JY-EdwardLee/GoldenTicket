@@ -12,6 +12,7 @@ import com.ssafy.ticket_backend.exception.PostLikeFailException;
 import com.ssafy.ticket_backend.exception.PostNotFoundException;
 import com.ssafy.ticket_backend.exception.PostUpdateFailException;
 import com.ssafy.ticket_backend.exception.PostUserNotFoundException;
+import com.ssafy.ticket_backend.exception.UserSignupException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,6 +20,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    // User
+    @ExceptionHandler(UserSignupException.class)
+    public ResponseEntity<ErrorResponse> handleUserSignupException(UserSignupException e) {
+        ErrorResponse response = new ErrorResponse("USER_SIGNUP_ERROR", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
     @ExceptionHandler(DatabaseOperationException.class)
     public ResponseEntity<ErrorResponse> handleDb(DatabaseOperationException e) {
@@ -46,7 +54,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handlePostUserNotFoundException(
         PostUserNotFoundException e) {
         ErrorResponse response = new ErrorResponse("POST_USER_NOT_FOUND", e.getMessage());
-        
+
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
@@ -103,4 +111,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
+
+
 }

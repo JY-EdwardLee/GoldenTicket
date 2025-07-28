@@ -5,18 +5,21 @@ import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
+import com.ssafy.ticket_backend.exception.UserSignupException;
 import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.User;
 import com.ssafy.ticket_backend.util.JwtUtil;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -44,10 +47,21 @@ public class UserServiceImpl implements UserService {
         return userMapper.selectUserByEmail(email);
     }
 
-    // 회원가입
+    /**
+     * @param userSignupRequest
+     * @return
+     */
+    @Transactional
     @Override
     public JwtTokenResponse signup(UserSignupRequest userSignupRequest) {
-        userMapper.insertUser(userSignupRequest);
+        try {
+            userMapper.insertUser(userSignupRequest);
+        } catch (DuplicateKeyException e) {
+            throw new UserSignupException("중복된 이메일입니다.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new UserSignupException("회원가입 중 오류가 발생하였습니다.");
+        }
 
         String accessToken = jwtUtil.generateAccessToken(userSignupRequest.getEmail());
         String refreshToken = jwtUtil.generateRefreshToken(userSignupRequest.getEmail());
@@ -208,6 +222,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.getMyPageByEmail(email);
     }
 
+    @Transactional
     @Override
     public void patchMyPage(String email, UserPatchRequest userPatchRequest) {
         userMapper.updateUser(email, userPatchRequest);

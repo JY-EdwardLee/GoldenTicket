@@ -18,7 +18,6 @@
     WHERE user_id = #{userId}
   </select>
 
-
   <!--  private String email;-->
   <!--  private String gender;-->
   <!--  private String userName;-->
@@ -28,7 +27,6 @@
   <!--  private String myTeam;-->
   <!--  private String socialProvider; // 예: "naver", "kakao"-->
 
-
   <!-- 유저 회원가입 -->
   <insert id="insertUser" parameterType="com.ssafy.ticket_backend.dto.request.UserSignupRequest"
     useGeneratedKeys="true" keyProperty="userId">
@@ -36,22 +34,25 @@
     email,
     user_name,
     user_role,
-    nickname,
+    nick_name,
     birth_date,
     phone_number,
     my_team,
-    social_provider
+    social_provider,
+    gender
     ) VALUES (
     #{email},
     #{userName},
-    #{userRole},
+    #{userRole, typeHandler=com.ssafy.ticket_backend.handler.UserRoleTypeHandler},
     #{nickname},
-    #{birthDate},
+    #{birthDate}::date,
     #{phoneNumber},
-    #{myTeam},
-    #{socialProvider}
+    #{myTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler},
+    #{socialProvider},
+    #{gender, typeHandler=com.ssafy.ticket_backend.handler.UserGenderTypeHandler}
     )
   </insert>
+
 
   <!-- 마이페이지 -->
   <select id="getMyPageByEmail" resultType="com.ssafy.ticket_backend.dto.response.MyPageResponse">
