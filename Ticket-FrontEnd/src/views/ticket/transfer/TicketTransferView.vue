@@ -14,7 +14,7 @@
               </div>
               <div class="match-detail">
                 <span class="series">{{ pageText.seriesTitle }}</span>
-                <span class="time">경기시간: {{ pageText.matchTime }}</span>
+                <span class="time">{{ selectedTicket.date }}</span>
               </div>
             </div>
             <div class="complete-message">
@@ -48,7 +48,7 @@
             <div class="detail-header-info-row">
               <div class="detail-header-info-line">
                 <div class="detail-header-info-col"><span class="info-icon">📅</span>{{ selectedTicket.date }}</div>
-                <div class="detail-header-info-col"><span class="info-icon">⏰</span>19:00</div>
+                <div class="detail-header-info-col"><span class="info-icon">⏰</span>{{ selectedTicket.time }}</div>
               </div>
               <div class="detail-header-info-line">
                 <div class="detail-header-info-col"><span class="info-icon">📍</span>{{ selectedTicket.stadium }}</div>
@@ -188,8 +188,15 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+// 화면 렌더에 필요한 기본 변수 선언 (없으면 추가)
+
+
+
 
 // 모든 텍스트 변수 한 곳에서 관리
+const selectedTicket = ref(null);
+const showDetailPage = ref(false);
+const showCompletePage = ref(false);
 const pageText = {
   homeTeam: 'SSG 랜더스',
   awayTeam: '키움 히어로즈',
@@ -220,8 +227,7 @@ const showTickets = ref(false);
 const activeTab = ref('NOL');
 const hoveredTicket = ref(null);
 
-const showDetailPage = ref(false);
-const selectedTicket = ref(null);
+
 
 const tickets = [
   {
@@ -262,7 +268,7 @@ const tickets = [
 
 const router = useRouter();
 
-const showCompletePage = ref(false);
+
 
 function handleApply(ticket) {
   selectedTicket.value = ticket;
@@ -283,10 +289,10 @@ function handleCompleteBack() {
   showDetailPage.value = true;
 }
 function handleCompleteConfirm() {
-  // 완료 → card-inner(티켓 불러오기) 상태로 이동
+  // 완료 → 티켓 목록(카드 리스트) 상태로 이동
   showCompletePage.value = false;
   showDetailPage.value = false;
-  showTickets.value = false;
+  showTickets.value = true;
   selectedTicket.value = null;
 }
 
@@ -364,14 +370,15 @@ function handleCompleteConfirm() {
   min-height: 350px;
 }
 .card-inner {
-  width: 100%;
+  width: 1000px;
+  height: 500px;
   padding: 48px 32px 48px 32px;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 .card-title {
-  font-size: 28px;
+  font-size: 40px;
   font-weight: 700;
   color: #969696;
   margin-bottom: 8px;
@@ -379,7 +386,8 @@ function handleCompleteConfirm() {
 }
 .card-desc {
   color: #969696;
-  font-size: 14px;
+  font-size: 20px;
+  margin-top: 20px;
   margin-bottom: 32px;
   text-align: center;
 }
@@ -403,18 +411,18 @@ function handleCompleteConfirm() {
 }
 .nol-img,
 .ticketlink-img {
-  width: 120px;
-  height: 48px;
+  width: 250px;
+  height: 100px;
   object-fit: contain;
   background: #fff;
 }
 .provider-btn {
   margin-top: 0;
-  width: 180px;
-  height: 44px;
+  width: 250px;
+  height: 54px;
   border: none;
   border-radius: 8px;
-  font-size: 17px;
+  font-size: 25px;
   font-weight: 700;
   color: #fff;
   background: #ce0e2d;
@@ -484,6 +492,7 @@ function handleCompleteConfirm() {
   display: flex;
   justify-content: center;
   gap: 16px;
+  margin-top: 24px;
   margin-bottom: 24px;
 }
 .ticket-tab {
@@ -999,7 +1008,7 @@ function handleCompleteConfirm() {
   flex-direction: column;
   align-items: center;
   padding: 40px 0;
-  min-height: 100vh;
+  height: 700px;
   background: #fafbfc;
 }
 .complete-card {
