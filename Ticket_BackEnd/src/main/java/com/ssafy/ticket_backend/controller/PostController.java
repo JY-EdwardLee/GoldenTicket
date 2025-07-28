@@ -3,6 +3,7 @@ package com.ssafy.ticket_backend.controller;
 import com.ssafy.ticket_backend.dto.request.PostRequest;
 import com.ssafy.ticket_backend.dto.request.PostUpdateRequest;
 import com.ssafy.ticket_backend.dto.response.PostDetailResponse;
+import com.ssafy.ticket_backend.dto.response.PostLikeResponse;
 import com.ssafy.ticket_backend.dto.response.PostResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.PostService;
@@ -33,7 +34,7 @@ public class PostController {
      * @return 성공/실패 메세지
      */
     @PostMapping("")
-    public ResponseEntity<PostResponse> createPost(
+    public ResponseEntity<PostResponse> createPosts(
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody PostRequest postRequest) {
         postService.createPost(userDetails.getUsername(), postRequest);
@@ -90,13 +91,13 @@ public class PostController {
      *
      * @param userDetails 좋아요를 누른 사람
      * @param postId      게시글 기본키
-     * @return
+     * @return 해당 게시물 좋아요 수 반환
      */
     @PostMapping("/{postId}/like")
-    public ResponseEntity<PostResponse> post(@AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable Long postId) {
-        postService.likePost(userDetails.getUsername(), postId);
-
-        return ResponseEntity.ok(new PostResponse(true, "좋아요 누르기 성공"));
+    public ResponseEntity<PostLikeResponse> post(
+        @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long postId) {
+        PostLikeResponse postLikeResponse = postService.likePost(userDetails.getUsername(), postId);
+        
+        return ResponseEntity.ok(postLikeResponse);
     }
 }
