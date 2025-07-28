@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ticket_backend.mapper.BoardMapper">
+  <select id="selectGameByGameId" resultType="Game">
+    SELECT *
+    FROM games
+    WHERE gameId = #{gameId}
+  </select>
+
+  <select id="selectGameByGameId" resultType="Game">
+    SELECT *
+    FROM games
+    WHERE game_datetime::DATE = #{gameDateTime}
+  </select>
+
+</mapper>
