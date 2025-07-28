@@ -4,8 +4,20 @@
       <!-- 닫기 버튼 -->
       <button class="close-button" @click="closeModal">
         <div class="close-icon">
-          <svg width="25" height="24" viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18.5 6L6.5 18M6.5 6L18.5 18" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <svg
+            width="25"
+            height="24"
+            viewBox="0 0 25 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M18.5 6L6.5 18M6.5 6L18.5 18"
+              stroke="#111827"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
           </svg>
         </div>
       </button>
@@ -48,12 +60,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import SocialLoginButton from './SocialLoginButton.vue';
+import { ref, onMounted, computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import SocialLoginButton from "./SocialLoginButton.vue";
 // import { KAKAO_AUTH_URL, NAVER_AUTH_URL } from '@/config/oauth';
-import { useAuthStore } from '@/stores/auth';
-import { API_CONFIG } from '@/config/api.config';
+import { useAuthStore } from "@/stores/auth";
+import { API_CONFIG } from "@/config/api.config";
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -61,11 +73,11 @@ const router = useRouter();
 const props = defineProps({
   isVisible: {
     type: Boolean,
-    default: false
-  }
+    default: false,
+  },
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(["close"]);
 
 // OAuth 인증 URL
 const KAKAO_AUTH_URL = computed(() => {
@@ -77,14 +89,14 @@ const NAVER_AUTH_URL = computed(() => {
 });
 
 const closeModal = () => {
-  emit('close');
+  emit("close");
 };
 
 const handleKakaoLogin = (e) => {
   e.preventDefault();
   const state = encodeURIComponent(window.location.pathname);
   const url = new URL(KAKAO_AUTH_URL.value);
-  url.searchParams.set('state', state);
+  // url.searchParams.set('state', state);
   window.location.href = url.toString();
 };
 
@@ -92,7 +104,7 @@ const handleNaverLogin = (e) => {
   e.preventDefault();
   const state = encodeURIComponent(window.location.pathname);
   const url = new URL(NAVER_AUTH_URL.value);
-  url.searchParams.set('state', state);
+  url.searchParams.set("state", state);
   window.location.href = url.toString();
 };
 </script>
@@ -123,7 +135,7 @@ const handleNaverLogin = (e) => {
   width: 448px;
   max-width: 448px;
   height: 412px;
-  background: #FFFFFF;
+  background: #ffffff;
   mix-blend-mode: normal;
   border-radius: 24px;
 }
@@ -197,7 +209,7 @@ const handleNaverLogin = (e) => {
   padding: 0px;
   width: 64px;
   height: 64px;
-  background: linear-gradient(90deg, #3B82F6 0%, #9333EA 100%);
+  background: linear-gradient(90deg, #3b82f6 0%, #9333ea 100%);
   mix-blend-mode: normal;
   border-radius: 16px;
   flex: none;
@@ -208,7 +220,7 @@ const handleNaverLogin = (e) => {
 .logo-text {
   width: 57px;
   height: 36px;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-style: normal;
   font-weight: 700;
   font-size: 30px;
@@ -216,7 +228,7 @@ const handleNaverLogin = (e) => {
   display: flex;
   align-items: center;
   letter-spacing: -0.75px;
-  color: #FFFFFF;
+  color: #ffffff;
   mix-blend-mode: normal;
   flex: none;
   order: 0;
@@ -241,7 +253,7 @@ const handleNaverLogin = (e) => {
 .main-title {
   width: auto;
   height: 40px;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-style: normal;
   font-weight: 700;
   font-size: 36px;
@@ -260,7 +272,7 @@ const handleNaverLogin = (e) => {
 .sub-title {
   width: auto;
   height: 32px;
-  font-family: 'Roboto', sans-serif;
+  font-family: "Roboto", sans-serif;
   font-style: normal;
   font-weight: 400;
   font-size: 24px;
@@ -308,7 +320,7 @@ const handleNaverLogin = (e) => {
   gap: 12px;
   width: 384px;
   height: 58px;
-  background: #FEE500;
+  background: #fee500;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -319,11 +331,11 @@ const handleNaverLogin = (e) => {
 }
 
 .kakao-login-button:hover {
-  background: #FDD835;
+  background: #fdd835;
 }
 
 .kakao-login-button:active {
-  background: #F9A825;
+  background: #f9a825;
 }
 
 .kakao-symbol {
@@ -341,12 +353,13 @@ const handleNaverLogin = (e) => {
 }
 
 .kakao-label {
-  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
   font-style: normal;
   font-weight: 500;
   font-size: 16px;
   line-height: 19px;
-  color: #3C1E1E;
+  color: #3c1e1e;
   text-align: center;
   flex-shrink: 0;
   /* 레이블 높이가 컨테이너 높이의 1/3을 넘지 않도록 제한 (58px의 1/3 ≈ 19px) */
@@ -363,7 +376,7 @@ const handleNaverLogin = (e) => {
   gap: 12px;
   width: 384px;
   height: 58px;
-  background: #03C75A;
+  background: #03c75a;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -374,11 +387,11 @@ const handleNaverLogin = (e) => {
 }
 
 .naver-login-button:hover {
-  background: #02B350;
+  background: #02b350;
 }
 
 .naver-login-button:active {
-  background: #029F46;
+  background: #029f46;
 }
 
 .naver-symbol {
@@ -396,7 +409,8 @@ const handleNaverLogin = (e) => {
 }
 
 .naver-label {
-  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
   font-style: normal;
   font-weight: 500;
   font-size: 16px;

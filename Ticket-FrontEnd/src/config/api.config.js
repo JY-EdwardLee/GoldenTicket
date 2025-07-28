@@ -1,9 +1,10 @@
 // API 기본 URL 설정
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 // 인증 관련 엔드포인트
 const AUTH = {
-  KAKAO: `${API_BASE_URL}/auth/kakao`,
+  KAKAO: `${API_BASE_URL}/users/auth/kakao`,
   NAVER: `${API_BASE_URL}/auth/naver`,
   SIGNUP: `${API_BASE_URL}/auth/signup`,
   REFRESH: `${API_BASE_URL}/auth/refresh`,

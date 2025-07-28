@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
     private static final String TEMP_USER_KEY_PREFIX = "tempUser:";
 
 
