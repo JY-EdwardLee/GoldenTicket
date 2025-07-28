@@ -59,7 +59,7 @@
     SELECT
     email,
     user_name,
-    nickname,
+    nick_name,
     gender,
     profile_photo_url,
     my_team,
@@ -79,7 +79,8 @@
     SET
     nickname = #{userPatchRequest.nickName},
     profile_photo_url = #{userPatchRequest.profileImageUrl},
-    my_team = #{userPatchRequest.myTeam},
+    my_team =
+    #{userPatchRequest.myTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler},
     gender = #{userPatchRequest.gender}
     WHERE email = #{email}
   </update>
