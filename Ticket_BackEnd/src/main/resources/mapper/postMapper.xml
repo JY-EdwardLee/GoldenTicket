@@ -21,7 +21,9 @@
     like_count
     FROM posts
     WHERE post_id = #{postId}
+    AND is_delete = false
   </select>
+
 
   <update id="plusView" parameterType="Long">
     UPDATE posts
@@ -38,6 +40,13 @@
   <delete id="deletePost" parameterType="Long">
     DELETE FROM posts WHERE post_id = #{postId}
   </delete>
+  
+  <update id="deleteTrue" parameterType="Long">
+    UPDATE posts
+    SET is_delete = true
+    WHERE post_id = #{postId}
+  </update>
+
 
   <update id="updatePost" parameterType="PostUpdateRequest">
     UPDATE posts

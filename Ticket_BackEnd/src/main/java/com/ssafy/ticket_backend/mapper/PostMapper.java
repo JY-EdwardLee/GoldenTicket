@@ -32,4 +32,6 @@ public interface PostMapper {
   void deletePostLike(Long userId, Long postId);
 
   Long selectPostLike(Long postId);
+
+  int deleteTrue(Long postId);
 }

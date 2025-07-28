@@ -27,6 +27,14 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // DB
+    @ExceptionHandler(DatabaseOperationException.class)
+    public ResponseEntity<ErrorResponse> handleDb(DatabaseOperationException e) {
+        ErrorResponse response = new ErrorResponse("DB_ERROR", e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
     // User
     @ExceptionHandler(UserSignupException.class)
     public ResponseEntity<ErrorResponse> handleUserSignupException(UserSignupException e) {
@@ -34,11 +42,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(DatabaseOperationException.class)
-    public ResponseEntity<ErrorResponse> handleDb(DatabaseOperationException e) {
-        ErrorResponse response = new ErrorResponse("DB_ERROR", e.getMessage());
+    @ExceptionHandler(BlockedUserException.class)
+    public ResponseEntity<ErrorResponse> handleBlockedUserException(BlockedUserException e) {
+        ErrorResponse response = new ErrorResponse("BLOCKED_USER", e.getMessage());
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     // Board
@@ -67,13 +75,6 @@ public class GlobalExceptionHandler {
     }
 
     // Post
-    @ExceptionHandler(BlockedUserException.class)
-    public ResponseEntity<ErrorResponse> handleBlockedUserException(BlockedUserException e) {
-        ErrorResponse response = new ErrorResponse("BLOCKED_USER", e.getMessage());
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    }
-
     @ExceptionHandler(PostNotFoundException.class)
     public ResponseEntity<ErrorResponse> handlePostNotFoundException(PostNotFoundException e) {
         ErrorResponse response = new ErrorResponse("POST_NOT_FOUND", e.getMessage());
@@ -110,15 +111,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
-    // Comment
-    @ExceptionHandler(CommentCreateFailException.class)
-    public ResponseEntity<ErrorResponse> handleCommentCreateFailException(
-        CommentCreateFailException e) {
-        ErrorResponse response = new ErrorResponse("Comment_Create_Fail", e.getMessage());
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    }
-
     @ExceptionHandler(PostRetrievalException.class)
     public ResponseEntity<ErrorResponse> handlePostRetrievalException(PostRetrievalException e) {
         ErrorResponse response = new ErrorResponse("POST_RETRIEVAL_FAIL", e.getMessage());
@@ -138,6 +130,15 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse("POST_DELETE_FAIL", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    // Comment
+    @ExceptionHandler(CommentCreateFailException.class)
+    public ResponseEntity<ErrorResponse> handleCommentCreateFailException(
+        CommentCreateFailException e) {
+        ErrorResponse response = new ErrorResponse("Comment_Create_Fail", e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     @ExceptionHandler(CommentDeleteFailException.class)
