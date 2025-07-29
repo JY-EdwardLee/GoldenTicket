@@ -29,9 +29,6 @@ public interface UserService {
     // Redis에 임시 저장된 유저 정보 조회
     OAuthUserResponse getTempUserInfo(String tempUserId);
 
-    // 로그인 된 유저 정보 반환
-    LoginUserResponse getLoginUser(String accessToken);
-
     // 로그아웃
     void logout(String token);
 
