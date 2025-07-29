@@ -47,10 +47,10 @@ http.interceptors.response.use(
         // 원래 요청을 새로운 토큰으로 재시도
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return http(originalRequest);
-      } catch (refreshError) {
+      } catch (Error) {
         // 리프레시 토큰도 만료된 경우 로그아웃 처리
         localStorage.removeItem('accessToken');
-        window.location.href = '/login';
+        window.location.href = '/';
         return Promise.reject(refreshError);
       }
     }

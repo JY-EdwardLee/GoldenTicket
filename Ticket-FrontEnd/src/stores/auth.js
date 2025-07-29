@@ -40,7 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null;
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
-    router.push('/login');
+    router.push('/');
   }
 
   // 토큰 검증 함수 (필요한 경우 API 호출로 검증 가능)

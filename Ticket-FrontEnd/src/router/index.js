@@ -59,7 +59,7 @@ router.beforeEach(async (to, from, next) => {
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!isAuthenticated) {
       // 인증되지 않은 경우 로그인 페이지로 리다이렉트
-      next({ name: 'Login', query: { redirect: to.fullPath } });
+      next({ name: 'OAuthCallback', query: { redirect: to.fullPath } });
     } else {
       next();
     }

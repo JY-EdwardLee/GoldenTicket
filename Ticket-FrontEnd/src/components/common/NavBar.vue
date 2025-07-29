@@ -23,14 +23,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import LoginModal from "./LoginModal.vue";
 import { useAuthStore } from "@/stores/auth";
-
+import axios from "axios";
+import { API_CONFIG } from "@/config/api.config";
+import { storeToRefs } from "pinia";
 // 스토어 및 라우터 초기화
 const authStore = useAuthStore();
 const router = useRouter();
+
+// store의 isAuthenticated를 반응형 참조로 가져옴
+const { isAuthenticated } = storeToRefs(authStore);
 
 // 로그인 상태 관리
 const isLoggedIn = ref(false);
@@ -38,8 +43,14 @@ const isLoginModalVisible = ref(false);
 
 // 컴포넌트 마운트 시 로그인 상태 확인
 onMounted(() => {
-  isLoggedIn.value = authStore.isAuthenticated;
+  isLoggedIn.value = isAuthenticated.value;
 });
+
+// isAuthenticated 상태가 변경될 때마다 isLoggedIn 업데이트
+watch(isAuthenticated, (newValue) => {
+  isLoggedIn.value = newValue;
+});
+
 // 로그인 모달 열기
 const openLoginModal = () => {
   isLoginModalVisible.value = true;
@@ -53,7 +64,11 @@ const closeLoginModal = () => {
 // 로그아웃 처리
 const handleLogout = () => {
   authStore.logout();
-  isLoggedIn.value = false;
+  isLoggedIn.value = isAuthenticated.value;
+  const response = axios.get(`${API_CONFIG.USER.LOGOUT}`, {
+    withCredentials: true,
+  });
+  console.log(response.data)
   router.push('/');
 };
 </script>
