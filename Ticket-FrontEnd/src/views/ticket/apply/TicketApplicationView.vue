@@ -56,8 +56,8 @@
           </div>
         </div>
         <div class="calendar-logo">
-  <img src="/landers_logo.png" alt="landers logo" />
-</div>
+          <img src="/landers_logo.png" alt="landers logo" />
+        </div>
       </div>
       <div class="info-area">
         <div class="selected-date-box">
@@ -71,11 +71,16 @@
         <div class="game-list-box">
           <b style="font-size: 30px;">{{ pageText.gameListTitle }}</b>
           <div v-if="selectedDate">
-            <div class="game-card">
-              <div class="game-title">{{ pageText.gameTitle }}</div>
-              <div class="game-desc">{{ pageText.gameDesc }}</div>
-              <button class="apply-btn" @click="step = 3">{{ pageText.applyBtn }}</button>
-            </div>
+            <template v-if="gamesOnDate.length > 0">
+              <div v-for="game in filteredGamesOnDate" :key="game.gameId" class="game-card">
+                <div class="game-title">{{ getTeamDisplayName(game.homeTeam) }} vs {{ getTeamDisplayName(game.awayTeam) }}</div>
+                <div class="game-datetime" style="font-weight: normal; color: inherit;">
+                  {{ formatGameDateTime(game.gameDateTime) }}
+                </div>
+                <button class="apply-btn" @click="() => handleApplyClick(game)">{{ pageText.applyBtn }}</button>
+              </div>
+            </template>
+            <div v-else class="no-game-centered">해당 날짜에 경기가 없습니다.</div>
           </div>
           <div v-else class="no-game" style="font-size: 20px;">{{ pageText.noGame }}</div>
         </div>
@@ -100,9 +105,9 @@
         <div class="apply-desc">경기 응모가 성공적으로 완료되었습니다.</div>
         <div class="apply-info-card">
           <div class="apply-info-title">응모한 경기</div>
-          <div class="apply-info-row"><span>경기:</span> <span class="right">SSG 랜더스 vs 키움 히어로즈</span></div>
-          <div class="apply-info-row"><span>일시:</span> <span class="right">{{ getFormattedDate() }}<span v-if="selectedTime"> {{ selectedTime }}</span></span></div>
-          <div class="apply-info-row"><span>장소:</span> <span class="right">인천 SSG 랜더스필드</span></div>
+          <div class="apply-info-row"><span>경기:</span> <span class="right">{{ selectedGame ? getTeamDisplayName(selectedGame.homeTeam) : '' }} vs {{ selectedGame ? getTeamDisplayName(selectedGame.awayTeam) : '' }}</span></div>
+          <div class="apply-info-row"><span>일시:</span> <span class="right">{{ selectedGame ? formatGameDateTime(selectedGame.gameDateTime) : '' }}</span></div>
+          <div class="apply-info-row"><span>장소:</span> <span class="right">{{ stadiumNameToEnum[selectedTeam] }}</span></div>
         </div>
         <button class="apply-confirm-btn" @click="step = 1">확인</button>
       </div>
@@ -112,17 +117,31 @@
 
 <script setup>
 import { ref } from 'vue';
+import axios from 'axios';
+import API_CONFIG from '@/config/api.config';
+import { stadiumNameToEnum } from '@/utils/teamStadium';
+import { teamNameToEnum, getEnumTeamName } from '@/utils/teamNameMap';
+
 const teamRows = [
   ['SSG랜더스', '키움히어로즈', 'LG트윈스', 'KT위즈', 'NC다이노스'],
   ['두산베어스', 'KIA타이거즈', '롯데자이언츠', '한화이글스', '삼성라이온즈']
 ];
 const selectedTeam = ref('');
+// 서버에서 받아올 경기 데이터 배열
 const bgHover = ref(false);
 const step = ref(1);
 const days = ['일', '월', '화', '수', '목', '금', '토'];
 const calendarDates = Array.from({ length: 31 }, (_, i) => i + 1);
 const selectedDate = ref(null);
 const selectedTime = ref(null);
+const gamesOnDate = ref([]);
+const selectedGame = ref(null);
+import { computed } from 'vue';
+const filteredGamesOnDate = computed(() => {
+  if (!selectedTeam.value) return [];
+  const teamEnum = teamNameToEnum[selectedTeam.value];
+  return gamesOnDate.value.filter(game => game.homeTeam === teamEnum || game.awayTeam === teamEnum);
+});
 const currentYear = 2025; // 시스템 기준 연도
 const selectedMonth = ref(7); // 기본 7월, 필요시 동적 할당 가능
 function getFormattedDate() {
@@ -144,14 +163,55 @@ const pageText = {
   gameTitle: 'SSG 랜더스 vs 키움 히어로즈',
   gameDesc: '인천 SSG 랜더스필드',
   applyBtn: '응모하기',
-  noGame: '선택된 날짜에 경기가 없습니다',
+  noGame: '날짜를 선택해주세요',
 };
 
 function selectTeam(team) {
   selectedTeam.value = team;
 }
-function selectDate(date) {
+async function selectDate(date) {
   selectedDate.value = date;
+  // 날짜 형식 YYYY-MM-DD
+  const formattedDate = `${currentYear}-${String(selectedMonth.value).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+  // 팀 ENUM 변환
+  const teamEnum = teamNameToEnum[selectedTeam.value];
+  // POST: 응모하기
+  try {
+    const { data } = await axios.post(API_CONFIG.TICKET.GAMES, {
+      date: formattedDate,
+      team: teamEnum
+    });
+    gamesOnDate.value = data;
+  } catch (error) {
+    console.error('응모/경기조회 에러:', error);
+    gamesOnDate.value = [];
+  }
+}
+async function handleApplyClick(game) {
+  selectedGame.value = game;
+  step.value = 3;
+  console.log()
+  try {
+    const { data } = await axios.post(`/games/${game.gameId}/applications`);
+    console.log('응모 결과:', data);
+  } catch (error) {
+    console.error('응모 요청 실패:', error);
+  }
+}
+
+function getTeamDisplayName(enumName) {
+  return enumName ? enumName.replace(/_/g, ' ') : '';
+}
+
+function formatGameDateTime(dateTimeStr) {
+  // ISO 8601 문자열을 'YYYY-MM-DD HH:mm' 형식으로 변환
+  const date = new Date(dateTimeStr);
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const hh = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
 }
 </script>
 
@@ -624,5 +684,13 @@ function selectDate(date) {
 }
 .apply-confirm-btn:hover {
   background: #b71c1c;
+}
+.no-game-centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  font-size: 22px;
+  color: #555;
 }
 </style>

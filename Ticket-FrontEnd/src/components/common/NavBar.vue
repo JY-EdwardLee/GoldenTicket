@@ -1,6 +1,8 @@
 <template>
   <nav class="navbar">
-    <div class="logo">logo</div>
+    <div class="logo">
+      <router-link to="/">골든티켓</router-link>
+    </div>
     <ul class="nav-links">
       <li><router-link to="/application">응모</router-link></li>
       <li><router-link to="/transfer">양도</router-link></li>
@@ -8,13 +10,31 @@
       <li><router-link to="/guide">FAQ</router-link></li>
     </ul>
     <div class="auth-links">
-      <a href="#">로그인 또는 회원가입</a>
+      <a href="#" @click.prevent="openLoginModal">로그인 또는 회원가입</a>
     </div>
   </nav>
+
+  <!-- 로그인 모달 -->
+  <LoginModal :isVisible="isLoginModalVisible" @close="closeLoginModal" />
 </template>
 
 <script setup>
-// Navigation logic here if needed
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import LoginModal from "./LoginModal.vue";
+
+// 로그인 모달 상태 관리
+const isLoginModalVisible = ref(false);
+const router = useRouter();
+// 로그인 모달 열기
+const openLoginModal = () => {
+  isLoginModalVisible.value = true;
+};
+
+// 로그인 모달 닫기
+const closeLoginModal = () => {
+  isLoginModalVisible.value = false;
+};
 </script>
 
 <style scoped>

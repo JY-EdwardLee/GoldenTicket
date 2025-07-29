@@ -30,10 +30,10 @@ public class PostController {
      *
      * @param userDetails 작성자 정보
      * @param postRequest 게시글 내용
-     * @return
+     * @return 성공/실패 메세지
      */
     @PostMapping("")
-    public ResponseEntity<PostResponse> createPosts(
+    public ResponseEntity<PostResponse> createPost(
         @AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody PostRequest postRequest) {
         postService.createPost(userDetails.getUsername(), postRequest);
@@ -44,8 +44,8 @@ public class PostController {
     /**
      * 게시글 상세보기
      *
-     * @param postId
-     * @return PostDetailResponse
+     * @param postId 게시글 기본키
+     * @return PostDetailResponse 게시글 내용
      */
     @GetMapping("/{postId}")
     public ResponseEntity<PostDetailResponse> getPostDetail(@PathVariable Long postId) {
@@ -59,7 +59,7 @@ public class PostController {
      *
      * @param userDetails       수정을 시도하려는 사람의 정보
      * @param postUpdateRequest 수정 내용
-     * @return
+     * @return 성공/실패 메세지
      */
     @PatchMapping("/{postId}")
     public ResponseEntity<PostResponse> updatePosts(
@@ -75,7 +75,7 @@ public class PostController {
      *
      * @param userDetails 삭제를 시도하려는 사람의 정보
      * @param postId      삭제하려는 게시글의 ID
-     * @return
+     * @return 성공/실패 메세지
      */
     @DeleteMapping("/{postId}")
     public ResponseEntity<PostResponse> deletePost(
@@ -89,7 +89,7 @@ public class PostController {
      * 좋아요 누르기
      *
      * @param userDetails 좋아요를 누른 사람
-     * @param postId
+     * @param postId      게시글 기본키
      * @return
      */
     @PostMapping("/{postId}/like")

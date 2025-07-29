@@ -16,7 +16,8 @@ import lombok.ToString;
 @ToString
 public class User {
 
-    private Long id;
+    // 게시판 api 테스트용 임시 수정
+    private Long userId;
 
     private String email;
     private String gender;

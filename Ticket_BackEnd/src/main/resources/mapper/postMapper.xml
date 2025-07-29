@@ -8,22 +8,27 @@
     VALUES (#{userId}, #{title}, #{content}, #{boardType}, #{imageUrl})
   </insert>
 
-  <select id="selectPostById" parameterType="Long" resultType="PostDetailResponse">
-    SELECT id, board_id, user_id, created_at, updated_at, view_count, title, content, image_url,
-    like_count, is_delete
+  <select id="selectPostById" parameterType="Long" resultType="Long">
+    SELECT *
     FROM posts
-    WHERE id = #{id}
+    WHERE post_id = #{postId}
   </select>
-
-  <delete id="deletePost" parameterType="Long">
-    DELETE FROM posts WHERE post_id = #{postId}
-  </delete>
 
   <update id="plusView" parameterType="Long">
     UPDATE posts
     SET view_count = view_count + 1
     WHERE post_id = #{postId}
   </update>
+
+  <select id="selectUserIdByPostId" parameterType="Long" resultType="Long">
+    SELECT user_id
+    FROM comments
+    WHERE post_id = #{postId}
+  </select>
+
+  <delete id="deletePost" parameterType="Long">
+    DELETE FROM posts WHERE post_id = #{postId}
+  </delete>
 
   <update id="updatePost" parameterType="PostUpdateRequest">
     UPDATE posts
@@ -37,10 +42,12 @@
 
   <!-- 좋아요 확인 -->
   <select id="selectLike" resultType="boolean">
-    SELECT COUNT(*) > 0
+    SELECT EXISTS(
+    SELECT 1
     FROM posts_like
     WHERE user_id = #{userId}
     AND post_id = #{postId}
+    )
   </select>
 
   <update id="plusLike">

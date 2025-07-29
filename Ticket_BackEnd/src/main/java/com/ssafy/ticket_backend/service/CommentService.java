@@ -7,11 +7,13 @@ import java.util.List;
 
 public interface CommentService {
 
-    public boolean createComment(CommentRequest commentRequest);
+    void createComment(String email, CommentRequest commentRequest);
 
-    public boolean deleteComment(Long commentId);
+    void deleteComment(String email, Long commentId);
 
-    public boolean updateComment(CommentUpdateRequest commentUpdateRequest);
+    void updateComment(String email, Long commentId, CommentUpdateRequest commentUpdateRequest);
 
-    public List<CommentDetailResponse> getComments(Long post_id);
+    List<CommentDetailResponse> getComments(Long post_id);
+
+    void likeComment(String email, Long commentId);
 }

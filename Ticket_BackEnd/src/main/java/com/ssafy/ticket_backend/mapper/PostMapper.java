@@ -13,7 +13,9 @@ public interface PostMapper {
 
     PostDetailResponse selectPostById(Long postId);
 
-    int plusView(String post_id);
+    int plusView(Long post_id);
+
+    Long selectUserIdByPostId(Long postId);
 
     int deletePost(Long postId);
 
@@ -21,7 +23,7 @@ public interface PostMapper {
 
     boolean selectLike(Long userId, Long postId);
 
-    void plusLike(@Param("{postId}") Long postId);
+    void plusLike(@Param("postId") Long postId);
 
-    void insertPostLike(@Param("{userId}") Long userId, @Param("{postId}") Long postId);
+    void insertPostLike(@Param("userId") Long userId, @Param("postId") Long postId);
 }

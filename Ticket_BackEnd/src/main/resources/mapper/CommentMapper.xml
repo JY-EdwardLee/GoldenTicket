@@ -14,17 +14,42 @@
 
   <update id="updateComment" parameterType="CommentUpdateRequest">
     UPDATE comments
-    SET content = #{content}
+    SET content = #{commentUpdateRequest.content}
     WHERE comment_id = #{commentId}
   </update>
 
-
-  <select id="getComments" parameterType="int" resultType="CommentDetailResponse">
-    SELECT FROM comments
-    where (post_id = #{post_id})
+  <select id="getComments" parameterType="Long" resultType="CommentDetailResponse">
+    SELECT comment_id, post_id, user_id, content, created_at, updated_at
+    FROM comments
+    WHERE post_id = #{postId}
   </select>
 
+  <select id="selectUserIdByCommentId" parameterType="Long" resultType="Long">
+    SELECT user_id
+    FROM comments
+    WHERE comment_id = #{commentId}
+  </select>
 
+  <!-- 좋아요 확인 -->
+  <select id="selectLike" resultType="boolean">
+    SELECT EXISTS(
+    SELECT 1
+    FROM comments_like
+    WHERE user_id = #{userId}
+    AND comment_id = #{commentId}
+    )
+  </select>
+
+  <update id="plusLike">
+    UPDATE comments
+    SET like_count = like_count + 1
+    WHERE comment_id = #{commentId}
+  </update>
+
+  <insert id="insertCommentLike">
+    INSERT INTO comments_like (user_id, comment_id)
+    VALUES (#{userId}, #{commentId})
+  </insert>
 </mapper>
 
 
