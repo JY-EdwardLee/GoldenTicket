@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
+import com.ssafy.ticket_backend.dto.response.LoginUserResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.exception.UserSignupException;
@@ -273,6 +274,29 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("OAuthUserResponse 역직렬화 실패", e);
         }
     }
+
+    /**
+     *  로그인 한 유저 정보 조회
+     *
+     * @param 엑세스 토큰
+     * @return LoginUserResponse
+     */
+    @Override
+    public LoginUserResponse getLoginUser(String accessToken) {
+        // 1. accessToken이 유효한지 검사
+        if (accessToken == null || !jwtUtil.validateToken(accessToken)) {
+            throw new RuntimeException("유효하지 않은 토큰입니다.");
+        }
+
+        // 2. 토큰에서 이메일 추출
+        String email = jwtUtil.getUserEmail(accessToken);
+
+        // 3. 이메일로 사용자 조회
+        LoginUserResponse loginUserResponse = userMapper.selectLogingUserByEmail(email);
+
+        return loginUserResponse;
+    }
+
 
     /**
      * 로그아웃 처리 (액세스 토큰 블랙리스트 등록 및 리프레시 토큰 제거)
