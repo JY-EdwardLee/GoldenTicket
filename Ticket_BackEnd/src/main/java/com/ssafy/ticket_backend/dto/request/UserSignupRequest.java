@@ -11,7 +11,6 @@ import lombok.Setter;
 // 유저 회원가입 요청 DTO
 public class UserSignupRequest {
 
-    private Long userId;
     private String email;
     private UserGender gender;
     private String userName;
