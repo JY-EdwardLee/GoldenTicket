@@ -61,15 +61,14 @@ const closeLoginModal = () => {
   isLoginModalVisible.value = false;
 };
 
-// 로그아웃 처리
-const handleLogout = () => {
-  authStore.logout();
-  isLoggedIn.value = isAuthenticated.value;
-  const response = axios.get(`${API_CONFIG.USER.LOGOUT}`, {
-    withCredentials: true,
-  });
-  console.log(response.data)
-  router.push('/');
+// In NavBar.vue
+const handleLogout = async () => {
+  try {
+    await authStore.logout();
+    isLoggedIn.value = false;
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
 };
 </script>
 
