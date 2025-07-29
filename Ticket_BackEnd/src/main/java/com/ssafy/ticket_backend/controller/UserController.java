@@ -194,31 +194,11 @@ public class UserController {
      */
     @PostMapping("/signup")
     public ResponseEntity<JwtTokenResponse> signup(
-        @RequestBody UserSignupRequest userSignupRequest, HttpServletResponse response) {
+        @RequestBody UserSignupRequest userSignupRequest) {
         JwtTokenResponse tokens = userService.signup(userSignupRequest);
-        // accessToken 쿠키 설정
-        ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
-            .httpOnly(true)
-            .secure(true)
-            .sameSite("Strict")
-            .path("/")
-            .maxAge(Duration.ofMinutes(30))
-            .build();
-
-        // refreshToken 쿠키 설정
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
-            .httpOnly(true)
-            .secure(true)
-            .sameSite("Strict")
-            .path("/auth/refresh")
-            .maxAge(Duration.ofDays(14))
-            .build();
-
-        response.addHeader("Set-Cookie", accessCookie.toString());
-        response.addHeader("Set-Cookie", refreshCookie.toString());
-
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(tokens);
     }
+
 
     /**
      * 로그아웃 처리
@@ -243,6 +223,31 @@ public class UserController {
     }
 
     /**
+     * 로그인 유저 정보 반환
+     *
+     * @return LoginUserResponse 로그인 유저 정보 응답 DTO
+     */
+    @GetMapping("/login-user")
+    public ResponseEntity<LoginUserResponse> getLoginUser(HttpServletRequest request) {
+        // 1. 쿠키에서 accessToken 추출
+        String accessToken = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("accessToken".equals(cookie.getName())) {
+                    accessToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        LoginUserResponse loginUserResponse = userService.getLoginUser(accessToken);
+
+        return ResponseEntity.ok(loginUserResponse);
+    }
+
+
+    /**
      * 마이페이지의 정보를 반환
      *
      * @return
@@ -254,7 +259,6 @@ public class UserController {
 
         return ResponseEntity.ok().body(myPage);
     }
-
 
     /**
      * 내 정보 수정

@@ -274,6 +274,23 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public LoginUserResponse getLoginUser(String accessToken) {
+        // 1. accessToken이 유효한지 검사
+        if (accessToken == null || !jwtUtil.validateToken(accessToken)) {
+            throw new RuntimeException("유효하지 않은 토큰입니다.");
+        }
+
+        // 2. 토큰에서 이메일 추출
+        String email = jwtUtil.getUserEmail(accessToken);
+
+        // 3. 이메일로 사용자 조회
+        LoginUserResponse loginUserResponse = userMapper.selectLogingUserByEmail(email)
+
+            return loginUserResponse;
+    }
+
+
     /**
      * 로그아웃 처리 (액세스 토큰 블랙리스트 등록 및 리프레시 토큰 제거)
      *
