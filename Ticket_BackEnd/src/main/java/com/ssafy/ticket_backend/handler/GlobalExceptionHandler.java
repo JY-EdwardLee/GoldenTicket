@@ -8,6 +8,7 @@ import com.ssafy.ticket_backend.exception.CommentDeleteFailException;
 import com.ssafy.ticket_backend.exception.CommentLikeFailException;
 import com.ssafy.ticket_backend.exception.CommentUpdateFailException;
 import com.ssafy.ticket_backend.exception.DatabaseOperationException;
+import com.ssafy.ticket_backend.exception.GameApplyException;
 import com.ssafy.ticket_backend.exception.PostCreateFailException;
 import com.ssafy.ticket_backend.exception.PostDeleteException;
 import com.ssafy.ticket_backend.exception.PostDeleteFailException;
@@ -28,151 +29,158 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  // DB
-  @ExceptionHandler(DatabaseOperationException.class)
-  public ResponseEntity<ErrorResponse> handleDb(DatabaseOperationException e) {
-    ErrorResponse response = new ErrorResponse("DB_ERROR", e.getMessage());
+    // DB
+    @ExceptionHandler(DatabaseOperationException.class)
+    public ResponseEntity<ErrorResponse> handleDb(DatabaseOperationException e) {
+        ErrorResponse response = new ErrorResponse("DB_ERROR", e.getMessage());
 
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-  }
-
-  // User
-  @ExceptionHandler(UserSignupException.class)
-  public ResponseEntity<ErrorResponse> handleUserSignupException(UserSignupException e) {
-    ErrorResponse response = new ErrorResponse("USER_SIGNUP_ERROR", e.getMessage());
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-  }
-
-  @ExceptionHandler(BlockedUserException.class)
-  public ResponseEntity<ErrorResponse> handleBlockedUserException(BlockedUserException e) {
-    ErrorResponse response = new ErrorResponse("BLOCKED_USER", e.getMessage());
-
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-  }
-
-  // Board
-
-  /**
-   * 검색 중 Enum타입에 있는 값이 아닌 다른 값을 검색하였을 경우
-   *
-   * @param ex
-   * @return
-   */
-  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-  public ResponseEntity<String> handleEnumBindingException(
-      MethodArgumentTypeMismatchException ex) {
-    if (ex.getRequiredType() == BoardType.class) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 게시판입니다.");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("요청 파라미터 오류");
-  }
+    // User
+    @ExceptionHandler(UserSignupException.class)
+    public ResponseEntity<ErrorResponse> handleUserSignupException(UserSignupException e) {
+        ErrorResponse response = new ErrorResponse("USER_SIGNUP_ERROR", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
-  @ExceptionHandler(BoardException.class)
-  public ResponseEntity<ErrorResponse> handleBoardException(BoardException e) {
-    ErrorResponse response = new ErrorResponse("BOARD_ERROR", e.getMessage());
+    @ExceptionHandler(BlockedUserException.class)
+    public ResponseEntity<ErrorResponse> handleBlockedUserException(BlockedUserException e) {
+        ErrorResponse response = new ErrorResponse("BLOCKED_USER", e.getMessage());
 
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-  }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
 
-  // Post
-  @ExceptionHandler(PostNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handlePostNotFoundException(PostNotFoundException e) {
-    ErrorResponse response = new ErrorResponse("POST_NOT_FOUND", e.getMessage());
+    // Board
 
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-  }
+    /**
+     * 검색 중 Enum타입에 있는 값이 아닌 다른 값을 검색하였을 경우
+     *
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<String> handleEnumBindingException(
+        MethodArgumentTypeMismatchException ex) {
+        if (ex.getRequiredType() == BoardType.class) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 게시판입니다.");
+        }
 
-  @ExceptionHandler(PostUserNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handlePostUserNotFoundException(
-      PostUserNotFoundException e) {
-    ErrorResponse response = new ErrorResponse("POST_USER_NOT_FOUND", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("요청 파라미터 오류");
+    }
 
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-  }
+    @ExceptionHandler(BoardException.class)
+    public ResponseEntity<ErrorResponse> handleBoardException(BoardException e) {
+        ErrorResponse response = new ErrorResponse("BOARD_ERROR", e.getMessage());
 
-  @ExceptionHandler(PostUpdateFailException.class)
-  public ResponseEntity<ErrorResponse> handlePostUpdateFailException(PostUpdateFailException e) {
-    ErrorResponse response = new ErrorResponse("Post_Update_Fail", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-  }
+    // Post
+    @ExceptionHandler(PostNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePostNotFoundException(PostNotFoundException e) {
+        ErrorResponse response = new ErrorResponse("POST_NOT_FOUND", e.getMessage());
 
-  @ExceptionHandler(PostDeleteFailException.class)
-  public ResponseEntity<ErrorResponse> handlePostDeleteFailException(PostDeleteFailException e) {
-    ErrorResponse response = new ErrorResponse("Post_Delete_Fail", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
 
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-  }
+    @ExceptionHandler(PostUserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePostUserNotFoundException(
+        PostUserNotFoundException e) {
+        ErrorResponse response = new ErrorResponse("POST_USER_NOT_FOUND", e.getMessage());
 
-  @ExceptionHandler(PostCreateFailException.class)
-  public ResponseEntity<ErrorResponse> handlePostCreateFailException(PostCreateFailException e) {
-    ErrorResponse response = new ErrorResponse("POST_Create_Fail", e.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
 
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-  }
+    @ExceptionHandler(PostUpdateFailException.class)
+    public ResponseEntity<ErrorResponse> handlePostUpdateFailException(PostUpdateFailException e) {
+        ErrorResponse response = new ErrorResponse("Post_Update_Fail", e.getMessage());
 
-  @ExceptionHandler(PostRetrievalException.class)
-  public ResponseEntity<ErrorResponse> handlePostRetrievalException(PostRetrievalException e) {
-    ErrorResponse response = new ErrorResponse("POST_RETRIEVAL_FAIL", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
 
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-  }
+    @ExceptionHandler(PostDeleteFailException.class)
+    public ResponseEntity<ErrorResponse> handlePostDeleteFailException(PostDeleteFailException e) {
+        ErrorResponse response = new ErrorResponse("Post_Delete_Fail", e.getMessage());
 
-  @ExceptionHandler(PostUpdateException.class)
-  public ResponseEntity<ErrorResponse> handlePostUpdateException(PostUpdateException e) {
-    ErrorResponse response = new ErrorResponse("POST_UPDATE_FAIL", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
 
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-  }
+    @ExceptionHandler(PostCreateFailException.class)
+    public ResponseEntity<ErrorResponse> handlePostCreateFailException(PostCreateFailException e) {
+        ErrorResponse response = new ErrorResponse("POST_Create_Fail", e.getMessage());
 
-  @ExceptionHandler(PostDeleteException.class)
-  public ResponseEntity<ErrorResponse> handlePostDeleteException(PostDeleteException e) {
-    ErrorResponse response = new ErrorResponse("POST_DELETE_FAIL", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
 
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-  }
+    @ExceptionHandler(PostRetrievalException.class)
+    public ResponseEntity<ErrorResponse> handlePostRetrievalException(PostRetrievalException e) {
+        ErrorResponse response = new ErrorResponse("POST_RETRIEVAL_FAIL", e.getMessage());
 
-  // Comment
-  @ExceptionHandler(CommentCreateFailException.class)
-  public ResponseEntity<ErrorResponse> handleCommentCreateFailException(
-      CommentCreateFailException e) {
-    ErrorResponse response = new ErrorResponse("Comment_Create_Fail", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
 
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-  }
+    @ExceptionHandler(PostUpdateException.class)
+    public ResponseEntity<ErrorResponse> handlePostUpdateException(PostUpdateException e) {
+        ErrorResponse response = new ErrorResponse("POST_UPDATE_FAIL", e.getMessage());
 
-  @ExceptionHandler(CommentDeleteFailException.class)
-  public ResponseEntity<ErrorResponse> handleCommentDeleteFailException(
-      CommentDeleteFailException e) {
-    ErrorResponse response = new ErrorResponse("Comment_Delete_Fail", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
 
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-  }
+    @ExceptionHandler(PostDeleteException.class)
+    public ResponseEntity<ErrorResponse> handlePostDeleteException(PostDeleteException e) {
+        ErrorResponse response = new ErrorResponse("POST_DELETE_FAIL", e.getMessage());
 
-  @ExceptionHandler(CommentUpdateFailException.class)
-  public ResponseEntity<ErrorResponse> handleCommentUpdateFailException(
-      CommentUpdateFailException e) {
-    ErrorResponse response = new ErrorResponse("Comment_Update_Fail", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
 
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-  }
+    // Comment
+    @ExceptionHandler(CommentCreateFailException.class)
+    public ResponseEntity<ErrorResponse> handleCommentCreateFailException(
+        CommentCreateFailException e) {
+        ErrorResponse response = new ErrorResponse("Comment_Create_Fail", e.getMessage());
 
-  @ExceptionHandler(CommentLikeFailException.class)
-  public ResponseEntity<ErrorResponse> handleCommentLikeFailException(
-      CommentLikeFailException e) {
-    ErrorResponse response = new ErrorResponse("Comment_Like_Fail", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
 
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-  }
+    @ExceptionHandler(CommentDeleteFailException.class)
+    public ResponseEntity<ErrorResponse> handleCommentDeleteFailException(
+        CommentDeleteFailException e) {
+        ErrorResponse response = new ErrorResponse("Comment_Delete_Fail", e.getMessage());
 
-  // S3
-  @ExceptionHandler(PresignedUrlGenerationException.class)
-  public ResponseEntity<ErrorResponse> handleCommentLikeFailException(
-      PresignedUrlGenerationException e) {
-    ErrorResponse response = new ErrorResponse("PRESIGNED_URL_GENERATION_FAILED", e.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
 
-    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-  }
+    @ExceptionHandler(CommentUpdateFailException.class)
+    public ResponseEntity<ErrorResponse> handleCommentUpdateFailException(
+        CommentUpdateFailException e) {
+        ErrorResponse response = new ErrorResponse("Comment_Update_Fail", e.getMessage());
 
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(CommentLikeFailException.class)
+    public ResponseEntity<ErrorResponse> handleCommentLikeFailException(
+        CommentLikeFailException e) {
+        ErrorResponse response = new ErrorResponse("Comment_Like_Fail", e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    // S3
+    @ExceptionHandler(PresignedUrlGenerationException.class)
+    public ResponseEntity<ErrorResponse> handleCommentLikeFailException(
+        PresignedUrlGenerationException e) {
+        ErrorResponse response = new ErrorResponse("PRESIGNED_URL_GENERATION_FAILED",
+            e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(GameApplyException.class)
+    public ResponseEntity<ErrorResponse> handleGameApplyException(GameApplyException e) {
+        ErrorResponse response = new ErrorResponse("GAME_APPLY_ERROR", e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 }
