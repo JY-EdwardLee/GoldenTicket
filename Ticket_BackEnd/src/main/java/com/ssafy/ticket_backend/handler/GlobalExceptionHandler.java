@@ -9,6 +9,7 @@ import com.ssafy.ticket_backend.exception.CommentLikeFailException;
 import com.ssafy.ticket_backend.exception.CommentUpdateFailException;
 import com.ssafy.ticket_backend.exception.DatabaseOperationException;
 import com.ssafy.ticket_backend.exception.GameApplyException;
+import com.ssafy.ticket_backend.exception.ImageDownloadUrlGenerationException;
 import com.ssafy.ticket_backend.exception.PostCreateFailException;
 import com.ssafy.ticket_backend.exception.PostDeleteException;
 import com.ssafy.ticket_backend.exception.PostDeleteFailException;
@@ -18,7 +19,9 @@ import com.ssafy.ticket_backend.exception.PostUpdateException;
 import com.ssafy.ticket_backend.exception.PostUpdateFailException;
 import com.ssafy.ticket_backend.exception.PostUserNotFoundException;
 import com.ssafy.ticket_backend.exception.PresignedUrlGenerationException;
+import com.ssafy.ticket_backend.exception.SaveUploadKeyException;
 import com.ssafy.ticket_backend.exception.TicketTransferException;
+import com.ssafy.ticket_backend.exception.UserProfileKeyQueryException;
 import com.ssafy.ticket_backend.exception.UserSignupException;
 import com.ssafy.ticket_backend.model.BoardType;
 import org.springframework.http.HttpStatus;
@@ -177,6 +180,33 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
+
+    @ExceptionHandler(SaveUploadKeyException.class)
+    public ResponseEntity<ErrorResponse> handleSaveUploadKeyException(SaveUploadKeyException e) {
+        ErrorResponse response = new ErrorResponse("SAVE_UPLOAD_KEY_FAILED", e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(UserProfileKeyQueryException.class)
+    public ResponseEntity<ErrorResponse> handleUserProfileKeyQueryException(
+        UserProfileKeyQueryException e) {
+        ErrorResponse response = new ErrorResponse("USER_PROFILE_KEY_QUERY_FAILED", e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+
+    @ExceptionHandler(ImageDownloadUrlGenerationException.class)
+    public ResponseEntity<ErrorResponse> handleImageDownloadUrlGenerationException(
+        ImageDownloadUrlGenerationException e) {
+
+        ErrorResponse response = new ErrorResponse("IMAGE_DOWNLOAD_URL_GENERATION_FAILED",
+            e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
 
     @ExceptionHandler(GameApplyException.class)
     public ResponseEntity<ErrorResponse> handleGameApplyException(GameApplyException e) {
