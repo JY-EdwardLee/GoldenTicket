@@ -1,0 +1,277 @@
+/* 히어로 섹션 스타일 */
+.hero-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 48px 0px;
+  width: 100%;
+  max-width: 1440px;
+  height: auto;
+  min-height: 546px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.hero-margin-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px 80px;
+  width: 100%;
+  max-width: 1440px;
+  height: auto;
+  min-height: 450px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.hero-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px 32px;
+  width: 100%;
+  max-width: 1280px;
+  height: auto;
+  min-height: 450px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  padding: 0px;
+  gap: 32px;
+  width: 100%;
+  max-width: 1216px;
+  height: auto;
+  min-height: 450px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+/* 히어로 박스 */
+.hero-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 48px;
+  width: calc(50% - 16px);
+  max-width: 592px;
+  height: auto;
+  min-height: 450px;
+  border-radius: 24px;
+  flex: 1;
+  flex-grow: 1;
+  box-sizing: border-box;
+}
+
+.hero-box.enter {
+  background: linear-gradient(135deg, #FFB22C 0%, #FF9A1A 100%);
+  order: 0;
+}
+
+.hero-box.transfer {
+  background: linear-gradient(135deg, #854836 0%, #6B3A2E 100%);
+  order: 1;
+}
+
+/* 히어로 박스 내용 */
+.hero-box .margin-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px 0px 32px;
+  width: 496px;
+  height: 112px;
+  flex: none;
+  align-self: stretch;
+  flex-grow: 0;
+}
+
+.hero-box .title-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px 0px 24px;
+  width: 496px;
+  height: 84px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
+
+.hero-box h1 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  width: 496px;
+  height: 60px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 60px;
+  line-height: 60px;
+  letter-spacing: -1.5px;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.hero-box .description-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px 0px 32px;
+  width: 496px;
+  height: 96px;
+  flex: none;
+  order: 2;
+  flex-grow: 0;
+}
+
+.hero-box .description {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  padding: 0px;
+  row-gap: 0px;
+  width: 496px;
+  height: 64px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.hero-box .description p {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.6px;
+  color: rgba(255, 255, 255, 0.9);
+  flex: none;
+  flex-grow: 0;
+  margin: 0;
+}
+
+.hero-box .description p:first-child {
+  width: 275px;
+  height: 32px;
+  order: 0;
+}
+
+.hero-box .description p:last-child {
+  width: 248px;
+  height: 32px;
+  order: 1;
+}
+
+/* 히어로 버튼 */
+.hero-button {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 17px 33px;
+  gap: 8px;
+  width: 156.25px;
+  height: 62px;
+  border: 1px solid #FFFFFF;
+  border-radius: 8px;
+  flex: none;
+  order: 3;
+  flex-grow: 0;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.hero-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hero-button-text {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 800;
+  font-size: 18px;
+  line-height: 28px;
+  text-align: center;
+  color: #FFFFFF;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.hero-button-icon {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;
+  width: 16px;
+  height: 16px;
+  border-radius: 0px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
+
+.hero-button-icon svg {
+  width: 18.77px;
+  height: 28px;
+  isolation: isolate;
+}
+
+/* 아이콘 스타일 */
+.icon {
+  position: absolute;
+  width: 18.75px;
+  height: 18px;
+  left: 0.01px;
+  top: 5px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  z-index: 0;
+}
+
+.icon-group {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 17.58%;
+  bottom: 17.58%;
+  transform: matrix(1, 0, 0, -1, 0, 0);
+}
+
+.icon-vector {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  top: 17.58%;
+  bottom: 17.58%;
+  background: #FFFFFF;
+  transform: matrix(1, 0, 0, -1, 0, 0);
+}
