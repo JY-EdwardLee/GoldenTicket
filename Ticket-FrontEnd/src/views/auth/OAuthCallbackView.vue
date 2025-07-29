@@ -30,7 +30,7 @@ const handleOAuthCallback = async () => {
     // URL에서 쿼리 파라미터 파싱
     const urlParams = new URLSearchParams(window.location.search);
     const redirect = urlParams.get('redirect') || '/';
-    const token = authStore.getToken();
+    // const token = authStore.getToken();
 
     // 필수 파라미터 검증
     
@@ -39,7 +39,8 @@ const handleOAuthCallback = async () => {
           withCredentials: true,
         });
 
-        if (response.data && response.data.id) {
+        console.log(response.data)
+        if (response.data || response.data.id) {
           // 사용자 정보를 store에 저장
           authStore.setUser(response.data);
           

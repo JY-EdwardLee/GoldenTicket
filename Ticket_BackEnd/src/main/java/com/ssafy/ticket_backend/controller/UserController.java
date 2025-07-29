@@ -175,7 +175,7 @@ public class UserController {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("accessToken".equals(cookie.getName())) {
+                if ("access_token".equals(cookie.getName())) {
                     accessToken = cookie.getValue();
                     break;
                 }
@@ -197,7 +197,6 @@ public class UserController {
     @GetMapping("/auth/temp-user")
     public ResponseEntity<OAuthUserResponse> getTempUserInfo(@RequestParam String tempUserId) {
         OAuthUserResponse oAuthUserResponse = userService.getTempUserInfo(tempUserId);
-
         return ResponseEntity.ok(oAuthUserResponse);
     }
 

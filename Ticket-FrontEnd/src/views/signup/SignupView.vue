@@ -161,12 +161,11 @@ const handleSubmit = async () => {
 const fetchUserData = async (userId) => {
   try {
     const response = await axios.get(
-      `${API_CONFIG.USER.TEMP_USER}`,
+      `${API_CONFIG.AUTH.TEMP_USER}`,
       {
         params: { tempUserId: userId },
       }
     );
-    console.log(response);
     if (response.data) {
       const userData = response.data;
       formData.userName = userData.userName || "";
@@ -186,7 +185,6 @@ onMounted(() => {
   // URL에서 user_id 파라미터 확인
   const userId = route.query.tempUserId;
   if (userId) {
-    console.log(userId);
     fetchUserData(userId);
   }
 });
