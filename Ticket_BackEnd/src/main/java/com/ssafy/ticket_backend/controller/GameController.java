@@ -44,7 +44,7 @@ public class GameController {
      * @return
      */
     @PostMapping("/{gameId}/applications")
-    public ResponseEntity<ApplicationGameResponse> ApplicationGame(
+    public ResponseEntity<ApplicationGameResponse> applicationGame(
         @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long gameId) {
         gameService.applicationGame(userDetails.getUsername(), gameId);
 
@@ -59,7 +59,7 @@ public class GameController {
      * @return
      */
     @DeleteMapping("/{gameId}/applications")
-    public ResponseEntity<?> CancelGame(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<?> cancelGame(@AuthenticationPrincipal CustomUserDetails userDetails,
         @PathVariable Long gameId) {
         gameService.cancelGame(userDetails.getUsername(), gameId);
 
