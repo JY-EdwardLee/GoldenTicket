@@ -1,5 +1,6 @@
 package com.ssafy.ticket_backend.service;
 
+import com.ssafy.ticket_backend.dto.request.GameCheckRequest;
 import com.ssafy.ticket_backend.exception.BlockedUserException;
 import com.ssafy.ticket_backend.exception.GameApplyException;
 import com.ssafy.ticket_backend.mapper.GameMapper;
@@ -16,6 +17,24 @@ public class GameServiceImpl implements GameService {
 
     private final UserMapper userMapper;
     private final GameMapper gameMapper;
+
+    /**
+     * 게임 목록 가져오기
+     *
+     * @param gameCheckRequest
+     * @return
+     */
+    @Override
+    public List<Game> selectGame(GameCheckRequest gameCheckRequest) {
+        try {
+            return gameMapper.selectGameByDateAndTeam(gameCheckRequest.getDate(),
+                gameCheckRequest.getTeam());
+        } catch (Exception e) {
+            //TODO
+            e.printStackTrace();
+            throw new RuntimeException("조회 간 오류가 발생하였습니다.");
+        }
+    }
 
     /**
      * 티켓 응모 함수

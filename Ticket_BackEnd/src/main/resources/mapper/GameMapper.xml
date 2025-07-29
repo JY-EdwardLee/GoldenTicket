@@ -2,6 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.ticket_backend.mapper.GameMapper">
+  <!-- 날짜와 팀으로 게임 검색 -->
+  <select id="selectGameByDateAndTeam" resultType="com.ssafy.ticket_backend.model.Game">
+    SELECT *
+    FROM games
+    WHERE game_datetime::DATE = #{gameDate}
+    AND (home_team = #{team, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler}
+    OR away_team = #{team, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler})
+  </select>
+
   <!-- 게임 검색 -->
   <select id="selectGameByGameId" resultType="com.ssafy.ticket_backend.model.Game">
     SELECT *
