@@ -194,10 +194,30 @@ public class UserController {
      */
     @PostMapping("/signup")
     public ResponseEntity<JwtTokenResponse> signup(
-        @RequestBody UserSignupRequest userSignupRequest) {
+        @RequestBody UserSignupRequest userSignupRequest, HttpServletResponse response) {
         JwtTokenResponse tokens = userService.signup(userSignupRequest);
-        // 유저 아이디도
-        return ResponseEntity.ok(tokens);
+        // accessToken 쿠키 설정
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("Strict")
+            .path("/")
+            .maxAge(Duration.ofMinutes(30))
+            .build();
+
+        // refreshToken 쿠키 설정
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("Strict")
+            .path("/auth/refresh")
+            .maxAge(Duration.ofDays(14))
+            .build();
+
+        response.addHeader("Set-Cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
+
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -234,6 +254,7 @@ public class UserController {
 
         return ResponseEntity.ok().body(myPage);
     }
+
 
     /**
      * 내 정보 수정

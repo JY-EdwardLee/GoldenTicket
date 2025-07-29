@@ -16,7 +16,6 @@ public class OAuthUserResponse {
     private JwtTokenResponse token; // 로그인 시
 
     // 미등록 시 사용자 정보
-
     private String email;
     private String nickName;
     private String socialProvider;

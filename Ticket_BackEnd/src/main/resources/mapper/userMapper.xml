@@ -59,7 +59,7 @@
     SELECT
     email,
     user_name,
-    nickname,
+    nick_name,
     gender,
     profile_photo_url,
     my_team,
@@ -79,8 +79,23 @@
     SET
     nickname = #{userPatchRequest.nickName},
     profile_photo_url = #{userPatchRequest.profileImageUrl},
-    my_team = #{userPatchRequest.myTeam},
+    my_team =
+    #{userPatchRequest.myTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler},
     gender = #{userPatchRequest.gender}
     WHERE email = #{email}
   </update>
+
+  <!-- S3 사용자 프로필 이미지 업데이트 -->
+  <update id="updateUserProfileImage">
+    UPDATE users
+    SET profile_photo_url = #{imageKey}
+    WHERE user_id = #{userId}
+  </update>
+
+  <!-- S3 사용자 프로필 이미지 key 조회 -->
+  <select id="getUserProfileImageKey" parameterType="Long" resultType="String">
+    SELECT profile_photo_url
+    FROM users
+    WHERE user_id = #{userId}
+  </select>
 </mapper>

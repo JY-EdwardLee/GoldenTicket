@@ -10,20 +10,29 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface CommentMapper {
 
-    int insertComment(CommentRequest commentRequest);
+  int insertComment(CommentRequest commentRequest);
 
-    int deleteComment(Long commentId);
+  int deleteComment(Long commentId);
 
-    int updateComment(@Param("commentId") Long commentId,
-        CommentUpdateRequest commentUpdateRequest);
+  int CommentDeleteTrue(Long commentId);
 
-    List<CommentDetailResponse> getComments(Long post_id);
+  int updateComment(@Param("commentId") Long commentId,
+      CommentUpdateRequest commentUpdateRequest);
 
-    Long selectUserIdByCommentId(Long postId);
+  List<CommentDetailResponse> getComments(Long post_id);
 
-    boolean selectLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
+  Long selectUserIdByCommentId(Long postId);
 
-    void plusLike(@Param("commentId") Long commentId);
+  boolean selectLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
 
-    void insertCommentLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
+  void plusLike(@Param("commentId") Long commentId);
+
+  void insertCommentLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
+
+  void minusLike(@Param("commentId") Long commentId);
+
+  void deletePostLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
+
+  Long selectCommentLike(Long postId);
+
 }
