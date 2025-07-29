@@ -64,16 +64,16 @@
         <label for="favoriteTeam">선호구단</label>
         <select id="favoriteTeam" v-model="formData.favoriteTeam" required>
           <option value="" disabled selected>선호하는 구단을 선택해주세요</option>
-          <option value="LG">LG 트윈스</option>
-          <option value="KT">KT 위즈</option>
-          <option value="SSG">SSG 랜더스</option>
-          <option value="NC">NC 다이노스</option>
-          <option value="두산">두산 베어스</option>
-          <option value="KIA">KIA 타이거즈</option>
-          <option value="롯데">롯데 자이언츠</option>
-          <option value="삼성">삼성 라이온즈</option>
-          <option value="한화">한화 이글스</option>
-          <option value="키움">키움 히어로즈</option>
+          <option value="LG_TWINS">LG 트윈스</option>
+          <option value="KT_WIZ">KT 위즈</option>
+          <option value="SSG_LANDERS">SSG 랜더스</option>
+          <option value="HANHWA_EAGLES">NC 다이노스</option>
+          <option value="DOOSAN_BEARERS">두산 베어스</option>
+          <option value="KIA_TIGERS">KIA 타이거즈</option>
+          <option value="LOTTE_GIANTS">롯데 자이언츠</option>
+          <option value="SAMSUNG_LIONS">삼성 라이온즈</option>
+          <option value="HANHWA_EAGLES">한화 이글스</option>
+          <option value="KIWOOM_HEROES">키움 히어로즈</option>
         </select>
       </div>
 
@@ -106,26 +106,29 @@ const formData = reactive({
   profilePhotoUrl: "",
   userName: "",
   gender: "",
-  birthDate: "",
+  birthdate: "",
 });
 
 const handleSubmit = async () => {
   try {
-    const userData = { ...formData };
-    
-    // 소셜 가입인 경우 provider 정보 추가
-    if (isSocialSignup.value && socialProvider.value) {
-      userData.socialProvider = socialProvider.value;
-    }
-
+    const userData = {
+      email: formData.email,
+      userName: formData.userName,
+      nickName: formData.nickName,
+      birthDate: formData.birthdate, // YYYY-MM-DD 형식이어야 함
+      phoneNumber: formData.phone,
+      myTeam: formData.favoriteTeam,
+      gender: formData.gender || "MALE", // 임시값 또는 선택 옵션으로 구현 필요
+      SocialProvider: isSocialSignup.value ? socialProvider.value : 'kakao',
+    };
+    console.log(userData);
     // 회원가입 API 호출
-    const response = await fetch(`${API_CONFIG.API_BASE_URL}/auth/signup`, {
+    const response = await fetch(`${API_CONFIG.AUTH.SIGNUP}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(userData),
-      credentials: 'include' // 쿠키 전송을 위해 필요
     });
 
     if (!response.ok) {
@@ -158,7 +161,7 @@ const handleSubmit = async () => {
 const fetchUserData = async (userId) => {
   try {
     const response = await axios.get(
-      API_CONFIG.BASE_URL + `/users/auth/temp-user`,
+      `http://localhost:8080/users/auth/temp-user`,
       {
         params: { tempUserId: userId },
       }
@@ -169,7 +172,7 @@ const fetchUserData = async (userId) => {
       formData.userName = userData.userName || "";
       formData.email = userData.email || "";
       formData.phone = userData.phone || "";
-      formData.birthDate = userData.birthYear + "-" + userData.birthDay || "";
+      formData.birthdate = userData.birthYear + "-" + userData.birthDay || "";
       formData.nickName = userData.nickName || "";
       formData.favoriteTeam = userData.favoriteTeam || "";
     }
@@ -181,8 +184,9 @@ const fetchUserData = async (userId) => {
 // 컴포넌트 마운트 시 쿼리 파라미터 확인 및 소셜 데이터로 폼 채우기
 onMounted(() => {
   // URL에서 user_id 파라미터 확인
-  const userId = route.query.temp_user_id;
+  const userId = route.query.tempUserId;
   if (userId) {
+    console.log(userId);
     fetchUserData(userId);
   }
 });

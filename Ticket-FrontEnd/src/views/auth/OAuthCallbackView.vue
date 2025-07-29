@@ -29,13 +29,13 @@ const handleOAuthCallback = async () => {
   try {
     // URL에서 쿼리 파라미터 파싱
     const urlParams = new URLSearchParams(window.location.search);
-    const registered = urlParams.get('registered');
+    const registered = urlParams.get('registered') || 'true';
     const redirect = urlParams.get('redirect') || '/';
     
     // 필수 파라미터 검증
-    if (registered === null) {
-      throw new Error('필수 파라미터가 누락되었습니다.');
-    }
+    // if (registered === null) {
+    //   throw new Error('필수 파라미터가 누락되었습니다.');
+    // }
     
     if (registered === 'true') {
       // HTTP-only 쿠키에 토큰이 저장되어 있으므로, 사용자 정보를 가져옴

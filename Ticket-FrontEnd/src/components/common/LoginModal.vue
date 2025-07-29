@@ -104,7 +104,7 @@ const handleNaverLogin = (e) => {
   e.preventDefault();
   const state = encodeURIComponent(window.location.pathname);
   const url = new URL(NAVER_AUTH_URL.value);
-  url.searchParams.set("state", state);
+  // url.searchParams.set("state", state);
   window.location.href = url.toString();
 };
 </script>
