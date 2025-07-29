@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ticket_backend.mapper.TransactionMapper">
+  <insert id="insertKakaoTransaction"
+    parameterType="com.ssafy.ticket_backend.model.KakaoTransaction">
+    INSERT INTO transaction_states (
+    ticket_id,
+    seller_id,
+    buyer_id,
+    transaction_status
+    ) VALUES (
+    #{kakaoPayApproveResponse.ticketId},
+    #{kakaoPayApproveResponse.sellerId},
+    #{kakaoPayApproveResponse.buyerId},
+    #{kakaoPayApproveResponse.transactionStatus}
+    )
+  </insert>
+
+  <select id="selectTicketByTicketId" parameterType="long"
+    resultType="com.ssafy.ticket_backend.model.Ticket">
+    SELECT *
+    FROM
+    tickets
+    WHERE
+    ticket_id = #{ticketId}
+  </select>
+
+  <update id="transactionComplete" parameterType="long">
+    UPDATE tickets
+    SET ticket_status = '거래 완료'
+    WHERE ticket_id = #{ticketId}
+  </update>
+</mapper>

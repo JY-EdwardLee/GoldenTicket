@@ -1,7 +1,12 @@
 package com.ssafy.ticket_backend.service;
 
+import com.ssafy.ticket_backend.dto.request.KakaoPayRequest;
 import com.ssafy.ticket_backend.dto.response.KakaoPayApproveResponse;
 import com.ssafy.ticket_backend.dto.response.KakaoPayReadyResponse;
+import com.ssafy.ticket_backend.mapper.TransactionMapper;
+import com.ssafy.ticket_backend.mapper.UserMapper;
+import com.ssafy.ticket_backend.model.KakaoTransaction;
+import com.ssafy.ticket_backend.model.Ticket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -11,6 +16,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -19,6 +25,8 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class KakaoPayService {
 
+    private final TransactionMapper transactionMapper;
+    private final UserMapper userMapper;
     @Value("${kakaopay.api-key}")
     private String apiKey;
     @Value("${kakaopay.cid}")
@@ -27,8 +35,6 @@ public class KakaoPayService {
     private String host;
     @Value("${kakaopay.ready-url}")
     private String readyUrl;
-    @Value("${kakaopay.approve-url}")
-    private String approveUrl;
     @Value("${kakaopay.base-url}")
     private String baseUrl;
     @Value("${kakaopay.cancel-url}")
@@ -41,22 +47,23 @@ public class KakaoPayService {
 
     private static final String REDIS_KEY_PREFIX = "kakaopay:order:";
 
-    public KakaoPayReadyResponse ready(String partnerOrderId, String partnerUserId, String itemName,
-        Integer quantity, Integer totalAmount) {
+    public KakaoPayReadyResponse ready(String partnerOrderId, String partnerUserId,
+        KakaoPayRequest kakaoPayRequest) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "KakaoAK " + apiKey);
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
         // The success_url needs to include the partner_order_id to retrieve context later
-        String successUrl = baseUrl + "/payment/success?partner_order_id=" + partnerOrderId;
+        String successUrl = baseUrl + "/payment/kakao/success?partner_order_id=" + partnerOrderId;
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("cid", cid);
         params.add("partner_order_id", partnerOrderId);
         params.add("partner_user_id", partnerUserId);
-        params.add("item_name", itemName);
-        params.add("quantity", String.valueOf(quantity));
-        params.add("total_amount", String.valueOf(totalAmount));
+        params.add("item_name", kakaoPayRequest.getItemName());
+        params.add("item_code", String.valueOf(kakaoPayRequest.getTicketId()));
+        params.add("quantity", String.valueOf(kakaoPayRequest.getQuantity()));
+        params.add("total_amount", String.valueOf(kakaoPayRequest.getTotalAmount()));
         params.add("tax_free_amount", "0");
         params.add("approval_url", successUrl);
         params.add("cancel_url", baseUrl + cancelUrl);
@@ -102,8 +109,8 @@ public class KakaoPayService {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 
-        KakaoPayApproveResponse response = restTemplate.postForObject(host + approveUrl, request,
-            KakaoPayApproveResponse.class);
+        KakaoPayApproveResponse response = restTemplate.postForObject(
+            "https://kapi.kakao.com/v1/payment/approve", request, KakaoPayApproveResponse.class);
 
         if (response != null) {
             // Clean up Redis
@@ -111,5 +118,25 @@ public class KakaoPayService {
         }
 
         return response;
+    }
+
+    /**
+     * 결제 정보 DB 저장
+     *
+     * @param approveResponse
+     */
+    @Transactional
+    public void insertKakaoTransaction(KakaoPayApproveResponse approveResponse) {
+        KakaoTransaction kakaoTransaction = new KakaoTransaction();
+        Ticket ticket = transactionMapper.selectTicketByTicketId(
+            Long.parseLong(approveResponse.getItem_code()));
+
+        kakaoTransaction.setBuyerId(ticket.getBuyerId());
+        kakaoTransaction.setSellerId(ticket.getSellerId());
+        kakaoTransaction.setTicketId(ticket.getTicketId());
+        kakaoTransaction.setTransactionStatus("거래 완료");
+
+        transactionMapper.insertKakaoTransaction(kakaoTransaction);  // 거래 기록 추가
+        transactionMapper.transactionComplete(ticket.getTicketId());  // 티켓의 거래 상태 변경
     }
 }
