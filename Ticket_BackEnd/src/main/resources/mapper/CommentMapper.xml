@@ -12,17 +12,32 @@
     DELETE FROM comments WHERE comment_id = #{comment_id}
   </delete>
 
+  <update id="CommentDeleteTrue" parameterType="Long">
+    UPDATE posts
+    SET is_delete = true
+    WHERE comment_id = #{commentId}
+  </update>
+
   <update id="updateComment" parameterType="CommentUpdateRequest">
     UPDATE comments
     SET content = #{commentUpdateRequest.content}
     WHERE comment_id = #{commentId}
   </update>
 
+
   <select id="getComments" parameterType="Long" resultType="CommentDetailResponse">
-    SELECT comment_id, post_id, user_id, content, created_at, updated_at
+    SELECT
+    comment_id,
+    post_id,
+    user_id,
+    content,
+    created_at,
+    updated_at
     FROM comments
     WHERE post_id = #{postId}
+    AND is_delete = false
   </select>
+
 
   <select id="selectUserIdByCommentId" parameterType="Long" resultType="Long">
     SELECT user_id
@@ -50,6 +65,23 @@
     INSERT INTO comments_like (user_id, comment_id)
     VALUES (#{userId}, #{commentId})
   </insert>
+
+  <update id="minusLike">
+    UPDATE comments
+    SET like_count = like_count - 1
+    WHERE comment_id = #{commentId}
+  </update>
+
+  <delete id="deletePostLike">
+    DELETE FROM comments_like
+    WHERE user_id = #{userId} AND comment_id = #{commentId}
+  </delete>
+
+
+  <select id="selectCommentLike" parameterType="Long" resultType="Long">
+    SELECT like_count FROM comments
+    WHERE comment_id = #{commentId}
+  </select>
 </mapper>
 
 

@@ -45,10 +45,6 @@ public class BoardController {
         @RequestParam(required = false) String title,
         @RequestParam(required = false) String content,
         @RequestParam(required = false) String writer) {
-        System.out.println("boardType = " + boardType);
-        System.out.println("title = " + title);
-        System.out.println("content = " + content);
-        System.out.println("writer = " + writer);
         List<PostAllResponse> list = boardService.searchPostBy(boardType, title, content, writer);
 
         return ResponseEntity.status(HttpStatus.OK).body(list);

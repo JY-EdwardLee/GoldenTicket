@@ -19,6 +19,7 @@
     FROM posts p
     JOIN users u ON p.user_id = u.user_id
     WHERE p.board_id = #{boardType, typeHandler=com.ssafy.ticket_backend.handler.BoardTypeHandler}
+    and p.is_delete = false
     ORDER BY p.created_at DESC
   </select>
 
@@ -38,6 +39,7 @@
     FROM posts p
     JOIN users u ON p.user_id = u.user_id
     WHERE p.board_id = #{boardType, typeHandler=com.ssafy.ticket_backend.handler.BoardTypeHandler}
+    and p.is_delete = false
     <if test="title != null and title != ''">
       AND p.title LIKE CONCAT('%', #{title}, '%')
     </if>

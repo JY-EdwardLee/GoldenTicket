@@ -32,9 +32,7 @@ http.interceptors.response.use(
     const originalRequest = error.config;
     
     // 401 에러이고, 토큰 갱신이 필요한 경우
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      
+    if (error.response?.status === 401 && error.response.data.message === 'Access token expired') {
       try {
         // 리프레시 토큰으로 새로운 액세스 토큰 요청
         const { data } = await axios.post(API_CONFIG.AUTH.REFRESH, {}, {
@@ -50,7 +48,7 @@ http.interceptors.response.use(
       } catch (refreshError) {
         // 리프레시 토큰도 만료된 경우 로그아웃 처리
         localStorage.removeItem('accessToken');
-        window.location.href = '/login';
+        localStorage.removeItem('refreshToken');
         return Promise.reject(refreshError);
       }
     }

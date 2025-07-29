@@ -34,15 +34,25 @@ export const useAuthStore = defineStore('auth', () => {
     setRedirectPath(null);
     return path;
   }
-
-  function logout() {
+// In auth.js
+async function logout() {
+  try {
+    // First, clear the local state
     token.value = null;
     user.value = null;
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
-    router.push('/login');
+    
+    // Then make the API call to invalidate the session
+    await axios.get(API_CONFIG.AUTH.LOGOUT, { withCredentials: true });
+  } catch (error) {
+    console.error('Logout error:', error);
+    // Even if the API call fails, we still want to clear the local state
+  } finally {
+    // Always redirect to home after logout
+    router.push('/');
   }
-
+}
   // 토큰 검증 함수 (필요한 경우 API 호출로 검증 가능)
   async function verifyToken() {
     if (!token.value) return false;
