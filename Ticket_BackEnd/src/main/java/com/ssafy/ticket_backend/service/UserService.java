@@ -34,6 +34,9 @@ public interface UserService {
     // 액세스 토큰 만료 시, 리프레시 토큰으로 새 토큰 재발급 요청
     JwtTokenResponse refreshToken(String refreshToken);
 
+    // 로그인 된 유저 정보 반환
+    LoginUserResponse getLoginUser(String accessToken);
+
     // 마이페이지
     MyPageResponse getMyPage(String email);
 
