@@ -5,7 +5,9 @@ import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
+import com.ssafy.ticket_backend.dto.response.PostAllResponse;
 import com.ssafy.ticket_backend.model.User;
+import java.util.List;
 
 
 public interface UserService {
@@ -39,6 +41,18 @@ public interface UserService {
 
     // 내 정보 수정
     void patchMyPage(String email, UserPatchRequest userPatchRequest);
+
+    // 나의 응모
+    void selectApplicationsByUser(String email);
+
+    // 나의 결제
+    void selectPaymentsByUser(String email);
+
+    // 나의 티켓
+    void selectTicketsByUser(String email);
+
+    // 나의 게시글
+    List<PostAllResponse> selectPostsByUser(String email);
 
     // 테스트 용도
     JwtTokenResponse testUser();

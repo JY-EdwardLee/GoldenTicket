@@ -5,10 +5,12 @@ import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
+import com.ssafy.ticket_backend.dto.response.PostAllResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.UserService;
 import com.ssafy.ticket_backend.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -248,6 +250,57 @@ public class UserController {
         userService.patchMyPage(userDetails.getUsername(), userPatchRequest);
 
         return ResponseEntity.accepted().build();
+    }
+
+    /**
+     * 나의 응모 목록
+     *
+     * @param userDetails
+     * @return
+     */
+    @GetMapping("/me/applications")
+    public ResponseEntity<MyPageResponse> getMyApplications(
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.selectApplicationsByUser(userDetails.getUsername());
+        return null;  // TODO
+    }
+
+    /**
+     * 나의 결제
+     *
+     * @param userDetails
+     * @return
+     */
+    @GetMapping("/me/payments")
+    public ResponseEntity<MyPageResponse> getMyPayments(
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.selectPaymentsByUser(userDetails.getUsername());
+        return null; // TODO
+    }
+
+    /**
+     * 나의 티켓 목록 //TODO DB 수정해야함!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * @return
+     */
+    @GetMapping("/me/tickets")
+    public ResponseEntity<MyPageResponse> getMyTickets(
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.selectTicketsByUser(userDetails.getUsername());
+        return null;
+    }
+
+    /**
+     * 나의 게시글 목록
+     *
+     * @return
+     */
+    @GetMapping("/me/posts")
+    public ResponseEntity<List<PostAllResponse>> getMyPosts(
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<PostAllResponse> postAllResponses = userService.selectPostsByUser(
+            userDetails.getUsername());
+        return ResponseEntity.ok(postAllResponses);
     }
 
     // 로그인 - 테스트 용 로그인이므로 실제 서비스에서는 사용 금지
