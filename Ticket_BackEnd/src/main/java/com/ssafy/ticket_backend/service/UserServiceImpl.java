@@ -357,6 +357,15 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * 회원 탈퇴
+     * @param email
+     * */
+    @Override
+    public void deleteUserByEmail(String email) {
+        userMapper.deleteUserByEmail(email);
+    }
+
+    /**
      * 테스트 용도. 실제 서비스에서 사용 금지
      *
      * @return

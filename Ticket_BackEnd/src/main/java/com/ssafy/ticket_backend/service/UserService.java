@@ -38,12 +38,14 @@ public interface UserService {
     // 액세스 토큰 만료 시, 리프레시 토큰으로 새 토큰 재발급 요청
     JwtTokenResponse refreshToken(String refreshToken);
 
-
     // 마이페이지
     MyPageResponse getMyPage(String email);
 
     // 내 정보 수정
     void patchMyPage(String email, UserPatchRequest userPatchRequest);
+
+    // 회원 탈퇴
+    void deleteUserByEmail(String email);
 
     // 테스트 용도
     JwtTokenResponse testUser();

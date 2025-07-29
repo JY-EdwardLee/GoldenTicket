@@ -36,4 +36,7 @@ public interface UserMapper {
 
   // S3 사용자 프로필 이미지 key 조회
   String getUserProfileImageKey(Long userId);
+
+  // 회원 탈퇴
+  void deleteUserByEmail(String email);
 }

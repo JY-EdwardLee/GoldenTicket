@@ -113,4 +113,11 @@
     FROM users
     WHERE user_id = #{userId}
   </select>
+
+  <!-- 회원 탈퇴 -->
+  <delete id="deleteUserByEmail" parameterType="string">
+    DELETE
+    FROM users
+    WHERE email = #{email}
+  </delete>
 </mapper>
