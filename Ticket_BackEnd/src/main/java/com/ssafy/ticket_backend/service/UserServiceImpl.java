@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
     private static final String TEMP_USER_KEY_PREFIX = "tempUser:";
 
 
@@ -140,7 +140,8 @@ public class UserServiceImpl implements UserService {
             // 회원가입 창에 필요한 데이터(카카오에서 받아온) 전달
             // 시연을 위해 더미데이터 강제 추가
             oauthUserResponse = OAuthUserResponse.builder().isRegistered(false).email(email)
-                .name("시니어 이름").nickname(nickname).birthday("05-22").birthyear("1960").gender("M")
+                .userName("시니어 이름").nickName(nickname).birthDay("05-22").birthYear("1960")
+                .gender("M")
                 .socialProvider("KAKAO").profilePhotoUrl(profilePhotoUrl).build();
             return oauthUserResponse;
         }
@@ -212,8 +213,8 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             // 회원가입 창에 필요한 데이터(카카오에서 받아온) 전달
             oauthUserResponse = OAuthUserResponse.builder().isRegistered(false).email(email)
-                .nickname(nickname).socialProvider("NAVER").gender(gender).birthday(birthday)
-                .birthyear(birthyear).profilePhotoUrl(profilePhotoUrl).name(name).build();
+                .nickName(nickname).socialProvider("NAVER").gender(gender).birthDay(birthday)
+                .birthYear(birthyear).profilePhotoUrl(profilePhotoUrl).userName(name).build();
             return oauthUserResponse;
         }
 
