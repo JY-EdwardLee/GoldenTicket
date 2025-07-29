@@ -13,7 +13,7 @@ public class Ticket {
     String seat;
     Long sellerId;
     Long buyerId;
-    String transactionState;
+    LocalDateTime transactionDate;
     LocalDateTime matchedDate;
     String image;
 }

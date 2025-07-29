@@ -18,6 +18,7 @@ import com.ssafy.ticket_backend.exception.PostUpdateException;
 import com.ssafy.ticket_backend.exception.PostUpdateFailException;
 import com.ssafy.ticket_backend.exception.PostUserNotFoundException;
 import com.ssafy.ticket_backend.exception.PresignedUrlGenerationException;
+import com.ssafy.ticket_backend.exception.TicketTransferException;
 import com.ssafy.ticket_backend.exception.UserSignupException;
 import com.ssafy.ticket_backend.model.BoardType;
 import org.springframework.http.HttpStatus;
@@ -180,6 +181,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(GameApplyException.class)
     public ResponseEntity<ErrorResponse> handleGameApplyException(GameApplyException e) {
         ErrorResponse response = new ErrorResponse("GAME_APPLY_ERROR", e.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    // Ticket
+    @ExceptionHandler(TicketTransferException.class)
+    public ResponseEntity<ErrorResponse> handleTicketTransferException(TicketTransferException e) {
+        ErrorResponse response = new ErrorResponse("TICKET_TRANSFER_ERROR", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
