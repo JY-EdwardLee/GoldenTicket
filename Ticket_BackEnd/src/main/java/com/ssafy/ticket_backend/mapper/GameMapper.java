@@ -1,5 +1,6 @@
 package com.ssafy.ticket_backend.mapper;
 
+import com.ssafy.ticket_backend.model.BaseballTeams;
 import com.ssafy.ticket_backend.model.Game;
 import java.time.LocalDate;
 import java.util.List;
@@ -8,6 +9,9 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface GameMapper {
+
+    // 날짜와 팀으로 게임 검색
+    List<Game> selectGameByDateAndTeam(@Param("gameDate") LocalDate date, BaseballTeams team);
 
     // 게임 검색
     Game selectGameByGameId(@Param("gameId") Long gameId);
