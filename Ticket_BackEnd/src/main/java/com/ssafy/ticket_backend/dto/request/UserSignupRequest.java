@@ -16,7 +16,7 @@ public class UserSignupRequest {
     private UserGender gender;
     private String userName;
     private UserRole userRole;
-    private String nickname;
+    private String nickName;
     private String birthDate;      // String으로 받고, LocalDate로 변환해도 됨
     private String phoneNumber;
     private BaseballTeams myTeam;
