@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -208,10 +209,18 @@ public class UserController {
      * @return 새롭게 발급된 JwtTokenResponse
      */
     @PostMapping("/auth/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
-        String refreshToken = request.get("refreshToken");
-        JwtTokenResponse response = userService.refreshToken(refreshToken);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+        String refreshToken = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("refresh_token".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        JwtTokenResponse jwtTokenResponse = userService.refreshToken(refreshToken);
+        return ResponseEntity.ok(jwtTokenResponse);
     }
 
     /**
@@ -297,6 +306,19 @@ public class UserController {
         userService.patchMyPage(userDetails.getUsername(), userPatchRequest);
 
         return ResponseEntity.accepted().build();
+    }
+
+    /**
+     * 회원 탈퇴
+     *
+     * @param email
+     * @return
+     */
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        String email = userDetails.getUsername();
+        userService.deleteUserByEmail(email);
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
 
     // 로그인 - 테스트 용 로그인이므로 실제 서비스에서는 사용 금지

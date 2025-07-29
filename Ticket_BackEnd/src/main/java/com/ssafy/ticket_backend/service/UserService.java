@@ -29,6 +29,9 @@ public interface UserService {
     // Redis에 임시 저장된 유저 정보 조회
     OAuthUserResponse getTempUserInfo(String tempUserId);
 
+    // 로그인 된 유저 정보 반환
+    LoginUserResponse getLoginUser(String accessToken);
+
     // 로그아웃
     void logout(String token);
 
@@ -43,6 +46,9 @@ public interface UserService {
 
     // 내 정보 수정
     void patchMyPage(String email, UserPatchRequest userPatchRequest);
+
+    // 회원 탈퇴
+    void deleteUserByEmail(String email);
 
     // 테스트 용도
     JwtTokenResponse testUser();

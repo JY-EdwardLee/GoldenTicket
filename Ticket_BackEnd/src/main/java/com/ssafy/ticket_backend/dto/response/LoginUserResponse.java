@@ -21,3 +21,4 @@ public class LoginUserResponse {
     private String gender;
     private String birthDate;
 }
+
