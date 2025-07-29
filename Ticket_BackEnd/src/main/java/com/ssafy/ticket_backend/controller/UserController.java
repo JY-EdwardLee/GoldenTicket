@@ -183,7 +183,7 @@ public class UserController {
         }
 
         LoginUserResponse loginUserResponse = userService.getLoginUser(accessToken);
-
+        loginUserResponse.setAccessToken(accessToken);
         return ResponseEntity.ok(loginUserResponse);
     }
 
