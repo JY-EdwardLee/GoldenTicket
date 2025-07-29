@@ -10,7 +10,11 @@
       <li><router-link to="/guide">FAQ</router-link></li>
     </ul>
     <div class="auth-links">
-      <a href="#" @click.prevent="openLoginModal">로그인 또는 회원가입</a>
+      <template v-if="isLoggedIn">
+        <router-link to="/mypage" class="auth-link">마이페이지</router-link>
+        <a href="#" @click.prevent="handleLogout" class="auth-link">로그아웃</a>
+      </template>
+      <a v-else href="#" @click.prevent="openLoginModal" class="auth-link">로그인 또는 회원가입</a>
     </div>
   </nav>
 
@@ -19,13 +23,23 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import LoginModal from "./LoginModal.vue";
+import { useAuthStore } from "@/stores/auth";
 
-// 로그인 모달 상태 관리
-const isLoginModalVisible = ref(false);
+// 스토어 및 라우터 초기화
+const authStore = useAuthStore();
 const router = useRouter();
+
+// 로그인 상태 관리
+const isLoggedIn = ref(false);
+const isLoginModalVisible = ref(false);
+
+// 컴포넌트 마운트 시 로그인 상태 확인
+onMounted(() => {
+  isLoggedIn.value = authStore.isAuthenticated;
+});
 // 로그인 모달 열기
 const openLoginModal = () => {
   isLoginModalVisible.value = true;
@@ -34,6 +48,13 @@ const openLoginModal = () => {
 // 로그인 모달 닫기
 const closeLoginModal = () => {
   isLoginModalVisible.value = false;
+};
+
+// 로그아웃 처리
+const handleLogout = () => {
+  authStore.logout();
+  isLoggedIn.value = false;
+  router.push('/');
 };
 </script>
 
@@ -72,6 +93,11 @@ const closeLoginModal = () => {
 .nav-links a.router-link-active {
   color: #ffb43a;
 }
+.auth-links {
+  display: flex;
+  gap: 16px;
+}
+
 .auth-links a {
   color: #888;
   text-decoration: none;

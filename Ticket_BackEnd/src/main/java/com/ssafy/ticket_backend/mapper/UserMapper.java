@@ -2,6 +2,7 @@ package com.ssafy.ticket_backend.mapper;
 
 import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
+import com.ssafy.ticket_backend.dto.response.LoginUserResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.PostUserResponse;
 import com.ssafy.ticket_backend.model.User;
@@ -32,4 +33,6 @@ public interface UserMapper {
 
   // S3 사용자 프로필 이미지 key 조회
   String getUserProfileImageKey(Long userId);
+
+  LoginUserResponse selectLogingUserByEmail(String email);
 }

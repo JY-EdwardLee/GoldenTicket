@@ -9,10 +9,12 @@ const AUTH = {
   SIGNUP: `${API_BASE_URL}/users/signup`,
   REFRESH: `${API_BASE_URL}/users/auth/refresh`,
   LOGOUT: `${API_BASE_URL}/users/logout`,
+  TEMP_USER: `${API_BASE_URL}/users/auth/temp-user`,
 };
 
 // 사용자 관련 엔드포인트
 const USER = {
+  LOGIN: `${API_BASE_URL}/users/login-user`,
   PROFILE: `${API_BASE_URL}/users/me`,
   UPDATE_PROFILE: `${API_BASE_URL}/users/me`,
   CHANGE_PASSWORD: `${API_BASE_URL}/users/me/password`,

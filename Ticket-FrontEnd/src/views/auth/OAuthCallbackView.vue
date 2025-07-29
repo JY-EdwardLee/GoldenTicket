@@ -29,20 +29,14 @@ const handleOAuthCallback = async () => {
   try {
     // URL에서 쿼리 파라미터 파싱
     const urlParams = new URLSearchParams(window.location.search);
-    const registered = urlParams.get('registered') || 'true';
     const redirect = urlParams.get('redirect') || '/';
-    
+    const token = authStore.getToken();
+
     // 필수 파라미터 검증
-    // if (registered === null) {
-    //   throw new Error('필수 파라미터가 누락되었습니다.');
-    // }
     
-    if (registered === 'true') {
-      // HTTP-only 쿠키에 토큰이 저장되어 있으므로, 사용자 정보를 가져옴
-      try {
-        // 백엔드에서 사용자 정보 요청 (withCredentials로 쿠키 포함)
-        const response = await axios.get(`${API_CONFIG.USER.PROFILE}`, {
-          withCredentials: true
+    try {
+      const response = await axios.get(`${API_CONFIG.USER.LOGIN}`, {
+          withCredentials: true,
         });
 
         if (response.data && response.data.id) {
@@ -55,10 +49,9 @@ const handleOAuthCallback = async () => {
         } else {
           throw new Error('사용자 정보를 가져오는데 실패했습니다.');
         }
-      } catch (err) {
-        console.error('사용자 정보 요청 실패:', err);
-        throw new Error('로그인은 성공했지만 사용자 정보를 가져오는데 실패했습니다.');
-      }
+    } catch (err) {
+      console.error('사용자 정보 요청 실패:', err);
+      throw new Error('로그인은 성공했지만 사용자 정보를 가져오는데 실패했습니다.');
     }
   } catch (err) {
     console.error('소셜 로그인 처리 중 오류 발생:', err);
@@ -70,7 +63,7 @@ const handleOAuthCallback = async () => {
 
 const handleRetry = () => {
   // 에러 발생 시 로그인 페이지로 이동
-  router.push('/login');
+  router.push('/');
 };
 
 onMounted(() => {

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 // 로그인한 유저 응답  DTO
-public class OAuthUserResponse {
+public class LoginUserResponse {
 
     private String userName;
     private String email;

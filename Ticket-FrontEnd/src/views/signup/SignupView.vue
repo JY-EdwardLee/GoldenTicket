@@ -148,7 +148,7 @@ const handleSubmit = async () => {
       }
       
       // 리다이렉트 처리
-      const redirectPath = route.query.redirect || '/';
+      const redirectPath = 'oauth/callback?registered=true&redirect=/';
       await router.push(redirectPath);
     }
   } catch (error) {
@@ -161,7 +161,7 @@ const handleSubmit = async () => {
 const fetchUserData = async (userId) => {
   try {
     const response = await axios.get(
-      `http://localhost:8080/users/auth/temp-user`,
+      `${API_CONFIG.USER.TEMP_USER}`,
       {
         params: { tempUserId: userId },
       }

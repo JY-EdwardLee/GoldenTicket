@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
+import com.ssafy.ticket_backend.dto.response.LoginUserResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.exception.UserSignupException;
@@ -285,7 +286,7 @@ public class UserServiceImpl implements UserService {
         String email = jwtUtil.getUserEmail(accessToken);
 
         // 3. 이메일로 사용자 조회
-        LoginUserResponse loginUserResponse = userMapper.selectLogingUserByEmail(email)
+        LoginUserResponse loginUserResponse = userMapper.selectLogingUserByEmail(email);
 
             return loginUserResponse;
     }
