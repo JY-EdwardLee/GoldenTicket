@@ -5,7 +5,8 @@ import HomeView from '../views/home/HomeView.vue';
 import TicketTransferView from '../views/ticket/transfer/TicketTransferView.vue';
 import TicketApplicationView from '../views/ticket/apply/TicketApplicationView.vue';
 import BulletinView from '../views/board/BulletinView.vue';
-import GuideView from '../views/userguide/GuideView.vue';
+import BulletinCreateView from '../views/board/BulletinCreateView.vue';
+import GuideView from '../views/user/GuideView.vue';
 import MyPageView from '../views/user/MyPageView.vue';
 import UserInfoComponent from '../components/user/UserInfoComponent.vue';
 import MyApplicationsComponent from '../components/user/MyApplicationsComponent.vue';
@@ -34,8 +35,7 @@ const routes = [
 
   // 게시판 페이지
   { path: '/bulletin', name: 'Bulletin', component: BulletinView },
-
-  // 사용자 가이드 페이지
+  { path: '/bulletin/create', name: 'BulletinCreate', component: BulletinCreateView },
   { path: '/guide', name: 'Guide', component: GuideView },
   { 
     path: '/mypage', 
