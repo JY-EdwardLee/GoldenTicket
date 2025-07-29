@@ -16,6 +16,7 @@
       </template>
       <a v-else href="#" @click.prevent="openLoginModal" class="auth-link">로그인 또는 회원가입</a>
     </div>
+    
   </nav>
 
   <!-- 로그인 모달 -->
