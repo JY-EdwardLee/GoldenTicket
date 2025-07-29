@@ -6,7 +6,7 @@ import TicketTransferView from '../views/ticket/transfer/TicketTransferView.vue'
 import TicketApplicationView from '../views/ticket/apply/TicketApplicationView.vue';
 import BulletinView from '../views/board/BulletinView.vue';
 import BulletinCreateView from '../views/board/BulletinCreateView.vue';
-import GuideView from '../views/user/GuideView.vue';
+import GuideView from '../views/userguide/GuideView.vue';
 import MyPageView from '../views/user/MyPageView.vue';
 import UserInfoComponent from '../components/user/UserInfoComponent.vue';
 import MyApplicationsComponent from '../components/user/MyApplicationsComponent.vue';
