@@ -175,7 +175,7 @@ public class UserController {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("accessToken".equals(cookie.getName())) {
+                if ("access_token".equals(cookie.getName())) {
                     accessToken = cookie.getValue();
                     break;
                 }
@@ -183,7 +183,7 @@ public class UserController {
         }
 
         LoginUserResponse loginUserResponse = userService.getLoginUser(accessToken);
-
+        loginUserResponse.setAccessToken(accessToken);
         return ResponseEntity.ok(loginUserResponse);
     }
 
