@@ -312,14 +312,14 @@ public class UserController {
     /**
      * 회원 탈퇴
      *
-     * @param
+     * @param email
      * @return
      */
-    @DeleteMapping("/")
+    @DeleteMapping("/delete")
     public ResponseEntity<?> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         String email = userDetails.getUsername();
         userService.deleteUserByEmail(email);
-        return ResponseEntity.ok("회원 탈퇴가 되었습니다.");
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
 
     // 로그인 - 테스트 용 로그인이므로 실제 서비스에서는 사용 금지
