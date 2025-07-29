@@ -84,4 +84,18 @@
     gender = #{userPatchRequest.gender}
     WHERE email = #{email}
   </update>
+
+  <!-- S3 사용자 프로필 이미지 업데이트 -->
+  <update id="updateUserProfileImage">
+    UPDATE users
+    SET profile_photo_url = #{imageKey}
+    WHERE user_id = #{userId}
+  </update>
+
+  <!-- S3 사용자 프로필 이미지 key 조회 -->
+  <select id="getUserProfileImageKey" parameterType="Long" resultType="String">
+    SELECT profile_photo_url
+    FROM users
+    WHERE user_id = #{userId}
+  </select>
 </mapper>

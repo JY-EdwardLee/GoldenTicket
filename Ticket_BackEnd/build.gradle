@@ -44,6 +44,8 @@ dependencies {
     testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.4'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // AWS S3
+    implementation 'com.amazonaws:aws-java-sdk-s3:1.12.700'
 }
 
 tasks.named('test') {
