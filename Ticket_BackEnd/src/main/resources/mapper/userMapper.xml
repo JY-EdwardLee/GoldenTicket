@@ -53,6 +53,21 @@
     )
   </insert>
 
+  <!-- 이메일로 유저 조회 (로그인 유저 조회 용) -->
+  <select id="selectLogingUserByEmail"
+    resultType="com.ssafy.ticket_backend.dto.response.LoginUserResponse">
+    SELECT
+    user_name,
+    email,
+    nick_name,
+    social_provider,
+    profile_photo_url,
+    gender,
+    birth_date
+    FROM users
+    WHERE email = #{email}
+  </select>
+
 
   <!-- 마이페이지 -->
   <select id="getMyPageByEmail" resultType="com.ssafy.ticket_backend.dto.response.MyPageResponse">
@@ -98,4 +113,11 @@
     FROM users
     WHERE user_id = #{userId}
   </select>
+
+  <!-- 회원 탈퇴 -->
+  <delete id="deleteUserByEmail" parameterType="string">
+    DELETE
+    FROM users
+    WHERE email = #{email}
+  </delete>
 </mapper>

@@ -3,6 +3,7 @@ package com.ssafy.ticket_backend.service;
 import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
+import com.ssafy.ticket_backend.dto.response.LoginUserResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
@@ -30,6 +31,9 @@ public interface UserService {
     // Redis에 임시 저장된 유저 정보 조회
     OAuthUserResponse getTempUserInfo(String tempUserId);
 
+    // 로그인 된 유저 정보 반환
+    LoginUserResponse getLoginUser(String accessToken);
+
     // 로그아웃
     void logout(String token);
 
@@ -41,6 +45,9 @@ public interface UserService {
 
     // 내 정보 수정
     void patchMyPage(String email, UserPatchRequest userPatchRequest);
+
+    // 회원 탈퇴
+    void deleteUserByEmail(String email);
 
     // 나의 응모
     void selectApplicationsByUser(String email);
