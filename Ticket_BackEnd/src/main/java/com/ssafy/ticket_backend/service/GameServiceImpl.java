@@ -20,13 +20,13 @@ public class GameServiceImpl implements GameService {
     /**
      * 티켓 응모 함수
      *
-     * @param username 사용자 이메일
-     * @param gameId   응모할 게임의 id
+     * @param userEmail 사용자 이메일
+     * @param gameId    응모할 게임의 id
      */
     @Override
-    public void applicationGame(String username, Long gameId) {
+    public void applicationGame(String userEmail, Long gameId) {
         try {
-            User user = userMapper.selectUserByEmail(username);
+            User user = userMapper.selectUserByEmail(userEmail);
 
             // 정지된 사용자라면
             if (user.getIsBlock()) {
@@ -35,9 +35,8 @@ public class GameServiceImpl implements GameService {
 
             // 게임이 있는지 확인
             Game game = gameMapper.selectGameByGameId(gameId);
-
             if (game == null) {
-                throw new GameApplyException("게임이 존재하지 않습니다.");
+                throw new GameApplyException("응모하려는 게임이 존재하지 않습니다.");
             }
 
             // 해당 날짜에 있는 게임 중 하나에 응모하였는지 확인
@@ -50,9 +49,32 @@ public class GameServiceImpl implements GameService {
 
             // 게임 응모
             gameMapper.insertWaitlist(user.getUserId(), game.getGameId());
+        } catch (GameApplyException e) {
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
             throw new GameApplyException("응모간 오류가 발생하였습니다.");
+        }
+    }
+
+    @Override
+    public void cancelGame(String userEmail, Long gameId) {
+        try {
+            User user = userMapper.selectUserByEmail(userEmail);
+
+            // 게임이 있는지 확인
+            if (gameMapper.selectGameByGameId(gameId) == null) {
+                throw new GameApplyException("취소하려는 게임이 존재하지 않습니다.");
+            }
+
+            // 게임 취소
+            if (gameMapper.deleteWaitlist(user.getUserId(), gameId) == 0) {
+                throw new GameApplyException("취소 할 대기열이 없습니다.");
+            }
+        } catch (GameApplyException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new GameApplyException("취소간 오류가 발생하였습니다.");
         }
     }
 }

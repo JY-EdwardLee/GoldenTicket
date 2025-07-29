@@ -21,4 +21,7 @@ public interface GameMapper {
 
     // 대기열 추가
     void insertWaitlist(@Param("userId") Long userId, @Param("gameId") Long gameId);
+
+    // 대기열 삭제
+    int deleteWaitlist(@Param("userId") Long userId, @Param("gameId") Long gameId);
 }

@@ -32,4 +32,11 @@
     VALUES (#{userId}, #{gameId})
   </insert>
 
+  <!-- 대기열 삭제 -->
+  <delete id="deleteWaitlist">
+    DELETE FROM waitlists
+    WHERE user_id = #{userId}
+    AND game_id = #{gameId}
+  </delete>
+
 </mapper>
