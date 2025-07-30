@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ticket_backend.mapper.TicketMapper">
+  <select id="selectTicketByTicketId" parameterType="long"
+    resultType="com.ssafy.ticket_backend.model.Ticket">
+    SELECT
+    *
+    FROM tickets
+    WHERE ticket_id = #{ticketId}
+  </select>
+
+  <!-- 티켓 정보 업데이트 -->
+  <update id="updateTicket" parameterType="com.ssafy.ticket_backend.mapper.TicketMapper">
+    UPDATE tickets
+    SET
+    ticket_status = #{ticketStatus},
+    price = #{price},
+    game_id = #{gameId},
+    seat = #{seat},
+    seller_id = #{sellerId},
+    buyer_id = #{buyerId},
+    transaction_date = #{transactionDate},
+    matched_date = #{matchedDate},
+    image = #{image}
+    WHERE ticket_id = #{ticketId}
+  </update>
+
+  <!-- 다른 플랫폼에서 티켓 가져오기 -->
+  <select id="selectTicketsFromOtherPlatform"
+    resultType="com.ssafy.ticket_backend.model.OtherPlatformTicket">
+    SELECT *
+    FROM otherPlatform
+    WHERE user_email = #{userEmail}
+    AND platform = #{platform}
+    AND game_datetime > now()
+  </select>
+
+  <insert id="insertTicket" parameterType="com.ssafy.ticket_backend.model.Ticket"
+    useGeneratedKeys="true" keyProperty="ticketId">
+    INSERT INTO ticket ( ticket_status,
+    price,
+    game_id,
+    seat,
+    seller_id,
+    buyer_id,
+    transaction_date,
+    matched_date,
+    image
+    ) VALUES (
+    #{ticketStatus},
+    #{price},
+    #{gameId},
+    #{seat},
+    #{sellerId},
+    #{buyerId},
+    #{transactionDate},
+    #{matchedDate},
+    #{image}
+    )
+  </insert>
+
+  <select id="selectTicketByGame" resultType="boolean">
+    SELECT EXISTS (
+    SELECT 1
+    FROM tickets
+    WHERE game_id = #{gameId}
+    AND seat = #{seat}
+    AND seller_id = #{userId}
+    )
+  </select>
+
+  <select id="selectTicketsByUserId" resultType="com.ssafy.ticket_backend.model.Ticket">
+    SELECT
+    ticket_id,
+    ticket_status,
+    price,
+    game_id,
+    seat,
+    seller_id,
+    buyer_id,
+    transaction_date,
+    matched_date,
+    image
+    FROM tickets
+    WHERE buyer_id = #{userId}
+  </select>
+
+  <select id="selectWaitListByGameId" resultType="int">
+    SELECT COUNT(*)
+    FROM waitlists
+    WHERE game_id = #{gameId}
+  </select>
+</mapper>

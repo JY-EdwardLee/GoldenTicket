@@ -116,8 +116,8 @@
 
   <!-- 회원 탈퇴 -->
   <delete id="deleteUserByEmail" parameterType="string">
-    DELETE
-    FROM users
+    UPDATE users
+    SET is_delete = TRUE
     WHERE email = #{email}
   </delete>
 </mapper>
