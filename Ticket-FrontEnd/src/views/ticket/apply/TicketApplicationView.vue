@@ -191,9 +191,9 @@ async function selectDate(date) {
 async function handleApplyClick(game) {
   selectedGame.value = game;
   step.value = 3;
-  console.log()
+  console.log('응모 클릭됨됨')
   try {
-    const { data } = await axios.post(`/games/${game.gameId}/applications`);
+    const { data } = await http.post(`/games/${game.gameId}/applications`);
     console.log('응모 결과:', data);
   } catch (error) {
     console.error('응모 요청 실패:', error);

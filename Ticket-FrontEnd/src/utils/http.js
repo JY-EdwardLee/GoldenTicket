@@ -13,6 +13,7 @@ const http = axios.create({
 // 요청 인터셉터
 http.interceptors.request.use(
   (config) => {
+    console.log('요청 인터셉터');
     // 요청 전에 토큰이 있으면 헤더에 추가
     const token = localStorage.getItem('accessToken');
     if (token) {
@@ -30,10 +31,12 @@ http.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
+    console.log('에러메시지', error);
     // 401 에러이고, 토큰 갱신이 필요한 경우
     if (error.response?.status === 401 && error.response.data.message === 'Access token expired') {
+      console.log('Access token expired');
       try {
+        console.log('리프레시 토큰으로 새로운 액세스 토큰 요청');
         // 리프레시 토큰으로 새로운 액세스 토큰 요청
         const { data } = await axios.post(API_CONFIG.AUTH.REFRESH, {}, {
           withCredentials: true,
@@ -46,6 +49,7 @@ http.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return http(originalRequest);
       } catch (refreshError) {
+        console.log('리프레시 토큰도 만료된 경우 로그아웃 처리');
         // 리프레시 토큰도 만료된 경우 로그아웃 처리
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
