@@ -55,7 +55,7 @@ public class UserController {
     public RedirectView redirectToKakaoLogin() {
         String kakaoAuthUrl =
             "https://kauth.kakao.com/oauth/authorize" + "?client_id=" + KakaoRestApiKey
-                + "&redirect_uri=" + "http://i13a109.p.ssafy.io:8080/ "
+                + "&redirect_uri=" + "http://i13a109.p.ssafy.io:8080/"
                 + "/users/auth/kakao/callback"
                 + "&response_type=code";
 
@@ -74,7 +74,7 @@ public class UserController {
         String naverAuthUrl =
             "https://nid.naver.com/oauth2.0/authorize" + "?response_type=code" + "&client_id="
                 + NaverClientId + "&redirect_uri="
-                + "http://localhost:8080/users/auth/naver/callback" + "&state=" + state;
+                + "http://i13a109.p.ssafy.io:8080/users/auth/naver/callback" + "&state=" + state;
 
         return new RedirectView(naverAuthUrl);
     }
