@@ -6,14 +6,15 @@ import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.LoginUserResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
+import com.ssafy.ticket_backend.dto.response.PostAllResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.UserService;
 import com.ssafy.ticket_backend.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -230,26 +231,18 @@ public class UserController {
      * @return JwtTokenResponse 토큰 응답
      */
     @PostMapping("/signup")
-    public ResponseEntity<JwtTokenResponse> signup(
-        @RequestBody UserSignupRequest userSignupRequest, HttpServletResponse response) {
+    public ResponseEntity<JwtTokenResponse> signup(@RequestBody UserSignupRequest userSignupRequest,
+        HttpServletResponse response) {
         JwtTokenResponse tokens = userService.signup(userSignupRequest);
         // accessToken 쿠키 설정
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
-            .httpOnly(true)
-            .secure(true)
-            .sameSite("Strict")
-            .path("/")
-            .maxAge(Duration.ofMinutes(30))
+            .httpOnly(true).secure(true).sameSite("Strict").path("/").maxAge(Duration.ofMinutes(30))
             .build();
 
         // refreshToken 쿠키 설정
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
-            .httpOnly(true)
-            .secure(true)
-            .sameSite("Strict")
-            .path("/auth/refresh")
-            .maxAge(Duration.ofDays(14))
-            .build();
+            .httpOnly(true).secure(true).sameSite("Strict").path("/auth/refresh")
+            .maxAge(Duration.ofDays(14)).build();
 
         response.addHeader("Set-Cookie", accessCookie.toString());
         response.addHeader("Set-Cookie", refreshCookie.toString());
@@ -292,7 +285,6 @@ public class UserController {
         return ResponseEntity.ok().body(myPage);
     }
 
-
     /**
      * 내 정보 수정
      *
@@ -311,7 +303,7 @@ public class UserController {
     /**
      * 회원 탈퇴
      *
-     * @param email
+     * @param userDetails
      * @return
      */
     @DeleteMapping("/delete")
@@ -319,6 +311,57 @@ public class UserController {
         String email = userDetails.getUsername();
         userService.deleteUserByEmail(email);
         return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+    }
+
+    /**
+     * 나의 응모 목록
+     *
+     * @param userDetails
+     * @return
+     */
+    @GetMapping("/me/applications")
+    public ResponseEntity<MyPageResponse> getMyApplications(
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.selectApplicationsByUser(userDetails.getUsername());
+        return null;  // TODO
+    }
+
+    /**
+     * 나의 결제
+     *
+     * @param userDetails
+     * @return
+     */
+    @GetMapping("/me/payments")
+    public ResponseEntity<MyPageResponse> getMyPayments(
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.selectPaymentsByUser(userDetails.getUsername());
+        return null; // TODO
+    }
+
+    /**
+     * 나의 티켓 목록 //TODO DB 수정해야함!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * @return
+     */
+    @GetMapping("/me/tickets")
+    public ResponseEntity<MyPageResponse> getMyTickets(
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.selectTicketsByUser(userDetails.getUsername());
+        return null;
+    }
+
+    /**
+     * 나의 게시글 목록
+     *
+     * @return
+     */
+    @GetMapping("/me/posts")
+    public ResponseEntity<List<PostAllResponse>> getMyPosts(
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<PostAllResponse> postAllResponses = userService.selectPostsByUser(
+            userDetails.getUsername());
+        return ResponseEntity.ok(postAllResponses);
     }
 
     // 로그인 - 테스트 용 로그인이므로 실제 서비스에서는 사용 금지

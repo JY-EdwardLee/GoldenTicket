@@ -6,10 +6,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class S3SaverRequest {
+public class S3DownloadRequest {
 
-  String key;
   S3Type type;
   Long refId;
-
 }

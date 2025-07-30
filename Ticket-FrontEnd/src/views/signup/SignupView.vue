@@ -2,7 +2,7 @@
   <div class="signup-container">
     <div class="signup-header">
       <h1>회원가입</h1>
-      <p>티켓 예매 서비스를 이용하시려면<br>회원가입이 필요해요</p>
+      <p>티켓 예매 서비스를 이용하시려면<br />회원가입이 필요해요</p>
     </div>
 
     <form @submit.prevent="handleSubmit" class="signup-form">
@@ -14,7 +14,7 @@
           v-model="formData.userName"
           placeholder="이름을 입력해주세요"
           required
-        >
+        />
       </div>
 
       <div class="form-group">
@@ -25,7 +25,7 @@
           v-model="formData.email"
           placeholder="이메일을 입력해주세요"
           required
-        >
+        />
       </div>
 
       <div class="form-group">
@@ -36,7 +36,7 @@
           v-model="formData.phone"
           placeholder="전화번호를 입력해주세요 (예: 010-1234-5678)"
           required
-        >
+        />
       </div>
 
       <div class="form-group">
@@ -46,7 +46,7 @@
           id="birthdate"
           v-model="formData.birthdate"
           required
-        >
+        />
       </div>
 
       <div class="form-group">
@@ -57,13 +57,15 @@
           v-model="formData.nickName"
           placeholder="닉네임을 입력해주세요"
           required
-        >
+        />
       </div>
 
       <div class="form-group">
         <label for="favoriteTeam">선호구단</label>
         <select id="favoriteTeam" v-model="formData.favoriteTeam" required>
-          <option value="" disabled selected>선호하는 구단을 선택해주세요</option>
+          <option value="" disabled selected>
+            선호하는 구단을 선택해주세요
+          </option>
           <option value="LG_TWINS">LG 트윈스</option>
           <option value="KT_WIZ">KT 위즈</option>
           <option value="SSG_LANDERS">SSG 랜더스</option>
@@ -79,14 +81,16 @@
 
       <div class="form-footer">
         <button type="submit" class="submit-btn">가입하기</button>
-        <p class="login-link">이미 계정이 있으신가요? <router-link to="/login">로그인</router-link></p>
+        <p class="login-link">
+          이미 계정이 있으신가요? <router-link to="/login">로그인</router-link>
+        </p>
       </div>
     </form>
   </div>
 </template>
 
 <script setup>
-import { reactive, onMounted } from "vue";
+import { reactive, onMounted, computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { API_CONFIG } from "@/config/api.config.js";
@@ -96,8 +100,7 @@ const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 
-const isSocialSignup = reactive(false);
-const socialProvider = reactive('');
+const socialProvider = ref("");
 
 const formData = reactive({
   email: "",
@@ -108,7 +111,12 @@ const formData = reactive({
   gender: "",
   birthdate: "",
 });
-
+const NAVER_AUTH_URL = computed(() => {
+  return `${API_CONFIG.AUTH.NAVER}`;
+});
+const KAKAO_AUTH_URL = computed(() => {
+  return `${API_CONFIG.AUTH.KAKAO}`;
+});
 const handleSubmit = async () => {
   try {
     const userData = {
@@ -124,40 +132,50 @@ const handleSubmit = async () => {
     console.log(userData);
     // 회원가입 API 호출
     const response = await fetch(`${API_CONFIG.AUTH.SIGNUP}`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(userData),
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || '회원가입에 실패했습니다.');
+      throw new Error(errorData.message || "회원가입에 실패했습니다.");
     }
-      // 리다이렉트 처리
-    if (socialProvider.value === 'kakao'){
-      const url = API_CONFIG.AUTH.KAKAO
+
+    // const data = await response.json();
+
+    // 회원가입 성공 시 토큰 저장 및 메인 페이지로 이동
+    // if (data.accessToken) {
+    //   authStore.setToken(data.accessToken);
+
+    //   // 사용자 정보 저장 (있는 경우)
+    //   if (data.user) {
+    //     authStore.setUser(data.user);
+    // }
+
+    // 리다이렉트 처리
+    console.log(userData);
+    if (socialProvider.value === "KAKAO") {
+      const url = new URL(KAKAO_AUTH_URL.value);
       window.location.href = url.toString();
-    } else if (socialProvider.value === 'naver') {
-      const url = API_CONFIG.AUTH.NAVER
+    } else if (socialProvider.value === "NAVER") {
+      const url = new URL(NAVER_AUTH_URL.value);
       window.location.href = url.toString();
     }
   } catch (error) {
-    console.error('회원가입 오류:', error);
-    alert(error.message || '회원가입 중 오류가 발생했습니다.');
+    console.error("회원가입 오류:", error);
+    alert(error.message || "회원가입 중 오류가 발생했습니다.");
   }
 };
 
 // 사용자 데이터 가져오기
 const fetchUserData = async (userId) => {
   try {
-    const response = await axios.get(
-      `${API_CONFIG.AUTH.TEMP_USER}`,
-      {
-        params: { tempUserId: userId },
-      }
-    );
+    const response = await axios.get(`${API_CONFIG.AUTH.TEMP_USER}`, {
+      params: { tempUserId: userId },
+    });
     if (response.data) {
       const userData = response.data;
       formData.userName = userData.userName || "";
@@ -166,9 +184,10 @@ const fetchUserData = async (userId) => {
       formData.birthdate = userData.birthYear + "-" + userData.birthDay || "";
       formData.nickName = userData.nickName || "";
       formData.favoriteTeam = userData.favoriteTeam || "";
+      socialProvider.value = userData.socialProvider;
     }
   } catch (error) {
-    console.error('사용자 데이터를 불러오는 중 오류가 발생했습니다:', error);
+    console.error("사용자 데이터를 불러오는 중 오류가 발생했습니다:", error);
   }
 };
 
@@ -187,7 +206,8 @@ onMounted(() => {
   max-width: 400px;
   margin: 0 auto;
   padding: 40px 20px;
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, sans-serif;
 }
 
 .signup-header {

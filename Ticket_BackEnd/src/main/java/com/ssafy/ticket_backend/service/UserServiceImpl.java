@@ -8,10 +8,14 @@ import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.LoginUserResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
+import com.ssafy.ticket_backend.dto.response.PostAllResponse;
 import com.ssafy.ticket_backend.exception.UserSignupException;
+import com.ssafy.ticket_backend.mapper.PostMapper;
+import com.ssafy.ticket_backend.mapper.TransactionMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.User;
 import com.ssafy.ticket_backend.util.JwtUtil;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +39,8 @@ import org.springframework.web.client.RestTemplate;
 public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
+    private final TransactionMapper transactionMapper;
+    private final PostMapper postMapper;
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
@@ -142,8 +148,7 @@ public class UserServiceImpl implements UserService {
             // 시연을 위해 더미데이터 강제 추가
             oauthUserResponse = OAuthUserResponse.builder().isRegistered(false).email(email)
                 .userName("시니어 이름").nickName(nickname).birthDay("05-22").birthYear("1960")
-                .gender("M")
-                .socialProvider("KAKAO").profilePhotoUrl(profilePhotoUrl).build();
+                .gender("M").socialProvider("KAKAO").profilePhotoUrl(profilePhotoUrl).build();
             return oauthUserResponse;
         }
 
@@ -355,6 +360,32 @@ public class UserServiceImpl implements UserService {
     @Override
     public void patchMyPage(String email, UserPatchRequest userPatchRequest) {
         userMapper.updateUser(email, userPatchRequest);
+    }
+
+    @Override
+    public void selectApplicationsByUser(String email) {
+        User user = userMapper.selectUserByEmail(email);
+
+
+    }
+
+    @Override
+    public void selectPaymentsByUser(String email) {
+        User user = userMapper.selectUserByEmail(email);
+
+        transactionMapper.selectTransactionByUserId(user.getUserId());
+    }
+
+    @Override
+    public void selectTicketsByUser(String email) {
+
+    }
+
+    @Override
+    public List<PostAllResponse> selectPostsByUser(String email) {
+        User user = userMapper.selectUserByEmail(email);
+
+        return postMapper.selectPostsByUserId(user.getUserId());
     }
 
     /**
