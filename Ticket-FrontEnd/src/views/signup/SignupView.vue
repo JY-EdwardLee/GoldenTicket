@@ -135,18 +135,6 @@ const handleSubmit = async () => {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.message || '회원가입에 실패했습니다.');
     }
-
-    // const data = await response.json();
-    
-    // 회원가입 성공 시 토큰 저장 및 메인 페이지로 이동
-    // if (data.accessToken) {
-    //   authStore.setToken(data.accessToken);
-      
-    //   // 사용자 정보 저장 (있는 경우)
-    //   if (data.user) {
-    //     authStore.setUser(data.user);
-      // }
-      
       // 리다이렉트 처리
     if (socialProvider.value === 'kakao'){
       const url = API_CONFIG.AUTH.KAKAO
@@ -155,7 +143,6 @@ const handleSubmit = async () => {
       const url = API_CONFIG.AUTH.NAVER
       window.location.href = url.toString();
     }
-    // }
   } catch (error) {
     console.error('회원가입 오류:', error);
     alert(error.message || '회원가입 중 오류가 발생했습니다.');
