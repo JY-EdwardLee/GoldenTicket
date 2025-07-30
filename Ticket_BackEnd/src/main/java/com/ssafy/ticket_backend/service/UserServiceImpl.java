@@ -281,7 +281,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     *  로그인 한 유저 정보 조회
+     * 로그인 한 유저 정보 조회
      *
      * @param 엑세스 토큰
      * @return LoginUserResponse
@@ -389,8 +389,9 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 회원 탈퇴
+     *
      * @param email
-     * */
+     */
     @Override
     public void deleteUserByEmail(String email) {
         userMapper.deleteUserByEmail(email);
