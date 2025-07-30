@@ -83,7 +83,7 @@
     matched_date,
     image
     FROM tickets
-    WHERE buyer_id = #{userId}
+    WHERE seller_id = #{userId} or buyer_id = #{userId}
   </select>
 
   <select id="selectWaitListByGameId" resultType="int">

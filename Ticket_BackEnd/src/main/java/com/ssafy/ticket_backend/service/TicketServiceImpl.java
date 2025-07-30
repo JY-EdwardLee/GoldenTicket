@@ -1,7 +1,7 @@
 package com.ssafy.ticket_backend.service;
 
+import com.ssafy.ticket_backend.dto.response.GameResponse;
 import com.ssafy.ticket_backend.dto.response.TicketResponse;
-import com.ssafy.ticket_backend.dto.response.TicketResponse.GameResponse;
 import com.ssafy.ticket_backend.exception.TicketTransferException;
 import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.TicketMapper;
@@ -50,12 +50,7 @@ public class TicketServiceImpl implements TicketService {
 
             ticketMapper.updateTicket(ticket);
 
-            TicketResponse ticketResponse = new TicketResponse();
-
-            ticketResponse.setTicketId(ticket.getTicketId());
-            ticketResponse.setStatus(ticket.getTicketStatus());
-            ticketResponse.setPrice(ticket.getPrice());
-            ticketResponse.setSeat(ticket.getSeat());
+            TicketResponse ticketResponse = new TicketResponse(ticket);
             ticketResponse.setGame(
                 new GameResponse(game.getGameId(), game.getGameDateTime(), game.getHomeTeam(),
                     game.getAwayTeam()));

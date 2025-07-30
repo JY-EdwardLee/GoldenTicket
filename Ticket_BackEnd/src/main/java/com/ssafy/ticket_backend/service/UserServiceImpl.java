@@ -10,6 +10,7 @@ import com.ssafy.ticket_backend.dto.response.MyApplicationResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
+import com.ssafy.ticket_backend.dto.response.TicketResponse;
 import com.ssafy.ticket_backend.exception.UserSignupException;
 import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.PostMapper;
@@ -17,6 +18,7 @@ import com.ssafy.ticket_backend.mapper.TicketMapper;
 import com.ssafy.ticket_backend.mapper.TransactionMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.Game;
+import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.User;
 import com.ssafy.ticket_backend.model.Waitlist;
 import com.ssafy.ticket_backend.util.JwtUtil;
@@ -379,9 +381,10 @@ public class UserServiceImpl implements UserService {
         for (Waitlist waitlist : waitlists) {
             Game game = gameMapper.selectGameByGameId(waitlist.getGameId());
 
-            MyApplicationResponse myApplicationResponse = new MyApplicationResponse();
+            MyApplicationResponse myApplicationResponse = new MyApplicationResponse(
+                waitlist.getId(), game.toGameResponse());
 
-
+            myApplicationResponses.add(myApplicationResponse);
         }
 
         return myApplicationResponses;
@@ -396,7 +399,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void selectTicketsByUser(String email) {
+        User user = userMapper.selectUserByEmail(email);
+        List<TicketResponse> ticketResponses = new ArrayList<>();
 
+        for (Ticket ticket : ticketMapper.selectTicketsByUserId(user.getUserId())) {
+            TicketResponse ticketResponse = new TicketResponse(ticket);
+
+            Game game = gameMapper.selectGameByGameId(ticket.getGameId());
+
+            ticketResponse.setGame(game.toGameResponse());
+
+        }
     }
 
     @Override
