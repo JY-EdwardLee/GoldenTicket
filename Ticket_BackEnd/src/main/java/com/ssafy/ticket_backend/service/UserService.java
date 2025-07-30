@@ -4,6 +4,7 @@ import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.LoginUserResponse;
+import com.ssafy.ticket_backend.dto.response.MyApplicationResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
@@ -50,7 +51,7 @@ public interface UserService {
     void deleteUserByEmail(String email);
 
     // 나의 응모
-    void selectApplicationsByUser(String email);
+    List<MyApplicationResponse> selectApplicationsByUser(String email);
 
     // 나의 결제
     void selectPaymentsByUser(String email);

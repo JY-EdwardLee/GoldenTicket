@@ -2,6 +2,7 @@ package com.ssafy.ticket_backend.mapper;
 
 import com.ssafy.ticket_backend.model.OtherPlatformTicket;
 import com.ssafy.ticket_backend.model.Ticket;
+import com.ssafy.ticket_backend.model.Waitlist;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -24,4 +25,6 @@ public interface TicketMapper {
     List<Ticket> selectTicketsByUserId(Long userId);
 
     int selectWaitListByGameId(Long gameId);
+
+    List<Waitlist> selectWaitlistByUserId(@Param("userId") Long userId);
 }
