@@ -3,10 +3,29 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ssafy.ticket_backend.mapper.PostMapper">
 
-  <insert id="insertPost" parameterType="PostRequest">
+  <insert id="insertPost"
+    parameterType="PostRequest"
+    useGeneratedKeys="true"
+    keyProperty="postId"
+    keyColumn="post_id">
     INSERT INTO posts (user_id, title, content, board_id, image_url)
     VALUES (#{userId}, #{title}, #{content}, #{boardType}, #{imageUrl})
   </insert>
+
+
+  <!-- 이미지 URL 업데이트 -->
+  <update id="updatePostImage">
+    UPDATE posts
+    SET image_url = #{imageUrl}
+    WHERE post_id = #{postId}
+  </update>
+
+  <!-- 게시글 이미지 키 조회 -->
+  <select id="getPostImageKey" parameterType="Long" resultType="String">
+    SELECT image_url
+    FROM posts
+    WHERE post_id = #{postId}
+  </select>
 
   <select id="selectPostById" parameterType="Long" resultType="PostDetailResponse">
     SELECT

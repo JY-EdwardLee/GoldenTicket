@@ -11,7 +11,13 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface PostMapper {
 
-    int insertPost(PostRequest postRequest);
+    Long insertPost(PostRequest postRequest); // PostgreSQL에서 생성된 postId를 직접 반환
+
+    // 이미지 URL 업데이트 메서드 추가
+    int updatePostImage(@Param("postId") Long postId, @Param("imageUrl") String imageUrl);
+
+    // 게시글 이미지 키 조회 메서드 추가
+    String getPostImageKey(@Param("postId") Long postId);
 
     PostDetailResponse selectPostById(Long postId);
 

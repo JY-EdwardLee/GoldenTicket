@@ -18,7 +18,8 @@ public class PostDetailResponse {
     private int viewCount;
     private String title;
     private String content;
-    private String imageUrl;
+    private String imageUrl;  // 작성자 프로필 이미지 URL
+    private String postImageUrl;  // 게시글 이미지 URL
 
     private int likeCount;
 

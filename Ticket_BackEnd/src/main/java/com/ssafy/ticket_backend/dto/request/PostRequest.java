@@ -10,9 +10,11 @@ import lombok.ToString;
 @ToString
 public class PostRequest {
 
-    Long userId;
-    String title;
-    String content;
-    BoardType boardType;
-    String imageUrl;
+  Long postId;        // insert 이후 기본키 반환값으로 받아와야해서 추가
+
+  Long userId;
+  String title;
+  String content;
+  BoardType boardType;
+  String imageUrl;
 }
