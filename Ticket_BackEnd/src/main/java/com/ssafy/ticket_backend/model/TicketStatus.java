@@ -1,5 +1,8 @@
 package com.ssafy.ticket_backend.model;
 
+/**
+ * 티켓의 상태
+ */
 public enum TicketStatus {
     BEFORE_ASSIGNMENT,  // 양도 전
     BEING_ASSIGNMENT,  // 양도 중
