@@ -133,6 +133,7 @@ public class JwtUtil {
             return true;
         } catch (ExpiredJwtException e) {
             System.out.println("토큰이 만료됨: " + e.getMessage());
+            throw e;
         } catch (UnsupportedJwtException e) {
             System.out.println("지원하지 않는 토큰: " + e.getMessage());
         } catch (MalformedJwtException e) {
