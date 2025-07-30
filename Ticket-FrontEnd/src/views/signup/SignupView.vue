@@ -119,7 +119,7 @@ const handleSubmit = async () => {
       phoneNumber: formData.phone,
       myTeam: formData.favoriteTeam,
       gender: formData.gender || "MALE", // 임시값 또는 선택 옵션으로 구현 필요
-      SocialProvider: isSocialSignup.value ? socialProvider.value : 'kakao',
+      socialProvider: socialProvider.value,
     };
     console.log(userData);
     // 회원가입 API 호출
@@ -136,21 +136,26 @@ const handleSubmit = async () => {
       throw new Error(errorData.message || '회원가입에 실패했습니다.');
     }
 
-    const data = await response.json();
+    // const data = await response.json();
     
     // 회원가입 성공 시 토큰 저장 및 메인 페이지로 이동
-    if (data.accessToken) {
-      authStore.setToken(data.accessToken);
+    // if (data.accessToken) {
+    //   authStore.setToken(data.accessToken);
       
-      // 사용자 정보 저장 (있는 경우)
-      if (data.user) {
-        authStore.setUser(data.user);
-      }
+    //   // 사용자 정보 저장 (있는 경우)
+    //   if (data.user) {
+    //     authStore.setUser(data.user);
+      // }
       
       // 리다이렉트 처리
-      const redirectPath = 'oauth/callback?registered=true&redirect=/';
-      await router.push(redirectPath);
+    if (socialProvider.value === 'kakao'){
+      const url = API_CONFIG.AUTH.KAKAO
+      window.location.href = url.toString();
+    } else if (socialProvider.value === 'naver') {
+      const url = API_CONFIG.AUTH.NAVER
+      window.location.href = url.toString();
     }
+    // }
   } catch (error) {
     console.error('회원가입 오류:', error);
     alert(error.message || '회원가입 중 오류가 발생했습니다.');
