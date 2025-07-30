@@ -379,9 +379,10 @@ public class UserServiceImpl implements UserService {
         for (Waitlist waitlist : waitlists) {
             Game game = gameMapper.selectGameByGameId(waitlist.getGameId());
 
-            MyApplicationResponse myApplicationResponse = new MyApplicationResponse();
+            MyApplicationResponse myApplicationResponse = new MyApplicationResponse(
+                waitlist.getId(), game.toGameResponse());
 
-
+            myApplicationResponses.add(myApplicationResponse);
         }
 
         return myApplicationResponses;

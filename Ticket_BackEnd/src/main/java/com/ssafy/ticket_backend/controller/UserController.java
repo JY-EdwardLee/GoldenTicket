@@ -4,6 +4,7 @@ import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.LoginUserResponse;
+import com.ssafy.ticket_backend.dto.response.MyApplicationResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
@@ -56,8 +57,7 @@ public class UserController {
         String kakaoAuthUrl =
             "https://kauth.kakao.com/oauth/authorize" + "?client_id=" + KakaoRestApiKey
                 + "&redirect_uri=" + "http://i13a109.p.ssafy.io:8080/"
-                + "/users/auth/kakao/callback"
-                + "&response_type=code";
+                + "/users/auth/kakao/callback" + "&response_type=code";
 
         return new RedirectView(kakaoAuthUrl);
     }
@@ -321,10 +321,12 @@ public class UserController {
      * @return
      */
     @GetMapping("/me/applications")
-    public ResponseEntity<MyPageResponse> getMyApplications(
+    public ResponseEntity<List<MyApplicationResponse>> getMyApplications(
         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        userService.selectApplicationsByUser(userDetails.getUsername());
-        return null;  // TODO
+        List<MyApplicationResponse> myApplicationResponses = userService.selectApplicationsByUser(
+            userDetails.getUsername());
+
+        return ResponseEntity.ok(myApplicationResponses);
     }
 
     /**

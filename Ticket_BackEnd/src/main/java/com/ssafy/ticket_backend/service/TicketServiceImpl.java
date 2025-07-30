@@ -1,7 +1,7 @@
 package com.ssafy.ticket_backend.service;
 
+import com.ssafy.ticket_backend.dto.response.GameResponse;
 import com.ssafy.ticket_backend.dto.response.TicketResponse;
-import com.ssafy.ticket_backend.dto.response.TicketResponse.GameResponse;
 import com.ssafy.ticket_backend.exception.TicketTransferException;
 import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.TicketMapper;
