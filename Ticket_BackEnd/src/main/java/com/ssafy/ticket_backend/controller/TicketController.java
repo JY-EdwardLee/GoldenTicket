@@ -22,9 +22,9 @@ public class TicketController {
     /**
      * 티켓 양도
      *
-     * @param userDetails
-     * @param ticketId
-     * @return
+     * @param userDetails 사용자 정보
+     * @param ticketId    티켓의 id
+     * @return 티켓의 정보
      */
     @GetMapping("/transfer/{ticketId}")
     public ResponseEntity<TicketResponse> transferTicket(
@@ -38,7 +38,9 @@ public class TicketController {
     /**
      * 다른 플랫폼에서 티켓 가져오기
      *
-     * @return
+     * @param userDetails 사용자 정보
+     * @param platform    NOL, TICKETLINK 중 하나
+     * @return 티켓의 정보
      */
     @GetMapping("/platform/{platform}")
     public ResponseEntity<List<TicketResponse>> getTicketsFromOtherPlatform(

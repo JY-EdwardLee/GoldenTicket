@@ -102,4 +102,12 @@
     WHERE user_id = #{userId}
     ORDER BY created_at DESC
   </select>
+
+  <!-- 티켓 양도 -->
+  <update id="transferTicket">
+    UPDATE ticket
+    SET buyer_id = #{userId},
+    matched_date = NOW()
+    WHERE ticket_id = #{ticketId}
+  </update>
 </mapper>

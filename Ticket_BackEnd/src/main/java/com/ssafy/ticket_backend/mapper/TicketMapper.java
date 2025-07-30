@@ -27,4 +27,6 @@ public interface TicketMapper {
     int selectWaitListByGameId(Long gameId);
 
     List<Waitlist> selectWaitlistByUserId(@Param("userId") Long userId);
+
+    void transferTicket(@Param("ticketId") String ticketId, @Param("userId") String userId);
 }

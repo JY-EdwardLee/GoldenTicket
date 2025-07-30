@@ -8,4 +8,6 @@ public interface TicketService {
     TicketResponse transferTicket(String userEmail, Long ticketId);
 
     List<TicketResponse> getTicketsFromOtherPlatform(String userEmail, String platform);
+
+    void transferTicketToBuyer(String ticketId, String userId);
 }

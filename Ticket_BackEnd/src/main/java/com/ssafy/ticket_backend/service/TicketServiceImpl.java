@@ -116,15 +116,8 @@ public class TicketServiceImpl implements TicketService {
                 continue;
             }
 
-            TicketResponse ticketResponse = new TicketResponse();
-
-            ticketResponse.setTicketId(ticket.getTicketId());
-            ticketResponse.setStatus(ticket.getTicketStatus());
-            ticketResponse.setPrice(ticket.getPrice());
-            ticketResponse.setSeat(ticket.getSeat());
-            ticketResponse.setGame(
-                new GameResponse(game.getGameId(), game.getGameDateTime(), game.getHomeTeam(),
-                    game.getAwayTeam()));
+            TicketResponse ticketResponse = new TicketResponse(ticket);
+            ticketResponse.setGame(game.toGameResponse());
 
             ticketResponse.setWaitNumber(ticketMapper.selectWaitListByGameId(game.getGameId()));
 
@@ -132,5 +125,10 @@ public class TicketServiceImpl implements TicketService {
         }
 
         return ticketResponses;
+    }
+
+    @Override
+    public void transferTicketToBuyer(String ticketId, String userId) {
+        ticketMapper.transferTicket(ticketId, userId);
     }
 }
