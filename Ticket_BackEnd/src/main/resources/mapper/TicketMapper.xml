@@ -38,7 +38,7 @@
 
   <insert id="insertTicket" parameterType="com.ssafy.ticket_backend.model.Ticket"
     useGeneratedKeys="true" keyProperty="ticketId">
-    INSERT INTO ticket ( ticket_status,
+    INSERT INTO tickets ( ticket_status,
     price,
     game_id,
     seat,

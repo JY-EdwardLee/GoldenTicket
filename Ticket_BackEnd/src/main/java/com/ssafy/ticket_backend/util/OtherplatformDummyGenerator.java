@@ -87,7 +87,8 @@ public class OtherplatformDummyGenerator {
     private static String generateEmail(int index) {
         String name = "user" + (index + 1);
         String domain = randomFromArray(EMAIL_DOMAINS);
-        return name + "@" + domain;
+//        return name + "@" + domain;
+        return "honggildong@example.com";
     }
 
     static class Game {

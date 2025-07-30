@@ -4,7 +4,6 @@ import com.ssafy.ticket_backend.dto.response.TicketResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.TicketService;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -47,6 +46,6 @@ public class TicketController {
         List<TicketResponse> TicketResponse = ticketService.getTicketsFromOtherPlatform(
             userDetails.getUsername(), platform);
 
-        return ResponseEntity.of(Optional.ofNullable(TicketResponse));
+        return ResponseEntity.ok(TicketResponse);
     }
 }

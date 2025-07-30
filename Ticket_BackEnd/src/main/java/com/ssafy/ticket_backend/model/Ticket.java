@@ -2,8 +2,10 @@ package com.ssafy.ticket_backend.model;
 
 import java.time.LocalDateTime;
 import lombok.Data;
+import lombok.ToString;
 
 @Data
+@ToString
 public class Ticket {
 
     Long ticketId;

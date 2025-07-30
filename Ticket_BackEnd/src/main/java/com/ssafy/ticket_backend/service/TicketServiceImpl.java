@@ -75,6 +75,7 @@ public class TicketServiceImpl implements TicketService {
      * @param platform
      * @return
      */
+    @Transactional
     @Override
     public List<TicketResponse> getTicketsFromOtherPlatform(String userEmail, String platform) {
 
@@ -110,7 +111,7 @@ public class TicketServiceImpl implements TicketService {
         }
 
         List<Ticket> tickets = ticketMapper.selectTicketsByUserId(user.getUserId());
-
+        System.out.println(tickets.size() + " tickets");
         for (Ticket ticket : tickets) {
             Game game = gameMapper.selectGameByGameId(ticket.getGameId());
 
@@ -135,5 +136,10 @@ public class TicketServiceImpl implements TicketService {
         }
 
         return ticketResponses;
+    }
+
+    @Override
+    public void insertTicketsFromOtherPlatform(String userEmail, String platform) {
+
     }
 }
