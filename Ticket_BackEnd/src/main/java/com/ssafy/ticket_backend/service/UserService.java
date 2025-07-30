@@ -9,6 +9,7 @@ import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
 import com.ssafy.ticket_backend.dto.response.TicketResponse;
+import com.ssafy.ticket_backend.dto.response.TransactionResponse;
 import com.ssafy.ticket_backend.model.User;
 import java.util.List;
 
@@ -55,7 +56,7 @@ public interface UserService {
     List<MyApplicationResponse> selectApplicationsByUser(String email);
 
     // 나의 결제
-    void selectPaymentsByUser(String email);
+    List<TransactionResponse> selectBuyListByUserId(String email);
 
     // 나의 티켓
     List<TicketResponse> selectTicketsByUser(String email);

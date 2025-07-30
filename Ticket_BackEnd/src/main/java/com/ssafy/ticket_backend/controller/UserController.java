@@ -9,6 +9,7 @@ import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
 import com.ssafy.ticket_backend.dto.response.TicketResponse;
+import com.ssafy.ticket_backend.dto.response.TransactionResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.UserService;
 import com.ssafy.ticket_backend.util.JwtUtil;
@@ -338,10 +339,11 @@ public class UserController {
      * @return
      */
     @GetMapping("/me/payments")
-    public ResponseEntity<MyPageResponse> getMyPayments(
+    public ResponseEntity<List<TransactionResponse>> getMyPayments(
         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        userService.selectPaymentsByUser(userDetails.getUsername());
-        return null; // TODO
+        List<TransactionResponse> transactionResponses = userService.selectBuyListByUserId(
+            userDetails.getUsername());
+        return ResponseEntity.ok(transactionResponses);
     }
 
     /**
@@ -354,7 +356,7 @@ public class UserController {
         @AuthenticationPrincipal CustomUserDetails userDetails) {
         List<TicketResponse> ticketResponses = userService.selectTicketsByUser(
             userDetails.getUsername());
-        
+
         return ResponseEntity.ok(ticketResponses);
     }
 

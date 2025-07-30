@@ -1,8 +1,9 @@
 package com.ssafy.ticket_backend.mapper;
 
-import com.ssafy.ticket_backend.dto.response.TransactionResponse;
 import com.ssafy.ticket_backend.model.KakaoTransaction;
 import com.ssafy.ticket_backend.model.Ticket;
+import com.ssafy.ticket_backend.model.Transaction;
+import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -16,5 +17,5 @@ public interface TransactionMapper {
 
     void transactionComplete(@Param("ticketId") Long ticketId);
 
-    TransactionResponse selectTransactionByUserId(Long userId);
+    List<Transaction> selectBuyListByUserId(Long userId);
 }

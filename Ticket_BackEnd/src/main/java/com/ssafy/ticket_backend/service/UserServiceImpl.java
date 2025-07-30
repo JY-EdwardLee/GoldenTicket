@@ -11,6 +11,7 @@ import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
 import com.ssafy.ticket_backend.dto.response.TicketResponse;
+import com.ssafy.ticket_backend.dto.response.TransactionResponse;
 import com.ssafy.ticket_backend.exception.UserSignupException;
 import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.PostMapper;
@@ -19,6 +20,7 @@ import com.ssafy.ticket_backend.mapper.TransactionMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.Game;
 import com.ssafy.ticket_backend.model.Ticket;
+import com.ssafy.ticket_backend.model.Transaction;
 import com.ssafy.ticket_backend.model.User;
 import com.ssafy.ticket_backend.model.Waitlist;
 import com.ssafy.ticket_backend.util.JwtUtil;
@@ -391,10 +393,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void selectPaymentsByUser(String email) {
+    public List<TransactionResponse> selectBuyListByUserId(String email) {
         User user = userMapper.selectUserByEmail(email);
 
-        transactionMapper.selectTransactionByUserId(user.getUserId());
+        List<Transaction> transactions = transactionMapper.selectBuyListByUserId(user.getUserId());
+        List<TransactionResponse> transactionResponses = new ArrayList<>();
+
+        for (Transaction transaction : transactions) {
+            TransactionResponse transactionResponse = new TransactionResponse();
+
+            Ticket ticket = ticketMapper.selectTicketByTicketId(transaction.getTicketId());
+
+            transactionResponse.setTransactionId(transaction.getTransactionId());
+            transactionResponse.setTicket(new TicketResponse(ticket));
+        }
+
     }
 
     @Override

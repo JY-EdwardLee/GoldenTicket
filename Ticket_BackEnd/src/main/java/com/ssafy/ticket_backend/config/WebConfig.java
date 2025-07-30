@@ -15,8 +15,7 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // 모든 API 경로
                     .allowedOrigins("http://localhost:5173") // Vue dev 서버 주소
-                    .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                    .allowedHeaders("*")
+                    .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS").allowedHeaders("*")
                     .allowCredentials(true); // 필요시 쿠키 허용
             }
         };
