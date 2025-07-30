@@ -1,35 +1,46 @@
-image: node:11
+# image: node:11
 
-stages:
-  - build
-  - deploy
+# stages:
+#   - build
+#   - deploy
 
 variables:
   EC2_HOST: i13a109.p.ssafy.io
   EC2_USER: ubuntu  # 필요 시
 
-before_script:
-  - apt-get update -y && apt-get install -y openssh-client rsync
-  - eval $(ssh-agent -s)
-  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-  - mkdir -p ~/.ssh
-  - chmod 700 ~/.ssh
-  - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+# before_script:
+#   - apt-get update -y && apt-get install -y openssh-client rsync
+#   - eval $(ssh-agent -s)
+#   - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+#   - mkdir -p ~/.ssh
+#   - chmod 700 ~/.ssh
+#   - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
-build:
-  stage: build
-  script:
-    - npm install
-    - npm run build
-  artifacts:
-    paths:
-      - dist/
+# build:
+#   stage: build
+#   script:
+#     - npm install
+#     - npm run build
+#   artifacts:
+#     paths:
+#       - dist/
 
-deploy:
+# deploy:
+#   stage: deploy
+#   script:
+#     - rsync -avz --delete dist/ $EC2_USER@$EC2_HOST:/var/www/html/
+#     - ssh $EC2_USER@$EC2_HOST "sudo systemctl restart nginx"
+#   only:
+#     - master
+#     - feature/frontend-cicd  # 테스트용 브랜치 추가
+
+frontend_deploy:
+  image: node:18
   stage: deploy
   script:
-    - rsync -avz --delete dist/ $EC2_USER@$EC2_HOST:/var/www/html/
-    - ssh $EC2_USER@$EC2_HOST "sudo systemctl restart nginx"
+    - echo "🎉 Frontend pipeline test completed!"
+    - echo "Ready for actual deployment"
+  dependencies:
+    - frontend_build
   only:
-    - master
-    - feature/frontend-cicd  # 테스트용 브랜치 추가
+    - feature/frontend-cicd
