@@ -1,5 +1,6 @@
 package com.ssafy.ticket_backend.dto.response;
 
+import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.TicketStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,5 +17,12 @@ public class TicketResponse {
     private GameResponse game;  // 경기 정보
     private String seat;  // 좌석 정보
     private int waitNumber;  // 대기열 인원
-    private GameResponse gameResponse;
+
+    public TicketResponse(Ticket ticket) {
+        this.ticketId = ticket.getTicketId();
+        this.status = ticket.getTicketStatus();
+        this.price = ticket.getPrice();
+        this.seat = ticket.getSeat();
+        this.waitNumber = 0;
+    }
 }

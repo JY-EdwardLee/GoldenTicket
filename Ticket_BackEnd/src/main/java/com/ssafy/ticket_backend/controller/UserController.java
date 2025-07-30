@@ -56,8 +56,8 @@ public class UserController {
     public RedirectView redirectToKakaoLogin() {
         String kakaoAuthUrl =
             "https://kauth.kakao.com/oauth/authorize" + "?client_id=" + KakaoRestApiKey
-                + "&redirect_uri=" + "http://i13a109.p.ssafy.io:8080/"
-                + "/users/auth/kakao/callback" + "&response_type=code";
+                + "&redirect_uri=" + "http://i13a109.p.ssafy.io:8080" + "/users/auth/kakao/callback"
+                + "&response_type=code";
 
         return new RedirectView(kakaoAuthUrl);
     }
@@ -287,6 +287,19 @@ public class UserController {
     }
 
     /**
+     * 회원 탈퇴
+     *
+     * @param userDetails
+     * @return
+     */
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.deleteUserByEmail(userDetails.getUsername());
+
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+    }
+
+    /**
      * 내 정보 수정
      *
      * @param userDetails      JWT를 받아와서 사용
@@ -299,19 +312,6 @@ public class UserController {
         userService.patchMyPage(userDetails.getUsername(), userPatchRequest);
 
         return ResponseEntity.accepted().build();
-    }
-
-    /**
-     * 회원 탈퇴
-     *
-     * @param userDetails
-     * @return
-     */
-    @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        String email = userDetails.getUsername();
-        userService.deleteUserByEmail(email);
-        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
 
     /**

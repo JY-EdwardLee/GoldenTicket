@@ -50,12 +50,7 @@ public class TicketServiceImpl implements TicketService {
 
             ticketMapper.updateTicket(ticket);
 
-            TicketResponse ticketResponse = new TicketResponse();
-
-            ticketResponse.setTicketId(ticket.getTicketId());
-            ticketResponse.setStatus(ticket.getTicketStatus());
-            ticketResponse.setPrice(ticket.getPrice());
-            ticketResponse.setSeat(ticket.getSeat());
+            TicketResponse ticketResponse = new TicketResponse(ticket);
             ticketResponse.setGame(
                 new GameResponse(game.getGameId(), game.getGameDateTime(), game.getHomeTeam(),
                     game.getAwayTeam()));
