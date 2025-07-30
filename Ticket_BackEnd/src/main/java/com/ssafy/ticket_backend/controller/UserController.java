@@ -119,6 +119,9 @@ public class UserController {
         response.addHeader("Set-Cookie", accessCookie.toString());
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
+        System.out.println("accessCookie: " + accessCookie);
+        System.out.println("refreshCookie: " + refreshCookie);
+        
         System.out.println("response 헤더 찍음!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         Collection<String> headerNames = response.getHeaderNames();
         for (String headerName : headerNames) {

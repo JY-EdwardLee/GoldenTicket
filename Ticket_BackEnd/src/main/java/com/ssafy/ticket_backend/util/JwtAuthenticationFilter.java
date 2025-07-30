@@ -3,6 +3,7 @@ package com.ssafy.ticket_backend.util;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -25,6 +26,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
         FilterChain filterChain) throws ServletException, IOException {
+        System.out.println("doFilterInternal 들어감!!!!!!!!!!");
+        for (Cookie cookie : request.getCookies()) {
+            System.out.println(cookie.toString());
+        }
 
         final String authorizationHeader = request.getHeader("Authorization");
         String jwt = null;
@@ -60,9 +65,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // UserDetailsService에서 유저 정보 로드 (여기선 userId가 PK로 사용된다고 가정)
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(userEmail);
 
-            UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(userDetails, null,
-                    userDetails.getAuthorities());
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(authToken);
