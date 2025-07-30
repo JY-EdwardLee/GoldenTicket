@@ -124,7 +124,7 @@ public class UserController {
         System.out.println("response 헤더 찍음!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         Collection<String> headerNames = response.getHeaderNames();
         for (String headerName : headerNames) {
-            System.out.println(response.getHeader(headerName) + " : " + headerName);
+            System.out.println("헤더 네임 : " + headerName + "바디 : " + response.getHeader(headerName));
         }
 
         // 로그인 완료 후 프론트 리다이렉트 (인증 상태 확인 페이지)
