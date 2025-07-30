@@ -133,9 +133,4 @@ public class TicketServiceImpl implements TicketService {
 
         return ticketResponses;
     }
-
-    @Override
-    public void insertTicketsFromOtherPlatform(String userEmail, String platform) {
-
-    }
 }

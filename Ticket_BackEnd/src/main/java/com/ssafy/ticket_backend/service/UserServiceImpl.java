@@ -121,7 +121,7 @@ public class UserServiceImpl implements UserService {
         MultiValueMap<String, String> tokenParams = new LinkedMultiValueMap<>();
         tokenParams.add("grant_type", "authorization_code");
         tokenParams.add("client_id", kakaoApiKey);
-        tokenParams.add("redirect_uri", "http://localhost:8080/users/auth/kakao/callback");
+        tokenParams.add("redirect_uri", "http://i13a109.p.ssafy.io:8080/users/auth/kakao/callback");
         tokenParams.add("code", code);
 
         HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(tokenParams,
@@ -398,7 +398,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void selectTicketsByUser(String email) {
+    public List<TicketResponse> selectTicketsByUser(String email) {
         User user = userMapper.selectUserByEmail(email);
         List<TicketResponse> ticketResponses = new ArrayList<>();
 
@@ -409,7 +409,10 @@ public class UserServiceImpl implements UserService {
 
             ticketResponse.setGame(game.toGameResponse());
 
+            ticketResponses.add(ticketResponse);
         }
+
+        return ticketResponses;
     }
 
     @Override

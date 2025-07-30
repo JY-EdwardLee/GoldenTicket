@@ -8,6 +8,7 @@ import com.ssafy.ticket_backend.dto.response.MyApplicationResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
+import com.ssafy.ticket_backend.dto.response.TicketResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.UserService;
 import com.ssafy.ticket_backend.util.JwtUtil;
@@ -187,6 +188,7 @@ public class UserController {
 
         LoginUserResponse loginUserResponse = userService.getLoginUser(accessToken);
         loginUserResponse.setAccessToken(accessToken);
+
         return ResponseEntity.ok(loginUserResponse);
     }
 
@@ -343,15 +345,17 @@ public class UserController {
     }
 
     /**
-     * 나의 티켓 목록 //TODO DB 수정해야함!!!!!!!!!!!!!!!!!!!!!!
+     * 나의 티켓 목록
      *
      * @return
      */
     @GetMapping("/me/tickets")
-    public ResponseEntity<MyPageResponse> getMyTickets(
+    public ResponseEntity<List<TicketResponse>> getMyTickets(
         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        userService.selectTicketsByUser(userDetails.getUsername());
-        return null;
+        List<TicketResponse> ticketResponses = userService.selectTicketsByUser(
+            userDetails.getUsername());
+        
+        return ResponseEntity.ok(ticketResponses);
     }
 
     /**
