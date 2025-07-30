@@ -27,7 +27,7 @@ public class TicketController {
      * @param ticketId
      * @return
      */
-    @GetMapping("/{ticketId}")
+    @GetMapping("/transfer/{ticketId}")
     public ResponseEntity<TicketResponse> transferTicket(
         @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long ticketId) {
         TicketResponse ticketResponse = ticketService.transferTicket(userDetails.getUsername(),
@@ -41,7 +41,7 @@ public class TicketController {
      *
      * @return
      */
-    @GetMapping("{platform}")
+    @GetMapping("/platform/{platform}")
     public ResponseEntity<List<TicketResponse>> getTicketsFromOtherPlatform(
         @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable String platform) {
         List<TicketResponse> TicketResponse = ticketService.getTicketsFromOtherPlatform(

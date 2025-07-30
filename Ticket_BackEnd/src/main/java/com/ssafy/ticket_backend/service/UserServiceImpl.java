@@ -6,15 +6,21 @@ import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.LoginUserResponse;
+import com.ssafy.ticket_backend.dto.response.MyApplicationResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
 import com.ssafy.ticket_backend.exception.UserSignupException;
+import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.PostMapper;
+import com.ssafy.ticket_backend.mapper.TicketMapper;
 import com.ssafy.ticket_backend.mapper.TransactionMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
+import com.ssafy.ticket_backend.model.Game;
 import com.ssafy.ticket_backend.model.User;
+import com.ssafy.ticket_backend.model.Waitlist;
 import com.ssafy.ticket_backend.util.JwtUtil;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -41,11 +47,13 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final TransactionMapper transactionMapper;
     private final PostMapper postMapper;
+    private final TicketMapper ticketMapper;
+    private final ObjectMapper objectMapper;
+    private final GameMapper gameMapper;
+
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
-    private final ObjectMapper objectMapper;
     private static final String TEMP_USER_KEY_PREFIX = "tempUser:";
-
 
     // 카카오 api 키
     @Value("${kakao.rest.api.key}")
@@ -281,10 +289,10 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 로그인 한 유저 정보 조회
+     * 로그인 한 유저의 정보 조회
      *
-     * @param 엑세스 토큰
-     * @return LoginUserResponse
+     * @param accessToken
+     * @return
      */
     @Override
     public LoginUserResponse getLoginUser(String accessToken) {
@@ -362,10 +370,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void selectApplicationsByUser(String email) {
+    public List<MyApplicationResponse> selectApplicationsByUser(String email) {
         User user = userMapper.selectUserByEmail(email);
 
+        List<Waitlist> waitlists = ticketMapper.selectWaitlistByUserId(user.getUserId());
+        List<MyApplicationResponse> myApplicationResponses = new ArrayList<>();
 
+        for (Waitlist waitlist : waitlists) {
+            Game game = gameMapper.selectGameByGameId(waitlist.getGameId());
+
+            MyApplicationResponse myApplicationResponse = new MyApplicationResponse();
+
+
+        }
+
+        return myApplicationResponses;
     }
 
     @Override

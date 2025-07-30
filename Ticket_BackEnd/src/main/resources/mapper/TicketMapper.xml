@@ -30,7 +30,7 @@
   <select id="selectTicketsFromOtherPlatform"
     resultType="com.ssafy.ticket_backend.model.OtherPlatformTicket">
     SELECT *
-    FROM otherPlatform
+    FROM other_platform
     WHERE user_email = #{userEmail}
     AND platform = #{platform}
     AND game_datetime > now()
@@ -90,5 +90,16 @@
     SELECT COUNT(*)
     FROM waitlists
     WHERE game_id = #{gameId}
+  </select>
+
+  <select id="selectWaitlistByUserId" resultType="com.ssafy.ticket_backend.model.Waitlist">
+    SELECT
+    waitlist_id AS id,
+    user_id AS userId,
+    game_id AS gameId,
+    created_at AS createdAt
+    FROM waitlists
+    WHERE user_id = #{userId}
+    ORDER BY created_at DESC
   </select>
 </mapper>
