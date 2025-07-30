@@ -17,6 +17,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -115,9 +116,16 @@ public class UserController {
                 tokens.getRefreshToken()).httpOnly(true).secure(false).path("/").sameSite("None")
             .maxAge(7 * 24 * 60 * 60) // 7일
             .build();
-
         response.addHeader("Set-Cookie", accessCookie.toString());
         response.addHeader("Set-Cookie", refreshCookie.toString());
+
+        response.addHeader("Authorization", "Bearer " + tokens.getAccessToken());
+
+        System.out.println("response 헤더 찍음!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        Collection<String> headerNames = response.getHeaderNames();
+        for (String headerName : headerNames) {
+            System.out.println(response.getHeader(headerName) + " : " + headerName);
+        }
 
         // 로그인 완료 후 프론트 리다이렉트 (인증 상태 확인 페이지)
         return ResponseEntity.status(HttpStatus.FOUND)
