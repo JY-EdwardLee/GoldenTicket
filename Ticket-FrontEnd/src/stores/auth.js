@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
+import { API_CONFIG } from '@/config/api.config';
 
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
@@ -44,7 +46,7 @@ async function logout() {
     localStorage.removeItem('user');
     
     // Then make the API call to invalidate the session
-    await axios.get(API_CONFIG.AUTH.LOGOUT, { withCredentials: true });
+    await axios.post(API_CONFIG.AUTH.LOGOUT, { withCredentials: true });
   } catch (error) {
     console.error('Logout error:', error);
     // Even if the API call fails, we still want to clear the local state

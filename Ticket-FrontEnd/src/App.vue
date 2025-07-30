@@ -8,6 +8,7 @@ const { isDeleteUserModalVisible, closeDeleteUserModal, handleDeleteUser } = use
 </script>
 
 <template>
+  <!-- Deployed via GitLab CI/CD at 2025-07-30 -->
   <DefaultLayout>
     <router-view />
     

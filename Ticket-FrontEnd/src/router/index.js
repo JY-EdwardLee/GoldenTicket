@@ -13,9 +13,12 @@ import MyTicketsComponent from '../components/user/MyTicketsComponent.vue';
 import MyPostsComponent from '../components/user/MyPostsComponent.vue';
 import PurchaseHistoryComponent from '../components/user/PurchaseHistoryComponent.vue';
 import PurchaseDetailComponent from '../components/user/PurchaseDetailComponent.vue';
-// Lazy load views for better performance
+import PaymentView from '../views/payment/PaymentView.vue';
+
+//  Lazy load views for better performance
 const SignupView = () => import('@/views/signup/SignupView.vue');
 const OAuthCallbackView = () => import('@/views/auth/OAuthCallbackView.vue');
+
 
 const routes = [
   // 메인 페이지
@@ -37,6 +40,10 @@ const routes = [
 
   // 사용자 가이드 페이지
   { path: '/guide', name: 'Guide', component: GuideView },
+
+  // 결제 페이지
+  { path: '/payment', name: 'Payment', component: PaymentView },
+  
   { 
     path: '/mypage', 
     name: 'MyPage', 
@@ -49,8 +56,8 @@ const routes = [
       { path: 'purchase', name: 'PurchaseHistory', component: PurchaseHistoryComponent },
       { path: 'purchase/:id', name: 'PurchaseDetail', component: PurchaseDetailComponent }
     ]
-  }
-];
+  },
+  ];
 
 const router = createRouter({
   history: createWebHistory(),
@@ -71,6 +78,7 @@ const router = createRouter({
     return savedPosition || { top: 0 };
   }
 });
+
 
 // 네비게이션 가드 설정
 router.beforeEach(async (to, from, next) => {

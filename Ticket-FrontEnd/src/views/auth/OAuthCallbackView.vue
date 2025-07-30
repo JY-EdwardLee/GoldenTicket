@@ -17,6 +17,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import axios from 'axios';
 import { API_CONFIG } from '@/config/api.config';
+import http from '@/utils/http';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -35,7 +36,7 @@ const handleOAuthCallback = async () => {
     // 필수 파라미터 검증
     
     try {
-      const response = await axios.get(`${API_CONFIG.USER.LOGIN}`, {
+      const response = await http.get(`${API_CONFIG.USER.LOGIN}`, {
           withCredentials: true,
         });
 
@@ -67,8 +68,8 @@ const handleRetry = () => {
   router.push('/');
 };
 
-onMounted(() => {
-  handleOAuthCallback();
+onMounted(() => { 
+    handleOAuthCallback();
 });
 </script>
 
