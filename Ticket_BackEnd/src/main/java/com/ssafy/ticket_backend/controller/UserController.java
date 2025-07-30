@@ -100,7 +100,7 @@ public class UserController {
 
             // 2) 회원가입 페이지로 리다이렉트하면서 tempUserId 전달
             return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http://localhost:5173/signup?tempUserId=" + tempUserId)
+                .header("Location", "http://i13a109.p.ssafy.io/signup?tempUserId=" + tempUserId)
                 .build();
         }
 
@@ -109,11 +109,11 @@ public class UserController {
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
             .httpOnly(true).secure(false) // 배포시 true로 변경
-            .path("/").sameSite("None").maxAge(60 * 60) // 1시간
+            .path("/").sameSite("Lax").maxAge(60 * 60) // 1시간
             .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token",
-                tokens.getRefreshToken()).httpOnly(true).secure(false).path("/").sameSite("None")
+                tokens.getRefreshToken()).httpOnly(true).secure(false).path("/").sameSite("Lax")
             .maxAge(7 * 24 * 60 * 60) // 7일
             .build();
         response.addHeader("Set-Cookie", accessCookie.toString());
@@ -130,7 +130,7 @@ public class UserController {
 
         // 로그인 완료 후 프론트 리다이렉트 (인증 상태 확인 페이지)
         return ResponseEntity.status(HttpStatus.FOUND)
-            .header("Location", "http://localhost:5173/oauth/callback").build();
+            .header("Location", "http://i13a109.p.ssafy.io/oauth/callback").build();
     }
 
     /**
@@ -152,7 +152,7 @@ public class UserController {
 
             // 2. 회원가입 페이지로 리다이렉트 + tempUserId 쿼리파라미터로 전달
             return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http://localhost:5173/signup?tempUserId=" + tempUserId)
+                .header("Location", "http://i13a109.p.ssafy.io/signup?tempUserId=" + tempUserId)
                 .build();
         }
 
@@ -161,11 +161,11 @@ public class UserController {
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
             .httpOnly(true).secure(false) // 배포 시 true
-            .path("/").sameSite("None").maxAge(60 * 60) // 1시간
+            .path("/").sameSite("Lax").maxAge(60 * 60) // 1시간
             .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token",
-                tokens.getRefreshToken()).httpOnly(true).secure(false).path("/").sameSite("None")
+                tokens.getRefreshToken()).httpOnly(true).secure(false).path("/").sameSite("Lax")
             .maxAge(7 * 24 * 60 * 60) // 7일
             .build();
 
@@ -174,7 +174,7 @@ public class UserController {
 
         // 로그인 성공 후 프론트엔드로 리다이렉트
         return ResponseEntity.status(HttpStatus.FOUND)
-            .header("Location", "http://localhost:5173/oauth/callback").build();
+            .header("Location", "http://i13a109.p.ssafy.io/oauth/callback").build();
     }
 
     /**
@@ -249,12 +249,12 @@ public class UserController {
         JwtTokenResponse tokens = userService.signup(userSignupRequest);
         // accessToken 쿠키 설정
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
-            .httpOnly(true).secure(false).sameSite("None").path("/").maxAge(Duration.ofMinutes(30))
+            .httpOnly(true).secure(false).sameSite("Lax").path("/").maxAge(Duration.ofMinutes(30))
             .build();
 
         // refreshToken 쿠키 설정
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
-            .httpOnly(true).secure(false).sameSite("None").path("/auth/refresh")
+            .httpOnly(true).secure(false).sameSite("Lax").path("/auth/refresh")
             .maxAge(Duration.ofDays(14)).build();
 
         response.addHeader("Set-Cookie", accessCookie.toString());
