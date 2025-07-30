@@ -4,9 +4,9 @@
 #   - build
 #   - deploy
 
-variables:
-  EC2_HOST: i13a109.p.ssafy.io
-  EC2_USER: ubuntu  # 필요 시
+# variables:
+#   EC2_HOST: i13a109.p.ssafy.io
+#   EC2_USER: ubuntu  # 필요 시
 
 # before_script:
 #   - apt-get update -y && apt-get install -y openssh-client rsync
