@@ -32,3 +32,4 @@ deploy:
     - ssh $EC2_USER@$EC2_HOST "sudo systemctl restart nginx"
   only:
     - master
+    - feature/frontend-cicd  # 테스트용 브랜치 추가

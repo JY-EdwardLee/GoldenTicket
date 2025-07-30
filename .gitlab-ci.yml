@@ -1,3 +1,7 @@
+# 외부 파일 포함
+include:
+  - local: 'gitlab-ci-frontend.yml'
+
 image: gradle:7-jdk17
 
 stages:
