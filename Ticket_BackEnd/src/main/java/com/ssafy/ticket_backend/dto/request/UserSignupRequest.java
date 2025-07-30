@@ -5,13 +5,15 @@ import com.ssafy.ticket_backend.model.UserGender;
 import com.ssafy.ticket_backend.model.UserRole;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
 // 유저 회원가입 요청 DTO
 public class UserSignupRequest {
 
-    private Long userId;
+    private long userId;
     private String email;
     private UserGender gender;
     private String userName;

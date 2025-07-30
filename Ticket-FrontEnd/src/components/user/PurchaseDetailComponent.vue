@@ -1,0 +1,453 @@
+<template>
+  <div class="purchase-detail-content">
+    <div class="container">
+      <!-- 뒤로 가기 -->
+      <div class="back-navigation">
+        <button @click="goBack" class="back-btn">
+          <span class="back-icon">‹</span>
+          구매 상세 정보
+        </button>
+        <div class="order-number">주문번호: {{ orderNumber }}</div>
+      </div>
+
+      <!-- 티켓 배너 -->
+      <div class="ticket-banner">
+        <div class="banner-content">
+          <div class="team-logo">
+            <img :src="generateRandomBannerImage()" :alt="ticketDetail.gameTitle" @error="handleImageError">
+          </div>
+          <div class="game-info">
+            <h2 class="game-title">{{ ticketDetail.gameTitle }}</h2>
+            <div class="game-subtitle">{{ ticketDetail.season }} {{ ticketDetail.league }}</div>
+          </div>
+          <div class="purchase-status-tag">구매 완료</div>
+        </div>
+      </div>
+
+      <!-- 경기 정보 -->
+      <div class="info-section">
+        <h3 class="section-title">경기 정보</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">경기 시간</span>
+            <span class="value">{{ ticketDetail.gameDateTime }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">장소</span>
+            <span class="value">{{ ticketDetail.venue }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">경기장</span>
+            <span class="value">{{ ticketDetail.stadium }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">좌석</span>
+            <span class="value">{{ ticketDetail.seatInfo }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">티켓 가격</span>
+            <span class="value price">{{ ticketDetail.ticketPrice }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 티켓 정보 -->
+      <div class="info-section">
+        <h3 class="section-title">티켓 정보</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">티켓 번호</span>
+            <span class="value">{{ ticketDetail.ticketNumber }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">좌석</span>
+            <span class="value">{{ ticketDetail.seatDetail }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">구역</span>
+            <span class="value">{{ ticketDetail.section }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">좌석 번호</span>
+            <span class="value">{{ ticketDetail.seatNumber }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 결제 정보 -->
+      <div class="info-section">
+        <h3 class="section-title">결제 정보</h3>
+        <div class="payment-summary">
+          <div class="payment-row">
+            <span class="label">티켓 가격</span>
+            <span class="value">{{ ticketDetail.ticketPrice }}</span>
+          </div>
+          <div class="payment-row total">
+            <span class="label">총 결제 금액</span>
+            <span class="value">{{ ticketDetail.totalPrice }}</span>
+          </div>
+          <div class="payment-details">
+            <div class="payment-method">
+              <span class="label">결제 방법</span>
+              <span class="value">{{ ticketDetail.paymentMethod }}</span>
+            </div>
+            <div class="payment-date">
+              <span class="label">결제 일시</span>
+              <span class="value">{{ ticketDetail.paymentDateTime }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 액션 버튼 -->
+      <div class="action-buttons">
+        <button class="cancel-btn" @click="requestCancel">
+          응모 취소
+        </button>
+        <button class="refund-btn" @click="requestRefund">
+          환불 요청
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
+
+const orderNumber = ref('P20250730001')
+
+// 티켓 상세 정보 (실제로는 API에서 가져올 데이터)
+const ticketDetail = ref({
+  gameTitle: 'SSG 랜더스 vs KIA 타이거즈',
+  season: '2025 KBO',
+  league: '정규시즌',
+  gameDateTime: '2025.07.30 18:30',
+  venue: '인천 문학경기장',
+  stadium: 'SSG 랜더스',
+  seatInfo: 'KIA 타이거즈',
+  ticketPrice: '25,000원',
+  ticketNumber: 'T20250730001',
+  seatDetail: '304구역 1열',
+  section: '1루',
+  seatNumber: '15-16번',
+  totalPrice: '25,000원',
+  paymentMethod: '신용카드 (***1234)',
+  paymentDateTime: '2025.07.25 14:32',
+  bannerImage: 'https://via.placeholder.com/400x150/8B1538/ffffff?text=NO+LIMITS+AMAZING+LANDERS'
+})
+
+// 뒤로 가기
+const goBack = () => {
+  router.go(-1)
+}
+
+// 응모 취소
+const requestCancel = () => {
+  if (confirm('응모를 취소하시겠습니까?')) {
+    alert('응모 취소 요청이 접수되었습니다.')
+  }
+}
+
+// 환불 요청
+const requestRefund = () => {
+  if (confirm('환불을 요청하시겠습니까?')) {
+    alert('환불 요청이 접수되었습니다.')
+  }
+}
+
+// 랜덤 배너 이미지 생성 함수
+const generateRandomBannerImage = () => {
+  const stadiumImages = [
+    'stadium', 'baseball', 'sports', 'arena', 'field',
+    'ballpark', 'diamond', 'game', 'crowd', 'fans'
+  ]
+  
+  const randomSeed = Math.floor(Math.random() * 1000)
+  const randomTheme = stadiumImages[Math.floor(Math.random() * stadiumImages.length)]
+  
+  // Picsum을 사용한 랜덤 이미지 (야구장/스포츠 테마)
+  return `https://picsum.photos/seed/${randomSeed}-${randomTheme}/400/150?blur=1`
+}
+
+// 이미지 로드 실패 시 대체 이미지
+const handleImageError = (event) => {
+  const fallbackColors = ['ff6b35', '3498db', '2ecc71', 'f39c12', 'e74c3c', '9b59b6']
+  const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)]
+  const gameTexts = ['BASEBALL', 'STADIUM', 'GAME', 'MATCH', 'SPORTS']
+  const randomText = gameTexts[Math.floor(Math.random() * gameTexts.length)]
+  
+  event.target.src = `https://via.placeholder.com/400x150/${randomColor}/ffffff?text=${randomText}`
+}
+
+// 컴포넌트 마운트 시 데이터 로드
+onMounted(() => {
+  const purchaseId = route.params.id
+  // 실제로는 여기서 API 호출하여 해당 ID의 상세 정보를 가져옴
+  console.log('Loading purchase detail for ID:', purchaseId)
+})
+</script>
+
+<style scoped>
+.purchase-detail-content {
+  width: 100%;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.back-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.back-icon {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.order-number {
+  font-size: 14px;
+  color: #666;
+}
+
+.ticket-banner {
+  background: linear-gradient(135deg, #8B1538 0%, #B91D47 100%);
+  border-radius: 12px;
+  padding: 30px;
+  margin-bottom: 30px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.team-logo {
+  width: 80px;
+  height: 50px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.team-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.game-info {
+  flex: 1;
+}
+
+.game-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 0 5px 0;
+  color: white;
+}
+
+.game-subtitle {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.purchase-status-tag {
+  background: #28a745;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.info-section {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 20px 0;
+  border-bottom: 2px solid var(--theme-primary, #ff6b35);
+  padding-bottom: 10px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-item .label {
+  font-weight: 500;
+  color: #666;
+  font-size: 14px;
+}
+
+.info-item .value {
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+}
+
+.info-item .value.price {
+  color: var(--theme-primary, #ff6b35);
+  font-size: 16px;
+}
+
+.payment-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.payment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.payment-row.total {
+  border-bottom: 2px solid var(--theme-primary, #ff6b35);
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--theme-primary, #ff6b35);
+}
+
+.payment-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.payment-method,
+.payment-date {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin: 30px 0;
+}
+
+.cancel-btn,
+.refund-btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #5a6268;
+}
+
+.refund-btn {
+  background: var(--theme-primary, #ff6b35);
+  color: white;
+}
+
+.refund-btn:hover {
+  background: var(--theme-accent, #e55a2e);
+}
+
+@media (max-width: 768px) {
+  .back-navigation {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .banner-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .game-title {
+    font-size: 20px;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .payment-details {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .cancel-btn,
+  .refund-btn {
+    width: 100%;
+    padding: 15px;
+  }
+}
+</style> 
