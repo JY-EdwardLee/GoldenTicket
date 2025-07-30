@@ -107,12 +107,12 @@ public class UserController {
         JwtTokenResponse tokens = userResponse.getToken();
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
-            .httpOnly(true).secure(true) // 배포시 true로 변경
-            .path("/").sameSite("Lax").maxAge(60 * 60) // 1시간
+            .httpOnly(true).secure(false) // 배포시 true로 변경
+            .path("/").sameSite("None").maxAge(60 * 60) // 1시간
             .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token",
-                tokens.getRefreshToken()).httpOnly(true).secure(true).path("/").sameSite("Lax")
+                tokens.getRefreshToken()).httpOnly(true).secure(false).path("/").sameSite("None")
             .maxAge(7 * 24 * 60 * 60) // 7일
             .build();
 
@@ -151,12 +151,12 @@ public class UserController {
         JwtTokenResponse tokens = userResponse.getToken();
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
-            .httpOnly(true).secure(true) // 배포 시 true
-            .path("/").sameSite("Lax").maxAge(60 * 60) // 1시간
+            .httpOnly(true).secure(false) // 배포 시 true
+            .path("/").sameSite("None").maxAge(60 * 60) // 1시간
             .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token",
-                tokens.getRefreshToken()).httpOnly(true).secure(true).path("/").sameSite("Lax")
+                tokens.getRefreshToken()).httpOnly(true).secure(false).path("/").sameSite("None")
             .maxAge(7 * 24 * 60 * 60) // 7일
             .build();
 
@@ -240,12 +240,12 @@ public class UserController {
         JwtTokenResponse tokens = userService.signup(userSignupRequest);
         // accessToken 쿠키 설정
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
-            .httpOnly(true).secure(true).sameSite("Strict").path("/").maxAge(Duration.ofMinutes(30))
+            .httpOnly(true).secure(false).sameSite("None").path("/").maxAge(Duration.ofMinutes(30))
             .build();
 
         // refreshToken 쿠키 설정
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
-            .httpOnly(true).secure(true).sameSite("Strict").path("/auth/refresh")
+            .httpOnly(true).secure(false).sameSite("None").path("/auth/refresh")
             .maxAge(Duration.ofDays(14)).build();
 
         response.addHeader("Set-Cookie", accessCookie.toString());
