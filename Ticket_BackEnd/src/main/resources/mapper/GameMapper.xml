@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ticket_backend.mapper.GameMapper">
+  <!-- 날짜와 팀으로 게임 검색 -->
+  <select id="selectGameByDateAndTeam" resultType="com.ssafy.ticket_backend.model.Game">
+    SELECT *
+    FROM games
+    WHERE game_datetime::DATE = #{gameDate}
+    AND (home_team = #{team, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler}
+    OR away_team = #{team, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler})
+  </select>
+
+  <!-- 게임 검색 -->
+  <select id="selectGameByGameId" resultType="com.ssafy.ticket_backend.model.Game">
+    SELECT *
+    FROM games
+    WHERE game_id = #{gameId}
+  </select>
+
+  <!-- 같은 날짜에 있는 게임 검색 -->
+  <select id="selectGameByDate" resultType="com.ssafy.ticket_backend.model.Game">
+    SELECT *
+    FROM games
+    WHERE game_datetime::DATE = #{gameDate}
+  </select>
+
+  <!-- 같은 날짜에 다른 게임에 응모하였는지 확인 -->
+  <select id="selectWaitlistsByGameIdAndUserId" resultType="boolean">
+    SELECT EXISTS (
+    SELECT 1
+    FROM waitlists
+    WHERE user_id = #{userId}
+    AND game_id = #{gameId}
+    )
+  </select>
+
+  <!-- 대기열 추가 -->
+  <insert id="insertWaitlist">
+    INSERT INTO waitlists (user_id, game_id)
+    VALUES (#{userId}, #{gameId})
+  </insert>
+
+  <!-- 대기열 삭제 -->
+  <delete id="deleteWaitlist">
+    DELETE FROM waitlists
+    WHERE user_id = #{userId}
+    AND game_id = #{gameId}
+  </delete>
+
+</mapper>

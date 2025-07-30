@@ -121,6 +121,7 @@ import axios from 'axios';
 import API_CONFIG from '@/config/api.config';
 import { stadiumNameToEnum } from '@/utils/teamStadium';
 import { teamNameToEnum, getEnumTeamName } from '@/utils/teamNameMap';
+import http from '@/utils/http'
 
 const teamRows = [
   ['SSG랜더스', '키움히어로즈', 'LG트윈스', 'KT위즈', 'NC다이노스'],

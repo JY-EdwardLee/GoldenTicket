@@ -3,12 +3,17 @@ package com.ssafy.ticket_backend.controller;
 import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
+import com.ssafy.ticket_backend.dto.response.LoginUserResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.UserService;
 import com.ssafy.ticket_backend.util.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.time.Duration;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -158,6 +164,30 @@ public class UserController {
             .header("Location", "http://localhost:5173/oauth/callback").build();
     }
 
+    /**
+     * 로그인 유저 정보 반환
+     *
+     * @return LoginUserResponse 로그인 유저 정보 응답 DTO
+     */
+    @GetMapping("/login-user")
+    public ResponseEntity<LoginUserResponse> getLoginUser(HttpServletRequest request) {
+        // 1. 쿠키에서 accessToken 추출
+        String accessToken = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("access_token".equals(cookie.getName())) {
+                    accessToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+
+        LoginUserResponse loginUserResponse = userService.getLoginUser(accessToken);
+        loginUserResponse.setAccessToken(accessToken);
+        return ResponseEntity.ok(loginUserResponse);
+    }
+
 
     /**
      * tempUserId로 Redis에 저장된 임시 사용자 정보 조회
@@ -168,7 +198,6 @@ public class UserController {
     @GetMapping("/auth/temp-user")
     public ResponseEntity<OAuthUserResponse> getTempUserInfo(@RequestParam String tempUserId) {
         OAuthUserResponse oAuthUserResponse = userService.getTempUserInfo(tempUserId);
-
         return ResponseEntity.ok(oAuthUserResponse);
     }
 
@@ -180,10 +209,18 @@ public class UserController {
      * @return 새롭게 발급된 JwtTokenResponse
      */
     @PostMapping("/auth/refresh")
-    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
-        String refreshToken = request.get("refreshToken");
-        JwtTokenResponse response = userService.refreshToken(refreshToken);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> refreshToken(HttpServletRequest request) {
+        String refreshToken = null;
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("refresh_token".equals(cookie.getName())) {
+                    refreshToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
+        JwtTokenResponse jwtTokenResponse = userService.refreshToken(refreshToken);
+        return ResponseEntity.ok(jwtTokenResponse);
     }
 
     /**
@@ -194,10 +231,30 @@ public class UserController {
      */
     @PostMapping("/signup")
     public ResponseEntity<JwtTokenResponse> signup(
-        @RequestBody UserSignupRequest userSignupRequest) {
+        @RequestBody UserSignupRequest userSignupRequest, HttpServletResponse response) {
         JwtTokenResponse tokens = userService.signup(userSignupRequest);
-        // 유저 아이디도
-        return ResponseEntity.ok(tokens);
+        // accessToken 쿠키 설정
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("Strict")
+            .path("/")
+            .maxAge(Duration.ofMinutes(30))
+            .build();
+
+        // refreshToken 쿠키 설정
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("Strict")
+            .path("/auth/refresh")
+            .maxAge(Duration.ofDays(14))
+            .build();
+
+        response.addHeader("Set-Cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
+
+        return ResponseEntity.ok().build();
     }
 
     /**
@@ -235,6 +292,7 @@ public class UserController {
         return ResponseEntity.ok().body(myPage);
     }
 
+
     /**
      * 내 정보 수정
      *
@@ -248,6 +306,19 @@ public class UserController {
         userService.patchMyPage(userDetails.getUsername(), userPatchRequest);
 
         return ResponseEntity.accepted().build();
+    }
+
+    /**
+     * 회원 탈퇴
+     *
+     * @param email
+     * @return
+     */
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        String email = userDetails.getUsername();
+        userService.deleteUserByEmail(email);
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
 
     // 로그인 - 테스트 용 로그인이므로 실제 서비스에서는 사용 금지

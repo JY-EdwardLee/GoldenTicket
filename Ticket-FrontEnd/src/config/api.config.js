@@ -1,6 +1,6 @@
 // API 기본 URL 설정
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://i13a109.p.ssafy.io:8080";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 import axios from 'axios';
 axios.defaults.baseURL = API_BASE_URL;
 
@@ -11,10 +11,12 @@ const AUTH = {
   SIGNUP: `${API_BASE_URL}/users/signup`,
   REFRESH: `${API_BASE_URL}/users/auth/refresh`,
   LOGOUT: `${API_BASE_URL}/users/logout`,
+  TEMP_USER: `${API_BASE_URL}/users/auth/temp-user`,
 };
 
 // 사용자 관련 엔드포인트
 const USER = {
+  LOGIN: `${API_BASE_URL}/users/login-user`,
   PROFILE: `${API_BASE_URL}/users/me`,
   UPDATE_PROFILE: `${API_BASE_URL}/users/me`,
   CHANGE_PASSWORD: `${API_BASE_URL}/users/me/password`,

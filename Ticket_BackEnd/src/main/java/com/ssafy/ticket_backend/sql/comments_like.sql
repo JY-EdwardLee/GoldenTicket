@@ -1,7 +1,7 @@
 CREATE TABLE comments_like
 (
-    user_id    INT NOT NULL,
-    comment_id INT NOT NULL,
+    user_id    BIGINT NOT NULL,
+    comment_id BIGINT NOT NULL,
 
     CONSTRAINT fk_commentlike_user FOREIGN KEY (user_id)
         REFERENCES users (user_id)

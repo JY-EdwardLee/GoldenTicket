@@ -148,7 +148,7 @@ const handleSubmit = async () => {
       }
       
       // 리다이렉트 처리
-      const redirectPath = route.query.redirect || '/';
+      const redirectPath = 'oauth/callback?registered=true&redirect=/';
       await router.push(redirectPath);
     }
   } catch (error) {
@@ -161,12 +161,11 @@ const handleSubmit = async () => {
 const fetchUserData = async (userId) => {
   try {
     const response = await axios.get(
-      `http://localhost:8080/users/auth/temp-user`,
+      `${API_CONFIG.AUTH.TEMP_USER}`,
       {
         params: { tempUserId: userId },
       }
     );
-    console.log(response);
     if (response.data) {
       const userData = response.data;
       formData.userName = userData.userName || "";
@@ -186,7 +185,6 @@ onMounted(() => {
   // URL에서 user_id 파라미터 확인
   const userId = route.query.tempUserId;
   if (userId) {
-    console.log(userId);
     fetchUserData(userId);
   }
 });

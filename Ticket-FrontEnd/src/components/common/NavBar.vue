@@ -10,8 +10,13 @@
       <li><router-link to="/guide">FAQ</router-link></li>
     </ul>
     <div class="auth-links">
-      <a href="#" @click.prevent="openLoginModal">로그인 또는 회원가입</a>
+      <template v-if="isLoggedIn">
+        <router-link to="/" class="auth-link">마이페이지</router-link>
+        <a href="#" @click.prevent="handleLogout" class="auth-link">로그아웃</a>
+      </template>
+      <a v-else href="#" @click.prevent="openLoginModal" class="auth-link">로그인 또는 회원가입</a>
     </div>
+    
   </nav>
 
   <!-- 로그인 모달 -->
@@ -19,13 +24,34 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import LoginModal from "./LoginModal.vue";
-
-// 로그인 모달 상태 관리
-const isLoginModalVisible = ref(false);
+import { useAuthStore } from "@/stores/auth";
+import axios from "axios";
+import { API_CONFIG } from "@/config/api.config";
+import { storeToRefs } from "pinia";
+// 스토어 및 라우터 초기화
+const authStore = useAuthStore();
 const router = useRouter();
+
+// store의 isAuthenticated를 반응형 참조로 가져옴
+const { isAuthenticated } = storeToRefs(authStore);
+
+// 로그인 상태 관리
+const isLoggedIn = ref(false);
+const isLoginModalVisible = ref(false);
+
+// 컴포넌트 마운트 시 로그인 상태 확인
+onMounted(() => {
+  isLoggedIn.value = isAuthenticated.value;
+});
+
+// isAuthenticated 상태가 변경될 때마다 isLoggedIn 업데이트
+watch(isAuthenticated, (newValue) => {
+  isLoggedIn.value = newValue;
+});
+
 // 로그인 모달 열기
 const openLoginModal = () => {
   isLoginModalVisible.value = true;
@@ -34,6 +60,16 @@ const openLoginModal = () => {
 // 로그인 모달 닫기
 const closeLoginModal = () => {
   isLoginModalVisible.value = false;
+};
+
+// In NavBar.vue
+const handleLogout = async () => {
+  try {
+    await authStore.logout();
+    isLoggedIn.value = false;
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
 };
 </script>
 
@@ -72,6 +108,11 @@ const closeLoginModal = () => {
 .nav-links a.router-link-active {
   color: #ffb43a;
 }
+.auth-links {
+  display: flex;
+  gap: 16px;
+}
+
 .auth-links a {
   color: #888;
   text-decoration: none;
