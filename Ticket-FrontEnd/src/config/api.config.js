@@ -13,7 +13,7 @@ const AUTH = {
   LOGOUT: `${API_BASE_URL}/users/logout`,
   TEMP_USER: `${API_BASE_URL}/users/auth/temp-user`,
 };
-
+W
 // 사용자 관련 엔드포인트
 const USER = {
   LOGIN: `${API_BASE_URL}/users/login-user`,

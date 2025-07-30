@@ -1,29 +1,34 @@
+image: node:18
+
 stages:
   - build
   - deploy
 
 variables:
   EC2_HOST: i13a109.p.ssafy.io
-  PRIVATE_KEY: $SSH_PRIVATE_KEY  # GitLab에 등록 필요
+  EC2_USER: ubuntu  # 필요 시
 
 before_script:
-  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+  - apt-get update -y && apt-get install -y openssh-client rsync
   - eval $(ssh-agent -s)
-  - echo "$PRIVATE_KEY" | tr -d '\r' | ssh-add -
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
   - mkdir -p ~/.ssh
   - chmod 700 ~/.ssh
   - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
 build:
   stage: build
-  image: node:11
   script:
     - npm install
-    - npm run build  # dist/ 폴더 생성
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
 
 deploy:
   stage: deploy
-  image: node:11
   script:
-    - scp -r dist/* $EC2_HOST:/var/www/html/  # 원하는 배포 경로
-    - ssh $EC2_HOST "sudo systemctl restart nginx"
+    - rsync -avz --delete dist/ $EC2_USER@$EC2_HOST:/var/www/html/
+    - ssh $EC2_USER@$EC2_HOST "sudo systemctl restart nginx"
+  only:
+    - master
