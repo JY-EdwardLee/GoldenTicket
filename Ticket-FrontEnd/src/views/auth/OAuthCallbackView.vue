@@ -13,12 +13,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router'; // useRoute 추가
 import { useAuthStore } from '@/stores/auth';
 import axios from 'axios';
 import { API_CONFIG } from '@/config/api.config';
 
 const router = useRouter();
+const route = useRoute(); // 현재 라우트 정보에 접근하기 위해 추가
 const authStore = useAuthStore();
 
 const isLoading = ref(true);
@@ -27,43 +28,41 @@ const error = ref(null);
 // OAuth 처리 핸들러
 const handleOAuthCallback = async () => {
   try {
-    // URL에서 쿼리 파라미터 파싱
-    const urlParams = new URLSearchParams(window.location.search);
-    const redirect = urlParams.get('redirect') || '/';
-    // const token = authStore.getToken();
+    // 1. URL에서 카카오가 보내준 인증 코드(code)를 추출합니다.
+    const code = route.query.code;
 
-    // 필수 파라미터 검증
-    
-    try {
-      const response = await axios.get(`${API_CONFIG.USER.LOGIN}`, {
-          withCredentials: true,
-        });
+    // 2. 인증 코드가 없으면 에러 처리
+    if (!code) {
+      throw new Error('인증 코드를 받지 못했습니다.');
+    }
 
-        console.log(response.data)
-        if (response.data || response.data.accessToken) {
-          // 사용자 정보를 store에 저장
-          authStore.setUser(response.data);
-          authStore.setToken(response.data.accessToken);
-          // 저장된 리다이렉트 경로 가져오기 (없으면 '/'로 기본값)
-          const redirectTo = authStore.getAndClearRedirectPath();
-          await router.push(redirectTo);
-        } else {
-          throw new Error('사용자 정보를 가져오는데 실패했습니다.');
-        }
-    } catch (err) {
-      console.error('사용자 정보 요청 실패:', err);
-      throw new Error('로그인은 성공했지만 사용자 정보를 가져오는데 실패했습니다.');
+    // 3. 추출한 인증 코드를 백엔드로 전송하여 로그인/회원가입 처리를 요청합니다.
+    //    백엔드는 이 코드를 받아 카카오 서버와 통신하여 액세스 토큰을 받고, 사용자 정보를 가져옵니다.
+    const response = await axios.post(API_CONFIG.AUTH.KAKAO_CALLBACK, { code });
+
+    // 4. 백엔드로부터 받은 데이터(JWT 토큰, 사용자 정보 등)를 처리합니다.
+    if (response.data && response.data.accessToken) {
+      // 사용자 정보와 토큰을 Pinia 스토어에 저장
+      authStore.setUser(response.data);
+      authStore.setToken(response.data.accessToken);
+
+      // 이전에 저장된 리다이렉트 경로로 이동하거나, 없으면 홈으로 이동
+      const redirectTo = authStore.getAndClearRedirectPath() || '/';
+      await router.push(redirectTo);
+    } else {
+      // 백엔드에서 에러가 발생했거나, 토큰이 없는 경우
+      throw new Error('서버로부터 유효한 응답을 받지 못했습니다.');
     }
   } catch (err) {
     console.error('소셜 로그인 처리 중 오류 발생:', err);
-    error.value = '로그인 처리 중 오류가 발생했습니다. ' + (err.message || '');
+    const message = err.response?.data?.message || err.message || '알 수 없는 오류';
+    error.value = `로그인 처리 중 오류가 발생했습니다: ${message}`;
   } finally {
     isLoading.value = false;
   }
 };
 
 const handleRetry = () => {
-  // 에러 발생 시 로그인 페이지로 이동
   router.push('/');
 };
 
