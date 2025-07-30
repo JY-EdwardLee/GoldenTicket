@@ -29,9 +29,9 @@ public class BoardController {
     @GetMapping("category/{boardType}")
     public ResponseEntity<List<PostAllResponse>> getPostsByCategory(
         @PathVariable BoardType boardType) {
-        List<PostAllResponse> list = boardService.getPostsByCategory(boardType);
+        List<PostAllResponse> postAllResponses = boardService.getPostsByCategory(boardType);
 
-        return ResponseEntity.status(HttpStatus.OK).body(list);
+        return ResponseEntity.status(HttpStatus.OK).body(postAllResponses);
     }
 
     /**
