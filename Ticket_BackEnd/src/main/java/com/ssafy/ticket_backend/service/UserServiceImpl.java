@@ -408,6 +408,7 @@ public class UserServiceImpl implements UserService {
             transactionResponse.setTicket(new TicketResponse(ticket));
         }
 
+        return null;
     }
 
     @Override
