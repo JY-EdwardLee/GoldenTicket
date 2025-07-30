@@ -25,7 +25,7 @@ public class JwtUtil {
     private final RedisTemplate<String, String> redisTemplate;
 
     // 엑세스 토큰 만료 시간: 1시간
-    private final long EXPIRATION_TIME = 1000 * 60 * 60;
+    private final long EXPIRATION_TIME = 1000 * 20;
 
     // 리프레시 토큰 만료 시간 : 7일
     private final long REFRESH_TIME = 1000 * 60 * 60 * 24 * 7;

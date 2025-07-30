@@ -1,0 +1,410 @@
+/* 랭킹 섹션 스타일 */
+.ranking-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 64px 0px;
+  width: 1440px;
+  height: 550px;
+  background: #FFFFFF;
+  border-radius: 0px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
+
+.ranking-margin-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px 80px;
+  width: 1440px;
+  height: 422px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.ranking-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px 32px;
+  width: 1280px;
+  max-width: 1280px;
+  height: 422px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.ranking-content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  align-content: flex-start;
+  padding: 0px;
+  gap: 32px;
+  width: 1216px;
+  height: 422px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+/* 랭킹 카드 */
+.ranking-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 33px;
+  width: 592px;
+  height: 422px;
+  background: #FFFFFF;
+  border: 1px solid #CECECE;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 16px;
+  flex: none;
+  flex-grow: 0;
+}
+
+.ranking-card:first-child {
+  order: 0;
+}
+
+.ranking-card:last-child {
+  order: 1;
+}
+
+/* 랭킹 카드 헤더 */
+.ranking-header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px 0px 24px;
+  width: 526px;
+  height: 60px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.ranking-title-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  width: 526px;
+  height: 36px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.ranking-icon-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px 12px 0px 0px;
+  width: 44px;
+  height: 32px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.ranking-icon {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;
+  width: 32px;
+  height: 32px;
+  background: #FFB22C;
+  border-radius: 9999px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.ranking-icon-inner {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;
+  width: 20px;
+  height: 20px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.ranking-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  width: 167.83px;
+  height: 36px;
+  border-radius: 0px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 36px;
+  letter-spacing: -0.75px;
+  color: #000000;
+  margin: 0;
+}
+
+/* 랭킹 리스트 */
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  width: 526px;
+  height: 296px;
+  border-radius: 0px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
+
+.ranking-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  width: 526px;
+  height: 88px;
+  background: #F7F7F7;
+  border-radius: 12px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.ranking-item + .ranking-item {
+  margin-top: 16px;
+}
+
+/* 랭킹 아이템 사용자 정보 */
+.ranking-user {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  margin: 0 auto;
+  width: 116.28px;
+  height: 52px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.ranking-user-icon-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px 12px 0px 0px;
+  width: 44px;
+  height: 32px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.ranking-user-icon {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 0px;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.ranking-user-icon.primary {
+  background: #FFB22C;
+}
+
+.ranking-user-icon.secondary {
+  background: #854836;
+}
+
+.ranking-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  width: 72.28px;
+  height: 52px;
+  border-radius: 0px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
+
+.ranking-user-name {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  width: 72.28px;
+  height: 28px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: -0.45px;
+  color: #000000;
+  margin: 0;
+}
+
+.ranking-user-count {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  width: 72.28px;
+  height: 24px;
+  border-radius: 0px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.4px;
+  color: #854836;
+  margin: 0;
+}
+
+/* 랭킹 점수 */
+.ranking-score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px;
+  margin: 0 auto;
+  width: 39.52px;
+  height: 56px;
+  border-radius: 0px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
+
+.ranking-score-number {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  width: 39.52px;
+  height: 32px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.6px;
+  color: #000000;
+  margin: 0;
+}
+
+.ranking-score-unit {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  width: 39.52px;
+  height: 24px;
+  border-radius: 0px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.4px;
+  color: #854836;
+  margin: 0;
+}
+
+/* 팀 랭킹 전용 스타일 */
+.team-ranking-user {
+  width: 133.39px;
+}
+
+.team-ranking-user-info {
+  width: 89.39px;
+}
+
+.team-ranking-user-name {
+  width: 89.39px;
+}
+
+.team-ranking-user-count {
+  width: 89.39px;
+}
+
+.team-ranking-change {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.4px;
+  margin-left: 8px;
+}
+
+.team-ranking-change.positive {
+  color: #16A34A;
+}
+
+.team-ranking-change.negative {
+  color: #DC2626;
+}
+
+.team-ranking-score {
+  width: 57.94px;
+}
+
+.team-ranking-score-number {
+  width: 57.94px;
+}
+
+.team-ranking-score-unit {
+  width: 57.94px;
+}

@@ -1,0 +1,290 @@
+/* 기본 설정 및 공통 스타일 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  font-style: normal;
+  color: #111827;
+  background: #FFFFFF;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 공통 레이아웃 */
+.container {
+  width: 1440px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 80px;
+}
+
+.margin-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px 32px;
+  width: 1280px;
+  max-width: 1280px;
+}
+
+/* Flexbox 유틸리티 */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+/* 간격 유틸리티 */
+.gap-8 {
+  gap: 8px;
+}
+
+.gap-16 {
+  gap: 16px;
+}
+
+.gap-24 {
+  gap: 24px;
+}
+
+.gap-32 {
+  gap: 32px;
+}
+
+/* 패딩 유틸리티 */
+.p-0 {
+  padding: 0px;
+}
+
+.p-16 {
+  padding: 16px;
+}
+
+.p-24 {
+  padding: 24px;
+}
+
+.p-32 {
+  padding: 32px;
+}
+
+.p-48 {
+  padding: 48px;
+}
+
+/* 마진 유틸리티 */
+.m-auto {
+  margin: 0 auto;
+}
+
+.mb-16 {
+  margin-bottom: 16px;
+}
+
+.mb-24 {
+  margin-bottom: 24px;
+}
+
+.mb-32 {
+  margin-bottom: 32px;
+}
+
+/* 보더 반지름 */
+.rounded-6 {
+  border-radius: 6px;
+}
+
+.rounded-8 {
+  border-radius: 8px;
+}
+
+.rounded-12 {
+  border-radius: 12px;
+}
+
+.rounded-16 {
+  border-radius: 16px;
+}
+
+.rounded-24 {
+  border-radius: 24px;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+/* 그림자 */
+.shadow-sm {
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-md {
+  box-shadow: 0px 4px 6px -4px rgba(0, 0, 0, 0.1), 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* 배경색 */
+.bg-white {
+  background: #FFFFFF;
+}
+
+.bg-gray-100 {
+  background: #F7F7F7;
+}
+
+.bg-primary {
+  background: #FFB22C;
+}
+
+.bg-secondary {
+  background: #854836;
+}
+
+/* 텍스트 색상 */
+.text-black {
+  color: #111827;
+}
+
+.text-white {
+  color: #FFFFFF;
+}
+
+.text-gray {
+  color: #5B5B5B;
+}
+
+.text-primary {
+  color: #FFB22C;
+}
+
+.text-secondary {
+  color: #854836;
+}
+
+.text-green {
+  color: #16A34A;
+}
+
+.text-red {
+  color: #DC2626;
+}
+
+/* 폰트 크기 */
+.text-sm {
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.4px;
+}
+
+.text-base {
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: -0.45px;
+}
+
+.text-lg {
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.5px;
+}
+
+.text-xl {
+  font-size: 24px;
+  line-height: 28px;
+  letter-spacing: -0.45px;
+}
+
+.text-2xl {
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.6px;
+}
+
+.text-3xl {
+  font-size: 30px;
+  line-height: 36px;
+  letter-spacing: -0.75px;
+}
+
+.text-4xl {
+  font-size: 48px;
+  line-height: 48px;
+  letter-spacing: -1.2px;
+}
+
+.text-5xl {
+  font-size: 60px;
+  line-height: 60px;
+  letter-spacing: -1.5px;
+}
+
+/* 폰트 굵기 */
+.font-normal {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-extrabold {
+  font-weight: 800;
+}
+
+/* 위치 */
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+/* 크기 */
+.w-full {
+  width: 100%;
+}
+
+.h-full {
+  height: 100%;
+}
+
+/* 투명도 */
+.opacity-90 {
+  opacity: 0.9;
+}
