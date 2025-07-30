@@ -84,6 +84,7 @@ public class TicketServiceImpl implements TicketService {
             userEmail, platform);
 
         List<TicketResponse> ticketResponses = new ArrayList<>();
+        List<Ticket> tickets = new ArrayList<>();
 
         // 다른 플랫폼에서 티켓을 가져온 후, 선별하여 tickets에 등록
         for (OtherPlatformTicket opt : otherPlatformTickets) {
@@ -91,7 +92,7 @@ public class TicketServiceImpl implements TicketService {
                 opt.getGameDatetime().toLocalDate(), opt.getHomeTeam());
 
             for (Game g : games) {
-                // 다른 플랫폼의 티켓이 이미 등록되어 있으면 생략
+                // 티켓이 이미 등록되어 있으면 생략
                 if (ticketMapper.selectTicketByGame(g.getGameId(), opt.getSeat(),
                     user.getUserId())) {
                     continue;
@@ -107,10 +108,10 @@ public class TicketServiceImpl implements TicketService {
                 ticket.setSellerId(user.getUserId());
 
                 ticketMapper.insertTicket(ticket);
+                tickets.add(ticket);
             }
         }
 
-        List<Ticket> tickets = ticketMapper.selectTicketsByUserId(user.getUserId());
         System.out.println(tickets.size() + " tickets");
         for (Ticket ticket : tickets) {
             Game game = gameMapper.selectGameByGameId(ticket.getGameId());
