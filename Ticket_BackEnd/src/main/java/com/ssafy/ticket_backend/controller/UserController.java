@@ -117,9 +117,7 @@ public class UserController {
             .maxAge(7 * 24 * 60 * 60) // 7일
             .build();
         response.addHeader("Set-Cookie", accessCookie.toString());
-//        response.addHeader("Set-Cookie", refreshCookie.toString());
-
-        response.addHeader("Authorization", "Bearer " + tokens.getAccessToken());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
 
         System.out.println("response 헤더 찍음!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         Collection<String> headerNames = response.getHeaderNames();
