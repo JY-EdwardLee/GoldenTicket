@@ -1,0 +1,267 @@
+/* 헤더 스타일 */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 0px 0px 1px;
+  position: absolute;
+  width: 1440px;
+  height: 81px;
+  left: 0px;
+  top: 0px;
+  background: #FFFFFF;
+  border-radius: 0px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+  z-index: 1;
+}
+
+.header-margin-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px 70px;
+  width: 1440px;
+  height: 80px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px;
+  gap: 10px;
+  width: 1300px;
+  height: 80px;
+  max-height: 80px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.header-inner {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px;
+  isolation: isolate;
+  width: 1300px;
+  height: 80px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 1;
+}
+
+/* 로고 */
+.logo-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  margin: 0 auto;
+  width: 56.02px;
+  height: 36px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  z-index: 0;
+}
+
+.logo-link {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  gap: 8px;
+  width: 56.02px;
+  height: 36px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  width: 56.02px;
+  height: 36px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.logo {
+  width: 57px;
+  height: 36px;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 30px;
+  line-height: 36px;
+  display: flex;
+  align-items: center;
+  letter-spacing: -0.75px;
+  color: #111827;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+/* 네비게이션 */
+.nav {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  gap: 32px;
+  position: absolute;
+  width: 431.89px;
+  height: 44px;
+  left: calc(50% - 431.89px/2 - 0.05px);
+  top: 18px;
+  border-radius: 0px;
+  flex: none;
+  order: 2;
+  flex-grow: 0;
+  z-index: 2;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 8px;
+  height: 44px;
+  border-radius: 6px;
+  flex: none;
+  flex-grow: 0;
+  text-decoration: none;
+}
+
+.nav-item:nth-child(1) {
+  width: 80.23px;
+  order: 0;
+}
+
+.nav-item:nth-child(2) {
+  width: 80.23px;
+  order: 1;
+}
+
+.nav-item:nth-child(3) {
+  width: 96.34px;
+  order: 2;
+}
+
+.nav-item:nth-child(4) {
+  width: 79.08px;
+  order: 3;
+}
+
+.nav-text {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  height: 28px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+.nav-text span {
+  height: 28px;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 28px;
+  display: flex;
+  align-items: center;
+  letter-spacing: -0.45px;
+  color: #111827;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+/* 로그인 버튼 */
+.login-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0px;
+  gap: 16px;
+  margin: 0 auto;
+  width: 227.94px;
+  height: 52px;
+  border-radius: 0px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+  z-index: 1;
+}
+
+.login-button {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 10px;
+  gap: 8px;
+  width: 228px;
+  height: 52px;
+  border-radius: 8px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.login-text {
+  width: 158px;
+  height: 28px;
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 28px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #5B5B5B;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+}
+
+/* 스티키 헤더 */
+.sticky-header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0px;
+  width: 1440px;
+  height: 81px;
+  border-radius: 0px;
+  flex: none;
+  order: 0;
+  flex-grow: 0;
+  z-index: 0;
+}
