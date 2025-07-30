@@ -58,7 +58,7 @@ public class UserController {
     public RedirectView redirectToKakaoLogin() {
         String kakaoAuthUrl =
             "https://kauth.kakao.com/oauth/authorize" + "?client_id=" + KakaoRestApiKey
-                + "&redirect_uri=" + "http://localhost:8080" + "/users/auth/kakao/callback"
+                + "&redirect_uri=" + "http://i13a109.p.ssafy.io:8080" + "/users/auth/kakao/callback"
                 + "&response_type=code";
 
         return new RedirectView(kakaoAuthUrl);
