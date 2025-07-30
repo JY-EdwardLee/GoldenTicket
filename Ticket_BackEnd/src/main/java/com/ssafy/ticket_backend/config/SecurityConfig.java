@@ -4,6 +4,7 @@ import com.ssafy.ticket_backend.util.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,15 +23,16 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
+//
 //        http
 //            .csrf(AbstractHttpConfigurer::disable)
 //            .cors(cors -> {}) // CORS 활성화
 //            .authorizeHttpRequests(auth -> auth
-//                .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
+//                .requestMatchers(HttpMethod.GET, "/users/**").permitAll()
+//                .requestMatchers(HttpMethod.POST, "/users/**").permitAll()
 //                .requestMatchers(HttpMethod.POST, "/users/signup").permitAll()
 //                .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
-//                .requestMatchers(HttpMethod.GET, "/games/**").permitAll()
+//                .requestMatchers(HttpMethod.POST, "/games/**").permitAll()
 //                // 이 외에는 인증 필요
 //                .anyRequest().authenticated()
 //            )
