@@ -97,7 +97,7 @@
             <!-- NOL -->
             <div class="provider-col">
               <img src="/nol_logo.png" alt="NOL" class="provider-img nol-img" />
-              <button class="provider-btn nol-btn" @click="showTickets = true">
+              <button class="provider-btn nol-btn" @click="fetchTickets('NOL')">
                 NOL 바로가기
                 <span class="btn-icon">↗</span>
               </button>
@@ -105,7 +105,7 @@
             <!-- Ticketlink -->
             <div class="provider-col">
               <img src="/ticketlink_logo.png" alt="티켓링크" class="provider-img ticketlink-img" />
-              <button class="provider-btn ticketlink-btn">
+              <button class="provider-btn ticketlink-btn" @click="fetchTickets('TICKETLINK')">
                 티켓링크 바로가기
                 <span class="btn-icon">↗</span>
               </button>
@@ -117,53 +117,59 @@
             <button :class="['ticket-tab', activeTab === 'NOL' ? 'active' : '']" @click="activeTab = 'NOL'">NOL</button>
             <button :class="['ticket-tab', activeTab === '티켓링크' ? 'active' : '']" @click="activeTab = '티켓링크'">티켓링크</button>
           </div>
-          <div class="ticket-list">
+          <div v-if="ticketLoading" class="ticket-list" style="justify-content:center;align-items:center;height:350px;">로딩중...</div>
+          <div v-else-if="ticketError" class="ticket-list" style="justify-content:center;align-items:center;height:350px;">{{ ticketError }}</div>
+          <div v-else-if="tickets.length === 0" class="ticket-list" style="justify-content:center;align-items:center;height:350px;">
+            <div style="font-size:32px;font-weight:700;color:#969696;text-align:center;">현재 보유하고 있는 티켓이 없습니다.</div>
+          </div>
+          <div v-else class="ticket-list" style="max-height:420px;overflow-y:auto;">
             <div
-              v-for="(ticket, idx) in tickets"
-              :key="ticket.id"
+              v-for="(ticket, idx) in tickets.slice(0, tickets.length > 3 ? 3 : tickets.length)"
+              :key="ticket.ticketId"
               class="ticket-card"
-              :class="[{'highlighted': hoveredTicket === ticket.id}, { 'landers-hover': hoveredTicket === ticket.id && ticket.landers } ]"
-              @mouseenter="hoveredTicket = ticket.id"
+              :style="{background: ticket.color}"
+              @mouseenter="hoveredTicket = ticket.ticketId"
               @mouseleave="hoveredTicket = null"
             >
               <div class="ticket-header">
-                <span class="ticket-title" :class="{ 'landers': ticket.landers }">{{ ticket.title }}</span>
-                <span v-if="ticket.landers && hoveredTicket === ticket.id" class="ticket-people">현재 응모 인원 : 13명</span>
+                <span class="ticket-title">{{ ticket.header }}</span>
+                <span class="ticket-people">현재 응모 인원 : {{ ticket.waitNumber }}명</span>
               </div>
-              <div class="ticket-info-row">
-                <span class="ticket-date">📅 {{ ticket.date }}</span>
-                <span class="ticket-time">⏰ {{ ticket.time }}</span>
+              <div class="ticket-info-row" style="justify-content:space-between;">
+                <span>📅 {{ ticket.game.date.split('T')[0] }}</span>
+                <span>🪑 {{ ticket.seat }}</span>
+                <span>₩{{ ticket.price.toLocaleString() }}</span>
+                <span style="margin-left:auto;font-weight:600;">{{ ticket.statusText }}</span>
               </div>
               <!-- 상세 정보: hover 시에만 표시 -->
               <transition name="fade">
-                <div v-if="hoveredTicket === ticket.id && ticket.landers" class="ticket-detail ticket-detail-horizontal">
-                  <div class="ticket-detail-bg"><img src="/landers_bg.png" alt="landers" /></div>
+                <div v-if="hoveredTicket === ticket.ticketId" class="ticket-detail ticket-detail-horizontal">
                   <div class="ticket-detail-header-row">
-                    <span class="ticket-detail-title">{{ ticket.title }}</span>
+                    <span class="ticket-detail-title">{{ ticket.header }}</span>
                   </div>
                   <div class="ticket-detail-info-row">
-                    <span class="ticket-date">📅 {{ ticket.date }}</span>
-                    <span class="ticket-time">⏰ {{ ticket.time }}</span>
-                    <span class="ticket-people">현재 응모 인원 : 13명</span>
+                    <span>📅 {{ ticket.game.date.split('T')[0] }}</span>
+                    <span>⏰ {{ ticket.game.date.split('T')[1]?.slice(0,5) }}</span>
+                    <span>현재 응모 인원 : {{ ticket.waitNumber }}명</span>
                   </div>
                   <div class="ticket-detail-horizontal-row-centered">
                     <div class="ticket-detail-block block-horizontal">
-                      <div class="block-title"><span class="block-icon">📍</span>경기장</div>
-                      <div class="block-content">인천 SSG 랜더스 필드</div>
+                      <div class="block-title"><span class="block-icon">🏟️</span>경기장</div>
+                      <div class="block-content">{{ ticket.game.home }} 홈</div>
                     </div>
                     <div class="ticket-detail-block block-horizontal">
-                      <div class="block-title"><span class="block-icon">🪑</span>좌석 위치</div>
-                      <div class="block-content">내야 지정석 A</div>
+                      <div class="block-title"><span class="block-icon">🪑</span>좌석</div>
+                      <div class="block-content">{{ ticket.seat }}</div>
                     </div>
                     <div class="ticket-detail-block block-horizontal">
-                      <div class="block-title"><span class="block-icon">🔒</span>티켓 가격</div>
-                      <div class="block-content">13,000원</div>
+                      <div class="block-title"><span class="block-icon">💰</span>가격</div>
+                      <div class="block-content">₩{{ ticket.price.toLocaleString() }}</div>
                     </div>
                   </div>
-                  <button class="apply-btn" @click="handleApply(ticket)">양도 신청하기 →</button>
                 </div>
               </transition>
             </div>
+            <div v-if="tickets.length > 3" style="margin-top:10px;text-align:center;color:#888;font-size:14px;">스크롤하여 더 많은 티켓을 확인하세요</div>
           </div>
         </div>
       </div>
@@ -189,6 +195,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 // 화면 렌더에 필요한 기본 변수 선언 (없으면 추가)
+
 
 
 
@@ -229,46 +236,49 @@ const hoveredTicket = ref(null);
 
 
 
-const tickets = [
-  {
-    id: 1,
-    title: 'NC 다이노스 vs 한화 이글스',
-    date: '2025년 7월 23일',
-    time: '오후 6시 30분',
-    landers: false,
-  },
-  {
-    id: 2,
-    title: '롯데 자이언츠 vs KIA 타이거즈',
-    date: '2025년 7월 23일',
-    time: '오후 6시 30분',
-    landers: false,
-  },
-  {
-    id: 3,
-    title: 'LANDERS vs 키움 히어로즈',
-    date: '2025년 7월 23일',
-    time: '오후 6시 30분',
-    landers: true,
-    price: 14000,
-    section: '내야 1루석',
-    row: 'A',
-    seat: '15-16',
-    gate: 'MAIN GATE',
-    provider: '네이버 1루석',
-    ticketId: 'T240724001',
-    stadium: '인천 SSG 랜더스 필드',
-    transferNotice: [
-      '양도 신청 후 취소는 불가능합니다.',
-      '매칭 완료 시 알림이 전송됩니다.',
-      '양도료는 경기 완료 후 지급됩니다.'
-    ]
-  },
-];
+import axios from 'axios';
+import { API_CONFIG } from '@/config/api.config.js';
+const { TICKET } = API_CONFIG;
+import { teamColortoEnum } from '@/utils/teamColor.js';
+import { getEnumTeamName } from '@/utils/teamNameMap.js';
+import http from '@/utils/http'
+
+const tickets = ref([]);
+const ticketLoading = ref(false);
+const ticketError = ref('');
+
+async function fetchTickets(platform) {
+  showTickets.value = true;
+  activeTab.value = platform === 'NOL' ? 'NOL' : '티켓링크';
+  ticketLoading.value = true;
+  ticketError.value = '';
+  try {
+    const res = await http.get(`tickets/platform/${platform}`);
+    tickets.value = res.data.map(ticket => {
+      const homeKor = Object.keys(teamNameToEnum).find(
+        key => teamNameToEnum[key] === ticket.game.home
+      ) || ticket.game.home;
+      const awayKor = Object.keys(teamNameToEnum).find(
+        key => teamNameToEnum[key] === ticket.game.away
+      ) || ticket.game.away;
+      return {
+        ...ticket,
+        homeKor,
+        awayKor,
+        color: teamColortoEnum[homeKor] ? `#${teamColortoEnum[homeKor]}` : '#395b8c',
+        header: `${awayKor} vs ${homeKor}`,
+        statusText: ticket.status === 'BEING_ASSIGNMENT' ? '응모 진행중' : ticket.status === 'TRANSACTION_COMPLETE' ? '응모 완료' : ticket.status === 'BEING_PAYING' ? '결제중' : '',
+      };
+    });
+  } catch (e) {
+    ticketError.value = '티켓 불러오기에 실패했습니다.';
+    tickets.value = [];
+  } finally {
+    ticketLoading.value = false;
+  }
+}
 
 const router = useRouter();
-
-
 
 function handleApply(ticket) {
   selectedTicket.value = ticket;
