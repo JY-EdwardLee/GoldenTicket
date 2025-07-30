@@ -7,7 +7,7 @@ import lombok.Data;
 public class Ticket {
 
     Long ticketId;
-    String ticketStatus;
+    TicketStatus ticketStatus;
     int price;
     Long gameId;
     String seat;

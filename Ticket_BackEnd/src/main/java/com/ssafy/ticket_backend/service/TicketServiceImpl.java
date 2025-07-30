@@ -9,6 +9,7 @@ import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.Game;
 import com.ssafy.ticket_backend.model.OtherPlatformTicket;
 import com.ssafy.ticket_backend.model.Ticket;
+import com.ssafy.ticket_backend.model.TicketStatus;
 import com.ssafy.ticket_backend.model.User;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,15 +37,16 @@ public class TicketServiceImpl implements TicketService {
                 throw new TicketTransferException("잘못된 티켓입니다.");
             }
 
-            if (!ticket.getTicketStatus().equals("양도 전")) {  // 양도 전 티켓이 아니라면
-                throw new TicketTransferException("잘못된 티켓입니다.");
+            if (!ticket.getTicketStatus()
+                .equals(TicketStatus.BEFORE_ASSIGNMENT)) {  // 양도 전 티켓이 아니라면
+                throw new TicketTransferException("양도 전 티켓이 아닙니다.");
             }
 
             if (game.isEnded()) {  // 이미 끝난 경기라면
                 throw new TicketTransferException("이미 종료된 경기입니다.");
             }
 
-            ticket.setTicketStatus("양도 중");
+            ticket.setTicketStatus(TicketStatus.BEING_ASSIGNMENT);
 
             ticketMapper.updateTicket(ticket);
 
@@ -80,33 +82,54 @@ public class TicketServiceImpl implements TicketService {
         List<OtherPlatformTicket> otherPlatformTickets = ticketMapper.selectTicketsFromOtherPlatform(
             userEmail, platform);
 
-        List<Ticket> tickets = new ArrayList<>();
         List<TicketResponse> ticketResponses = new ArrayList<>();
 
+        // 다른 플랫폼에서 티켓을 가져온 후, 선별하여 tickets에 등록
         for (OtherPlatformTicket opt : otherPlatformTickets) {
-            Ticket ticket = new Ticket();
+            List<Game> games = gameMapper.selectGameByDateAndTeam(
+                opt.getGameDatetime().toLocalDate(), opt.getHomeTeam());
 
-            ticket.setPrice(opt.getPrice());
-            ticket.setSeat(opt.getSeat());
+            for (Game g : games) {
+                // 다른 플랫폼의 티켓이 이미 등록되어 있으면 생략
+                if (ticketMapper.selectTicketByGame(g.getGameId(), opt.getSeat(),
+                    user.getUserId())) {
+                    continue;
+                }
 
-            Game game = gameMapper.selectGameByDateAndTeam(opt.getGameDatetime().toLocalDate(),
-                opt.getHomeTeam()).get(0);
+                // 티켓 정보에 등록
+                Ticket ticket = new Ticket();
 
-            ticket.setGameId(game.getGameId());
-            ticket.setSellerId(user.getUserId());
+                ticket.setPrice(opt.getPrice());
+                ticket.setSeat(opt.getSeat());
+                ticket.setTicketStatus(TicketStatus.BEFORE_ASSIGNMENT);
+                ticket.setGameId(g.getGameId());
+                ticket.setSellerId(user.getUserId());
 
-            tickets.add(ticket);
-            ticketMapper.insertTicket(ticket);
+                ticketMapper.insertTicket(ticket);
+            }
+        }
 
-            TicketResponse.GameResponse gameResponse = new TicketResponse.GameResponse(
-                game.getGameId(), game.getGameDateTime(), game.getHomeTeam(), game.getAwayTeam());
+        List<Ticket> tickets = ticketMapper.selectTicketsByUserId(user.getUserId());
+
+        for (Ticket ticket : tickets) {
+            Game game = gameMapper.selectGameByGameId(ticket.getGameId());
+
+            // 게임이 취소되거나 종료되었다면
+            if (game.isCanceled() || game.isEnded()) {
+                continue;
+            }
 
             TicketResponse ticketResponse = new TicketResponse();
+
             ticketResponse.setTicketId(ticket.getTicketId());
             ticketResponse.setStatus(ticket.getTicketStatus());
             ticketResponse.setPrice(ticket.getPrice());
             ticketResponse.setSeat(ticket.getSeat());
-            ticketResponse.setGame(gameResponse);
+            ticketResponse.setGame(
+                new GameResponse(game.getGameId(), game.getGameDateTime(), game.getHomeTeam(),
+                    game.getAwayTeam()));
+
+            ticketResponse.setWaitNumber(ticketMapper.selectWaitListByGameId(game.getGameId()));
 
             ticketResponses.add(ticketResponse);
         }

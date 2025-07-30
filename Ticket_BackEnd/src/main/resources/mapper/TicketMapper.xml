@@ -60,4 +60,35 @@
     )
   </insert>
 
+  <select id="selectTicketByGame" resultType="boolean">
+    SELECT EXISTS (
+    SELECT 1
+    FROM tickets
+    WHERE game_id = #{gameId}
+    AND seat = #{seat}
+    AND seller_id = #{userId}
+    )
+  </select>
+
+  <select id="selectTicketsByUserId" resultType="com.ssafy.ticket_backend.model.Ticket">
+    SELECT
+    ticket_id,
+    ticket_status,
+    price,
+    game_id,
+    seat,
+    seller_id,
+    buyer_id,
+    transaction_date,
+    matched_date,
+    image
+    FROM tickets
+    WHERE buyer_id = #{userId}
+  </select>
+
+  <select id="selectWaitListByGameId" resultType="int">
+    SELECT COUNT(*)
+    FROM waitlists
+    WHERE game_id = #{gameId}
+  </select>
 </mapper>

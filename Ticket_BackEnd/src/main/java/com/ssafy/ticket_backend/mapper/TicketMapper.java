@@ -18,4 +18,10 @@ public interface TicketMapper {
         @Param("platform") String platform);
 
     void insertTicket(Ticket ticket);
+
+    boolean selectTicketByGame(Long gameId, String seat, Long userId);
+
+    List<Ticket> selectTicketsByUserId(Long userId);
+
+    int selectWaitListByGameId(Long gameId);
 }
