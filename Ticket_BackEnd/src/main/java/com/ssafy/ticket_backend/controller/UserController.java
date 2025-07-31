@@ -238,7 +238,7 @@ public class UserController {
     }
 
     /**
-     * 회원가입 처리
+     * 회원가입 
      *
      * @param userSignupRequest 회원가입 요청 정보
      * @return JwtTokenResponse 토큰 응답

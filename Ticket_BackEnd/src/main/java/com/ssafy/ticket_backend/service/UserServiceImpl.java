@@ -22,8 +22,11 @@ import com.ssafy.ticket_backend.model.Game;
 import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.Transaction;
 import com.ssafy.ticket_backend.model.User;
+import com.ssafy.ticket_backend.model.UserRole;
 import com.ssafy.ticket_backend.model.Waitlist;
 import com.ssafy.ticket_backend.util.JwtUtil;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cglib.core.Local;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
@@ -81,7 +85,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 일반 회원가입 처리
+     * 일반 회원 가입
      *
      * @param userSignupRequest 회원가입 요청 정보
      * @return JWT 토큰(access, refresh)
@@ -90,6 +94,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public JwtTokenResponse signup(UserSignupRequest userSignupRequest) {
         try {
+            // 나이 계산
+            String birthDateStr = userSignupRequest.getBirthDate();
+            LocalDate birthDate = LocalDate.parse(birthDateStr);
+            LocalDate today = LocalDate.now();
+            Period period = Period.between(birthDate, today);
+            int age = period.getYears();
+
+            // 나이에 따라 userRole 설정
+            UserRole userRole = (age >= 50) ? UserRole.SENIOR : UserRole.USER;
+            userSignupRequest.setUserRole(userRole);
+
             userMapper.insertUser(userSignupRequest);
         } catch (DuplicateKeyException e) {
             throw new UserSignupException("중복된 이메일입니다.");
