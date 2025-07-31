@@ -3,7 +3,7 @@ variables:
   BUILD_DIR: dist        # 빌드 결과물 디렉토리
 
 frontend_build:
-  image: node:22
+  image: node:24
   stage: build
   script:
     - echo "🏗️ Building frontend..."
@@ -16,7 +16,6 @@ frontend_build:
     expire_in: 1 hour
   only:
     - master
-    - feature/frontend-cicd
 
 frontend_deploy:
   image: ubuntu:20.04  # SSH 명령어 사용을 위해
