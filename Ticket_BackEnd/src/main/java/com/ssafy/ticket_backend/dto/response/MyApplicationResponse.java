@@ -15,6 +15,8 @@ public class MyApplicationResponse {
     private Long waitlist_id;
     private WaitlistStatus status;
     private LocalDateTime date;
+    private LocalDateTime matchedDate;
+    private int price;
     private GameResponse game;
 
     public void waitlistToMyApplicationResponse(Waitlist waitlist) {

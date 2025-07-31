@@ -403,6 +403,14 @@ public class UserServiceImpl implements UserService {
             myApplicationResponse.waitlistToMyApplicationResponse(waitlist);
             myApplicationResponse.setGame(game.toGameResponse());
 
+            if (waitlist.getTransactionId() != null) {
+                Ticket ticket = transactionMapper.selectTicketByTransactionId(
+                    waitlist.getTransactionId());
+
+                myApplicationResponse.setMatchedDate(ticket.getMatchedDate());
+                myApplicationResponse.setPrice(ticket.getPrice());
+            }
+
             myApplicationResponses.add(myApplicationResponse);
         }
 

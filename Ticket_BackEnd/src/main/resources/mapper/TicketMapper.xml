@@ -97,6 +97,7 @@
     waitlist_id AS id,
     user_id AS userId,
     game_id AS gameId,
+    transaction_id AS transactionId,
     created_at AS createdAt,
     waitlist_status AS status
     FROM waitlists

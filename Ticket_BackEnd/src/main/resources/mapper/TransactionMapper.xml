@@ -42,4 +42,13 @@
     WHERE
     buyer_id = #{userId}
   </select>
+
+  <select id="selectTicketByTransactionId" resultType="com.ssafy.ticket_backend.model.Ticket"
+    parameterType="long">
+    SELECT t.*
+    FROM tickets t
+    JOIN transaction_states ts ON t.ticket_id = ts.ticket_id
+    WHERE ts.transaction_id = #{transactionId}
+  </select>
+
 </mapper>
