@@ -1,46 +1,34 @@
-# image: node:11
+variables:
+  FRONTEND_DIR: Ticket-FrontEnd  # 프론트엔드 디렉토리 경로 (프로젝트 구조에 맞게 수정)
+  BUILD_DIR: dist        # 빌드 결과물 디렉토리
 
-# stages:
-#   - build
-#   - deploy
-
-# variables:
-#   EC2_HOST: i13a109.p.ssafy.io
-#   EC2_USER: ubuntu  # 필요 시
-
-# before_script:
-#   - apt-get update -y && apt-get install -y openssh-client rsync
-#   - eval $(ssh-agent -s)
-#   - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-#   - mkdir -p ~/.ssh
-#   - chmod 700 ~/.ssh
-#   - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
-
-# build:
-#   stage: build
-#   script:
-#     - npm install
-#     - npm run build
-#   artifacts:
-#     paths:
-#       - dist/
-
-# deploy:
-#   stage: deploy
-#   script:
-#     - rsync -avz --delete dist/ $EC2_USER@$EC2_HOST:/var/www/html/
-#     - ssh $EC2_USER@$EC2_HOST "sudo systemctl restart nginx"
-#   only:
-#     - master
-#     - feature/frontend-cicd  # 테스트용 브랜치 추가
+frontend_build:
+  image: node:18
+  stage: build
+  script:
+    - echo "🏗️ Building frontend..."
+    - cd $FRONTEND_DIR     # 프론트엔드 디렉토리로 이동
+    - npm install
+    - npm run build
+  artifacts:
+    paths:
+      - $FRONTEND_DIR/$BUILD_DIR/  # 빌드 결과물 저장
+    expire_in: 1 hour
+  only:
+    - master
+    - feature/frontend-cicd
 
 frontend_deploy:
-  image: node:18
+  image: ubuntu:20.04  # SSH 명령어 사용을 위해
   stage: deploy
+  before_script:
+    - apt-get update -y && apt-get install -y openssh-client rsync
   script:
-    - echo "🎉 Frontend pipeline test completed!"
-    - echo "Ready for actual deployment"
-  # dependencies:           # 이 부분 제거
-  #   - frontend_build
+    - echo "🚀 Deploying frontend..."
+    # 기존 .gitlab-ci.yml의 SSH 설정을 그대로 활용
+    - rsync -avz --delete -e "ssh -i ~/.ssh/id_rsa" $FRONTEND_DIR/$BUILD_DIR/ $EC2_USER@$EC2_HOST:/var/www/html/
+    - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "sudo systemctl restart nginx"
+  dependencies:
+    - frontend_build
   only:
-    - feature/frontend-cicd
+    - master
