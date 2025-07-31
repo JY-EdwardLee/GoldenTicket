@@ -57,7 +57,7 @@ const routes = [
       { path: 'purchase/:id', name: 'PurchaseDetail', component: PurchaseDetailComponent }
     ]
   },
-  ];
+];
 
 const router = createRouter({
   history: createWebHistory(),
@@ -69,15 +69,14 @@ const router = createRouter({
       name: 'OAuthCallback',
       component: OAuthCallbackView,
       meta: { requiresAuth: false }
-    },
-    // 기존 라우트 유지
-    ...routes
+    }
   ],
   scrollBehavior(to, from, savedPosition) {
     // 페이지 전환 시 스크롤을 맨 위로 이동
     return savedPosition || { top: 0 };
   }
 });
+
 
 
 // 네비게이션 가드 설정
