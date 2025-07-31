@@ -49,6 +49,8 @@ dependencies {
     // 크롤링(selenum)
     implementation 'org.seleniumhq.selenium:selenium-java:4.20.0'
     implementation 'org.seleniumhq.selenium:selenium-chrome-driver:4.20.0'
+    // 웹소켓
+    implementation 'org.springframework.boot:spring-boot-starter-websocket' // 웹소켓 의존성 추가
 }
 
 tasks.named('test') {
