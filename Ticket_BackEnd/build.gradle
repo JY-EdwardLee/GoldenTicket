@@ -46,6 +46,9 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // AWS S3
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.700'
+    // 크롤링(selenum)
+    implementation 'org.seleniumhq.selenium:selenium-java:4.20.0'
+    implementation 'org.seleniumhq.selenium:selenium-chrome-driver:4.20.0'
 }
 
 tasks.named('test') {
