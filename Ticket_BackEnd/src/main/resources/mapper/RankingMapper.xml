@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ticket_backend.mapper.RankingMapper">
+
+  <!-- 유저 양도 랭킹 조회 (상위 3명)-->
+  <select id="selectUserRanking"
+    resultType="com.ssafy.ticket_backend.dto.response.UserRankingResponse">
+    SELECT
+    user_name AS userName,
+    transfer_number AS transferAllCount
+    ORDER BY transferAllCount DESC
+    LIMIT 3
+  </select>
+
+
+  <!-- 팀별 양도 랭킹 조회 (상위 3팀)-->
+  <select id="selectTeamRanking"
+    resultType="com.ssafy.ticket_backend.dto.response.TeamRankingResponse">
+    SELECT
+    my_team AS teamName,
+    SUM(transfer_number) AS transferAllCount
+    FROM users
+    GROUP BY my_team
+    ORDER BY transferAllCount DESC
+    LIMIT 3
+  </select>
+</mapper>
