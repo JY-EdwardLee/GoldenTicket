@@ -20,10 +20,14 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
+        http
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(authorize -> authorize
+                // 웹소켓 핸드쉐이크 요청 허용
+                .requestMatchers("/ws-notify/**").permitAll()  // 혹은 인증 허용에 맞게 조정
+                .anyRequest().authenticated()  // 나머지는 인증 필요
+            )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-//
 //        http
 //            .csrf(AbstractHttpConfigurer::disable)
 //            .cors(cors -> {}) // CORS 활성화
