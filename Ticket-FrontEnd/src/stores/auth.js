@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { API_CONFIG } from '@/config/api.config';
+import http from '@/utils/http';
 
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
@@ -46,7 +47,7 @@ async function logout() {
     localStorage.removeItem('user');
     
     // Then make the API call to invalidate the session
-    await axios.post(API_CONFIG.AUTH.LOGOUT, { withCredentials: true });
+    await http.post(API_CONFIG.AUTH.LOGOUT, { withCredentials: true });
   } catch (error) {
     console.error('Logout error:', error);
     // Even if the API call fails, we still want to clear the local state
