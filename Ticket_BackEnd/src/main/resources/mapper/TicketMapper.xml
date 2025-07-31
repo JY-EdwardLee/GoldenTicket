@@ -117,9 +117,10 @@
   <insert id="insertOtherPlatformTicket"
     parameterType="com.ssafy.ticket_backend.model.OtherPlatformTicket">
     INSERT INTO other_platform
-    (platform, price, seat, game_datetime, home_team, away_team, user_email)
+    (platform, price, seat, game_datetime, home_team, away_team, stadium, user_email)
     VALUES
-    (#{platform}, #{price}, #{seat}, #{gameDatetime}, #{homeTeam}, #{awayTeam}, #{userEmail})
+    (#{platform}, #{price}, #{seat}, #{gameDatetime}, #{homeTeam}, #{awayTeam}, #{stadium}
+    ,#{userEmail})
   </insert>
 
 

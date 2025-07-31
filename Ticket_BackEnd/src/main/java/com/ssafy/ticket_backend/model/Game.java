@@ -7,21 +7,28 @@ import lombok.Data;
 @Data
 public class Game {
 
-    Long gameId;
-    LocalDateTime gameDateTime;
-    BaseballTeams homeTeam;
-    BaseballTeams awayTeam;
-    boolean isCanceled;
-    boolean isEnded;
+  Long gameId;
+  LocalDateTime gameDateTime;
+  BaseballTeams homeTeam;
+  BaseballTeams awayTeam;
+  boolean isCanceled;
+  boolean isEnded;
+  // 추가
+  Stadium stadium;
 
-    public GameResponse toGameResponse() {
-        GameResponse gameResponse = new GameResponse();
+  // MyBatis 매핑을 위한 문자열 필드 (not null 문제 혹시나)
+  String homeTeamString;
+  String awayTeamString;
+  String stadiumString;
 
-        gameResponse.setId(gameId);
-        gameResponse.setDate(gameDateTime);
-        gameResponse.setHome(homeTeam);
-        gameResponse.setAway(awayTeam);
+  public GameResponse toGameResponse() {
+    GameResponse gameResponse = new GameResponse();
 
-        return gameResponse;
-    }
+    gameResponse.setId(gameId);
+    gameResponse.setDate(gameDateTime);
+    gameResponse.setHome(homeTeam);
+    gameResponse.setAway(awayTeam);
+
+    return gameResponse;
+  }
 }
