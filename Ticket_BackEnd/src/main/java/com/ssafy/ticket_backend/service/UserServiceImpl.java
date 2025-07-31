@@ -443,8 +443,15 @@ public class UserServiceImpl implements UserService {
      * @param email
      */
     @Override
-    public void deleteUserByEmail(String email) {
+    public void deleteUserByEmail(String accessToken) {
+        String email = jwtUtil.getUserEmail(accessToken);
+
+        // DB에서 사용자 삭제
         userMapper.deleteUserByEmail(email);
+        // Redis에서 Refresh Token 삭제
+        jwtUtil.addToBlackList(accessToken);
+        // Access Token을 블랙리스트에 등록
+        jwtUtil.deleteRefreshToken(email);
     }
 
     /**

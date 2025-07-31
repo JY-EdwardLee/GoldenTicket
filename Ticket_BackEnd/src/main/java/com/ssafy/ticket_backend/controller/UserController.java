@@ -305,8 +305,11 @@ public class UserController {
      * @return
      */
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        userService.deleteUserByEmail(userDetails.getUsername());
+    public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String authHeader) {
+
+        String accessToken = authHeader.substring(7);
+
+        userService.deleteUserByEmail(accessToken);
 
         return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }

@@ -50,7 +50,7 @@ public interface UserService {
     void patchMyPage(String email, UserPatchRequest userPatchRequest);
 
     // 회원 탈퇴
-    void deleteUserByEmail(String email);
+    void deleteUserByEmail(String accessToken);
 
     // 나의 응모
     List<MyApplicationResponse> selectApplicationsByUser(String email);
