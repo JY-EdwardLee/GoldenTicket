@@ -18,29 +18,29 @@
           
           <!-- 티켓 이미지 -->
           <div class="ticket-image">
-            <img :src="generateRandomImage(purchase.id)" :alt="purchase.gameTitle" @error="handleImageError">
+            <img :src="purchase.ticket.image" :alt="purchase.ticket.game.title">
           </div>
           
           <!-- 티켓 정보 -->
           <div class="ticket-info">
-            <h3 class="game-title">{{ purchase.gameTitle }}</h3>
+            <h3 class="game-title">{{ purchase.ticket.game.title }}</h3>
             <div class="game-details">
               <div class="detail-row">
                 <span class="icon">📅</span>
-                <span class="label">{{ purchase.gameDate }}</span>
-                <span class="value">{{ purchase.gameTime }}</span>
+                <span class="label">{{ purchase.ticket.game.date }}</span>
+                <span class="value">{{ purchase.ticket.game.time }}</span>
               </div>
               <div class="detail-row">
                 <span class="icon">📍</span>
-                <span class="label">{{ purchase.stadium }}</span>
+                <span class="label">{{ purchase.ticket.game.home }}</span>
               </div>
               <div class="detail-row">
                 <span class="icon">🎟️</span>
-                <span class="label">{{ purchase.seatInfo }}</span>
+                <span class="label">{{ purchase.ticket.seat }}</span>
               </div>
               <div class="detail-row">
                 <span class="icon">💰</span>
-                <span class="label">{{ purchase.price }}</span>
+                <span class="label">{{ purchase.ticket.price }}</span>
               </div>
             </div>
             
@@ -68,79 +68,56 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { API_CONFIG } from '@/config/api.config'
+import http from '@/utils/http'
 
 const router = useRouter()
 
 // 구매 내역 데이터 (실제로는 API에서 가져올 데이터)
 const purchases = ref([
-  {
-    id: 1,
-    gameTitle: 'SSG 랜더스 vs KIA 타이거즈',
-    gameDate: '2025.07.30',
-    gameTime: '18:30',
-    stadium: '인천 문학경기장',
-    seatInfo: '304구역 1열',
-    price: '25,000원',
-    purchaseDate: '2025.07.25 14:32',
-    image: 'https://via.placeholder.com/120x80/ff6b35/ffffff?text=SSG+vs+KIA'
-  },
-  {
-    id: 2,
-    gameTitle: '두산 베어스 vs 한화 이글스',
-    gameDate: '2025.08.01',
-    gameTime: '19:00',
-    stadium: '잠실야구장',
-    seatInfo: '208구역 8열',
-    price: '30,000원',
-    purchaseDate: '2025.07.24 11:20',
-    image: 'https://via.placeholder.com/120x80/002c5f/ffffff?text=두산+vs+한화'
-  },
-  {
-    id: 3,
-    gameTitle: 'LG 트윈스 vs KT 위즈',
-    gameDate: '2025.08.01',
-    gameTime: '14:00',
-    stadium: '잠실야구장',
-    seatInfo: '105구역 12열',
-    price: '22,000원',
-    purchaseDate: '2025.07.23 16:45',
-    image: 'https://via.placeholder.com/120x80/c70025/ffffff?text=LG+vs+KT'
-  }
+      { "transactionId": 8,
+        "ticket": {
+            "ticketId": 225,
+            "image": '/src/assets/logo/KT.svg',
+            "status": "BEFORE_ASSIGNMENT",
+            "price": 15499,
+            "game": {
+                "id": 22,
+                "date": "2025-08-03T17:00:00",
+                "home": "SAMSUNG_LIONS",
+                "away": "SSG_LANDERS"
+            },
+            "seat": "내야 178구역 2열 10번",
+            "waitNumber": 0
+        }},
 ])
-
-// 랜덤 이미지 생성 함수
-const generateRandomImage = (id) => {
-  const colors = [
-    'ff6b35', 'e55a2e', '3498db', '2ecc71', 'f39c12', 
-    'e74c3c', '9b59b6', '1abc9c', '34495e', 'f1c40f'
-  ]
-  const themes = [
-    'Baseball', 'Stadium', 'Ticket', 'Game', 'Sports',
-    'Match', 'League', 'Team', 'Fan', 'Victory'
-  ]
-  
-  const colorIndex = id % colors.length
-  const themeIndex = id % themes.length
-  const color = colors[colorIndex]
-  const theme = themes[themeIndex]
-  
-  // Unsplash API를 사용한 랜덤 야구 관련 이미지
-  return `https://picsum.photos/seed/${id}-${theme}/120/80?blur=1`
-}
 
 // 상세 페이지로 이동
 const goToPurchaseDetail = (purchaseId) => {
   router.push(`/mypage/purchase/${purchaseId}`)
 }
 
-// 이미지 로드 실패 시 대체 이미지
-const handleImageError = (event) => {
-  const fallbackColors = ['ff6b35', '3498db', '2ecc71', 'f39c12', 'e74c3c']
-  const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)]
-  event.target.src = `https://via.placeholder.com/120x80/${randomColor}/ffffff?text=⚾`
+const isLoading = ref(false)
+
+const fetchPurchases = async () => {
+  try {
+    isLoading.value = true
+    const response = await http.get(API_CONFIG.USER.PAYMENTS)
+    // purchases.value = response.data
+    console.log(purchases.value)
+  } catch (error) {
+    console.error('구매 내역 조회 중 오류 발생:', error)
+  } finally {
+    isLoading.value = false
+  }
 }
+
+onMounted(() => {
+  fetchPurchases()
+})
+
 </script>
 
 <style scoped>
@@ -201,7 +178,7 @@ const handleImageError = (event) => {
 .ticket-image {
   flex-shrink: 0;
   width: 120px;
-  height: 80px;
+  /* height: 80px; */
   border-radius: 8px;
   overflow: hidden;
   background: #f8f9fa;

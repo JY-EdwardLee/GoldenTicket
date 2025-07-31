@@ -11,7 +11,7 @@
     </ul>
     <div class="auth-links">
       <template v-if="isLoggedIn">
-        <router-link to="/" class="auth-link">마이페이지</router-link>
+        <router-link to="/mypage" class="auth-link">마이페이지</router-link>
         <a href="#" @click.prevent="handleLogout" class="auth-link">로그아웃</a>
       </template>
       <a v-else href="#" @click.prevent="openLoginModal" class="auth-link">로그인 또는 회원가입</a>
@@ -67,6 +67,8 @@ const handleLogout = async () => {
   try {
     await authStore.logout();
     isLoggedIn.value = false;
+    authStore.setRedirectPath('/');
+    window.location.href = '/';
   } catch (error) {
     console.error('Logout failed:', error);
   }

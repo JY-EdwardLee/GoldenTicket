@@ -17,7 +17,7 @@
           <label>이름</label>
           <div class="input-wrapper">
             <div class="input-icon">👤</div>
-            <input type="text" :value="user?.userName || ''" readonly>
+            <input type="text" :value="user?.name || ''" readonly>
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -39,7 +39,7 @@
           <label>닉네임</label>
           <div class="input-wrapper">
             <div class="input-icon">🏷️</div>
-            <input type="text" :value="user?.nickName || ''" readonly>
+            <input type="text" :value="user?.nickname || ''" readonly>
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -172,11 +172,12 @@ import { ref, computed, onMounted } from 'vue'
 import { useTeamThemeStore } from '../../stores/teamTheme.js'
 import { useAuthStore } from '../../stores/auth.js'
 
-// 테마 스토어 사용
-const themeStore = useTeamThemeStore
+// 스토어 초기화
+const themeStore = useTeamThemeStore()
 const authStore = useAuthStore()
-const userInfo = localStorage.getItem('userInfo')
-const user = ref(null)
+
+// 사용자 정보를 반응형으로 참조
+const user = computed(() => authStore.user.value || {})
 
 // 팀 정보 데이터
 const teams = {
@@ -238,6 +239,24 @@ const selectedTeam = ref('SSG_')
 // 현재 팀 정보
 const currentTeam = computed(() => teams[selectedTeam.value] || teams.SSG_)
 
+// 컴포넌트 마운트 시 사용자 정보 로드 및 테마 초기화
+onMounted(async () => {
+  if (!authStore.user.value) {
+    await authStore.getUserInfo()
+  }
+  
+  // 저장된 팀이 있으면 해당 팀으로 설정
+  const savedTeam = user.value.myTeam
+  if (savedTeam) {
+    const teamKey = Object.keys(teams).find(key => teams[key].name === savedTeam)
+    if (teamKey) {
+      selectedTeam.value = teamKey
+    }
+  }
+  
+  themeStore.initializeTheme()
+})
+
 // 관심 팀 변경 함수
 const changeFavoriteTeam = () => {
   if (selectedTeam.value) {
@@ -266,29 +285,65 @@ const handleImageError = (event) => {
   event.target.style.display = 'none'
   const placeholder = event.target.nextElementSibling
   if (placeholder) {
-    placeholder.style.display = 'flex'
+
+// 테마 스토어 사용
+const themeStore = useTeamThemeStore
+const authStore = useAuthStore()
+
+// 팀 정보 데이터
+const teams = {
+  SSG_: {
+    name: 'SSG_LANDERS',
+    logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/SSG_Landers_logo.svg/1200px-SSG_Landers_logo.svg.png',
+    color: '#CE0E2D'
+  },
+  kiwoom: {
+    name: 'KIWOOM_HEROES',
+    logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/Kiwoom_Heroes_logo.svg/1200px-Kiwoom_Heroes_logo.svg.png',
+    color: '#820024'
+  },
+  lg: {
+    name: 'LG_TWINS',
+    logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/2/2f/LG_Twins_logo.svg/1200px-LG_Twins_logo.svg.png',
+    color: '#C41E3A'
+  },
+  kt: {
+    name: 'KT_WIZ',
+    logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/KT_Wiz_logo.svg/1200px-KT_Wiz_logo.svg.png',
+    color: '#000000'
+  },
+  kia: {
+    name: 'KIA_TIGERS',
+    logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/KIA_Tigers_logo.svg/1200px-KIA_Tigers_logo.svg.png',
+    color: '#DA291C'
+  },
+  nc: {
+    name: 'NC_DINOS',
+    logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/NC_Dinos_logo.svg/1200px-NC_Dinos_logo.svg.png',
+    color: '#315288'
+  },
+  samsung: {
+    name: 'SAMSUNG_LIONS',
+    logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/Samsung_Lions_logo.svg/1200px-Samsung_Lions_logo.svg.png',
+    color: '#074CA1'
+  },
+  lotte: {
+    name: 'LOTTE_GIANTS',
+    logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/Lotte_Giants_logo.svg/1200px-Lotte_Giants_logo.svg.png',
+    color: '#002E6D'
+  },
+  doosan: {
+    name: 'DOOSAN_BEAR',
+    logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/Doosan_Bears_logo.svg/1200px-Doosan_Bears_logo.svg.png',
+    color: '#131230'
+  },
+  hanwha: {
+    name: 'HANHWA_EAGLES',
+    logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/Hanwha_Eagles_logo.svg/1200px-Hanwha_Eagles_logo.svg.png',
+    color: '#FF6600'
   }
 }
 
-// 컴포넌트 마운트 시 테마 초기화
-onMounted(async () => {
-  await authStore.getUserInfo()
-  // 저장된 팀이 있으면 해당 팀으로 설정
-  const userInfo = localStorage.getItem('user')
-  console.log('userInfo : ', userInfo)
-  const savedTeam = authStore.user.value?.myTeam
-  console.log('savedTeam : ', savedTeam)
-  if (userInfo) {
-    user.value = JSON.parse(userInfo)
-  if (savedTeam) {
-    // 저장된 팀명으로 select 값 찾기, 지금 팀 key.name으로 되어 있음 바꿔야 함함
-    const teamKey = Object.keys(teams).find(key => teams[key].name === savedTeam)
-    if (teamKey) {
-      selectedTeam.value = teamKey
-    }
-  }
-  themeStore.initializeTheme()
-}})
 </script>
 
 <style scoped>
