@@ -205,9 +205,8 @@ public class CrawlerController {
                         if (teamItems.size() >= 2) {
                             // 첫 번째 팀 (원정팀)
                             try {
-                                WebElement awayTeamElement = teamItems.get(0)
-                                    .findElement(By.cssSelector(
-                                        "strong[class*='MatchBoxHeadToHeadArea_team']"));
+                                WebElement awayTeamElement = teamItems.get(0).findElement(
+                                    By.cssSelector("strong[class*='MatchBoxHeadToHeadArea_team']"));
                                 awayTeam = awayTeamElement.getText().trim();
                                 System.out.println("원정팀 파싱: " + awayTeam);
                             } catch (Exception e) {
@@ -217,9 +216,8 @@ public class CrawlerController {
 
                             // 두 번째 팀 (홈팀)
                             try {
-                                WebElement homeTeamElement = teamItems.get(1)
-                                    .findElement(By.cssSelector(
-                                        "strong[class*='MatchBoxHeadToHeadArea_team']"));
+                                WebElement homeTeamElement = teamItems.get(1).findElement(
+                                    By.cssSelector("strong[class*='MatchBoxHeadToHeadArea_team']"));
                                 homeTeam = homeTeamElement.getText().trim();
                                 System.out.println("홈팀 파싱: " + homeTeam);
                             } catch (Exception e) {
@@ -268,11 +266,10 @@ public class CrawlerController {
                             crawlMapper.insertGame(game);
                             System.out.println("경기 정보 저장 성공: " + game);
                         } else {
-                            System.out.println("⚠️ 경기 정보 누락으로 저장 건너뜀: " +
-                                "홈팀=" + game.getHomeTeam() +
-                                ", 원정팀=" + game.getAwayTeam() +
-                                ", 경기장=" + game.getStadium() +
-                                ", 날짜=" + game.getGameDateTime());
+                            System.out.println(
+                                "⚠️ 경기 정보 누락으로 저장 건너뜀: " + "홈팀=" + game.getHomeTeam() + ", 원정팀="
+                                    + game.getAwayTeam() + ", 경기장=" + game.getStadium() + ", 날짜="
+                                    + game.getGameDateTime());
                         }
                         System.out.println(game);
 
