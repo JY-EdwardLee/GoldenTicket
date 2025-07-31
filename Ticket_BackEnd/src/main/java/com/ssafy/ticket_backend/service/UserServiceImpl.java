@@ -34,7 +34,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.core.Local;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpEntity;
@@ -400,7 +399,7 @@ public class UserServiceImpl implements UserService {
             Game game = gameMapper.selectGameByGameId(waitlist.getGameId());
 
             MyApplicationResponse myApplicationResponse = new MyApplicationResponse(
-                waitlist.getId(), game.toGameResponse());
+                waitlist.getId(), waitlist.getStatus(), game.toGameResponse());
 
             myApplicationResponses.add(myApplicationResponse);
         }
@@ -424,7 +423,7 @@ public class UserServiceImpl implements UserService {
             transactionResponse.setTicket(new TicketResponse(ticket));
         }
 
-        return null;
+        return transactionResponses;
     }
 
     @Override

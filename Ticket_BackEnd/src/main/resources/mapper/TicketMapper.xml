@@ -97,7 +97,8 @@
     waitlist_id AS id,
     user_id AS userId,
     game_id AS gameId,
-    created_at AS createdAt
+    created_at AS createdAt,
+    waitlist_status AS status
     FROM waitlists
     WHERE user_id = #{userId}
     ORDER BY created_at DESC
@@ -110,7 +111,7 @@
     matched_date = NOW()
     WHERE ticket_id = #{ticketId}
   </update>
-  
+
   <!-- other_platform 더미 데이터 생성용 -->
   <insert id="insertOtherPlatformTicket"
     parameterType="com.ssafy.ticket_backend.model.OtherPlatformTicket">

@@ -354,6 +354,7 @@ public class UserController {
         @AuthenticationPrincipal CustomUserDetails userDetails) {
         List<TransactionResponse> transactionResponses = userService.selectBuyListByUserId(
             userDetails.getUsername());
+        
         return ResponseEntity.ok(transactionResponses);
     }
 
