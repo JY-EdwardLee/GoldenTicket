@@ -3,6 +3,7 @@ package com.ssafy.ticket_backend.controller;
 import com.ssafy.ticket_backend.mapper.CrawlMapper;
 import com.ssafy.ticket_backend.model.BaseballTeams;
 import com.ssafy.ticket_backend.model.Game;
+import com.ssafy.ticket_backend.model.Stadium;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -15,6 +16,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
+/**
+ * 월별 경기일정 크롤링
+ */
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/crawler")
@@ -25,10 +30,14 @@ public class CrawlerController {
   // 팀 이름을 BaseballTeams enum으로 매핑하는 메서드
   private BaseballTeams mapTeamName(String teamName) {
     if (teamName == null || teamName.isEmpty()) {
+      System.out.println("팀 이름이 null이거나 비어있음");
       return null;
     }
 
-    switch (teamName.trim()) {
+    String trimmedTeamName = teamName.trim();
+    System.out.println("팀 이름 매핑 시도: '" + trimmedTeamName + "'");
+
+    switch (trimmedTeamName) {
       case "KIA":
         return BaseballTeams.KIA_TIGERS;
       case "삼성":
@@ -50,6 +59,42 @@ public class CrawlerController {
       case "키움":
         return BaseballTeams.KIWOOM_HEROES;
       default:
+        System.out.println("알 수 없는 팀 이름: '" + trimmedTeamName + "'");
+        return null;
+    }
+  }
+
+  // 경기장 이름을 Stadium enum으로 매핑하는 메서드
+  private Stadium mapStadiumName(String stadiumName) {
+    if (stadiumName == null || stadiumName.isEmpty()) {
+      System.out.println("경기장 이름이 null이거나 비어있음");
+      return null;
+    }
+
+    String trimmedStadiumName = stadiumName.trim();
+    System.out.println("경기장 이름 매핑 시도: '" + trimmedStadiumName + "'");
+
+    switch (trimmedStadiumName) {
+      case "잠실":
+        return Stadium.JAMSIL;
+      case "문학":
+        return Stadium.MUNHAK;
+      case "사직":
+        return Stadium.SAJIK;
+      case "광주":
+        return Stadium.GWANGJU;
+      case "창원":
+        return Stadium.CHANGWON;
+      case "대구":
+        return Stadium.DAEGU;
+      case "대전":
+        return Stadium.DAEJEON;
+      case "고척":
+        return Stadium.GOCHUK;
+      case "수원":
+        return Stadium.SUWON;
+      default:
+        System.out.println("알 수 없는 경기장: '" + trimmedStadiumName + "'");
         return null;
     }
   }
@@ -89,7 +134,7 @@ public class CrawlerController {
     WebDriver driver = new ChromeDriver();
 
     try {
-      String url = "https://m.sports.naver.com/kbaseball/schedule/index?category=kbo&date=2025-09-01";
+      String url = "https://m.sports.naver.com/kbaseball/schedule/index?category=kbo&date=2025-08-01";
       System.out.println("크롤링 시작: " + url);
       driver.get(url);
 
@@ -146,7 +191,7 @@ public class CrawlerController {
               stadium = "경기장 정보 없음";
             }
 
-            // 팀 정보 추출
+            // 혹시 NUll 값이 들어오는 문제점
             List<WebElement> teamItems = matchItem.findElements(
                 By.cssSelector("div[class*='MatchBoxHeadToHeadArea_team_item']"));
             String awayTeam = "";
@@ -154,14 +199,18 @@ public class CrawlerController {
             String awayScore = "";
             String homeScore = "";
 
+            System.out.println("팀 아이템 수: " + teamItems.size());
+
             if (teamItems.size() >= 2) {
               // 첫 번째 팀 (원정팀)
               try {
                 WebElement awayTeamElement = teamItems.get(0)
                     .findElement(By.cssSelector("strong[class*='MatchBoxHeadToHeadArea_team']"));
                 awayTeam = awayTeamElement.getText().trim();
+                System.out.println("원정팀 파싱: " + awayTeam);
               } catch (Exception e) {
                 awayTeam = "원정팀 정보 없음";
+                System.out.println("원정팀 파싱 실패: " + e.getMessage());
               }
 
               // 두 번째 팀 (홈팀)
@@ -169,8 +218,10 @@ public class CrawlerController {
                 WebElement homeTeamElement = teamItems.get(1)
                     .findElement(By.cssSelector("strong[class*='MatchBoxHeadToHeadArea_team']"));
                 homeTeam = homeTeamElement.getText().trim();
+                System.out.println("홈팀 파싱: " + homeTeam);
               } catch (Exception e) {
                 homeTeam = "홈팀 정보 없음";
+                System.out.println("홈팀 파싱 실패: " + e.getMessage());
               }
 
               // 스코어 추출
@@ -204,16 +255,26 @@ public class CrawlerController {
             game.setAwayTeam(mapTeamName(awayTeam));
             game.setCanceled("취소".equals(status));
             game.setEnded("종료".equals(status));
+            game.setStadium(mapStadiumName(stadium));
 
-            // **DB 업로드**
-            crawlMapper.insertGame(game);
+            // null 체크 후 DB 업로드
+            if (game.getHomeTeam() != null && game.getAwayTeam() != null
+                && game.getStadium() != null && game.getGameDateTime() != null) {
+              // MyBatis 매핑을 위한 문자열 필드 설정
+              game.setHomeTeamString(game.getHomeTeam().name());
+              game.setAwayTeamString(game.getAwayTeam().name());
+              game.setStadiumString(game.getStadium().name());
+
+              crawlMapper.insertGame(game);
+              System.out.println("경기 정보 저장 성공: " + game);
+            } else {
+              System.out.println("⚠️ 경기 정보 누락으로 저장 건너뜀: " +
+                  "홈팀=" + game.getHomeTeam() +
+                  ", 원정팀=" + game.getAwayTeam() +
+                  ", 경기장=" + game.getStadium() +
+                  ", 날짜=" + game.getGameDateTime());
+            }
             System.out.println(game);
-
-            // toString으로 출력
-            // TODO
-//            String gameInfo = game.toString() + "\n";
-//            result.append(gameInfo);
-//            System.out.print(gameInfo);
 
           } catch (Exception e) {
             String errorMsg = "⚠️ 경기 정보 파싱 실패: " + e.getMessage() + "\n";
@@ -233,3 +294,4 @@ public class CrawlerController {
     return result.toString();
   }
 }
+

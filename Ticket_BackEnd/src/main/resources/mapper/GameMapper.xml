@@ -50,7 +50,15 @@
 
   <!-- 더미 생성용 -->
   <select id="getAllGame">
-    SELECT * FROM games
+    SELECT
+    game_id,
+    game_datetime,
+    home_team,
+    away_team,
+    is_cancelled,
+    is_ended,
+    stadium
+    FROM games
     WHERE is_cancelled = FALSE AND is_ended = FALSE
   </select>
 

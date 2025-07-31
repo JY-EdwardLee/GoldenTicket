@@ -5,8 +5,8 @@
 <mapper namespace="com.ssafy.ticket_backend.mapper.CrawlMapper">
 
   <insert id="insertGame" parameterType="com.ssafy.ticket_backend.model.Game">
-    INSERT INTO games (game_datetime, home_team, away_team, is_cancelled, is_ended)
-    VALUES (#{gameDateTime}, #{homeTeam}, #{awayTeam}, #{isCanceled}, #{isEnded})
+    INSERT INTO games (game_datetime, home_team, away_team, is_cancelled, is_ended, stadium)
+    VALUES (#{gameDateTime}, #{homeTeamString}, #{awayTeamString}, #{isCanceled}, #{isEnded}, #{stadiumString})
   </insert>
 
 </mapper>

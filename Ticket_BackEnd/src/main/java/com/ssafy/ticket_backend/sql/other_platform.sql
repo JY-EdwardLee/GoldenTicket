@@ -7,5 +7,6 @@ CREATE TABLE Other_platform
     game_dateTime TIMESTAMP WITHOUT TIME ZONE NOT NULL,     -- game 정보와 일치
     home_team     VARCHAR(50)  NOT NULL,                    -- game 정보와 일치
     away_team     VARCHAR(50)  NOT NULL,                    -- game 정보와 일치
-    user_email character varying(255) COLLATE pg_catalog."default" NOT NULL,    --
+    stadium 	  VARCHAR(50)  NOT NULL,					-- stadium 추가
+    user_email character varying(255) COLLATE pg_catalog."default" NOT NULL    --
 );

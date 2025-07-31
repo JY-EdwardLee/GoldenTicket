@@ -13,6 +13,7 @@ public class OtherPlatformTicket {
   LocalDateTime gameDatetime;
   private BaseballTeams homeTeam;
   private BaseballTeams awayTeam;
-  // 추가
   private String userEmail;
+  // 추가
+  Stadium stadium;
 }
