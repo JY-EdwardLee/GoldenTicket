@@ -110,4 +110,15 @@
     matched_date = NOW()
     WHERE ticket_id = #{ticketId}
   </update>
+  
+  <!-- other_platform 더미 데이터 생성용 -->
+  <insert id="insertOtherPlatformTicket"
+    parameterType="com.ssafy.ticket_backend.model.OtherPlatformTicket">
+    INSERT INTO other_platform
+    (platform, price, seat, game_datetime, home_team, away_team, user_email)
+    VALUES
+    (#{platform}, #{price}, #{seat}, #{gameDatetime}, #{homeTeam}, #{awayTeam}, #{userEmail})
+  </insert>
+
+
 </mapper>
