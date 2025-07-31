@@ -37,8 +37,8 @@
 
   <!-- 대기열 추가 -->
   <insert id="insertWaitlist">
-    INSERT INTO waitlists (user_id, game_id)
-    VALUES (#{userId}, #{gameId})
+    INSERT INTO waitlists (user_id, game_id, waitlist_status)
+    VALUES (#{userId}, #{gameId}, 'BEING_WAITING`)
   </insert>
 
   <!-- 대기열 삭제 -->
@@ -47,5 +47,19 @@
     WHERE user_id = #{userId}
     AND game_id = #{gameId}
   </delete>
+
+  <!-- 더미 생성용 -->
+  <select id="getAllGame">
+    SELECT
+    game_id,
+    game_datetime,
+    home_team,
+    away_team,
+    is_cancelled,
+    is_ended,
+    stadium
+    FROM games
+    WHERE is_cancelled = FALSE AND is_ended = FALSE
+  </select>
 
 </mapper>

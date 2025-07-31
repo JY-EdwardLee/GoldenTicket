@@ -22,8 +22,11 @@ import com.ssafy.ticket_backend.model.Game;
 import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.Transaction;
 import com.ssafy.ticket_backend.model.User;
+import com.ssafy.ticket_backend.model.UserRole;
 import com.ssafy.ticket_backend.model.Waitlist;
 import com.ssafy.ticket_backend.util.JwtUtil;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +84,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 일반 회원가입 처리
+     * 일반 회원 가입
      *
      * @param userSignupRequest 회원가입 요청 정보
      * @return JWT 토큰(access, refresh)
@@ -90,6 +93,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public JwtTokenResponse signup(UserSignupRequest userSignupRequest) {
         try {
+            // 나이 계산
+            String birthDateStr = userSignupRequest.getBirthDate();
+            LocalDate birthDate = LocalDate.parse(birthDateStr);
+            LocalDate today = LocalDate.now();
+            Period period = Period.between(birthDate, today);
+            int age = period.getYears();
+
+            // 나이에 따라 userRole 설정
+            UserRole userRole = (age >= 50) ? UserRole.SENIOR : UserRole.USER;
+            userSignupRequest.setUserRole(userRole);
+
             userMapper.insertUser(userSignupRequest);
         } catch (DuplicateKeyException e) {
             throw new UserSignupException("중복된 이메일입니다.");
@@ -123,7 +137,7 @@ public class UserServiceImpl implements UserService {
         MultiValueMap<String, String> tokenParams = new LinkedMultiValueMap<>();
         tokenParams.add("grant_type", "authorization_code");
         tokenParams.add("client_id", kakaoApiKey);
-        tokenParams.add("redirect_uri", "http://i13a109.p.ssafy.io:8080/users/auth/kakao/callback");
+        tokenParams.add("redirect_uri", "http://localhost:8080/users/auth/kakao/callback");
         tokenParams.add("code", code);
 
         HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(tokenParams,
@@ -384,8 +398,18 @@ public class UserServiceImpl implements UserService {
         for (Waitlist waitlist : waitlists) {
             Game game = gameMapper.selectGameByGameId(waitlist.getGameId());
 
-            MyApplicationResponse myApplicationResponse = new MyApplicationResponse(
-                waitlist.getId(), game.toGameResponse());
+            MyApplicationResponse myApplicationResponse = new MyApplicationResponse();
+
+            myApplicationResponse.waitlistToMyApplicationResponse(waitlist);
+            myApplicationResponse.setGame(game.toGameResponse());
+
+            if (waitlist.getTransactionId() != null) {
+                Ticket ticket = transactionMapper.selectTicketByTransactionId(
+                    waitlist.getTransactionId());
+
+                myApplicationResponse.setMatchedDate(ticket.getMatchedDate());
+                myApplicationResponse.setPrice(ticket.getPrice());
+            }
 
             myApplicationResponses.add(myApplicationResponse);
         }
@@ -409,7 +433,7 @@ public class UserServiceImpl implements UserService {
             transactionResponse.setTicket(new TicketResponse(ticket));
         }
 
-        return null;
+        return transactionResponses;
     }
 
     @Override
@@ -440,11 +464,18 @@ public class UserServiceImpl implements UserService {
     /**
      * 회원 탈퇴
      *
-     * @param email
+     * @param accessToken
      */
     @Override
-    public void deleteUserByEmail(String email) {
+    public void deleteUserByEmail(String accessToken) {
+        String email = jwtUtil.getUserEmail(accessToken);
+
+        // DB에서 사용자 삭제
         userMapper.deleteUserByEmail(email);
+        // Redis에서 Refresh Token 삭제
+        jwtUtil.addToBlackList(accessToken);
+        // Access Token을 블랙리스트에 등록
+        jwtUtil.deleteRefreshToken(email);
     }
 
     /**

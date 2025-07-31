@@ -25,7 +25,7 @@ public class JwtUtil {
     private final RedisTemplate<String, String> redisTemplate;
 
     // 엑세스 토큰 만료 시간: 1시간
-    private final long EXPIRATION_TIME = 1000 * 20;
+    private final long EXPIRATION_TIME = 1000 * 60 * 60;
 
     // 리프레시 토큰 만료 시간 : 7일
     private final long REFRESH_TIME = 1000 * 60 * 60 * 24 * 7;
@@ -67,7 +67,7 @@ public class JwtUtil {
     }
 
     /**
-     * Redis에 저장된 리프레시 토큰 삭제 (로그아웃 시 호출)
+     * Redis에 저장된 리프레시 토큰 삭제 (로그아웃, 회원탈퇴 시 호출)
      *
      * @param email 사용자 이메일
      */
@@ -78,7 +78,7 @@ public class JwtUtil {
     }
 
     /**
-     * 엑세스 토큰을 블랙리스트에 등록 (로그아웃 시 호출)
+     * 엑세스 토큰을 블랙리스트에 등록 (로그아웃, 회원탈퇴 시 호출)
      *
      * @param 토큰 로그아웃 처리핳 엑세스 토큰 문자열
      */

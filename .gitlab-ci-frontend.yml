@@ -27,7 +27,7 @@ frontend_build:
     - npm uninstall rollup
     - npm install rollup --force
     
-    - npm run build
+    - npm run build 
     
   artifacts:
     paths:

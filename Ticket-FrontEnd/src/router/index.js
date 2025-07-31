@@ -53,10 +53,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   { path: '/bulletin/detail/:id', name: 'BoardDetail', component: BoardDetailView },
+  
+  // 사용자 가이드 페이지
   { path: '/guide', name: 'Guide', component: GuideView },
 
   // 결제 페이지
-  { path: '/payment', name: 'Payment', component: PaymentView },
+  { path: '/payment/:id', name: 'Payment', component: PaymentView },
   
   { 
     path: '/mypage', 

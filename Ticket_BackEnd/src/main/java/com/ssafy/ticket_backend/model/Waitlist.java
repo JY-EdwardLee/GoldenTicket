@@ -6,8 +6,10 @@ import lombok.Data;
 @Data
 public class Waitlist {
 
-    Long id;
-    Long userId;
-    Long gameId;
-    LocalDateTime createdAt;
+    private Long id;
+    private Long userId;
+    private Long gameId;
+    private Long transactionId;
+    private LocalDateTime createdAt;
+    private WaitlistStatus status;
 }

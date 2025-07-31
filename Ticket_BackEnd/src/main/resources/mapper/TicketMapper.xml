@@ -97,7 +97,9 @@
     waitlist_id AS id,
     user_id AS userId,
     game_id AS gameId,
-    created_at AS createdAt
+    transaction_id AS transactionId,
+    created_at AS createdAt,
+    waitlist_status AS status
     FROM waitlists
     WHERE user_id = #{userId}
     ORDER BY created_at DESC
@@ -110,4 +112,16 @@
     matched_date = NOW()
     WHERE ticket_id = #{ticketId}
   </update>
+
+  <!-- other_platform 더미 데이터 생성용 -->
+  <insert id="insertOtherPlatformTicket"
+    parameterType="com.ssafy.ticket_backend.model.OtherPlatformTicket">
+    INSERT INTO other_platform
+    (platform, price, seat, game_datetime, home_team, away_team, stadium, user_email)
+    VALUES
+    (#{platform}, #{price}, #{seat}, #{gameDatetime}, #{homeTeam}, #{awayTeam}, #{stadium}
+    ,#{userEmail})
+  </insert>
+
+
 </mapper>

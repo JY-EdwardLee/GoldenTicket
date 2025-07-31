@@ -53,7 +53,7 @@ public class TicketServiceImpl implements TicketService {
             TicketResponse ticketResponse = new TicketResponse(ticket);
             ticketResponse.setGame(
                 new GameResponse(game.getGameId(), game.getGameDateTime(), game.getHomeTeam(),
-                    game.getAwayTeam()));
+                    game.getAwayTeam(), game.getStadium()));
 
             return ticketResponse;
         } catch (TicketTransferException e) {
