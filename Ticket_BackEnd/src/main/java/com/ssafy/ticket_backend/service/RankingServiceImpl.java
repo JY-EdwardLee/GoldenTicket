@@ -25,7 +25,7 @@ public class RankingServiceImpl implements RankingService {
             userRankingResponse.setRank(rank++);
 
         }
-        return List.of();
+        return userRankingList;
     }
 
     // 팀별 양도 랭킹 조회
