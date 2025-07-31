@@ -3,7 +3,7 @@ variables:
   BUILD_DIR: dist        # 빌드 결과물 디렉토리
 
 frontend_build:
-  image: node:18
+  image: node:22
   stage: build
   script:
     - echo "🏗️ Building frontend..."
