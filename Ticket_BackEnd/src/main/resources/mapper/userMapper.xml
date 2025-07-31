@@ -120,4 +120,12 @@
     SET is_delete = TRUE
     WHERE email = #{email}
   </delete>
+
+  <!-- other_flatform 더미용도  -->
+  <select id="getUserEmailForDummy" resultType="String">
+    SELECT email FROM users
+    WHERE is_block = FALSE AND is_delete = FALSE
+  </select>
+
+
 </mapper>

@@ -48,4 +48,10 @@
     AND game_id = #{gameId}
   </delete>
 
+  <!-- 더미 생성용 -->
+  <select id="getAllGame">
+    SELECT * FROM games
+    WHERE is_cancelled = FALSE AND is_ended = FALSE
+  </select>
+
 </mapper>
