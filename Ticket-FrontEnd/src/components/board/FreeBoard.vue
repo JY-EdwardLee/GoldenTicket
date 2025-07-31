@@ -50,6 +50,7 @@ import BoardTable from './BoardTable.vue';
 import BoardPagination from './BoardPagination.vue';
 import { useRouter } from 'vue-router';
 import { boardAPI, BOARD_TYPES } from '@/api/board.js';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const searchValue = ref('');
@@ -142,13 +143,12 @@ const handlePageChange = (page) => {
 
 const handleWriteClick = () => {
   // TODO: 로그인 여부 확인 로직 추가
-  // const isLoggedIn = useAuthStore().isLoggedIn;
-  // if (!isLoggedIn) {
-  //   alert('로그인이 필요합니다.');
-  //   router.push('/login');
-  //   return;
-  // }
-  
+  const isAuthenticated = useAuthStore().isAuthenticated;
+  if (!isAuthenticated) {
+    alert('로그인이 필요합니다.');
+    router.push('/login');
+    return;
+  }
   // 자유게시판 타입을 쿼리 파라미터로 전달하여 글쓰기 페이지로 이동
   router.push({
     name: 'BulletinCreate',

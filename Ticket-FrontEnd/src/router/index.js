@@ -99,7 +99,8 @@ const router = createRouter({
 // 네비게이션 가드 설정
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
-  
+  const isAuthenticated = authStore.isAuthenticated;
+
   // 개발 환경에서 라우터 가드 임시 비활성화 (테스트용)
   if (import.meta.env.DEV && import.meta.env.VITE_DISABLE_AUTH_GUARD === 'true') {
     console.log('🔧 개발 모드: 인증 가드가 비활성화되었습니다.');
@@ -110,7 +111,7 @@ router.beforeEach(async (to, from, next) => {
   // 인증이 필요한 페이지인지 확인
   if (to.meta.requiresAuth) {
     // 인증 상태 확인
-    if (!authStore.isLoggedIn) {
+    if (!isAuthenticated) {
       // 로그인되지 않은 경우 로그인 페이지로 리다이렉트
       next({ name: 'Home' });
       return;
