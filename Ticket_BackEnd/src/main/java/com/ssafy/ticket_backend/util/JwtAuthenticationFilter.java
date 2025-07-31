@@ -27,9 +27,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
         FilterChain filterChain) throws ServletException, IOException {
         System.out.println("doFilterInternal 들어감!!!!!!!!!!");
-        for (Cookie cookie : request.getCookies()) {
-            System.out.println(cookie.toString());
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                System.out.println(cookie.toString());
+            }
         }
+
 
         final String authorizationHeader = request.getHeader("Authorization");
         String jwt = null;
