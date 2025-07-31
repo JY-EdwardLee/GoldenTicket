@@ -1,7 +1,10 @@
 <template>
   <nav class="navbar">
     <div class="logo">
-      <router-link to="/">골든티켓</router-link>
+      <router-link to="/">
+        <span>골든 티켓</span>
+        <!-- <img src="@/assets/images/logo1.png" alt="logo" /> -->
+      </router-link>
     </div>
     <ul class="nav-links">
       <li><router-link to="/application">응모</router-link></li>
@@ -89,10 +92,19 @@ const handleLogout = async () => {
   top: 0;
   z-index: 100;
 }
+
 .logo {
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 2rem;
+  font-family: "Bagel Fat One", system-ui;
+  font-style: normal;
 }
+
+.logo span {
+  color: #d79508;
+}
+
+
 .nav-links {
   display: flex;
   gap: 32px;
