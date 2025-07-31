@@ -398,8 +398,10 @@ public class UserServiceImpl implements UserService {
         for (Waitlist waitlist : waitlists) {
             Game game = gameMapper.selectGameByGameId(waitlist.getGameId());
 
-            MyApplicationResponse myApplicationResponse = new MyApplicationResponse(
-                waitlist.getId(), waitlist.getStatus(), game.toGameResponse());
+            MyApplicationResponse myApplicationResponse = new MyApplicationResponse();
+
+            myApplicationResponse.waitlistToMyApplicationResponse(waitlist);
+            myApplicationResponse.setGame(game.toGameResponse());
 
             myApplicationResponses.add(myApplicationResponse);
         }
@@ -454,7 +456,7 @@ public class UserServiceImpl implements UserService {
     /**
      * 회원 탈퇴
      *
-     * @param email
+     * @param accessToken
      */
     @Override
     public void deleteUserByEmail(String accessToken) {
