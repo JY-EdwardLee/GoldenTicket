@@ -16,12 +16,22 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import NoticeBoard from '@/components/board/NoticeBoard.vue';
 import FreeBoard from '@/components/board/FreeBoard.vue';
 import GroupBoard from '@/components/board/GroupBoard.vue';
 
+const route = useRoute();
 const selectedTab = ref('notice');
+
+onMounted(() => {
+  // 쿼리 파라미터에서 tab 값을 확인하여 탭 설정
+  const tabParam = route.query.tab;
+  if (tabParam && ['notice', 'free', 'group'].includes(tabParam)) {
+    selectedTab.value = tabParam;
+  }
+});
 </script>
 
 <style scoped>

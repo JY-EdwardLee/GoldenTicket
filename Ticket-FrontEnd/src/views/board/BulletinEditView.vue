@@ -1,29 +1,35 @@
 <template>
-  <div class="bulletin-create-root">
+  <div class="bulletin-edit-root">
     <div class="container">
       <div class="header-section">
-        <h1 class="page-title">게시글 작성</h1>
+        <h1 class="page-title">게시글 수정</h1>
         <div class="breadcrumb">
           <router-link to="/bulletin" class="breadcrumb-link">게시판</router-link>
           <span class="breadcrumb-separator">></span>
-          <span class="breadcrumb-current">글쓰기</span>
+          <span class="breadcrumb-current">글 수정</span>
         </div>
       </div>
 
-      <form @submit.prevent="handleSubmit" class="create-form">
-        <!-- 게시판 타입 선택 -->
+      <!-- 로딩 상태 -->
+      <div v-if="isLoading" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>게시글을 불러오는 중...</p>
+      </div>
+      
+      <!-- 에러 상태 -->
+      <div v-else-if="error" class="error-container">
+        <p class="error-message">{{ error }}</p>
+        <button @click="loadPostDetail" class="retry-btn">다시 시도</button>
+      </div>
+      
+      <!-- 수정 폼 -->
+      <form v-else @submit.prevent="handleSubmit" class="edit-form">
+        <!-- 게시판 타입 표시 (수정 불가) -->
         <div class="form-group">
-          <label for="boardType" class="form-label">게시판 종류</label>
-          <select 
-            id="boardType" 
-            v-model="formData.boardType" 
-            class="form-select"
-            required
-          >
-            <option value="">게시판을 선택하세요</option>
-            <option :value="BOARD_TYPES.FREE">자유게시판</option>
-            <option :value="BOARD_TYPES.GROUP">단체 관련 게시판</option>
-          </select>
+          <label class="form-label">게시판 종류</label>
+          <div class="board-type-display">
+            {{ boardTypeName }}
+          </div>
         </div>
 
         <!-- 제목 입력 -->
@@ -76,8 +82,8 @@
             :disabled="!isFormValid || isSubmitting"
             class="btn btn-primary"
           >
-            <span v-if="isSubmitting">작성 중...</span>
-            <span v-else>작성 완료</span>
+            <span v-if="isSubmitting">수정 중...</span>
+            <span v-else>수정 완료</span>
           </button>
         </div>
       </form>
@@ -90,19 +96,29 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
-import { boardAPI, validatePostData, BOARD_TYPES } from '@/api/board.js';
+import { boardAPI, validatePostData, BOARD_TYPE_NAMES } from '@/api/board.js';
 
 const router = useRouter();
 const route = useRoute();
 
+// 상태 관리
+const isLoading = ref(false);
+const error = ref('');
+const isSubmitting = ref(false);
+
 // 폼 데이터
 const formData = ref({
-  boardType: '',
   title: '',
   content: ''
 });
 
-const isSubmitting = ref(false);
+// 게시글 정보
+const postInfo = ref({});
+
+// 게시판 타입 이름
+const boardTypeName = computed(() => {
+  return BOARD_TYPE_NAMES[postInfo.value.boardType] || '일반';
+});
 
 // 에디터 설정 (시니어 친화적으로 간소화)
 const editorOptions = ref({
@@ -124,22 +140,45 @@ const editorOptions = ref({
 const isFormValid = computed(() => {
   const contentText = getContentText(formData.value.content);
   
-  return formData.value.boardType && 
-         formData.value.title.trim() && 
+  return formData.value.title.trim() && 
          contentText.trim().length > 0;
 });
 
-// 마운트 시 게시판 타입 자동 설정
-onMounted(() => {
-  const boardType = route.query.type;
-  if (boardType && ['free', 'group'].includes(boardType)) {
-    // 쿼리 파라미터의 타입을 BOARD_TYPES 상수에 맞게 변환
-    if (boardType === 'free') {
-      formData.value.boardType = BOARD_TYPES.FREE;
-    } else if (boardType === 'group') {
-      formData.value.boardType = BOARD_TYPES.GROUP;
-    }
+// 게시글 상세 조회
+const loadPostDetail = async () => {
+  const postId = route.params.id;
+  if (!postId) {
+    error.value = '게시글 ID가 없습니다.';
+    return;
   }
+
+  isLoading.value = true;
+  error.value = '';
+  
+  try {
+    const result = await boardAPI.getPostDetail(postId);
+    
+    if (result.success) {
+      postInfo.value = result.data;
+      // 폼 데이터 초기화
+      formData.value.title = result.data.title;
+      formData.value.content = result.data.content;
+      console.log('게시글 상세 조회 성공:', result.data);
+    } else {
+      error.value = result.message;
+      console.error('게시글 상세 조회 실패:', result.message);
+    }
+  } catch (err) {
+    error.value = '게시글을 불러오는 중 오류가 발생했습니다.';
+    console.error('게시글 상세 조회 중 오류:', err);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// 컴포넌트 마운트 시 게시글 조회
+onMounted(() => {
+  loadPostDetail();
 });
 
 // 에디터 준비 완료
@@ -206,7 +245,12 @@ const handleSubmit = async () => {
   if (!isFormValid.value) return;
 
   // 클라이언트 측 유효성 검사
-  const validation = validatePostData(formData.value);
+  const validation = validatePostData({
+    title: formData.value.title,
+    content: formData.value.content,
+    boardType: postInfo.value.boardType
+  });
+  
   if (!validation.isValid) {
     alert(validation.errors.join('\n'));
     return;
@@ -218,24 +262,22 @@ const handleSubmit = async () => {
     // content를 안전하게 처리
     const contentText = getContentText(formData.value.content);
     
-    // API 호출로 게시글 저장
-    const result = await boardAPI.createPost({
-      boardType: formData.value.boardType,
+    // API 호출로 게시글 수정
+    const result = await boardAPI.updatePost(route.params.id, {
       title: formData.value.title.trim(),
-      content: contentText.trim(),
-      imageUrl: null // 현재는 이미지 업로드 기능 없음
+      content: contentText.trim()
     });
     
     if (result.success) {
-      alert(result.message || '게시글이 성공적으로 작성되었습니다.');
-      // 성공 시 게시판으로 이동
-      router.push('/bulletin');
+      alert(result.message || '게시글이 성공적으로 수정되었습니다.');
+      // 성공 시 게시글 상세 페이지로 이동
+      router.push(`/bulletin/detail/${route.params.id}`);
     } else {
-      alert(result.message || '게시글 작성에 실패했습니다.');
+      alert(result.message || '게시글 수정에 실패했습니다.');
     }
   } catch (error) {
-    console.error('게시글 작성 실패:', error);
-    alert('게시글 작성 중 오류가 발생했습니다. 다시 시도해주세요.');
+    console.error('게시글 수정 실패:', error);
+    alert('게시글 수정 중 오류가 발생했습니다. 다시 시도해주세요.');
   } finally {
     isSubmitting.value = false;
   }
@@ -243,14 +285,14 @@ const handleSubmit = async () => {
 
 // 취소
 const handleCancel = () => {
-  if (confirm('작성 중인 내용이 사라집니다. 정말로 취소하시겠습니까?')) {
-    router.push('/bulletin');
+  if (confirm('수정 중인 내용이 사라집니다. 정말로 취소하시겠습니까?')) {
+    router.push(`/bulletin/detail/${route.params.id}`);
   }
 };
 </script>
 
 <style scoped>
-.bulletin-create-root {
+.bulletin-edit-root {
   min-height: 100vh;
   background: #f8f9fa;
   padding: 20px 0;
@@ -300,7 +342,61 @@ const handleCancel = () => {
   opacity: 0.8;
 }
 
-.create-form {
+/* 로딩 스타일 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px;
+  color: #6b7280;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #e11d48;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 에러 스타일 */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px;
+  color: #dc2626;
+}
+
+.error-message {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.retry-btn {
+  background: #e11d48;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.retry-btn:hover {
+  background: #be123c;
+}
+
+.edit-form {
   padding: 40px;
 }
 
@@ -316,7 +412,15 @@ const handleCancel = () => {
   margin-bottom: 8px;
 }
 
-.form-select,
+.board-type-display {
+  padding: 12px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 16px;
+}
+
 .form-input {
   width: 100%;
   padding: 12px 16px;
@@ -325,25 +429,18 @@ const handleCancel = () => {
   font-size: 16px;
   transition: border-color 0.2s, box-shadow 0.2s;
   background: white !important;
-  color: #1f2937 !important; /* 텍스트 색상을 검정으로 강제 설정 */
+  color: #1f2937 !important;
 }
 
-.form-select:focus,
 .form-input:focus {
   outline: none;
   border-color: #e11d48;
   box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.1);
 }
 
-/* placeholder 색상 명시적 설정 */
 .form-input::placeholder {
   color: #9ca3af !important;
   opacity: 1;
-}
-
-.form-select option {
-  color: #1f2937 !important;
-  background: white !important;
 }
 
 .char-count {
@@ -485,7 +582,7 @@ const handleCancel = () => {
 
 :deep(.ql-editor) {
   padding: 20px;
-  color: #1f2937 !important; /* 에디터 텍스트 색상을 검정으로 설정 */
+  color: #1f2937 !important;
   font-size: 16px;
   line-height: 1.8;
 }
@@ -570,7 +667,7 @@ const handleCancel = () => {
   }
   
   .header-section,
-  .create-form {
+  .edit-form {
     padding: 20px;
   }
   

@@ -8,6 +8,7 @@
     
     <BoardTable 
       :posts="noticePosts"
+      boardType="notice"
       @postClick="handlePostClick"
     />
     
@@ -34,30 +35,34 @@ const noticePosts = ref([
   {
     id: 4,
     title: '2024 시즌 티켓 교환 관련 공지사항',
+    author: '관리자',
     date: '2024.01.15',
     views: 1245,
-    comments: 23
+    likes: 23
   },
   {
     id: 3,
     title: '양도 시 유의사항 안내',
+    author: '관리자',
     date: '2024.01.14',
     views: 892,
-    comments: 15
+    likes: 15
   },
   {
     id: 2,
     title: '응모 시스템 업데이트 안내',
+    author: '관리자',
     date: '2024.01.13',
     views: 756,
-    comments: 8
+    likes: 8
   },
   {
     id: 1,
     title: '신규 회원 가입 이벤트',
+    author: '관리자',
     date: '2024.01.12',
     views: 634,
-    comments: 12
+    likes: 12
   }
 ]);
 

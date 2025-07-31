@@ -4,32 +4,54 @@
       <tr>
         <th>번호</th>
         <th>제목</th>
+        <th>작성자</th>
         <th>등록일</th>
         <th>조회수</th>
-        <th>댓글</th>
+        <th>좋아요</th>
       </tr>
     </thead>
     <tbody>
-      <tr v-for="post in posts" :key="post.id" @click="$emit('postClick', post)">
+      <tr v-for="post in posts" :key="post.id" @click="handleRowClick(post)">
         <td>{{ post.id }}</td>
         <td class="title-cell">{{ post.title }}</td>
+        <td class="author-cell">{{ post.author }}</td>
         <td>{{ post.date }}</td>
         <td>{{ post.views?.toLocaleString() }}</td>
-        <td>{{ post.comments }}</td>
+        <td class="like-cell">
+          <span class="like-icon">❤️</span>
+          {{ post.likes?.toLocaleString() || 0 }}
+        </td>
       </tr>
     </tbody>
   </table>
 </template>
 
 <script setup>
-defineProps({
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const props = defineProps({
   posts: {
     type: Array,
     required: true
+  },
+  boardType: {
+    type: String,
+    default: 'free'
   }
 });
 
 defineEmits(['postClick']);
+
+const handleRowClick = (post) => {
+  // 상세 페이지로 이동 (게시판 타입 포함)
+  router.push({
+    name: 'BoardDetail',
+    params: { id: post.id },
+    query: { type: props.boardType }
+  });
+};
 </script>
 
 <style scoped>
@@ -70,5 +92,23 @@ defineEmits(['postClick']);
 .title-cell {
   text-align: left;
   padding-left: 20px;
+}
+
+.author-cell {
+  font-weight: 500;
+  color: #374151;
+}
+
+.like-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: #e11d48;
+  font-weight: 500;
+}
+
+.like-icon {
+  font-size: 14px;
 }
 </style> 
