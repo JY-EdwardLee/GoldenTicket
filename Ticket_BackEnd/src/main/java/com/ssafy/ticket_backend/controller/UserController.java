@@ -121,7 +121,7 @@ public class UserController {
 
         System.out.println("accessCookie: " + accessCookie);
         System.out.println("refreshCookie: " + refreshCookie);
-        
+
         System.out.println("response 헤더 찍음!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         Collection<String> headerNames = response.getHeaderNames();
         for (String headerName : headerNames) {
@@ -238,7 +238,7 @@ public class UserController {
     }
 
     /**
-     * 회원가입 
+     * 회원가입
      *
      * @param userSignupRequest 회원가입 요청 정보
      * @return JwtTokenResponse 토큰 응답
@@ -301,7 +301,6 @@ public class UserController {
     /**
      * 회원 탈퇴
      *
-     * @param userDetails
      * @return
      */
     @DeleteMapping("/delete")
