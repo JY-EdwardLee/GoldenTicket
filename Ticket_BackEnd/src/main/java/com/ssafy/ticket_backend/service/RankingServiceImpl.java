@@ -6,6 +6,7 @@ import com.ssafy.ticket_backend.dto.response.TeamRankingResponse;
 import com.ssafy.ticket_backend.dto.response.UserRankingResponse;
 import com.ssafy.ticket_backend.mapper.RankingMapper;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ public class RankingServiceImpl implements RankingService {
     private static final String TEAM_RANKING_TODAY_KEY = "ranking:team_today";
     private static final String TEAM_RANKING_YESTERDAY_KEY = "ranking:team_yesterday";
     private static final Duration TTL = Duration.ofDays(1); // 1일 캐시
+
 
     // 유저 양도 랭킹 조회
     @Override
@@ -98,12 +100,11 @@ public class RankingServiceImpl implements RankingService {
                     }
                 );
 
-                // Map으로 변환: teamName 기준
-                Map<String, Integer> yesterdayMap = yesterdayList.stream()
-                    .collect(Collectors.toMap(
-                        team -> team.getTeamName().name(),
-                        TeamRankingResponse::getTransferAllCount
-                    ));
+                // Map으로 변환, teamName 기준
+                Map<String, Integer> yesterdayMap = new HashMap<>();
+                for (TeamRankingResponse team : yesterdayList) {
+                    yesterdayMap.put(team.getTeamName().name(), team.getTransferAllCount());
+                }
 
                 // 오늘과 비교해서 증가율 계산
                 for (TeamRankingResponse today : todayList) {
