@@ -3,6 +3,7 @@ package com.ssafy.ticket_backend.service;
 import com.ssafy.ticket_backend.dto.request.PostRequest;
 import com.ssafy.ticket_backend.dto.request.PostUpdateRequest;
 import com.ssafy.ticket_backend.dto.request.S3DownloadRequest;
+import com.ssafy.ticket_backend.dto.request.S3SaverRequest;
 import com.ssafy.ticket_backend.dto.response.CommentDetailResponse;
 import com.ssafy.ticket_backend.dto.response.PostDetailResponse;
 import com.ssafy.ticket_backend.dto.response.PostLikeResponse;
@@ -66,28 +67,28 @@ public class PostServiceImpl implements PostService {
       Long actualPostId = postRequest.getPostId();
 
       // TODO 이미지 처리 성공 -> 단 나중에 확인 하겠습니다.
-      // 생성된 게시글의 postId를 가져와서 이미지 키 변경
-//      if (postRequest.getImageUrl() != null && !postRequest.getImageUrl().trim().isEmpty()) {
-//        try {
-//
-//          // 임시 키를 실제 postId로 변경
-//          String updatedImageUrl = s3PostService.updateTempKeyToActualKey(
-//              postRequest.getImageUrl(),
-//              actualPostId
-//          );
-//
-//          // 변경된 이미지 URL로 게시글 업데이트
-//          if (updatedImageUrl != null) {
-//            int updateResult = postMapper.updatePostImage(actualPostId, updatedImageUrl);
-//            if (updateResult != 1) {
-//              System.err.println("이미지 URL 업데이트 실패");
-//            }
-//          }
-//        } catch (Exception e) {
-//          System.err.println("이미지 키 변경 실패: " + e.getMessage());
-//          // 이미지 키 변경 실패해도 게시글 작성은 성공으로 처리
-//        }
-//      }
+      //  생성된 게시글의 postId를 가져와서 이미지 키 변경
+      if (postRequest.getImageUrl() != null && !postRequest.getImageUrl().trim().isEmpty()) {
+        try {
+
+          // 임시 키를 실제 postId로 변경
+          String updatedImageUrl = s3PostService.updateTempKeyToActualKey(
+              postRequest.getImageUrl(),
+              actualPostId
+          );
+
+          // 변경된 이미지 URL로 게시글 업데이트
+          if (updatedImageUrl != null) {
+            int updateResult = postMapper.updatePostImage(actualPostId, updatedImageUrl);
+            if (updateResult != 1) {
+              System.err.println("이미지 URL 업데이트 실패");
+            }
+          }
+        } catch (Exception e) {
+          System.err.println("이미지 키 변경 실패: " + e.getMessage());
+          // 이미지 키 변경 실패해도 게시글 작성은 성공으로 처리
+        }
+      }
     } catch (DataAccessException | BlockedUserException e) {
       throw e;
     } catch (Exception e) {
@@ -182,8 +183,10 @@ public class PostServiceImpl implements PostService {
 
       int result = postMapper.updatePost(postUpdateRequest);
 
-      // TODO
-      //  fornt수정페이지 : refid받아와서  (키 url 발급 s3 업로드 -> 키만 db에 저장해주면 됨.
+      //  fornt수정페이지 : refid받아와서  (키 url 발급 s3 업로드 -> 키만 db에 저장해주면 됨.)
+      s3PostService.saveUploadKey(
+          new S3SaverRequest(postUpdateRequest.getImageUrl(), S3Type.PostImage,
+              postUpdateRequest.getPostId()));
 
       if (result != 1) {
         throw new DatabaseOperationException("게시물 수정중 오류가 발생하였습니다.");

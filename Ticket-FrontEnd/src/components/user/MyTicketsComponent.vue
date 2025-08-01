@@ -17,8 +17,8 @@
           <div class="ticket-info">
             <div class="team-icon">⚾</div>
             <div class="game-details">
-              <h3 class="game-title">{{ ticket.gameTitle }}</h3>
-              <p class="stadium">{{ ticket.stadium }}</p>
+              <h3 class="game-title">{{ enumToTeamName[ticket.game.away] }} vs {{ enumToTeamName[ticket.game.home] }}</h3>
+              <p class="stadium">{{ stadiumOfTeam[ticket.game.stadium] }}</p>
             </div>
           </div>
           <div class="ticket-status" :class="ticket.status">
@@ -30,23 +30,23 @@
           <div class="ticket-details">
             <div class="detail-item">
               <span class="label">경기시간:</span>
-              <span class="value">{{ ticket.gameTime }}</span>
+              <span class="value">{{ ticket.game.time }}</span>
             </div>
             <div class="detail-item">
               <span class="label">경기일:</span>
-              <span class="value">{{ ticket.gameDate }}</span>
+              <span class="value">{{ ticket.game.date }}</span>
             </div>
             <div class="detail-item">
               <span class="label">좌석:</span>
-              <span class="value">{{ ticket.seatInfo }}</span>
+              <span class="value">{{ ticket.seat }}</span>
             </div>
             <div class="detail-item">
               <span class="label">티켓 번호:</span>
-              <span class="value">{{ ticket.ticketNumber }}</span>
+              <span class="value">{{ ticket.ticketId }}</span>
             </div>
             <div class="detail-item">
               <span class="label">구매일:</span>
-              <span class="value">{{ ticket.purchaseDate }}</span>
+              <span class="value">{{ formatDate(ticket.transactionDate) }}</span>
             </div>
             <div class="detail-item">
               <span class="label">구매 금액:</span>
@@ -57,7 +57,7 @@
 
         <div class="ticket-actions">
           <button 
-            v-if="ticket.status === 'active'" 
+            v-if="ticket.status === 'TRANSACTION_COMPLETE'" 
             class="qr-btn"
             @click="showQRCode(ticket)"
           >
@@ -87,11 +87,11 @@
             <canvas ref="qrCanvas" class="qr-code"></canvas>
           </div>
           <div class="ticket-info-modal">
-            <h4>{{ selectedTicket?.gameTitle }}</h4>
-            <p>{{ selectedTicket?.stadium }}</p>
-            <p>경기일: {{ selectedTicket?.gameDate }}</p>
-            <p>좌석: {{ selectedTicket?.seatInfo }}</p>
-            <p>티켓번호: {{ selectedTicket?.ticketNumber }}</p>
+            <h4>{{ enumToTeamName[selectedTicket?.game.away] }} vs {{ enumToTeamName[selectedTicket?.game.home] }}</h4>
+            <p>{{ stadiumOfTeam[selectedTicket?.game.stadium] }}</p>
+            <p>경기일: {{ selectedTicket?.game.date }}</p>
+            <p>좌석: {{ selectedTicket?.seat }}</p>
+            <p>티켓번호: {{ selectedTicket?.ticketId }}</p>
           </div>
         </div>
       </div>
@@ -100,57 +100,57 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted } from 'vue'
 import QRCode from 'qrcode'
+import { API_CONFIG } from '@/config/api.config'
+import http from '@/utils/http'
+import { formatDate } from '@/utils/dateUtils'
+import { teamNameToEnum, enumToTeamName } from '@/utils/teamNameMap'
+
+const isLoading = ref(false)
+
+const ticketStatus = {
+    BEFORE_ASSIGNMENT: '양도 전',
+    BEING_ASSIGNMENT: '양도 중',
+    BEING_PAYING: '결제 중',
+    TRANSACTION_COMPLETE: '거래 완료'
+}
+
+const stadiumOfTeam = {
+  'JAMSIL': '대구 삼성 라이온즈 파크',
+  'GOCHUK': '고척 스카이돔',
+  'JAMSIL': '서울종합운동장 야구장',
+  'JAMSIL': '서울종합운동장 야구장',
+  'SUWON': '수원 케이티 위즈 파크',
+  'MUNHAK': '인천 SSG 랜더스필드',
+  'CHANGWON': '창원NC파크',
+  'GWANGJU': '광주 기아 챔피언스 필드',
+  'SAJIK': '사직 야구장',
+  'DAEJEON': '대전 한화생명 볼파크',
+}
 
 // 티켓 데이터 (실제로는 API에서 가져올 데이터)
 const tickets = ref([
   {
     id: 1,
-    gameTitle: 'SSG 랜더스 vs KIA 타이거즈',
-    stadium: '인천 문학경기장',
-    gameTime: '18:30',
-    gameDate: '2024.01.15',
-    seatInfo: '1루석 A구역 15열 8번',
-    ticketNumber: 'TKT-2024-001234',
-    purchaseDate: '2024.01.10',
+    game: {
+      id: 1,
+      away: 'SSG 랜더스',
+      home: 'KIA 타이거즈',
+      date: '2024.01.15',  
+      stadium: '인천 문학경기장',
+      },
+    time: '18:30',
+    seat: '1루석 A구역 15열 8번',
     price: '25,000',
-    status: 'active'
+    status: 'BEING_ASSIGNMENT'
   },
-  {
-    id: 2,
-    gameTitle: '두산 베어스 vs 한화 이글스',
-    stadium: '잠실야구장',
-    gameTime: '18:30',
-    gameDate: '2024.01.20',
-    seatInfo: '3루석 B구역 12열 3번',
-    ticketNumber: 'TKT-2024-001235',
-    purchaseDate: '2024.01.12',
-    price: '30,000',
-    status: 'used'
-  },
-  {
-    id: 3,
-    gameTitle: 'LG 트윈스 vs KT 위즈',
-    stadium: '잠실야구장',
-    gameTime: '18:30',
-    gameDate: '2024.01.25',
-    seatInfo: '중앙석 C구역 8열 15번',
-    ticketNumber: 'TKT-2024-001236',
-    purchaseDate: '2024.01.14',
-    price: '35,000',
-    status: 'cancelled'
-  }
 ])
 
 // 상태 텍스트 반환
 const getStatusText = (status) => {
-  const statusMap = {
-    'active': '사용 가능',
-    'used': '사용 완료',
-    'cancelled': '환불 완료'
-  }
-  return statusMap[status] || status
+  const statusMap = ticketStatus
+  return statusMap[status]
 }
 
 // QR코드 모달 관련 상태
@@ -209,6 +209,24 @@ const closeModal = () => {
   showModal.value = false
   selectedTicket.value = null
 }
+
+const fetchTickets = async () => {
+  try {
+    isLoading.value = true
+    const response = await http.get(API_CONFIG.USER.TICKETS)
+    tickets.value = response.data
+    console.log(tickets.value)
+  } catch (error) {
+    console.error('티켓 조회 중 오류 발생:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchTickets()
+})
+
 </script>
 
 <style scoped>
@@ -312,6 +330,7 @@ const closeModal = () => {
   border-radius: 20px;
   font-size: 12px;
   font-weight: bold;
+  color: #333;
 }
 
 .ticket-status.active {

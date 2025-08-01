@@ -14,7 +14,7 @@
       <div class="ticket-banner">
         <div class="banner-content">
           <div class="team-logo">
-            <img :src="generateRandomBannerImage()" :alt="ticketDetail.gameTitle" @error="handleImageError">
+            <img src="" alt="ticketDetail.gameTitle">
           </div>
           <div class="game-info">
             <h2 class="game-title">{{ ticketDetail.gameTitle }}</h2>
@@ -160,34 +160,10 @@ const requestRefund = () => {
   }
 }
 
-// 랜덤 배너 이미지 생성 함수
-const generateRandomBannerImage = () => {
-  const stadiumImages = [
-    'stadium', 'baseball', 'sports', 'arena', 'field',
-    'ballpark', 'diamond', 'game', 'crowd', 'fans'
-  ]
-  
-  const randomSeed = Math.floor(Math.random() * 1000)
-  const randomTheme = stadiumImages[Math.floor(Math.random() * stadiumImages.length)]
-  
-  // Picsum을 사용한 랜덤 이미지 (야구장/스포츠 테마)
-  return `https://picsum.photos/seed/${randomSeed}-${randomTheme}/400/150?blur=1`
-}
-
-// 이미지 로드 실패 시 대체 이미지
-const handleImageError = (event) => {
-  const fallbackColors = ['ff6b35', '3498db', '2ecc71', 'f39c12', 'e74c3c', '9b59b6']
-  const randomColor = fallbackColors[Math.floor(Math.random() * fallbackColors.length)]
-  const gameTexts = ['BASEBALL', 'STADIUM', 'GAME', 'MATCH', 'SPORTS']
-  const randomText = gameTexts[Math.floor(Math.random() * gameTexts.length)]
-  
-  event.target.src = `https://via.placeholder.com/400x150/${randomColor}/ffffff?text=${randomText}`
-}
-
-// 컴포넌트 마운트 시 데이터 로드
 onMounted(() => {
   const purchaseId = route.params.id
-  // 실제로는 여기서 API 호출하여 해당 ID의 상세 정보를 가져옴
+
+
   console.log('Loading purchase detail for ID:', purchaseId)
 })
 </script>

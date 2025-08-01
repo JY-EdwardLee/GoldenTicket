@@ -138,6 +138,8 @@
 <script>
 import NavBar from '@/components/common/NavBar.vue';
 import FooterBar from '@/components/common/FooterBar.vue';
+import { useAuthStore } from '@/stores/auth';
+
 
 export default {
   name: 'PaymentView',
