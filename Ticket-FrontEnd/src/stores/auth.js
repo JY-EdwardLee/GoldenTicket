@@ -11,7 +11,20 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref(JSON.parse(localStorage.getItem('user') || 'null'));
   const redirectPath = ref(localStorage.getItem('redirectPath') || null);
 
-  const isAuthenticated = computed(() => !!token.value);
+  const isTokenExpired = (token) => {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+      return payload.exp < now;
+    } catch (e) {
+      return true; // 디코딩 실패 시 무조건 만료된 것으로 간주
+    }
+  };
+  
+  const isAuthenticated = computed(() => {
+    const t = token.value;
+    return !!t && !isTokenExpired(t);
+  });
 
   function setToken(newToken) {
     token.value = newToken;
