@@ -15,9 +15,9 @@ public class TicketResponse {
     private Long ticketId;  // 티켓 ID
     private TicketStatus status;  // 티켓 상태
     private int price;  // 가격
-    private GameResponse game;  // 경기 정보
     private String seat;  // 좌석 정보
     private int waitNumber;  // 대기열 인원
+    private GameResponse game;  // 경기 정보
     private LocalDateTime transactionDate;  // 거래 날짜
 
     public TicketResponse(Ticket ticket) {

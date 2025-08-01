@@ -40,15 +40,16 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.4'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     // AWS S3
     implementation 'com.amazonaws:aws-java-sdk-s3:1.12.700'
     // 크롤링(selenum)
     implementation 'org.seleniumhq.selenium:selenium-java:4.20.0'
     implementation 'org.seleniumhq.selenium:selenium-chrome-driver:4.20.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'  // Swagger
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.4'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {

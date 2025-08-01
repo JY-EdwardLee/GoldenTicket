@@ -133,4 +133,14 @@ public class TicketServiceImpl implements TicketService {
     public void transferTicketToBuyer(String ticketId, String userId) {
         ticketMapper.transferTicket(ticketId, userId);
     }
+
+    @Override
+    public TicketResponse getTicketDetail(String userEmail, Long ticketId) {
+        Ticket ticket = ticketMapper.selectTicketByTicketId(ticketId);
+        TicketResponse ticketResponse = new TicketResponse(ticket);
+        Game game = gameMapper.selectGameByGameId(ticket.getGameId());
+        ticketResponse.setGame(game.toGameResponse());
+
+        return ticketResponse;
+    }
 }
