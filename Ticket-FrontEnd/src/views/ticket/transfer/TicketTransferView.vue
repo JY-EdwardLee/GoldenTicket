@@ -97,7 +97,7 @@
             <!-- NOL -->
             <div class="provider-col">
               <img src="/nol_logo.png" alt="NOL" class="provider-img nol-img" />
-              <button class="provider-btn nol-btn" @click="showTickets = true">
+              <button class="provider-btn nol-btn" @click="fetchTickets('NOL')">
                 NOL 바로가기
                 <span class="btn-icon">↗</span>
               </button>
@@ -105,7 +105,7 @@
             <!-- Ticketlink -->
             <div class="provider-col">
               <img src="/ticketlink_logo.png" alt="티켓링크" class="provider-img ticketlink-img" />
-              <button class="provider-btn ticketlink-btn">
+              <button class="provider-btn ticketlink-btn" @click="fetchTickets('TICKETLINK')">
                 티켓링크 바로가기
                 <span class="btn-icon">↗</span>
               </button>
@@ -117,53 +117,63 @@
             <button :class="['ticket-tab', activeTab === 'NOL' ? 'active' : '']" @click="activeTab = 'NOL'">NOL</button>
             <button :class="['ticket-tab', activeTab === '티켓링크' ? 'active' : '']" @click="activeTab = '티켓링크'">티켓링크</button>
           </div>
-          <div class="ticket-list">
+          <div v-if="ticketLoading" class="ticket-list" style="justify-content:center;align-items:center;height:350px;">로딩중...</div>
+          <div v-else-if="ticketError" class="ticket-list" style="justify-content:center;align-items:center;height:350px;">{{ ticketError }}</div>
+          <div v-else-if="tickets.length === 0" class="ticket-list" style="justify-content:center;align-items:center;height:350px;">
+            <div style="font-size:32px;font-weight:700;color:#969696;text-align:center;">현재 보유하고 있는 티켓이 없습니다.</div>
+          </div>
+          <div v-else class="ticket-list" style="max-height:600px;overflow-y:auto;">
             <div
               v-for="(ticket, idx) in tickets"
-              :key="ticket.id"
-              class="ticket-card"
-              :class="[{'highlighted': hoveredTicket === ticket.id}, { 'landers-hover': hoveredTicket === ticket.id && ticket.landers } ]"
-              @mouseenter="hoveredTicket = ticket.id"
+              :key="ticket.ticketId"
+              :class="[
+                'ticket-card',
+                getTeamClass(ticket),
+                { 'highlighted': hoveredTicket === ticket.ticketId }
+              ]"
+              :style="getTicketStyle(ticket)"
+              @mouseenter="hoveredTicket = ticket.ticketId"
               @mouseleave="hoveredTicket = null"
             >
               <div class="ticket-header">
-                <span class="ticket-title" :class="{ 'landers': ticket.landers }">{{ ticket.title }}</span>
-                <span v-if="ticket.landers && hoveredTicket === ticket.id" class="ticket-people">현재 응모 인원 : 13명</span>
+                <span class="ticket-title">{{ ticket.header }}</span>
+                <span class="ticket-people">현재 응모 인원 : {{ ticket.waitNumber }}명</span>
               </div>
-              <div class="ticket-info-row">
-                <span class="ticket-date">📅 {{ ticket.date }}</span>
-                <span class="ticket-time">⏰ {{ ticket.time }}</span>
+              <div class="ticket-info-row" style="justify-content:space-between;">
+                <span>📅 {{ ticket.game.date.split('T')[0] }}</span>
+                <span>🪑 {{ ticket.seat }}</span>
+                <span>₩{{ ticket.price.toLocaleString() }}</span>
+                <span style="margin-left:auto;font-weight:600;">{{ ticket.statusText }}</span>
               </div>
               <!-- 상세 정보: hover 시에만 표시 -->
               <transition name="fade">
-                <div v-if="hoveredTicket === ticket.id && ticket.landers" class="ticket-detail ticket-detail-horizontal">
-                  <div class="ticket-detail-bg"><img src="/landers_bg.png" alt="landers" /></div>
+                <div v-if="hoveredTicket === ticket.ticketId" class="ticket-detail ticket-detail-horizontal" :style="getTicketDetailStyle(ticket)">
                   <div class="ticket-detail-header-row">
-                    <span class="ticket-detail-title">{{ ticket.title }}</span>
+                    <span class="ticket-detail-title">{{ ticket.header }}</span>
                   </div>
                   <div class="ticket-detail-info-row">
-                    <span class="ticket-date">📅 {{ ticket.date }}</span>
-                    <span class="ticket-time">⏰ {{ ticket.time }}</span>
-                    <span class="ticket-people">현재 응모 인원 : 13명</span>
+                    <span>📅 {{ ticket.game.date.split('T')[0] }}</span>
+                    <span>⏰ {{ ticket.game.date.split('T')[1]?.slice(0,5) }}</span>
+                    <span>현재 응모 인원 : {{ ticket.waitNumber }}명</span>
                   </div>
                   <div class="ticket-detail-horizontal-row-centered">
                     <div class="ticket-detail-block block-horizontal">
-                      <div class="block-title"><span class="block-icon">📍</span>경기장</div>
-                      <div class="block-content">인천 SSG 랜더스 필드</div>
+                      <div class="block-title"><span class="block-icon">🏟️</span>경기장</div>
+                      <div class="block-content">{{ ticket.game.home }} 홈</div>
                     </div>
                     <div class="ticket-detail-block block-horizontal">
-                      <div class="block-title"><span class="block-icon">🪑</span>좌석 위치</div>
-                      <div class="block-content">내야 지정석 A</div>
+                      <div class="block-title"><span class="block-icon">🪑</span>좌석</div>
+                      <div class="block-content">{{ ticket.seat }}</div>
                     </div>
                     <div class="ticket-detail-block block-horizontal">
-                      <div class="block-title"><span class="block-icon">🔒</span>티켓 가격</div>
-                      <div class="block-content">13,000원</div>
+                      <div class="block-title"><span class="block-icon">💰</span>가격</div>
+                      <div class="block-content">₩{{ ticket.price.toLocaleString() }}</div>
                     </div>
                   </div>
-                  <button class="apply-btn" @click="handleApply(ticket)">양도 신청하기 →</button>
                 </div>
               </transition>
             </div>
+            <div v-if="tickets.length > 3" style="margin-top:10px;text-align:center;color:#888;font-size:14px;">스크롤하여 더 많은 티켓을 확인하세요</div>
           </div>
         </div>
       </div>
@@ -189,6 +199,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 // 화면 렌더에 필요한 기본 변수 선언 (없으면 추가)
+
 
 
 
@@ -229,46 +240,152 @@ const hoveredTicket = ref(null);
 
 
 
-const tickets = [
-  {
-    id: 1,
-    title: 'NC 다이노스 vs 한화 이글스',
-    date: '2025년 7월 23일',
-    time: '오후 6시 30분',
-    landers: false,
-  },
-  {
-    id: 2,
-    title: '롯데 자이언츠 vs KIA 타이거즈',
-    date: '2025년 7월 23일',
-    time: '오후 6시 30분',
-    landers: false,
-  },
-  {
-    id: 3,
-    title: 'LANDERS vs 키움 히어로즈',
-    date: '2025년 7월 23일',
-    time: '오후 6시 30분',
-    landers: true,
-    price: 14000,
-    section: '내야 1루석',
-    row: 'A',
-    seat: '15-16',
-    gate: 'MAIN GATE',
-    provider: '네이버 1루석',
-    ticketId: 'T240724001',
-    stadium: '인천 SSG 랜더스 필드',
-    transferNotice: [
-      '양도 신청 후 취소는 불가능합니다.',
-      '매칭 완료 시 알림이 전송됩니다.',
-      '양도료는 경기 완료 후 지급됩니다.'
-    ]
-  },
-];
+import axios from 'axios';
+import { API_CONFIG } from '@/config/api.config.js';
+const { TICKET } = API_CONFIG;
+import { teamColortoEnum } from '@/utils/teamColor.js';
+import { getEnumTeamName, teamNameToEnum } from '@/utils/teamNameMap.js';
+import http from '@/utils/http'
+
+const tickets = ref([]);
+const ticketLoading = ref(false);
+const ticketError = ref('');
+
+// 팀 로고 매핑
+const teamLogoMap = {
+  'KIA타이거즈': 'kia.svg',
+  '삼성라이온즈': 'samsung.svg',
+  'LG트윈스': 'LG.svg',
+  '두산베어스': 'DOOSAN.svg',
+  'KT위즈': 'KT.svg',
+  'SSG랜더스': 'SSG.svg',
+  '롯데자이언츠': 'LOTTE.svg',
+  '한화이글스': 'HanWha.svg',
+  'NC다이노스': 'NC.svg',
+  '키움히어로즈': 'KIWOOM.svg'
+}
+
+// 팀명 정규화 함수 (공백 제거)
+const normalizeTeamName = (teamName) => {
+  return teamName ? teamName.replace(/\s+/g, '') : ''
+}
+
+// 팀별 CSS 클래스명 생성 함수
+const getTeamClass = (ticket) => {
+  const homeTeam = normalizeTeamName(ticket.homeKor || ticket.game?.home || '')
+  return homeTeam ? `team-${homeTeam.toLowerCase()}` : 'team-default'
+}
+
+// 팀별 색상 매핑
+const getTeamColor = (teamName) => {
+  const normalizedTeam = normalizeTeamName(teamName || '')
+  const teamColors = {
+    'kia타이거즈': '#EA0029',
+    '삼성라이온즈': '#074CA1',
+    'lg트윈스': '#C30452',
+    '두산베어스': '#1A1748',
+    'kt위즈': '#000000',
+    'ssg랜더스': '#CE0E2D',
+    '롯데자이언츠': '#041E42',
+    '한화이글스': '#FC4E00',
+    'nc다이노스': '#315288',
+    '키움히어로즈': '#570514'
+  }
+  return teamColors[normalizedTeam] || '#395b8c'
+}
+
+// 티켓 디테일 스타일 생성 함수
+const getTicketDetailStyle = (ticket) => {
+  const homeTeam = ticket.homeKor || ticket.game?.home || ''
+  const teamColor = getTeamColor(homeTeam)
+  
+  return {
+    background: `${teamColor}e8`, // 투명도 91% (e8 = 232/255)
+    color: '#fff'
+  }
+}
+
+// 티켓 스타일 생성 함수 (기본 스타일만)
+const getTicketStyle = (ticket) => {
+  const logoPath = teamLogoMap[normalizeTeamName(ticket.homeKor || ticket.game?.home || '')]
+  
+  let style = {
+    transition: 'all 0.3s ease',
+    position: 'relative'
+  }
+  
+  // 호버 상태일 때 로고 배경 추가
+  if (hoveredTicket.value === ticket.ticketId && logoPath) {
+    style.backgroundImage = `url('/src/assets/logo/${logoPath}')`
+    style.backgroundSize = 'contain'
+    style.backgroundPosition = 'center'
+    style.backgroundRepeat = 'no-repeat'
+    style.zIndex = 10
+    style.height = 'auto'
+    style.minHeight = '320px'
+  }
+  
+  return style
+}
+
+async function fetchTickets(platform) {
+  console.log(` NOL 버튼 클릭됨 - 플랫폼: ${platform}`);
+  showTickets.value = true;
+  activeTab.value = platform === 'NOL' ? 'NOL' : '티켓링크';
+  ticketLoading.value = true;
+  ticketError.value = '';
+  try {
+    console.log(` API 요청 시작: tickets/platform/${platform}`);
+    const res = await http.get(`tickets/platform/${platform}`);
+    console.log(` API 응답 받음:`, res.data);
+    console.log(` 받은 티켓 개수: ${res.data.length}개`);
+    
+    tickets.value = res.data.map(ticket => {
+      const homeKor = Object.keys(teamNameToEnum).find(
+        key => teamNameToEnum[key] === ticket.game.home
+      ) || ticket.game.home;
+      const awayKor = Object.keys(teamNameToEnum).find(
+        key => teamNameToEnum[key] === ticket.game.away
+      ) || ticket.game.away;
+      
+      // 정규화된 팀명으로 색상 확인
+      const normalizedHome = normalizeTeamName(homeKor);
+      const teamColor = teamColortoEnum[normalizedHome];
+      
+      console.log(` 홈팀: ${homeKor} -> 정규화: ${normalizedHome} -> 색상: ${teamColor}`);
+      console.log(` 어웨이팀: ${awayKor}`);
+      
+      const processedTicket = {
+        ...ticket,
+        homeKor,
+        awayKor,
+        color: teamColor ? `#${teamColor}` : '#395b8c',
+        header: `${awayKor} vs ${homeKor}`,
+        statusText: ticket.status === 'BEING_ASSIGNMENT' ? '응모 진행중' : ticket.status === 'TRANSACTION_COMPLETE' ? '응모 완료' : ticket.status === 'BEING_PAYING' ? '결제중' : '',
+      };
+      
+      console.log(` 처리된 티켓:`, {
+        id: processedTicket.ticketId,
+        header: processedTicket.header,
+        color: processedTicket.color,
+        status: processedTicket.statusText
+      });
+      
+      return processedTicket;
+    });
+    
+    console.log(` 최종 티켓 배열:`, tickets.value);
+  } catch (e) {
+    console.error(` 티켓 불러오기 실패:`, e);
+    ticketError.value = '티켓 불러오기에 실패했습니다.';
+    tickets.value = [];
+  } finally {
+    ticketLoading.value = false;
+    console.log(` 티켓 로딩 완료`);
+  }
+}
 
 const router = useRouter();
-
-
 
 function handleApply(ticket) {
   selectedTicket.value = ticket;
@@ -520,29 +637,139 @@ function handleCompleteConfirm() {
 .ticket-card {
   width: 660px;
   max-width: 95vw;
-  background: #395b8c;
+  /* background 제거 - 인라인 스타일로 팀 색상 동적 적용 */
   border-radius: 8px;
   color: #fff;
   font-size: 20px;
   font-weight: 700;
   box-shadow: 0 2px 8px 0 #0001;
   padding: 24px 32px 18px 32px;
-  transition: transform 0.25s cubic-bezier(.4,1.5,.5,1), box-shadow 0.2s, background 0.2s, height 0.35s cubic-bezier(.4,1.5,.5,1);
+  transition: box-shadow 0.3s ease, background 0.3s ease, height 0.3s ease, min-height 0.3s ease;
   position: relative;
   cursor: pointer;
-  overflow: hidden;
+  overflow: visible;
   height: 130px;
   min-height: 130px;
-  max-height: 330px;
+  max-height: 400px;
+}
+
+/* 팀별 색상 클래스 */
+.ticket-card.team-kia타이거즈 {
+  background-color: #EA0029 !important;
+}
+
+.ticket-card.team-삼성라이온즈 {
+  background-color: #074CA1 !important;
+}
+
+.ticket-card.team-lg트윈스 {
+  background-color: #C30452 !important;
+}
+
+.ticket-card.team-두산베어스 {
+  background-color: #1A1748 !important;
+}
+
+.ticket-card.team-kt위즈 {
+  background-color: #000000 !important;
+}
+
+.ticket-card.team-ssg랜더스 {
+  background-color: #CE0E2D !important;
+}
+
+.ticket-card.team-롯데자이언츠 {
+  background-color: #041E42 !important;
+}
+
+.ticket-card.team-한화이글스 {
+  background-color: #FC4E00 !important;
+}
+
+.ticket-card.team-nc다이노스 {
+  background-color: #315288 !important;
+}
+
+.ticket-card.team-키움히어로즈 {
+  background-color: #570514 !important;
+}
+
+.ticket-card.team-default {
+  background-color: #395b8c !important;
+}
+
+/* hover 시 팀 색상 유지 및 그림자 효과 */
+.ticket-card.highlighted.team-kia타이거즈 {
+  box-shadow: 0 12px 48px 0 #EA002955 !important;
+}
+
+.ticket-card.highlighted.team-삼성라이온즈 {
+  box-shadow: 0 12px 48px 0 #074CA155 !important;
+}
+
+.ticket-card.highlighted.team-lg트윈스 {
+  box-shadow: 0 12px 48px 0 #C3045255 !important;
+}
+
+.ticket-card.highlighted.team-두산베어스 {
+  box-shadow: 0 12px 48px 0 #1A174855 !important;
+}
+
+.ticket-card.highlighted.team-kt위즈 {
+  box-shadow: 0 12px 48px 0 #00000055 !important;
+}
+
+.ticket-card.highlighted.team-ssg랜더스 {
+  box-shadow: 0 12px 48px 0 #CE0E2D55 !important;
+}
+
+.ticket-card.highlighted.team-롯데자이언츠 {
+  box-shadow: 0 12px 48px 0 #041E4255 !important;
+}
+
+.ticket-card.highlighted.team-한화이글스 {
+  box-shadow: 0 12px 48px 0 #FC4E0055 !important;
+}
+
+.ticket-card.highlighted.team-nc다이노스 {
+  box-shadow: 0 12px 48px 0 #31528855 !important;
+}
+
+.ticket-card.highlighted.team-키움히어로즈 {
+  box-shadow: 0 12px 48px 0 #57051455 !important;
+}
+
+.ticket-card.highlighted.team-default {
+  box-shadow: 0 12px 48px 0 #395b8c55 !important;
+}
+
+.ticket-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: inherit;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.ticket-card:hover::before {
+  opacity: 0.1;
+}
+
+.ticket-card > * {
+  position: relative;
+  z-index: 2;
 }
 .ticket-card.highlighted.landers-hover {
-  height: 330px !important;
-  min-height: 330px !important;
-  max-height: 330px !important;
-  transform: scale(1.07) translateY(-12px);
-  z-index: 2;
-  box-shadow: 0 8px 32px 0 #ce0e2d33;
-  background: #ce0e2d;
+  /* 인라인 스타일로 동적 팀 색상 적용하므로 CSS 고정 색상 제거 */
+  transition: all 0.3s ease;
 }
 
 .ticket-card .ticket-title {
@@ -563,10 +790,8 @@ function handleCompleteConfirm() {
   letter-spacing: 1px;
 }
 .ticket-card.highlighted {
-  transform: scale(1.07) translateY(-12px);
-  z-index: 2;
-  box-shadow: 0 8px 32px 0 #ce0e2d33;
-  background: #ce0e2d;
+  /* 인라인 스타일로 동적 팀 색상 적용하므로 CSS 고정 색상 제거 */
+  transition: all 0.3s ease;
 }
 .ticket-card .ticket-header {
   display: flex;
@@ -1111,6 +1336,48 @@ function handleCompleteConfirm() {
   font-weight: 600;
   cursor: pointer;
   margin-top: 4px;
+}
+
+/* Fade transition for ticket details */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.fade-enter-to, .fade-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Ticket detail styling improvements */
+.ticket-detail {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  animation: expandDetail 0.3s ease;
+}
+
+@keyframes expandDetail {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    margin-top: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+}
+
+.ticket-detail-horizontal {
+  overflow: hidden;
 }
 </style>
 
