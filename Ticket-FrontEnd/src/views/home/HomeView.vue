@@ -99,12 +99,17 @@
         </v-container>
       </v-container>
     </v-main>
+    
+    <!-- Login Modal -->
+    <LoginModal :isVisible="showLoginModal" @close="closeLoginModal" />
   </v-app>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
+import LoginModal from '@/components/common/LoginModal.vue';
 
 // 공통 컴포넌트 import
 import HeroCard from '../../components/ui/HeroCard.vue';
@@ -116,13 +121,32 @@ import SectionHeader from '../../components/ui/SectionHeader.vue';
 // 라우터 설정
 const router = useRouter();
 
+// Auth store
+const authStore = useAuthStore();
+const showLoginModal = ref(false);
+
+// 로그인 모달 닫기
+function closeLoginModal() {
+  showLoginModal.value = false;
+}
+
 // 메인 페이지 로직
 const goToApply = () => {
+  // 로그인 상태 확인
+  if (!authStore.isAuthenticated) {
+    showLoginModal.value = true;
+    return;
+  }
   // 응모 페이지로 이동
   router.push('/application');
 };
 
 const goToTransfer = () => {
+  // 로그인 상태 확인
+  if (!authStore.isAuthenticated) {
+    showLoginModal.value = true;
+    return;
+  }
   // 양도 페이지로 이동
   router.push('/transfer');
 };
