@@ -1,7 +1,10 @@
 <template>
   <nav class="navbar">
     <div class="logo">
-      <router-link to="/">골든티켓</router-link>
+      <router-link to="/">
+        <span>골든 티켓</span>
+        <!-- <img src="@/assets/images/logo1.png" alt="logo" /> -->
+      </router-link>
     </div>
     <ul class="nav-links">
       <li><router-link to="/application">응모</router-link></li>
@@ -11,7 +14,7 @@
     </ul>
     <div class="auth-links">
       <template v-if="isLoggedIn">
-        <router-link to="/" class="auth-link">마이페이지</router-link>
+        <router-link to="/mypage" class="auth-link">마이페이지</router-link>
         <a href="#" @click.prevent="handleLogout" class="auth-link">로그아웃</a>
       </template>
       <a v-else href="#" @click.prevent="openLoginModal" class="auth-link">로그인 또는 회원가입</a>
@@ -67,6 +70,8 @@ const handleLogout = async () => {
   try {
     await authStore.logout();
     isLoggedIn.value = false;
+    authStore.setRedirectPath('/');
+    window.location.href = '/';
   } catch (error) {
     console.error('Logout failed:', error);
   }
@@ -87,10 +92,19 @@ const handleLogout = async () => {
   top: 0;
   z-index: 100;
 }
+
 .logo {
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 2rem;
+  font-family: "Bagel Fat One", system-ui;
+  font-style: normal;
 }
+
+.logo span {
+  color: #d79508;
+}
+
+
 .nav-links {
   display: flex;
   gap: 32px;

@@ -1,0 +1,37 @@
+variables:
+  FRONTEND_DIR: Ticket-FrontEnd
+  BUILD_DIR: dist
+
+frontend_build:
+  image: node:24
+  stage: build
+  script:
+    - echo "🏗️ Building frontend..."
+    - cd $FRONTEND_DIR
+    
+    # 완전 초기화
+    - rm -rf node_modules package-lock.json
+    - npm cache clean --force
+    
+    # 아키텍처 정보 확인
+    - uname -a
+    - node -e "console.log(process.platform, process.arch)"
+    
+    # 의존성 설치
+    - npm install
+    
+    # rollup 바이너리 강제 설치
+    - npm install @rollup/rollup-linux-x64-gnu --save-dev --force
+    
+    # 또는 전체 rollup 재설치
+    - npm uninstall rollup
+    - npm install rollup --force
+    
+    - npm run build 
+    
+  artifacts:
+    paths:
+      - $FRONTEND_DIR/$BUILD_DIR/
+    expire_in: 1 hour
+  only:
+    - master

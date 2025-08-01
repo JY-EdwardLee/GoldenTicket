@@ -30,13 +30,21 @@ public class S3Controller {
   private final S3PostService s3PostService;
   private final UserMapper userMapper;
 
-
   /*
   [정리]
   [업로드]
   front 업로드 url 요청 ->
   back 키 발급과 url 발급 ->
   front url통해서 s3에 업로드 -> front 업로드 성공시 key를 재전송 -> back db에 저장
+
+
+ [게시물 로직]
+  게시물 최소 입력시 -> post_id 기본키가 없다.
+  (front)임시 refId값 만들어서 전송 ->  (back) 키,url 발급 -> front(s3 업로드 이후 키 전송)
+  -> 서버단에서 postId 생성이후 해당 postId로 수정 후 db에 키값 정상저장.
+
+  게시물 업데이트 시
+  user 로직 그대로 활용해도 될듯
 
   [조회]
   타입과 id를 통해 key db에서 조회 -> 조회한걸로 url 발급 -> front에서 이미지 보기 끝.
@@ -101,6 +109,7 @@ public class S3Controller {
     if (S3Type.UserProfile.equals(s3SaveRequest.getType())) {
       response = s3UserService.saveUploadKey(s3SaveRequest);
     } else if (S3Type.PostImage.equals(s3SaveRequest.getType())) {
+      // 게시글 업데이트 시에만 사용한다.
       response = s3PostService.saveUploadKey(s3SaveRequest);
     } else {
       throw new IllegalArgumentException("지원하지 않는 이미지 타입입니다: " + s3SaveRequest.getType());

@@ -19,6 +19,11 @@ const USER = {
   LOGIN: `${API_BASE_URL}/users/login-user`,
   PROFILE: `${API_BASE_URL}/users/me`,
   UPDATE_PROFILE: `${API_BASE_URL}/users/me`,
+  APPLICANTS: `${API_BASE_URL}/users/me/applications`,
+  PAYMENTS: `${API_BASE_URL}/users/me/payments`,
+  TICKETS: `${API_BASE_URL}/users/me/tickets`,
+  POSTS: `${API_BASE_URL}/users/me/posts`,
+  PLATFORMS: `${API_BASE_URL}/users/platform-link`,
   CHANGE_PASSWORD: `${API_BASE_URL}/users/me/password`,
   DELETE_ACCOUNT: `${API_BASE_URL}/users/me`,
 };
@@ -35,12 +40,12 @@ const TICKET = {
 
 // 게시판 관련 엔드포인트
 const BOARD = {
-  LIST: `${API_BASE_URL}/boards`,
-  DETAIL: (id) => `${API_BASE_URL}/boards/${id}`,
-  CREATE: `${API_BASE_URL}/boards`,
-  UPDATE: (id) => `${API_BASE_URL}/boards/${id}`,
-  DELETE: (id) => `${API_BASE_URL}/boards/${id}`,
-  COMMENTS: (boardId) => `${API_BASE_URL}/boards/${boardId}/comments`,
+  LIST: `${API_BASE_URL}/posts`,
+  DETAIL: (id) => `${API_BASE_URL}/posts/${id}`,
+  CREATE: `${API_BASE_URL}/posts`,
+  UPDATE: (id) => `${API_BASE_URL}/posts/${id}`,
+  DELETE: (id) => `${API_BASE_URL}/posts/${id}`,
+  COMMENTS: (boardId) => `${API_BASE_URL}/posts/${boardId}/comments`,
 };
 
 // API 설정 내보내기

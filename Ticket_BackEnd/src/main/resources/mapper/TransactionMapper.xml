@@ -32,15 +32,23 @@
     WHERE ticket_id = #{ticketId}
   </update>
 
-  <!-- 거래 정보 가져오기 -->
-  <select id="selectTransactionByUserId" parameterType="long"
-    resultType="com.ssafy.ticket_backend.dto.response.TransactionResponse">
+  <!-- 구매 정보 가져오기 -->
+  <select id="selectBuyListByUserId" parameterType="long"
+    resultType="com.ssafy.ticket_backend.model.Transaction">
     SELECT
     *
     FROM
     transaction_states
     WHERE
-    seller_id = #{userId}
-    OR buyer_id = #{userId}
+    buyer_id = #{userId}
   </select>
+
+  <select id="selectTicketByTransactionId" resultType="com.ssafy.ticket_backend.model.Ticket"
+    parameterType="long">
+    SELECT t.*
+    FROM tickets t
+    JOIN transaction_states ts ON t.ticket_id = ts.ticket_id
+    WHERE ts.transaction_id = #{transactionId}
+  </select>
+
 </mapper>

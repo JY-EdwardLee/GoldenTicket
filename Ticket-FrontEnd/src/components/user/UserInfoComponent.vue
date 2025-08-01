@@ -17,7 +17,7 @@
           <label>이름</label>
           <div class="input-wrapper">
             <div class="input-icon">👤</div>
-            <input type="text" value="홍길동" readonly>
+            <input type="text" :value="user?.userName || ''" readonly>
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -28,7 +28,7 @@
           <label>이메일</label>
           <div class="input-wrapper">
             <div class="input-icon">📧</div>
-            <input type="email" value="hong@example.com" readonly>
+            <input type="email" :value="user?.email || ''" readonly>
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -39,7 +39,7 @@
           <label>닉네임</label>
           <div class="input-wrapper">
             <div class="input-icon">🏷️</div>
-            <input type="text" value="야구매니아" readonly>
+            <input type="text" :value="user?.nickName || ''" readonly>
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -50,7 +50,7 @@
           <label>전화번호</label>
           <div class="input-wrapper">
             <div class="input-icon">📱</div>
-            <input type="tel" value="010-1234-5678" readonly>
+            <input type="tel" :value="user?.phoneNumber || ''" readonly>
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -61,7 +61,7 @@
           <label>생년월일</label>
           <div class="input-wrapper">
             <div class="input-icon">🎂</div>
-            <input type="date" value="1990-01-01">
+            <input type="date" :value="user?.birthDate || ''">
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -170,69 +170,73 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useTeamThemeStore } from '../../stores/teamTheme.js'
+import { useAuthStore } from '../../stores/auth.js'
 
 // 테마 스토어 사용
 const themeStore = useTeamThemeStore
+const authStore = useAuthStore()
+const userInfo = localStorage.getItem('userInfo')
+const user = ref(null)
 
 // 팀 정보 데이터
 const teams = {
-  ssg: {
-    name: 'SSG 랜더스',
+  SSG_: {
+    name: 'SSG_LANDERS',
     logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/SSG_Landers_logo.svg/1200px-SSG_Landers_logo.svg.png',
     color: '#CE0E2D'
   },
   kiwoom: {
-    name: '키움 히어로즈',
+    name: 'KIWOOM_HEROES',
     logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/Kiwoom_Heroes_logo.svg/1200px-Kiwoom_Heroes_logo.svg.png',
     color: '#820024'
   },
   lg: {
-    name: 'LG 트윈스',
+    name: 'LG_TWINS',
     logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/2/2f/LG_Twins_logo.svg/1200px-LG_Twins_logo.svg.png',
     color: '#C41E3A'
   },
   kt: {
-    name: 'KT 위즈',
+    name: 'KT_WIZ',
     logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/KT_Wiz_logo.svg/1200px-KT_Wiz_logo.svg.png',
     color: '#000000'
   },
   kia: {
-    name: 'KIA 타이거즈',
+    name: 'KIA_TIGERS',
     logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/KIA_Tigers_logo.svg/1200px-KIA_Tigers_logo.svg.png',
     color: '#DA291C'
   },
   nc: {
-    name: 'NC 다이노스',
+    name: 'NC_DINOS',
     logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/NC_Dinos_logo.svg/1200px-NC_Dinos_logo.svg.png',
     color: '#315288'
   },
   samsung: {
-    name: '삼성 라이온즈',
+    name: 'SAMSUNG_LIONS',
     logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/Samsung_Lions_logo.svg/1200px-Samsung_Lions_logo.svg.png',
     color: '#074CA1'
   },
   lotte: {
-    name: '롯데 자이언츠',
+    name: 'LOTTE_GIANTS',
     logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/Lotte_Giants_logo.svg/1200px-Lotte_Giants_logo.svg.png',
     color: '#002E6D'
   },
   doosan: {
-    name: '두산 베어스',
+    name: 'DOOSAN_BEAR',
     logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/Doosan_Bears_logo.svg/1200px-Doosan_Bears_logo.svg.png',
     color: '#131230'
   },
   hanwha: {
-    name: '한화 이글스',
+    name: 'HANHWA_EAGLES',
     logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/Hanwha_Eagles_logo.svg/1200px-Hanwha_Eagles_logo.svg.png',
     color: '#FF6600'
   }
 }
 
 // 현재 선택된 팀 (기본값: SSG)
-const selectedTeam = ref('ssg')
+const selectedTeam = ref('SSG_')
 
 // 현재 팀 정보
-const currentTeam = computed(() => teams[selectedTeam.value] || teams.ssg)
+const currentTeam = computed(() => teams[selectedTeam.value] || teams.SSG_)
 
 // 관심 팀 변경 함수
 const changeFavoriteTeam = () => {
@@ -267,18 +271,24 @@ const handleImageError = (event) => {
 }
 
 // 컴포넌트 마운트 시 테마 초기화
-onMounted(() => {
+onMounted(async () => {
+  await authStore.getUserInfo()
   // 저장된 팀이 있으면 해당 팀으로 설정
-  const savedTeam = themeStore.selectedTeam.value
+  const userInfo = localStorage.getItem('user')
+  console.log('userInfo : ', userInfo)
+  const savedTeam = authStore.user.value?.myTeam
+  console.log('savedTeam : ', savedTeam)
+  if (userInfo) {
+    user.value = JSON.parse(userInfo)
   if (savedTeam) {
-    // 저장된 팀명으로 select 값 찾기
+    // 저장된 팀명으로 select 값 찾기, 지금 팀 key.name으로 되어 있음 바꿔야 함함
     const teamKey = Object.keys(teams).find(key => teams[key].name === savedTeam)
     if (teamKey) {
       selectedTeam.value = teamKey
     }
   }
   themeStore.initializeTheme()
-})
+}})
 </script>
 
 <style scoped>

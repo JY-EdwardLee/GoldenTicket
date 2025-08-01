@@ -4,9 +4,12 @@ import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.LoginUserResponse;
+import com.ssafy.ticket_backend.dto.response.MyApplicationResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
+import com.ssafy.ticket_backend.dto.response.TicketResponse;
+import com.ssafy.ticket_backend.dto.response.TransactionResponse;
 import com.ssafy.ticket_backend.model.User;
 import java.util.List;
 
@@ -47,16 +50,16 @@ public interface UserService {
     void patchMyPage(String email, UserPatchRequest userPatchRequest);
 
     // 회원 탈퇴
-    void deleteUserByEmail(String email);
+    void deleteUserByEmail(String accessToken);
 
     // 나의 응모
-    void selectApplicationsByUser(String email);
+    List<MyApplicationResponse> selectApplicationsByUser(String email);
 
     // 나의 결제
-    void selectPaymentsByUser(String email);
+    List<TransactionResponse> selectBuyListByUserId(String email);
 
     // 나의 티켓
-    void selectTicketsByUser(String email);
+    List<TicketResponse> selectTicketsByUser(String email);
 
     // 나의 게시글
     List<PostAllResponse> selectPostsByUser(String email);

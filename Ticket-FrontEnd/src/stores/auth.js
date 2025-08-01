@@ -1,6 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
+import { API_CONFIG } from '@/config/api.config';
+import http from '@/utils/http';
 
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
@@ -34,21 +37,30 @@ export const useAuthStore = defineStore('auth', () => {
     setRedirectPath(null);
     return path;
   }
+
+  async function getUserInfo() {
+    try {
+      const response = await http.get(API_CONFIG.USER.PROFILE);
+      setUser(response.data);
+      console.log(user.value);
+    } catch (error) {
+      console.error('Failed to fetch user info:', error);
+    }
+  }
 // In auth.js
 async function logout() {
   try {
+    // First make the API call to invalidate the session
+    await http.post(API_CONFIG.AUTH.LOGOUT, { withCredentials: true });
+  } catch (error) {
+    console.error('Logout error:', error);
+    // Even if the API call fails, we still want to clear the local state
+  } finally {
     // First, clear the local state
     token.value = null;
     user.value = null;
     localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
-    
-    // Then make the API call to invalidate the session
-    await axios.get(API_CONFIG.AUTH.LOGOUT, { withCredentials: true });
-  } catch (error) {
-    console.error('Logout error:', error);
-    // Even if the API call fails, we still want to clear the local state
-  } finally {
     // Always redirect to home after logout
     router.push('/');
   }
@@ -72,6 +84,7 @@ async function logout() {
     setRedirectPath,
     getAndClearRedirectPath,
     logout,
-    verifyToken
+    verifyToken,
+    getUserInfo,
   };
 });

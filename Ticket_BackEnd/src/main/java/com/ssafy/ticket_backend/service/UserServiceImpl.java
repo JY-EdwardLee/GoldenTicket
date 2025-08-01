@@ -6,15 +6,28 @@ import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.LoginUserResponse;
+import com.ssafy.ticket_backend.dto.response.MyApplicationResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
+import com.ssafy.ticket_backend.dto.response.TicketResponse;
+import com.ssafy.ticket_backend.dto.response.TransactionResponse;
 import com.ssafy.ticket_backend.exception.UserSignupException;
+import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.PostMapper;
+import com.ssafy.ticket_backend.mapper.TicketMapper;
 import com.ssafy.ticket_backend.mapper.TransactionMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
+import com.ssafy.ticket_backend.model.Game;
+import com.ssafy.ticket_backend.model.Ticket;
+import com.ssafy.ticket_backend.model.Transaction;
 import com.ssafy.ticket_backend.model.User;
+import com.ssafy.ticket_backend.model.UserRole;
+import com.ssafy.ticket_backend.model.Waitlist;
 import com.ssafy.ticket_backend.util.JwtUtil;
+import java.time.LocalDate;
+import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -41,11 +54,13 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final TransactionMapper transactionMapper;
     private final PostMapper postMapper;
+    private final TicketMapper ticketMapper;
+    private final ObjectMapper objectMapper;
+    private final GameMapper gameMapper;
+
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
-    private final ObjectMapper objectMapper;
     private static final String TEMP_USER_KEY_PREFIX = "tempUser:";
-
 
     // 카카오 api 키
     @Value("${kakao.rest.api.key}")
@@ -69,7 +84,7 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 일반 회원가입 처리
+     * 일반 회원 가입
      *
      * @param userSignupRequest 회원가입 요청 정보
      * @return JWT 토큰(access, refresh)
@@ -78,6 +93,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public JwtTokenResponse signup(UserSignupRequest userSignupRequest) {
         try {
+            // 나이 계산
+            String birthDateStr = userSignupRequest.getBirthDate();
+            LocalDate birthDate = LocalDate.parse(birthDateStr);
+            LocalDate today = LocalDate.now();
+            Period period = Period.between(birthDate, today);
+            int age = period.getYears();
+
+            // 나이에 따라 userRole 설정
+            UserRole userRole = (age >= 50) ? UserRole.SENIOR : UserRole.USER;
+            userSignupRequest.setUserRole(userRole);
+
             userMapper.insertUser(userSignupRequest);
         } catch (DuplicateKeyException e) {
             throw new UserSignupException("중복된 이메일입니다.");
@@ -282,10 +308,10 @@ public class UserServiceImpl implements UserService {
 
 
     /**
-     * 로그인 한 유저 정보 조회
+     * 로그인 한 유저의 정보 조회
      *
-     * @param 엑세스 토큰
-     * @return LoginUserResponse
+     * @param accessToken
+     * @return
      */
     @Override
     public LoginUserResponse getLoginUser(String accessToken) {
@@ -363,22 +389,69 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void selectApplicationsByUser(String email) {
+    public List<MyApplicationResponse> selectApplicationsByUser(String email) {
         User user = userMapper.selectUserByEmail(email);
 
+        List<Waitlist> waitlists = ticketMapper.selectWaitlistByUserId(user.getUserId());
+        List<MyApplicationResponse> myApplicationResponses = new ArrayList<>();
 
+        for (Waitlist waitlist : waitlists) {
+            Game game = gameMapper.selectGameByGameId(waitlist.getGameId());
+
+            MyApplicationResponse myApplicationResponse = new MyApplicationResponse();
+
+            myApplicationResponse.waitlistToMyApplicationResponse(waitlist);
+            myApplicationResponse.setGame(game.toGameResponse());
+
+            if (waitlist.getTransactionId() != null) {
+                Ticket ticket = transactionMapper.selectTicketByTransactionId(
+                    waitlist.getTransactionId());
+
+                myApplicationResponse.setMatchedDate(ticket.getMatchedDate());
+                myApplicationResponse.setPrice(ticket.getPrice());
+            }
+
+            myApplicationResponses.add(myApplicationResponse);
+        }
+
+        return myApplicationResponses;
     }
 
     @Override
-    public void selectPaymentsByUser(String email) {
+    public List<TransactionResponse> selectBuyListByUserId(String email) {
         User user = userMapper.selectUserByEmail(email);
 
-        transactionMapper.selectTransactionByUserId(user.getUserId());
+        List<Transaction> transactions = transactionMapper.selectBuyListByUserId(user.getUserId());
+        List<TransactionResponse> transactionResponses = new ArrayList<>();
+
+        for (Transaction transaction : transactions) {
+            TransactionResponse transactionResponse = new TransactionResponse();
+
+            Ticket ticket = ticketMapper.selectTicketByTicketId(transaction.getTicketId());
+
+            transactionResponse.setTransactionId(transaction.getTransactionId());
+            transactionResponse.setTicket(new TicketResponse(ticket));
+        }
+
+        return transactionResponses;
     }
 
     @Override
-    public void selectTicketsByUser(String email) {
+    public List<TicketResponse> selectTicketsByUser(String email) {
+        User user = userMapper.selectUserByEmail(email);
+        List<TicketResponse> ticketResponses = new ArrayList<>();
 
+        for (Ticket ticket : ticketMapper.selectTicketsByUserId(user.getUserId())) {
+            TicketResponse ticketResponse = new TicketResponse(ticket);
+
+            Game game = gameMapper.selectGameByGameId(ticket.getGameId());
+
+            ticketResponse.setGame(game.toGameResponse());
+
+            ticketResponses.add(ticketResponse);
+        }
+
+        return ticketResponses;
     }
 
     @Override
@@ -391,11 +464,18 @@ public class UserServiceImpl implements UserService {
     /**
      * 회원 탈퇴
      *
-     * @param email
+     * @param accessToken
      */
     @Override
-    public void deleteUserByEmail(String email) {
+    public void deleteUserByEmail(String accessToken) {
+        String email = jwtUtil.getUserEmail(accessToken);
+
+        // DB에서 사용자 삭제
         userMapper.deleteUserByEmail(email);
+        // Redis에서 Refresh Token 삭제
+        jwtUtil.addToBlackList(accessToken);
+        // Access Token을 블랙리스트에 등록
+        jwtUtil.deleteRefreshToken(email);
     }
 
     /**

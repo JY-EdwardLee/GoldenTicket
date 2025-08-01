@@ -4,9 +4,12 @@ import com.ssafy.ticket_backend.dto.request.UserPatchRequest;
 import com.ssafy.ticket_backend.dto.request.UserSignupRequest;
 import com.ssafy.ticket_backend.dto.response.JwtTokenResponse;
 import com.ssafy.ticket_backend.dto.response.LoginUserResponse;
+import com.ssafy.ticket_backend.dto.response.MyApplicationResponse;
 import com.ssafy.ticket_backend.dto.response.MyPageResponse;
 import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
+import com.ssafy.ticket_backend.dto.response.TicketResponse;
+import com.ssafy.ticket_backend.dto.response.TransactionResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.UserService;
 import com.ssafy.ticket_backend.util.JwtUtil;
@@ -55,8 +58,7 @@ public class UserController {
     public RedirectView redirectToKakaoLogin() {
         String kakaoAuthUrl =
             "https://kauth.kakao.com/oauth/authorize" + "?client_id=" + KakaoRestApiKey
-                + "&redirect_uri=" + "http://i13a109.p.ssafy.io:8080/"
-                + "/users/auth/kakao/callback"
+                + "&redirect_uri=" + "http://localhost:8080" + "/users/auth/kakao/callback"
                 + "&response_type=code";
 
         return new RedirectView(kakaoAuthUrl);
@@ -74,7 +76,7 @@ public class UserController {
         String naverAuthUrl =
             "https://nid.naver.com/oauth2.0/authorize" + "?response_type=code" + "&client_id="
                 + NaverClientId + "&redirect_uri="
-                + "http://i13a109.p.ssafy.io:8080/users/auth/naver/callback" + "&state=" + state;
+                + "http://http://localhost:8080/users/auth/naver/callback" + "&state=" + state;
 
         return new RedirectView(naverAuthUrl);
     }
@@ -113,7 +115,6 @@ public class UserController {
                 tokens.getRefreshToken()).httpOnly(true).secure(false).path("/").sameSite("Lax")
             .maxAge(7 * 24 * 60 * 60) // 7일
             .build();
-
         response.addHeader("Set-Cookie", accessCookie.toString());
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
@@ -187,6 +188,7 @@ public class UserController {
 
         LoginUserResponse loginUserResponse = userService.getLoginUser(accessToken);
         loginUserResponse.setAccessToken(accessToken);
+
         return ResponseEntity.ok(loginUserResponse);
     }
 
@@ -226,7 +228,7 @@ public class UserController {
     }
 
     /**
-     * 회원가입 처리
+     * 회원가입
      *
      * @param userSignupRequest 회원가입 요청 정보
      * @return JwtTokenResponse 토큰 응답
@@ -237,12 +239,12 @@ public class UserController {
         JwtTokenResponse tokens = userService.signup(userSignupRequest);
         // accessToken 쿠키 설정
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
-            .httpOnly(true).secure(true).sameSite("Strict").path("/").maxAge(Duration.ofMinutes(30))
+            .httpOnly(true).secure(false).sameSite("Lax").path("/").maxAge(Duration.ofMinutes(30))
             .build();
 
         // refreshToken 쿠키 설정
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
-            .httpOnly(true).secure(true).sameSite("Strict").path("/auth/refresh")
+            .httpOnly(true).secure(false).sameSite("Lax").path("/auth/refresh")
             .maxAge(Duration.ofDays(14)).build();
 
         response.addHeader("Set-Cookie", accessCookie.toString());
@@ -287,6 +289,21 @@ public class UserController {
     }
 
     /**
+     * 회원 탈퇴
+     *
+     * @return
+     */
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String authHeader) {
+
+        String accessToken = authHeader.substring(7);
+
+        userService.deleteUserByEmail(accessToken);
+
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+    }
+
+    /**
      * 내 정보 수정
      *
      * @param userDetails      JWT를 받아와서 사용
@@ -302,29 +319,18 @@ public class UserController {
     }
 
     /**
-     * 회원 탈퇴
-     *
-     * @param userDetails
-     * @return
-     */
-    @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        String email = userDetails.getUsername();
-        userService.deleteUserByEmail(email);
-        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
-    }
-
-    /**
      * 나의 응모 목록
      *
      * @param userDetails
      * @return
      */
     @GetMapping("/me/applications")
-    public ResponseEntity<MyPageResponse> getMyApplications(
+    public ResponseEntity<List<MyApplicationResponse>> getMyApplications(
         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        userService.selectApplicationsByUser(userDetails.getUsername());
-        return null;  // TODO
+        List<MyApplicationResponse> myApplicationResponses = userService.selectApplicationsByUser(
+            userDetails.getUsername());
+
+        return ResponseEntity.ok(myApplicationResponses);
     }
 
     /**
@@ -334,22 +340,26 @@ public class UserController {
      * @return
      */
     @GetMapping("/me/payments")
-    public ResponseEntity<MyPageResponse> getMyPayments(
+    public ResponseEntity<List<TransactionResponse>> getMyPayments(
         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        userService.selectPaymentsByUser(userDetails.getUsername());
-        return null; // TODO
+        List<TransactionResponse> transactionResponses = userService.selectBuyListByUserId(
+            userDetails.getUsername());
+
+        return ResponseEntity.ok(transactionResponses);
     }
 
     /**
-     * 나의 티켓 목록 //TODO DB 수정해야함!!!!!!!!!!!!!!!!!!!!!!
+     * 나의 티켓 목록
      *
      * @return
      */
     @GetMapping("/me/tickets")
-    public ResponseEntity<MyPageResponse> getMyTickets(
+    public ResponseEntity<List<TicketResponse>> getMyTickets(
         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        userService.selectTicketsByUser(userDetails.getUsername());
-        return null;
+        List<TicketResponse> ticketResponses = userService.selectTicketsByUser(
+            userDetails.getUsername());
+
+        return ResponseEntity.ok(ticketResponses);
     }
 
     /**
@@ -366,6 +376,7 @@ public class UserController {
     }
 
     // 로그인 - 테스트 용 로그인이므로 실제 서비스에서는 사용 금지
+
     @PostMapping("/testlogin")
     public ResponseEntity<JwtTokenResponse> testLogin() {
         JwtTokenResponse tokens = userService.testUser();

@@ -38,14 +38,14 @@
                   class="post-checkbox"
                 >
               </td>
-              <td class="number-column">{{ post.id }}</td>
+              <td class="number-column">{{ post.postId }}</td>
               <td class="title-column">
-                <router-link :to="`/bulletin/${post.id}`" class="post-title">
+                <router-link :to="`/bulletin/${post.postId}`" class="post-title">
                   {{ post.title }}
                 </router-link>
               </td>
-              <td class="date-column">{{ post.createdDate }}</td>
-              <td class="views-column">{{ post.views }}</td>
+              <td class="date-column">{{ post.createdAt }}</td>
+              <td class="views-column">{{ post.viewCount }}</td>
             </tr>
           </tbody>
         </table>
@@ -110,39 +110,26 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { API_CONFIG } from '@/config/api.config'
+import http from '@/utils/http'
+import router from '@/router'
 
 // 게시글 데이터 (실제로는 API에서 가져올 데이터)
 const posts = ref([
   {
-    id: 147,
-    title: '야구 경기 관람 후기',
-    createdDate: '2025.07.23',
-    views: 20
-  },
-  {
-    id: 146,
-    title: 'SSG 랜더스 응원 후기',
-    createdDate: '2025.07.23',
-    views: 30
-  },
-  {
-    id: 145,
-    title: '문학경기장 방문 꿀팁',
-    createdDate: '2025.07.22',
-    views: 15
-  },
-  {
-    id: 144,
-    title: '야구 좌석 추천',
-    createdDate: '2025.07.21',
-    views: 8
-  },
-  {
-    id: 143,
-    title: '응모 당첨 후기',
-    createdDate: '2025.07.20',
-    views: 25
+    "postId": 1,
+    "boardId": "free",
+    "userId": 1001,
+    "createdAt": "2025-07-29T10:00:00",
+    "updatedAt": "2025-07-29T10:30:00",
+    "viewCount": 123,
+    "title": "첫 번째 게시글",
+    "content": "이것은 게시글 내용입니다.",
+    "imageUrl": "https://example.com/image1.jpg",
+    "likeCount": 5,
+    "isDelete": false,
+    "nickName": "홍길동"
   }
 ])
 
@@ -217,6 +204,25 @@ const goToWrite = () => {
   alert('글쓰기 페이지로 이동합니다.')
   // router.push('/bulletin/write') 등으로 구현
 }
+
+const isLoading = ref(false)
+
+const fetchPosts = async () => {
+  try {
+    isLoading.value = true
+    const response = await http.get(API_CONFIG.USER.POSTS)
+    posts.value = response.data
+    console.log(posts.value)
+  } catch (error) {
+    console.error('게시글 조회 중 오류 발생:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchPosts()
+})
 </script>
 
 <style scoped>

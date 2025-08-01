@@ -4,7 +4,6 @@ import com.ssafy.ticket_backend.dto.response.TicketResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.TicketService;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,11 +22,11 @@ public class TicketController {
     /**
      * 티켓 양도
      *
-     * @param userDetails
-     * @param ticketId
-     * @return
+     * @param userDetails 사용자 정보
+     * @param ticketId    티켓의 id
+     * @return 티켓의 정보
      */
-    @GetMapping("/{ticketId}")
+    @GetMapping("/transfer/{ticketId}")
     public ResponseEntity<TicketResponse> transferTicket(
         @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long ticketId) {
         TicketResponse ticketResponse = ticketService.transferTicket(userDetails.getUsername(),
@@ -39,14 +38,16 @@ public class TicketController {
     /**
      * 다른 플랫폼에서 티켓 가져오기
      *
-     * @return
+     * @param userDetails 사용자 정보
+     * @param platform    NOL, TICKETLINK 중 하나
+     * @return 티켓의 정보
      */
-    @GetMapping("{platform}")
+    @GetMapping("/platform/{platform}")
     public ResponseEntity<List<TicketResponse>> getTicketsFromOtherPlatform(
         @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable String platform) {
         List<TicketResponse> TicketResponse = ticketService.getTicketsFromOtherPlatform(
             userDetails.getUsername(), platform);
 
-        return ResponseEntity.of(Optional.ofNullable(TicketResponse));
+        return ResponseEntity.ok(TicketResponse);
     }
 }

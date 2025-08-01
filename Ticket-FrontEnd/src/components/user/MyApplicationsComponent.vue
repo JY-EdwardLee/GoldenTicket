@@ -28,8 +28,8 @@
                   <div class="team-info">
           <div class="team-icon">⚾</div>
           <div class="game-details">
-            <h3 class="game-title">{{ application.gameTitle }}</h3>
-            <p class="stadium">{{ application.stadium }}</p>
+            <h3 class="game-title">{{ application.game.away }} vs {{ application.game.home }}</h3>
+            <p class="stadium">{{ application.game.stadium }}</p>
           </div>
         </div>
           <div class="status-badge" :class="application.status">
@@ -41,40 +41,44 @@
           <div class="game-info">
             <div class="info-item">
               <span class="label">경기시간 : </span>
-              <span class="value">{{ application.gameTime }}</span>
+              <span class="value">{{ formatDate(application.game.date) }}</span>
             </div>
-            <div class="info-item">
+            <div v-if="application.status === 'BEING_WAITING'" class="info-item">
               <span class="label">응모일 : </span>
-              <span class="value">{{ application.applicationDate }}</span>
+              <span class="value">{{ formatDate(application.date) }}</span>
             </div>
-            <div v-if="application.paymentAmount" class="info-item">
+            <div v-if="application.status === 'WAITING_PAYING'" class="info-item">
+              <span class="label">매칭 일시 : </span>
+              <span class="value">{{ formatDate(application.matchedDate) }}</span>
+            </div>
+            <div v-if="application.status === 'WAITING_PAYING'" class="info-item">
               <span class="label">결제 금액 : </span>
-              <span class="value">{{ application.paymentAmount }}원</span>
+              <span class="value">{{ application.price }}원</span>
             </div>
-            <div v-if="application.cancellationDate" class="info-item">
+            <div v-if="application.status === 'CANCEL_WAITING'" class="info-item">
               <span class="label">취소일 : </span>
-              <span class="value">{{ application.cancellationDate }}</span>
+              <span class="value">{{ formatCancelDate(application.cancellationDate) }}</span>
             </div>
           </div>
         </div>
 
         <div class="card-actions">
           <button 
-            v-if="application.status === 'applying'" 
+            v-if="application.status === 'BEING_WAITING'" 
             class="cancel-btn"
             @click="cancelApplication(application.id)"
           >
             응모 취소
           </button>
           <button 
-            v-if="application.status === 'payment-pending'" 
+            v-if="application.status === 'WAITING_PAYING'" 
             class="cancel-btn"
             @click="cancelPayment(application.id)"
           >
             결제 취소
           </button>
           <button 
-            v-if="application.status === 'payment-pending'" 
+            v-if="application.status === 'WAITING_PAYING'" 
             class="payment-btn"
             @click="processPayment(application.id)"
           >
@@ -95,47 +99,25 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+import { API_CONFIG } from '@/config/api.config'
+import http from '@/utils/http'
+
+const isLoading = ref(false)
 
 // 탭 데이터
 const tabs = [
-  { id: 'applying', name: '응모 중' },
-  { id: 'payment-pending', name: '결제 대기' },
-  { id: 'cancelled', name: '응모 취소' }
+  { id: 'BEING_WAITING', name: '응모 중' },
+  { id: 'WAITING_PAYING', name: '결제 대기' },
+  { id: 'CANCEL_WAITING', name: '응모 취소' }
 ]
 
-// 현재 활성 탭
-const activeTab = ref('applying')
+// 현재 활성 탭 applying, payment-pending, cancelled
+const activeTab = ref('BEING_WAITING')
 
 // 응모 내역 데이터 (실제로는 API에서 가져올 데이터)
-const applications = ref([
-  {
-    id: 1,
-    gameTitle: 'SSG 랜더스 vs KIA 타이거즈',
-    stadium: '인천 문학경기장',
-    gameTime: '18:30',
-    applicationDate: '2024.01.10',
-    status: 'applying'
-  },
-  {
-    id: 2,
-    gameTitle: '두산 베어스 vs 한화 이글스',
-    stadium: '잠실야구장',
-    gameTime: '18:30',
-    applicationDate: '2024.01.12',
-    paymentAmount: '25,000',
-    status: 'payment-pending'
-  },
-  {
-    id: 3,
-    gameTitle: 'LG 트윈스 vs KT 위즈',
-    stadium: '잠실야구장',
-    gameTime: '18:30',
-    applicationDate: '2024.01.08',
-    cancellationDate: '2024.01.09',
-    status: 'cancelled'
-  }
-])
+const applications = ref([])
 
 // 현재 탭에 따른 필터링된 응모 내역
 const filteredApplications = computed(() => {
@@ -145,9 +127,9 @@ const filteredApplications = computed(() => {
 // 상태 텍스트 반환
 const getStatusText = (status) => {
   const statusMap = {
-    'applying': '응모 중',
-    'payment-pending': '결제 대기',
-    'cancelled': '응모 취소'
+    'BEING_WAITING': '응모 중',
+    'WAITING_PAYING': '결제 대기',
+    'CANCEL_WAITING': '응모 취소'
   }
   return statusMap[status] || status
 }
@@ -166,9 +148,43 @@ const cancelPayment = (id) => {
 
 // 결제 처리
 const processPayment = (id) => {
+  http.put(API_CONFIG.USER.APPLICANTS + '/' + id)  
   console.log('결제 처리:', id)
   // API 호출 로직
 }
+
+// 날짜 포맷팅 메서드
+const formatDate = (dateString) => {
+  const date = new Date(dateString)
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}시 ${String(date.getMinutes()).padStart(2, '0')}분`
+}
+
+
+const formatCancelDate = (dateString) => {
+  const date = new Date(dateString);  // 기존 날짜 객체 생성
+  date.setMinutes(date.getMinutes() + 10);  // 10분 더하기
+
+  // 날짜를 'YYYY-MM-DD HH시 MM분' 형식으로 변환
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}시 ${String(date.getMinutes()).padStart(2, '0')}분`;
+}
+
+const fetchApplications = async () => {
+  try {
+    isLoading.value = true
+    const response = await http.get(API_CONFIG.USER.APPLICANTS)
+    console.log('응모 내역 조회 결과:', response.data)
+    applications.value = response.data
+  } catch (error) {
+    console.error('응모 내역 조회 중 오류 발생:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchApplications()
+})
+
 </script>
 
 <style scoped>

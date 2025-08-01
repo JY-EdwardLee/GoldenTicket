@@ -7,6 +7,7 @@ import com.ssafy.ticket_backend.dto.response.TossPayReadyResponse;
 import com.ssafy.ticket_backend.dto.response.TossPayResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.KakaoPayService;
+import com.ssafy.ticket_backend.service.TicketService;
 import com.ssafy.ticket_backend.service.TossPayService;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class PaymentController {
 
+    private final TicketService ticketService;
     private final KakaoPayService kakaoPayService;
     private final TossPayService tossPayService;
 
@@ -55,10 +57,10 @@ public class PaymentController {
         try {
             KakaoPayApproveResponse approveResponse = kakaoPayService.approve(pgToken,
                 partnerOrderId);
-            System.out.println("결제 완료: " + approveResponse);
             kakaoPayService.insertKakaoTransaction(approveResponse);
+            ticketService.transferTicketToBuyer(approveResponse.getItem_code(),
+                approveResponse.getPartner_user_id());
 
-            // TODO 반환 형식 어떻게 할지
             return ResponseEntity.ok(approveResponse);
         } catch (IllegalStateException e) {
             // Redis에서 데이터를 찾지 못한 경우 (만료 또는 잘못된 요청)

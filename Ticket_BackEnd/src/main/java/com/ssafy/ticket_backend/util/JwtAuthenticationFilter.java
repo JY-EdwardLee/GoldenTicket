@@ -60,9 +60,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // UserDetailsService에서 유저 정보 로드 (여기선 userId가 PK로 사용된다고 가정)
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(userEmail);
 
-            UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(userDetails, null,
-                    userDetails.getAuthorities());
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
             SecurityContextHolder.getContext().setAuthentication(authToken);
