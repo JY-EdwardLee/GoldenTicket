@@ -285,6 +285,11 @@ onMounted(() => {
 
 .ticket-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.ticket-card:hover::before {
+  background: rgba(255, 107, 53, 0.1); /* 주황색 배경 오버레이 */
 }
 
 .ticket-header {
