@@ -10,3 +10,16 @@ export const stadiumNameToEnum = {
   'NC다이노스': '창원NC파크',
   '키움히어로즈': '고척 스카이돔',
 };
+
+export const stadiumOfTeam = {
+  'JAMSIL': '대구 삼성 라이온즈 파크',
+  'GOCHUK': '고척 스카이돔',
+  'JAMSIL': '서울종합운동장 야구장',
+  'JAMSIL': '서울종합운동장 야구장',
+  'SUWON': '수원 케이티 위즈 파크',
+  'MUNHAK': '인천 SSG 랜더스필드',
+  'CHANGWON': '창원NC파크',
+  'GWANGJU': '광주 기아 챔피언스 필드',
+  'SAJIK': '사직 야구장',
+  'DAEJEON': '대전 한화생명 볼파크',
+}
