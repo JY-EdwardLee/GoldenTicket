@@ -18,4 +18,6 @@ public interface TransactionMapper {
     void transactionComplete(@Param("ticketId") Long ticketId);
 
     List<Transaction> selectBuyListByUserId(Long userId);
+
+    Ticket selectTicketByTransactionId(Long transactionId);
 }

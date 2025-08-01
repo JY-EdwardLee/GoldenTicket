@@ -12,6 +12,20 @@ export const teamNameToEnum = {
   '키움히어로즈': 'KIWOOM_HEROES',
 };
 
+export const enumToTeamName = {
+  'KIA_TIGERS':'KIA타이거즈',
+  'SAMSUNG_LIONS': '삼성라이온즈',
+  'LG_TWINS': 'LG트윈스',
+  'DOOSAN_BEARS': '두산베어스',
+  'KT_WIZ': 'KT위즈',
+  'SSG_LANDERS': 'SSG랜더스',
+  'LOTTE_GIANTS': '롯데자이언츠',
+  'HANHWA_EAGLES': '한화이글스',
+  'NC_DINOS': 'NC다이노스',
+  'KIWOOM_HEROES': '키움히어로즈',
+};
+
+
 export function getEnumTeamName(korName) {
   return teamNameToEnum[korName] || korName;
 }

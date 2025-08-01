@@ -137,7 +137,7 @@ public class UserServiceImpl implements UserService {
         MultiValueMap<String, String> tokenParams = new LinkedMultiValueMap<>();
         tokenParams.add("grant_type", "authorization_code");
         tokenParams.add("client_id", kakaoApiKey);
-        tokenParams.add("redirect_uri", "http://i13a109.p.ssafy.io:8080/users/auth/kakao/callback");
+        tokenParams.add("redirect_uri", "http://localhost:8080/users/auth/kakao/callback");
         tokenParams.add("code", code);
 
         HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(tokenParams,
@@ -398,8 +398,18 @@ public class UserServiceImpl implements UserService {
         for (Waitlist waitlist : waitlists) {
             Game game = gameMapper.selectGameByGameId(waitlist.getGameId());
 
-            MyApplicationResponse myApplicationResponse = new MyApplicationResponse(
-                waitlist.getId(), waitlist.getStatus(), game.toGameResponse());
+            MyApplicationResponse myApplicationResponse = new MyApplicationResponse();
+
+            myApplicationResponse.waitlistToMyApplicationResponse(waitlist);
+            myApplicationResponse.setGame(game.toGameResponse());
+
+            if (waitlist.getTransactionId() != null) {
+                Ticket ticket = transactionMapper.selectTicketByTransactionId(
+                    waitlist.getTransactionId());
+
+                myApplicationResponse.setMatchedDate(ticket.getMatchedDate());
+                myApplicationResponse.setPrice(ticket.getPrice());
+            }
 
             myApplicationResponses.add(myApplicationResponse);
         }
@@ -454,7 +464,7 @@ public class UserServiceImpl implements UserService {
     /**
      * 회원 탈퇴
      *
-     * @param email
+     * @param accessToken
      */
     @Override
     public void deleteUserByEmail(String accessToken) {

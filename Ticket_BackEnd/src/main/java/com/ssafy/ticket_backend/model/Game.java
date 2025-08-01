@@ -11,6 +11,7 @@ public class Game {
     LocalDateTime gameDateTime;
     BaseballTeams homeTeam;
     BaseballTeams awayTeam;
+    Stadium stadium;
     boolean isCanceled;
     boolean isEnded;
 
@@ -21,6 +22,7 @@ public class Game {
         gameResponse.setDate(gameDateTime);
         gameResponse.setHome(homeTeam);
         gameResponse.setAway(awayTeam);
+        gameResponse.setStadium(stadium);
 
         return gameResponse;
     }

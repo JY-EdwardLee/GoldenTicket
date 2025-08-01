@@ -17,7 +17,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Duration;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -59,7 +58,7 @@ public class UserController {
     public RedirectView redirectToKakaoLogin() {
         String kakaoAuthUrl =
             "https://kauth.kakao.com/oauth/authorize" + "?client_id=" + KakaoRestApiKey
-                + "&redirect_uri=" + "http://i13a109.p.ssafy.io:8080" + "/users/auth/kakao/callback"
+                + "&redirect_uri=" + "http://localhost:8080" + "/users/auth/kakao/callback"
                 + "&response_type=code";
 
         return new RedirectView(kakaoAuthUrl);
@@ -77,7 +76,7 @@ public class UserController {
         String naverAuthUrl =
             "https://nid.naver.com/oauth2.0/authorize" + "?response_type=code" + "&client_id="
                 + NaverClientId + "&redirect_uri="
-                + "http://i13a109.p.ssafy.io:8080/users/auth/naver/callback" + "&state=" + state;
+                + "http://http://localhost:8080/users/auth/naver/callback" + "&state=" + state;
 
         return new RedirectView(naverAuthUrl);
     }
@@ -100,7 +99,7 @@ public class UserController {
 
             // 2) 회원가입 페이지로 리다이렉트하면서 tempUserId 전달
             return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http://i13a109.p.ssafy.io/signup?tempUserId=" + tempUserId)
+                .header("Location", "http://localhost:5173/signup?tempUserId=" + tempUserId)
                 .build();
         }
 
@@ -119,18 +118,9 @@ public class UserController {
         response.addHeader("Set-Cookie", accessCookie.toString());
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
-        System.out.println("accessCookie: " + accessCookie);
-        System.out.println("refreshCookie: " + refreshCookie);
-
-        System.out.println("response 헤더 찍음!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        Collection<String> headerNames = response.getHeaderNames();
-        for (String headerName : headerNames) {
-            System.out.println("헤더 네임 : " + headerName + "바디 : " + response.getHeader(headerName));
-        }
-
         // 로그인 완료 후 프론트 리다이렉트 (인증 상태 확인 페이지)
         return ResponseEntity.status(HttpStatus.FOUND)
-            .header("Location", "http://i13a109.p.ssafy.io/oauth/callback").build();
+            .header("Location", "http://localhost:5173/oauth/callback").build();
     }
 
     /**
@@ -152,7 +142,7 @@ public class UserController {
 
             // 2. 회원가입 페이지로 리다이렉트 + tempUserId 쿼리파라미터로 전달
             return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http://i13a109.p.ssafy.io/signup?tempUserId=" + tempUserId)
+                .header("Location", "http://localhost:5173/signup?tempUserId=" + tempUserId)
                 .build();
         }
 
@@ -174,7 +164,7 @@ public class UserController {
 
         // 로그인 성공 후 프론트엔드로 리다이렉트
         return ResponseEntity.status(HttpStatus.FOUND)
-            .header("Location", "http://i13a109.p.ssafy.io/oauth/callback").build();
+            .header("Location", "http://localhost:5173/oauth/callback").build();
     }
 
     /**
@@ -354,7 +344,7 @@ public class UserController {
         @AuthenticationPrincipal CustomUserDetails userDetails) {
         List<TransactionResponse> transactionResponses = userService.selectBuyListByUserId(
             userDetails.getUsername());
-        
+
         return ResponseEntity.ok(transactionResponses);
     }
 
@@ -386,6 +376,7 @@ public class UserController {
     }
 
     // 로그인 - 테스트 용 로그인이므로 실제 서비스에서는 사용 금지
+
     @PostMapping("/testlogin")
     public ResponseEntity<JwtTokenResponse> testLogin() {
         JwtTokenResponse tokens = userService.testUser();

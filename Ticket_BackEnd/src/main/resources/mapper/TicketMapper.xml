@@ -36,6 +36,15 @@
     AND game_datetime > now()
   </select>
 
+  <select id="selectTicketByGame" resultType="com.ssafy.ticket_backend.model.Ticket"
+    parameterType="map">
+    SELECT *
+    FROM tickets
+    WHERE game_id = #{gameId}
+    AND seat = #{seat}
+    AND seller_id = #{userId}
+  </select>
+
   <insert id="insertTicket" parameterType="com.ssafy.ticket_backend.model.Ticket"
     useGeneratedKeys="true" keyProperty="ticketId">
     INSERT INTO tickets ( ticket_status,
@@ -60,7 +69,7 @@
     )
   </insert>
 
-  <select id="selectTicketByGame" resultType="boolean">
+  <select id="checkTicketByGame" resultType="boolean">
     SELECT EXISTS (
     SELECT 1
     FROM tickets
@@ -97,6 +106,7 @@
     waitlist_id AS id,
     user_id AS userId,
     game_id AS gameId,
+    transaction_id AS transactionId,
     created_at AS createdAt,
     waitlist_status AS status
     FROM waitlists
@@ -116,9 +126,10 @@
   <insert id="insertOtherPlatformTicket"
     parameterType="com.ssafy.ticket_backend.model.OtherPlatformTicket">
     INSERT INTO other_platform
-    (platform, price, seat, game_datetime, home_team, away_team, user_email)
+    (platform, price, seat, game_datetime, home_team, away_team, stadium, user_email)
     VALUES
-    (#{platform}, #{price}, #{seat}, #{gameDatetime}, #{homeTeam}, #{awayTeam}, #{userEmail})
+    (#{platform}, #{price}, #{seat}, #{gameDatetime}, #{homeTeam}, #{awayTeam}, #{stadium}
+    ,#{userEmail})
   </insert>
 
 

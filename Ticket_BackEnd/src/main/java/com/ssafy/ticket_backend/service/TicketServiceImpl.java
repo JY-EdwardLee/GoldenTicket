@@ -53,7 +53,7 @@ public class TicketServiceImpl implements TicketService {
             TicketResponse ticketResponse = new TicketResponse(ticket);
             ticketResponse.setGame(
                 new GameResponse(game.getGameId(), game.getGameDateTime(), game.getHomeTeam(),
-                    game.getAwayTeam()));
+                    game.getAwayTeam(), game.getStadium()));
 
             return ticketResponse;
         } catch (TicketTransferException e) {
@@ -87,27 +87,29 @@ public class TicketServiceImpl implements TicketService {
                 opt.getGameDatetime().toLocalDate(), opt.getHomeTeam());
 
             for (Game g : games) {
-                // 티켓이 이미 등록되어 있으면 생략
-                if (ticketMapper.selectTicketByGame(g.getGameId(), opt.getSeat(),
+                // 티켓 정보에 등록
+                Ticket ticket;
+                // 티켓이 등록되어 있으면
+                if (ticketMapper.checkTicketByGame(g.getGameId(), opt.getSeat(),
                     user.getUserId())) {
-                    continue;
+                    ticket = ticketMapper.selectTicketByGame(g.getGameId(), opt.getSeat(),
+                        user.getUserId());
+                } else {  // 티켓이 등록되어 있지 않으면
+                    ticket = new Ticket();
+
+                    ticket.setPrice(opt.getPrice());
+                    ticket.setSeat(opt.getSeat());
+                    ticket.setTicketStatus(TicketStatus.BEFORE_ASSIGNMENT);
+                    ticket.setGameId(g.getGameId());
+                    ticket.setSellerId(user.getUserId());
+
+                    ticketMapper.insertTicket(ticket);  // 티켓 등록
                 }
 
-                // 티켓 정보에 등록
-                Ticket ticket = new Ticket();
-
-                ticket.setPrice(opt.getPrice());
-                ticket.setSeat(opt.getSeat());
-                ticket.setTicketStatus(TicketStatus.BEFORE_ASSIGNMENT);
-                ticket.setGameId(g.getGameId());
-                ticket.setSellerId(user.getUserId());
-
-                ticketMapper.insertTicket(ticket);
                 tickets.add(ticket);
             }
         }
 
-        System.out.println(tickets.size() + " tickets");
         for (Ticket ticket : tickets) {
             Game game = gameMapper.selectGameByGameId(ticket.getGameId());
 
@@ -130,5 +132,15 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public void transferTicketToBuyer(String ticketId, String userId) {
         ticketMapper.transferTicket(ticketId, userId);
+    }
+
+    @Override
+    public TicketResponse getTicketDetail(String userEmail, Long ticketId) {
+        Ticket ticket = ticketMapper.selectTicketByTicketId(ticketId);
+        TicketResponse ticketResponse = new TicketResponse(ticket);
+        Game game = gameMapper.selectGameByGameId(ticket.getGameId());
+        ticketResponse.setGame(game.toGameResponse());
+
+        return ticketResponse;
     }
 }

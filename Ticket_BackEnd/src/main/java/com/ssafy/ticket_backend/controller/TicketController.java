@@ -50,4 +50,13 @@ public class TicketController {
 
         return ResponseEntity.ok(TicketResponse);
     }
+
+    @GetMapping("/details/{ticketId}")
+    public ResponseEntity<TicketResponse> getTicketDetail(
+        @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long ticketId) {
+        TicketResponse ticketDetail = ticketService.getTicketDetail(userDetails.getUsername(),
+            ticketId);
+
+        return ResponseEntity.ok(ticketDetail);
+    }
 }

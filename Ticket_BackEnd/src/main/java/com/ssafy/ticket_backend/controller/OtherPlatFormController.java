@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
+/**
+ * 경기일정 별 5개의 티켓 랜덤생성 좌석,가격,플랫폼 랜덤선택
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/other-platform")
@@ -24,6 +28,7 @@ public class OtherPlatFormController {
     game_dateTime TIMESTAMP WITHOUT TIME ZONE NOT NULL,     -- game 정보와 일치
     home_team     VARCHAR(50)  NOT NULL,                    -- game 정보와 일치
     away_team     VARCHAR(50)  NOT NULL,                    -- game 정보와 일치
+	  stadium 	  VARCHAR(50)  NOT NULL,					            -- stadium 추가
     user_email character varying(255) COLLATE pg_catalog."default" NOT NULL,    --
    */
 
@@ -78,15 +83,16 @@ public class OtherPlatFormController {
           // 가격 생성
           int price = generatePriceBySeatType(seatInfo);
 
-                     // OtherPlatformTicket 객체 생성
-           OtherPlatformTicket ticket = new OtherPlatformTicket();
-           ticket.setPlatform(randomPlatform);
-           ticket.setPrice(price);
-           ticket.setSeat(seatInfo);
-           ticket.setGameDatetime(game.getGameDateTime());
-           ticket.setHomeTeam(game.getHomeTeam());
-           ticket.setAwayTeam(game.getAwayTeam());
-           ticket.setUserEmail(randomEmail);
+          // OtherPlatformTicket 객체 생성
+          OtherPlatformTicket ticket = new OtherPlatformTicket();
+          ticket.setPlatform(randomPlatform);
+          ticket.setPrice(price);
+          ticket.setSeat(seatInfo);
+          ticket.setGameDatetime(game.getGameDateTime());
+          ticket.setHomeTeam(game.getHomeTeam());
+          ticket.setAwayTeam(game.getAwayTeam());
+          ticket.setUserEmail(randomEmail);
+          ticket.setStadium(game.getStadium());
 
           ticketMapper.insertOtherPlatformTicket(ticket);
 
