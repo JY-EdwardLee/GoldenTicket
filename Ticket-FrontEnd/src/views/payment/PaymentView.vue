@@ -8,14 +8,14 @@
           <h3 class="section-title">주문상품 정보</h3>
           <div class="order-detail">
             <div class="order-info">
-              <div class="order-title">SSG 랜더스 VS 두산 베어스</div>
+              <div class="order-title">{{ enumToTeamName(ticket?.homeTeamName) }} VS {{ enumToTeamName(ticket?.awayTeamName) }}</div>
               <div class="order-meta">
-                <span>인천SSG랜더스필드</span>
-                <span>2024.08.15 (목) 18:30</span>
-                <span>1루석 1매</span>
+                <span>{{ stadiumNameOfTeam(ticket?.homeTeamName) }}</span>
+                <span> {{ formatDate(ticket?.matchDate) }}</span>
+                <span>{{ ticket?.seatRow }} {{ ticket?.seatNumber }}석 {{ ticket?.quantity }}매</span>
               </div>
             </div>
-            <div class="order-price">60,000원</div>
+            <div class="order-price">{{ ticket?.price }}원</div>
           </div>
         </div>
 
@@ -23,7 +23,7 @@
         <div class="total-amount-section">
           <div class="total-amount">
             <span>총 주문금액</span>
-            <span class="amount">60,000원</span>
+            <span class="amount">{{ ticket?.price }}원</span>
           </div>
         </div>
 
@@ -32,15 +32,15 @@
           <h3 class="section-title">주문자 정보</h3>
           <div class="form-group">
             <label>이름</label>
-            <input type="text" placeholder="이름을 입력해주세요">
+            <input type="text" :value="user?.userName || ''" >
           </div>
           <div class="form-group">
             <label>휴대전화</label>
-            <input type="tel" placeholder="휴대전화 번호를 입력해주세요">
+            <input type="tel" :value="user?.phoneNumber || ''" >
           </div>
           <div class="form-group">
             <label>이메일</label>
-            <input type="email" placeholder="이메일을 입력해주세요">
+            <input type="email" :value="user?.email || ''" >
           </div>
         </div>
       </div>
@@ -91,7 +91,7 @@
           </div>
 
           <!-- Bank Transfer Section -->
-          <div class="payment-details" v-if="showBankTransfer">
+          <div class="payment-details bank-transfer-wrapper" v-if="showBankTransfer">
             <div class="bank-transfer">
               <h4>무통장입금</h4>
               <div class="bank-info">
@@ -130,40 +130,70 @@
     <!-- Action Buttons -->
     <div class="action-buttons">
       <button class="btn-cancel">취소</button>
-      <button class="btn-pay">60,000원 결제하기</button>
+      <button class="btn-pay">결제하기</button>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
 import NavBar from '@/components/common/NavBar.vue';
 import FooterBar from '@/components/common/FooterBar.vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { API_CONFIG } from '@/config/api.config';
+import { enumToTeamName } from '@/utils/teamNameMap';
+import { stadiumOfTeam } from '@/utils/teamStadium';
+import { formatDate } from '@/utils/dateUtils';
+import http from '@/utils/http';
+
+// 사용자 정보
+const user = ref(null)
+// 티켓 정보
+const ticket = ref(null)
 
 
-export default {
-  name: 'PaymentView',
-  components: {
-    NavBar,
-    FooterBar
-  },
-  data() {
-    return {
-      selectedPayment: 'simple',
-      showSimplePayment: true,
-      showBankTransfer: false
-    };
-  },
-  methods: {
-    togglePaymentSection(type) {
-      this.showSimplePayment = type === 'simple';
-      this.showBankTransfer = type === 'bank';
-    }
+onMounted(() => {
+  const authStore = useAuthStore()
+  authStore.getUserInfo()
+  const userInfo = localStorage.getItem('user')
+  if (userInfo) {
+    user.value = JSON.parse(userInfo)
+    console.log(user.value)
   }
+  const response = http.get(API_CONFIG.TICKET.DETAIL, {
+    params: {
+      ticketId: this.$route.params.id
+    }
+  })
+  console.log(response)
+  ticket.value = response.data
+})
+
+const selectedPayment = ref('simple')
+const showSimplePayment = ref(true)
+const showBankTransfer = ref(false)
+
+const togglePaymentSection = (type) => {
+      showSimplePayment.value = type === 'simple';
+      showBankTransfer.value = type === 'bank';
 }
+
 </script>
 
 <style scoped>
+.bank-transfer-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 0 0 0 24px;
+  width: 478px;
+  height: 270px;
+  flex: none;
+  order: 1;
+  flex-grow: 0;
+}
+
 .payment-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -478,7 +508,6 @@ export default {
 
 .btn-cancel,
 .btn-pay {
-  flex: 1;
   padding: 1rem;
   border: none;
   border-radius: 4px;
@@ -486,11 +515,13 @@ export default {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  width: 80%;
 }
 
 .btn-cancel {
   background: #f0f0f0;
   color: #666;
+  width: 20%;
 }
 
 .btn-pay {

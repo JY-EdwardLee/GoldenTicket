@@ -28,8 +28,8 @@
                   <div class="team-info">
           <div class="team-icon">⚾</div>
           <div class="game-details">
-            <h3 class="game-title">{{ application.game.away }} vs {{ application.game.home }}</h3>
-            <p class="stadium">{{ application.game.stadium }}</p>
+            <h3 class="game-title">{{ enumToTeamName[application.game.away] }} vs {{ enumToTeamName[application.game.home] }}</h3>
+            <p class="stadium">{{ stadiumOfTeam[application.game.stadium] }}</p>
           </div>
         </div>
           <div class="status-badge" :class="application.status">
@@ -80,7 +80,7 @@
           <button 
             v-if="application.status === 'WAITING_PAYING'" 
             class="payment-btn"
-            @click="processPayment(application.id)"
+            @click="processPayment(application.ticketId)"
           >
             결제하기
           </button>
@@ -102,9 +102,15 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { API_CONFIG } from '@/config/api.config'
+import { enumToTeamName } from '@/utils/teamNameMap'
+import { stadiumOfTeam } from '@/utils/teamStadium'
+import { useRouter } from 'vue-router';
+
 import http from '@/utils/http'
 
 const isLoading = ref(false)
+
+const router = useRouter()
 
 // 탭 데이터
 const tabs = [
@@ -147,10 +153,9 @@ const cancelPayment = (id) => {
 }
 
 // 결제 처리
-const processPayment = (id) => {
-  http.put(API_CONFIG.USER.APPLICANTS + '/' + id)  
-  console.log('결제 처리:', id)
-  // API 호출 로직
+const processPayment = (applicationId) => {
+  // 결제 페이지로 이동
+  router.push(`/payment/${applicationId}`)
 }
 
 // 날짜 포맷팅 메서드

@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
 import { API_CONFIG } from '@/config/api.config';
 import http from '@/utils/http';
 

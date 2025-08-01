@@ -113,6 +113,7 @@ router.beforeEach(async (to, from, next) => {
     // 인증 상태 확인
     if (!isAuthenticated) {
       // 로그인되지 않은 경우 로그인 페이지로 리다이렉트
+      alert('로그인 후 이용해주세요.');
       next({ name: 'Home' });
       return;
     }
