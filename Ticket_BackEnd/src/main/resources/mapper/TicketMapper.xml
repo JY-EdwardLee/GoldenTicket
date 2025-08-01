@@ -36,6 +36,15 @@
     AND game_datetime > now()
   </select>
 
+  <select id="selectTicketByGame" resultType="com.ssafy.ticket_backend.model.Ticket"
+    parameterType="map">
+    SELECT *
+    FROM tickets
+    WHERE game_id = #{gameId}
+    AND seat = #{seat}
+    AND seller_id = #{userId}
+  </select>
+
   <insert id="insertTicket" parameterType="com.ssafy.ticket_backend.model.Ticket"
     useGeneratedKeys="true" keyProperty="ticketId">
     INSERT INTO tickets ( ticket_status,
@@ -60,7 +69,7 @@
     )
   </insert>
 
-  <select id="selectTicketByGame" resultType="boolean">
+  <select id="checkTicketByGame" resultType="boolean">
     SELECT EXISTS (
     SELECT 1
     FROM tickets
