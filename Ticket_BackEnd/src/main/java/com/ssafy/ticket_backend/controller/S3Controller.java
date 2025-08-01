@@ -39,7 +39,7 @@ public class S3Controller {
 
 
  [게시물 로직]
-  게시물 최소 입력시 -> post_id 기본키가 없다.
+  게시물 최초 입력시 -> post_id 기본키가 없다.
   (front)임시 refId값 만들어서 전송 ->  (back) 키,url 발급 -> front(s3 업로드 이후 키 전송)
   -> 서버단에서 postId 생성이후 해당 postId로 수정 후 db에 키값 정상저장.
 
