@@ -3,7 +3,6 @@ package com.ssafy.ticket_backend.service;
 import com.ssafy.ticket_backend.dto.request.PostRequest;
 import com.ssafy.ticket_backend.dto.request.PostUpdateRequest;
 import com.ssafy.ticket_backend.dto.request.S3DownloadRequest;
-import com.ssafy.ticket_backend.dto.request.S3SaverRequest;
 import com.ssafy.ticket_backend.dto.response.CommentDetailResponse;
 import com.ssafy.ticket_backend.dto.response.PostDetailResponse;
 import com.ssafy.ticket_backend.dto.response.PostLikeResponse;
@@ -106,6 +105,7 @@ public class PostServiceImpl implements PostService {
   @Override
   public PostDetailResponse getPostDetail(Long postId) {
     try {
+
       // 게시물 정보
       PostDetailResponse postDetailResponse = postMapper.selectPostById(postId);
       if (postDetailResponse == null) {
@@ -147,8 +147,8 @@ public class PostServiceImpl implements PostService {
       if (postUserResponse == null) {
         throw new PostUserNotFoundException("게시글 작성자 정보가 존재하지 않습니다.");
       }
-      postDetailResponse.setPostUser(postUserResponse);
 
+      postDetailResponse.setPostUser(postUserResponse);
       return postDetailResponse;
 
     } catch (PostUserNotFoundException | PostNotFoundException | DatabaseOperationException e) {
@@ -167,6 +167,7 @@ public class PostServiceImpl implements PostService {
   @Transactional
   @Override
   public void updatePost(String email, PostUpdateRequest postUpdateRequest) {
+
     try {
       User user = userMapper.selectUserByEmail(email);
 
@@ -183,10 +184,8 @@ public class PostServiceImpl implements PostService {
 
       int result = postMapper.updatePost(postUpdateRequest);
 
-      //  fornt수정페이지 : refid받아와서  (키 url 발급 s3 업로드 -> 키만 db에 저장해주면 됨.)
-      s3PostService.saveUploadKey(
-          new S3SaverRequest(postUpdateRequest.getImageUrl(), S3Type.PostImage,
-              postUpdateRequest.getPostId()));
+      // 이미지 URL은 updatePost 쿼리에서 이미 처리됨
+      // imageUrl이 null이면 DB에서도 null로 업데이트됨
 
       if (result != 1) {
         throw new DatabaseOperationException("게시물 수정중 오류가 발생하였습니다.");
@@ -217,13 +216,8 @@ public class PostServiceImpl implements PostService {
         }
       }
 
-      int result = postMapper.deletePost(PostId);
-
-      if (result != 1) {
-        throw new DatabaseOperationException("게시물 삭제 중 오류가 발생하였습니다.");
-      }
-
       int deleteTrue = postMapper.deleteTrue(PostId);
+
       if (deleteTrue != 1) {
         throw new DatabaseOperationException("게시물 삭제 중 오류가 발생하였습니다.");
       }
@@ -233,7 +227,6 @@ public class PostServiceImpl implements PostService {
     } catch (Exception e) {
       throw new PostDeleteException("게시글 삭제시 오류가 발생하였습니다.");
     }
-
   }
 
   /**

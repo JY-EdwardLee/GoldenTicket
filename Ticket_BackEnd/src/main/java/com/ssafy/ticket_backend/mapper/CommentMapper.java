@@ -12,16 +12,14 @@ public interface CommentMapper {
 
   int insertComment(CommentRequest commentRequest);
 
-  int deleteComment(Long commentId);
-
   int CommentDeleteTrue(Long commentId);
 
   int updateComment(@Param("commentId") Long commentId,
       CommentUpdateRequest commentUpdateRequest);
 
-  List<CommentDetailResponse> getComments(Long post_id);
+  List<CommentDetailResponse> getComments(Long postId);
 
-  Long selectUserIdByCommentId(Long postId);
+  Long selectUserIdByCommentId(Long commentId);
 
   boolean selectLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
 
@@ -33,6 +31,6 @@ public interface CommentMapper {
 
   void deletePostLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
 
-  Long selectCommentLike(Long postId);
+  Long selectCommentLike(Long commentId);
 
 }

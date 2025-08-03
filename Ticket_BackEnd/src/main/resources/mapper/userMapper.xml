@@ -19,7 +19,7 @@
   <!-- 게시판번호로 유저 조회 (커뮤니티 용)-->
   <select id="selectUserByPostId" parameterType="Long"
     resultType="PostUserResponse">
-    SELECT user_id, nickname
+    SELECT user_id, nick_name
     FROM users
     WHERE user_id = #{userId}
   </select>

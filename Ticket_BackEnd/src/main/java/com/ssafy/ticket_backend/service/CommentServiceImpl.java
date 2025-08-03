@@ -32,6 +32,7 @@ public class CommentServiceImpl implements CommentService {
   @Transactional
   @Override
   public void createComment(String email, CommentRequest commentRequest) {
+
     User user = userMapper.selectUserByEmail(email);
 
     if (user.getIsBlock()) {
@@ -67,25 +68,17 @@ public class CommentServiceImpl implements CommentService {
 
     if (!user.getUserRole().equals(UserRole.ADMIN)) {
       Long result = commentMapper.selectUserIdByCommentId(commentId);
-
-      if (result == null) {
-        throw new CommentDeleteFailException("존재하지 않는 댓글입니다.");
-      } else if (user.getUserId() != result) {
+      if (user.getUserId() != result) {
         throw new CommentDeleteFailException("권한이 없습니다.");
       }
     }
 
-    int result = commentMapper.deleteComment(commentId);
-    if (result != 1) {
-      throw new DatabaseOperationException("댓글 삭제 중 오류가 발생하였습니다.");
-    }
-
     // 댓글 삭제시 true
     int deleteTrue = commentMapper.CommentDeleteTrue(commentId);
+
     if (deleteTrue != 1) {
       throw new DatabaseOperationException("댓글 삭제 중 오류가 발생하였습니다.");
     }
-
   }
 
   /**

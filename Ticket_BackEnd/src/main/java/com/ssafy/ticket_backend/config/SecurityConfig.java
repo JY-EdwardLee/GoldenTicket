@@ -16,28 +16,32 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 //        http.csrf(AbstractHttpConfigurer::disable)
 //            .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
 //            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        http
-            .csrf(AbstractHttpConfigurer::disable)
-            .cors(cors -> {}) // CORS 활성화
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.GET, "/users/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/users/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/users/signup").permitAll()
-                .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
-                .requestMatchers(HttpMethod.POST, "/games/**").permitAll()
-                // 이 외에는 인증 필요
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+    http
+        .csrf(AbstractHttpConfigurer::disable)
+        .cors(cors -> {
+        }) // CORS 활성화
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(HttpMethod.GET, "/users/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/users/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/users/signup").permitAll()
+            .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
+            .requestMatchers(HttpMethod.POST, "/games/**").permitAll()
+            .requestMatchers("/posts/**").permitAll()
+            .requestMatchers("/boards/**").permitAll()
+            .requestMatchers("/s3/**").permitAll()
+            // 이 외에는 인증 필요
+            .anyRequest().authenticated()
+        )
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+    return http.build();
+  }
 }
