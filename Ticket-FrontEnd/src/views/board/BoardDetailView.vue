@@ -18,8 +18,6 @@
         <!-- 상단 네비게이션 -->
         <div class="top-navigation">
           <div class="nav-links">
-            <button class="nav-btn" @click="goToPrevious">이전글</button>
-            <button class="nav-btn" @click="goToNext">다음글</button>
             <button class="nav-btn list-btn" @click="goToList">목록</button>
           </div>
         </div>
@@ -194,20 +192,9 @@ const loadPostDetail = async (showLoading = true) => {
   try {
     const result = await boardAPI.getPostDetail(postId);
     
-    console.log('게시글 상세 조회 결과:', result);
-    
     // 백엔드에서 직접 PostDetailResponse 객체를 반환하므로 result 자체가 데이터
     if (result) {
       post.value = result;
-      console.log('게시글 상세 조회 성공:', result);
-      console.log('이미지 URL 상세 분석:', {
-        postImageUrl: result.postImageUrl,
-        imageUrl: result.imageUrl,
-        hasPostImage: !!result.postImageUrl,
-        hasUserImage: !!result.imageUrl,
-        postImageUrlType: typeof result.postImageUrl,
-        imageUrlType: typeof result.imageUrl
-      });
       
       // 작성자 판별 (로그인된 사용자와 비교)
       if (authStore.isAuthenticated && authStore.user) {
@@ -217,13 +204,7 @@ const loadPostDetail = async (showLoading = true) => {
         
         isAuthor.value = isUserIdMatch || isNicknameMatch;
         
-        console.log('작성자 판별:', {
-          postAuthor: post.value.postUser,
-          currentUser: authStore.user,
-          isUserIdMatch,
-          isNicknameMatch,
-          isAuthor: isAuthor.value
-        });
+        
       }
       
       // 좋아요 상태는 서버에서 받아와야 하지만, 현재는 기본값으로 설정
@@ -289,16 +270,6 @@ onMounted(() => {
 });
 
 // 네비게이션 함수들
-const goToPrevious = () => {
-  console.log('이전글');
-  // TODO: 이전글 로직
-};
-
-const goToNext = () => {
-  console.log('다음글');
-  // TODO: 다음글 로직
-};
-
 const goToList = () => {
   // 게시판 타입에 따라 올바른 탭으로 이동
   let tabType = 'free'; // 기본값
