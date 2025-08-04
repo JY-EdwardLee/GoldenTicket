@@ -66,14 +66,14 @@
           <button 
             v-if="application.status === 'BEING_WAITING'" 
             class="cancel-btn"
-            @click="cancelApplication(application.id)"
+            @click="cancelPayment(application.game.id)"
           >
             응모 취소
           </button>
           <button 
             v-if="application.status === 'WAITING_PAYING'" 
             class="cancel-btn"
-            @click="cancelPayment(application.id)"
+            @click="cancelPayment(application.game.id)"
           >
             결제 취소
           </button>
@@ -140,22 +140,22 @@ const getStatusText = (status) => {
   return statusMap[status] || status
 }
 
-// 응모 취소
-const cancelApplication = (id) => {
-  console.log('응모 취소:', id)
-  // API 호출 로직
-}
-
-// 결제 취소
-const cancelPayment = (id) => {
-  console.log('결제 취소:', id)
-  // API 호출 로직
-}
+// 결제/응모 취소
+const cancelPayment = async (id) => {
+  try {
+    await http.delete(API_CONFIG.TICKET.CANCEL(id));
+    await fetchApplications();  // 취소 후 응모 내역 다시 불러오기
+    activeTab.value = 'CANCEL_WAITING'
+  } catch (error) {
+    console.error('결제 취소 중 오류 발생:', error);
+  }
+};
 
 // 결제 처리
-const processPayment = (applicationId) => {
+const processPayment = (id) => {
+  console.log(id)
   // 결제 페이지로 이동
-  router.push(`/payment/${applicationId}`)
+  router.push(`/payment/${id}`)
 }
 
 // 날짜 포맷팅 메서드
@@ -177,8 +177,8 @@ const fetchApplications = async () => {
   try {
     isLoading.value = true
     const response = await http.get(API_CONFIG.USER.APPLICANTS)
-    console.log('응모 내역 조회 결과:', response.data)
     applications.value = response.data
+    console.log(applications.value)
   } catch (error) {
     console.error('응모 내역 조회 중 오류 발생:', error)
   } finally {

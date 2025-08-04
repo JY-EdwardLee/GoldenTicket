@@ -62,7 +62,7 @@
                }">
           </div> -->
           <div class="detail-header" :style="getTicketDetailStyle(selectedTicket)" style="position: relative; z-index: 3;">
-            <div class="detail-header-logo">{{ getTeamLogoName(selectedTicket.homeKor || selectedTicket.game?.home) }}</div>
+            <div class="detail-header-logo" style="font-size: 26px; font-weight: 900; letter-spacing: 1px;">{{ getTeamLogoName(selectedTicket.homeKor || selectedTicket.game?.home) }}</div>
             <div class="detail-header-ticketid">TICKET ID<br /><span class="ticketid-value">#{{ selectedTicket.ticketId }}</span></div>
             <div class="detail-match-title">
               <div class="main-title">
@@ -108,11 +108,13 @@
               <button class="apply-no" @click="handleBack">{{ pageText.applyNoText }}</button>
             </div>
           </div>
-          <div class="detail-notice-box" style="position: relative; z-index: 3;">
-            <div class="notice-title">{{ pageText.noticeTitle }}</div>
-            <ul class="notice-list">
-              <li v-for="notice in selectedTicket.transferNotice" :key="notice">{{ notice }}</li>
-            </ul>
+          <div class="detail-notice-box" style="position: relative; z-index: 3; margin-top: 20px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
+            <div class="notice-title" style="font-size: 18px; font-weight: 700; color: #ce0e2d; margin-bottom: 15px;">양도 신청 주의사항</div>
+            <div class="notice-content" style="font-size: 14px; color: #333; line-height: 1.8;">
+              <div style="margin-bottom: 8px;">• 양도 신청 후 취소는 불가능합니다.</div>
+              <div style="margin-bottom: 8px;">• 매칭 완료 시 알림이 전송됩니다.</div>
+              <div style="margin-bottom: 8px;">• 양도료는 경기 시작 후 지급됩니다.</div>
+            </div>
           </div>
         </div>
       </div>
@@ -125,7 +127,7 @@
             <div class="provider-col">
               <img src="/nol_logo.png" alt="NOL" class="provider-img nol-img" />
               <button class="provider-btn nol-btn" @click="fetchTickets('NOL')">
-                NOL 바로가기
+                NOL 불러오기
                 <span class="btn-icon">↗</span>
               </button>
             </div>
@@ -133,7 +135,7 @@
             <div class="provider-col">
               <img src="/ticketlink_logo.png" alt="티켓링크" class="provider-img ticketlink-img" />
               <button class="provider-btn ticketlink-btn" @click="fetchTickets('TICKETLINK')">
-                티켓링크 바로가기
+                티켓링크 불러오기
                 <span class="btn-icon">↗</span>
               </button>
             </div>
@@ -232,7 +234,10 @@
                   <div class="ticket-detail-transfer-btn-row">
                     <button 
                       class="ticket-detail-transfer-btn" 
-                      :style="{ backgroundColor: getTeamColor(ticket.game.home) }"
+                      :style="{ 
+                        backgroundColor: getTeamColor(ticket.homeKor || ticket.game?.home),
+                        border: `2px solid ${getTeamColor(ticket.homeKor || ticket.game?.home)}` 
+                      }"
                       @click="handleApply(ticket)"
                     >
                       양도하기
@@ -258,20 +263,11 @@ import { teamColortoEnum } from '@/utils/teamColor.js';
 // 화면 렌더에 필요한 기본 변수 선언 (없으면 추가)
 
 
-
-
-
 // 모든 텍스트 변수 한 곳에서 관리
 const selectedTicket = ref(null);
 const showDetailPage = ref(false);
 const showCompletePage = ref(false);
 const pageText = {
-  homeTeam: 'SSG 랜더스',
-  awayTeam: '키움 히어로즈',
-  matchTime: '18:30',
-  detailHeaderLogo: 'SSG LANDERS',
-  mainTitleLanders: 'LANDERS',
-  mainTitleKiwoom: '키움 히어로즈',
   seriesTitle: '⚾ 오늘 한국시리즈',
   completeMainMessage: '양도 신청 되었습니다.',
   completeSubMessage: '양도가 완료되면 알려드리겠습니다.',
@@ -348,20 +344,59 @@ const getTeamBackgroundImage = (teamName) => {
 
 // 팀별 로고명 가져오기
 const getTeamLogoName = (teamName) => {
-  const normalizedTeam = normalizeTeamName(teamName || '')
+  if (!teamName) return '';
+  
+  // 팀명을 소문자로 변환하고 공백 제거하여 정규화
+  const normalizedTeam = teamName.toLowerCase().replace(/\s+/g, '');
+  
   const teamLogoNames = {
     'kia타이거즈': 'KIA TIGERS',
+    'kia': 'KIA TIGERS',
     '삼성라이온즈': 'SAMSUNG LIONS',
+    '삼성': 'SAMSUNG LIONS',
     'lg트윈스': 'LG TWINS',
+    'lg': 'LG TWINS',
     '두산베어스': 'DOOSAN BEARS',
+    '두산': 'DOOSAN BEARS',
     'kt위즈': 'KT WIZ',
+    'kt': 'KT WIZ',
     'ssg랜더스': 'SSG LANDERS',
+    'ssg': 'SSG LANDERS',
     '롯데자이언츠': 'LOTTE GIANTS',
+    '롯데': 'LOTTE GIANTS',
     '한화이글스': 'HANWHA EAGLES',
+    '한화': 'HANWHA EAGLES',
     'nc다이노스': 'NC DINOS',
-    '키움히어로즈': 'KIWOOM HEROES'
+    'nc': 'NC DINOS',
+    '키움히어로즈': 'KIWOOM HEROES',
+    '키움': 'KIWOOM HEROES'
+  };
+  
+  // 정규화된 팀명으로 먼저 찾기
+  if (teamLogoNames[normalizedTeam]) {
+    return teamLogoNames[normalizedTeam];
   }
-  return teamLogoNames[normalizedTeam] || teamName
+  
+  // 부분 매칭으로 찾기
+  for (const [key, value] of Object.entries(teamLogoNames)) {
+    if (normalizedTeam.includes(key.toLowerCase()) || key.toLowerCase().includes(normalizedTeam)) {
+      return value;
+    }
+  }
+  
+  // 매칭되지 않으면 영어로 변환 시도
+  if (normalizedTeam.includes('lg')) return 'LG TWINS';
+  if (normalizedTeam.includes('삼성')) return 'SAMSUNG LIONS';
+  if (normalizedTeam.includes('kia')) return 'KIA TIGERS';
+  if (normalizedTeam.includes('두산')) return 'DOOSAN BEARS';
+  if (normalizedTeam.includes('kt')) return 'KT WIZ';
+  if (normalizedTeam.includes('ssg')) return 'SSG LANDERS';
+  if (normalizedTeam.includes('롯데')) return 'LOTTE GIANTS';
+  if (normalizedTeam.includes('한화')) return 'HANWHA EAGLES';
+  if (normalizedTeam.includes('nc')) return 'NC DINOS';
+  if (normalizedTeam.includes('키움')) return 'KIWOOM HEROES';
+  
+  return teamName; // 매칭되지 않으면 원본 반환
 }
 
 // 좌석 정보 파싱 함수
@@ -407,8 +442,6 @@ const getTeamLogo = (teamName) => {
   const normalizedTeam = normalizeTeamName(teamName || '').toLowerCase()
   
   // 디버그: 팀명 로그 출력
-  console.log('Original teamName:', teamName)
-  console.log('Normalized teamName:', normalizedTeam)
   
   // 팀별 로고 매핑 - public 폴더의 로고 파일 사용 (소문자로 통일)
   const teamLogoMap = {
@@ -425,7 +458,6 @@ const getTeamLogo = (teamName) => {
   }
   
   const logoPath = teamLogoMap[normalizedTeam]
-  console.log('Logo path for', normalizedTeam, ':', logoPath)
   
   return logoPath || null
 }
@@ -442,6 +474,7 @@ const getTeamColor = (teamName) => {
   const normalizedTeam = normalizeTeamName(teamName || '')
   // teamColortoEnum의 색상 값에 # 추가
   const colorCode = teamColortoEnum[normalizedTeam]
+  
   return colorCode ? `#${colorCode}` : '#395b8c'
 }
 
@@ -758,8 +791,8 @@ function handleCompleteConfirm() {
 }
 .nol-img,
 .ticketlink-img {
-  width: 250px;
-  height: 100px;
+  width: 280px;
+  height: 150px;
   object-fit: contain;
   background: #fff;
 }
@@ -1003,13 +1036,13 @@ function handleCompleteConfirm() {
 }
 
 .ticket-card .ticket-title {
-  font-size: 22px;
+  font-size: 25px;
   font-weight: 700;
 }
 .ticket-card .ticket-info-row {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 400;
-  margin-top: 8px;
+  margin-top: 20px;
   display: flex;
   gap: 20px;
 }
@@ -1029,7 +1062,7 @@ function handleCompleteConfirm() {
   align-items: center;
 }
 .ticket-card .ticket-people {
-  font-size: 15px;
+  font-size: 18px;
   color: #fff;
   font-weight: 500;
   white-space: nowrap;
@@ -1076,7 +1109,7 @@ function handleCompleteConfirm() {
   justify-content: space-between;
   align-items: center;
   gap: 18px;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 400;
   color: #fff;
   margin-bottom: 18px;
@@ -1273,7 +1306,7 @@ function handleCompleteConfirm() {
   width: 600px;
   background: #fff;
   border-radius: 22px;
-  box-shadow: 0 4px 32px 0 #0002;
+  box-shadow: 0 4px 32px 0 #0001;
   overflow: hidden;
   margin-top: 10px;
   margin-bottom: 40px;
@@ -1310,6 +1343,7 @@ function handleCompleteConfirm() {
   align-items: center;
   width: auto;
   min-width: 200px;
+  margin-left: 50px;
   gap: 6px;
   flex: 1;
 }
@@ -1324,6 +1358,7 @@ function handleCompleteConfirm() {
   position: absolute;
   left: 32px;
   top: 22px;
+  font-family: 'Allura', 'Alex Brush', 'Satisfy', cursive;
 }
 .detail-header-ticketid {
   position: absolute;
@@ -1693,17 +1728,17 @@ function handleCompleteConfirm() {
   font-size: 20px;
   font-weight: 600;
   width: 200px;
-  height: 50px;
+  height: 80px;
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  /* 배경색은 인라인 스타일로 동적 설정 */
+  /* 배경색은 인라인 스타일로 홈팀 색깔 동적 설정 */
   margin-left: auto;
   flex-shrink: 0;
   z-index: 200; /* 매우 높은 z-index로 설정하여 클릭 가능하도록 */
   position: relative;
+  background-color: inherit; /* Add this line to remove fallback background-color */
 }
-
 .ticket-detail-transfer-btn:hover {
   filter: brightness(0.9);
   transform: translateY(-1px);
@@ -1799,4 +1834,3 @@ function handleCompleteConfirm() {
   top: 0 !important;
 }
 </style>
-
