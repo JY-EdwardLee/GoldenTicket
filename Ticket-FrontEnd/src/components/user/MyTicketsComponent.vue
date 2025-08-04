@@ -7,12 +7,13 @@
 
     <!-- 티켓 목록 -->
     <div class="tickets-list">
-              <div
-          v-for="ticket in tickets"
-          :key="ticket.id"
-          class="ticket-card"
-          :style="{ backgroundImage: `url(${generateTicketBackground(ticket.id)})` }"
-        >
+      <router-link
+        v-for="ticket in tickets"
+        :key="ticket.id"
+        :to="`/mypage/tickets/${ticket.id}`"
+        class="ticket-card"
+        :style="{ backgroundImage: `url(${generateTicketBackground(ticket.id)})` }"
+      >
         <div class="ticket-header">
           <div class="ticket-info">
             <div class="team-icon">⚾</div>
@@ -59,12 +60,12 @@
           <button 
             v-if="ticket.status === 'TRANSACTION_COMPLETE'" 
             class="qr-btn"
-            @click="showQRCode(ticket)"
+            @click.stop="showQRCode($event, ticket)"
           >
             QR코드
           </button>
         </div>
-      </div>
+      </router-link>
 
       <!-- 티켓이 없을 때 -->
       <div v-if="tickets.length === 0" class="empty-state">
@@ -101,6 +102,7 @@
 
 <script setup>
 import { ref, nextTick, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import QRCode from 'qrcode'
 import { API_CONFIG } from '@/config/api.config'
 import http from '@/utils/http'
@@ -108,6 +110,7 @@ import { formatDate } from '@/utils/dateUtils'
 import { teamNameToEnum, enumToTeamName } from '@/utils/teamNameMap'
 
 const isLoading = ref(false)
+const router = useRouter()
 
 const ticketStatus = {
     BEFORE_ASSIGNMENT: '양도 전',
@@ -173,7 +176,9 @@ const generateTicketBackground = (ticketId) => {
 }
 
 // QR코드 표시 함수
-const showQRCode = async (ticket) => {
+const showQRCode = async (event, ticket) => {
+  // Prevent the click from bubbling up to the router-link
+  event.stopPropagation()
   selectedTicket.value = ticket
   showModal.value = true
   
@@ -253,7 +258,10 @@ onMounted(() => {
   gap: 20px;
 }
 
-.ticket-card {
+a.ticket-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
   background: white;
   background-size: cover;
   background-position: center;
@@ -261,10 +269,23 @@ onMounted(() => {
   border-radius: 12px;
   padding: 25px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
+  transition: all 0.2s ease;
   border-left: 4px solid var(--theme-primary, #ff6b35);
   position: relative;
   overflow: hidden;
+  cursor: pointer;
+  transform: translateY(0);
+}
+
+a.ticket-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  border-left-color: #ff8c5a;
+}
+
+a.ticket-card:active {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
 }
 
 .ticket-card::before {

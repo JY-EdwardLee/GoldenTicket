@@ -16,6 +16,12 @@ export const useAuthStore = defineStore('auth', () => {
       const now = Math.floor(Date.now() / 1000);
       return payload.exp < now;
     } catch (e) {
+      console.error('Token decoding failed:', e);
+      console.error('Token:', token);
+      token.value = null;
+      user.value = null;
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
       return true; // 디코딩 실패 시 무조건 만료된 것으로 간주
     }
   };
