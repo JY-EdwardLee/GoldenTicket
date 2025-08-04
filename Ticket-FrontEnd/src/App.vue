@@ -9,8 +9,10 @@ const { isDeleteUserModalVisible, closeDeleteUserModal, handleDeleteUser } = use
 
 <template>
   <DefaultLayout>
-    <!-- Deployed via GitLab CI/CD at 2025-07-31 -->
     <!-- 얍얍얍! -->
+    <!-- 2025-08-04 중요한건 꺽이지 않는 마음음 -->
+    <!-- Deployed via GitLab CI/CD at 2025-07-31 -->
+
     <router-view />
     
     <!-- 전역 회원탈퇴 모달 -->
