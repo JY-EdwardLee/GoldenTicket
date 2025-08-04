@@ -80,7 +80,18 @@ async function logout() {
   // 토큰 검증 함수 (필요한 경우 API 호출로 검증 가능)
   async function verifyToken() {
     if (!token.value) return false;
-    
+    try {
+      const response = await http.get(API_CONFIG.USER.PROFILE);
+      setUser(response.data);
+      console.log(user.value);
+      return true;
+    } catch (error) {
+      console.error('Failed to fetch user info:', error);
+      token.value = null;
+      user.value = null;
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+    }
     // 여기서는 간단히 토큰 존재 여부만 확인
     // 실제로는 API 호출을 통해 토큰 검증이 필요할 수 있음
     return !!token.value;

@@ -49,12 +49,10 @@ public class TicketServiceImpl implements TicketService {
                 throw new TicketTransferException("이미 종료된 경기입니다.");
             }
 
-            int countWaitList = ticketMapper.countWaitListByGameId(game.getGameId());
+            List<Waitlist> waitlists = ticketMapper.selectWaitingWaitListByGameId(game.getGameId());
 
             // 대기열이 있다면
-            if (countWaitList > 0) {
-                List<Waitlist> waitlists = ticketMapper.selectWaitListByGameId(game.getGameId());
-
+            if (!waitlists.isEmpty()) {
                 // 무작위 추첨
                 List<Long> randomPicks = new ArrayList<>();
                 for (Waitlist w : waitlists) {

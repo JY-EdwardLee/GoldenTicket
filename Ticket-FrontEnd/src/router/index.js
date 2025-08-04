@@ -58,8 +58,14 @@ const routes = [
   { path: '/guide', name: 'Guide', component: GuideView },
 
   // 결제 페이지
-  { path: '/payment/:id', name: 'Payment', component: PaymentView },
-  
+  {
+    path: '/payment/:id',
+    name: 'Payment',
+    component: PaymentView,
+    meta: { requiresAuth: true }
+  },
+
+  // 마이페이지
   { 
     path: '/mypage', 
     name: 'MyPage', 

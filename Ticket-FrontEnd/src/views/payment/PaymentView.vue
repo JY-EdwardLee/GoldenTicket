@@ -8,11 +8,11 @@
           <h3 class="section-title">주문상품 정보</h3>
           <div class="order-detail">
             <div class="order-info">
-              <div class="order-title">{{ enumToTeamName(ticket?.homeTeamName) }} VS {{ enumToTeamName(ticket?.awayTeamName) }}</div>
+              <div class="order-title">{{ enumToTeamName[ticket?.game.home] }} VS {{ enumToTeamName[ticket?.game.away] }}</div>
               <div class="order-meta">
-                <span>{{ stadiumNameOfTeam(ticket?.homeTeamName) }}</span>
-                <span> {{ formatDate(ticket?.matchDate) }}</span>
-                <span>{{ ticket?.seatRow }} {{ ticket?.seatNumber }}석 {{ ticket?.quantity }}매</span>
+                <span>{{ stadiumOfTeam[ticket?.game.stadium] }}</span>
+                <span> {{ formatDate(ticket?.game.date) }}</span>
+                <span>{{ ticket?.seat }}석 </span>
               </div>
             </div>
             <div class="order-price">{{ ticket?.price }}원</div>
@@ -32,15 +32,15 @@
           <h3 class="section-title">주문자 정보</h3>
           <div class="form-group">
             <label>이름</label>
-            <input type="text" :value="user?.userName || ''" >
+            <input type="text" v-model="formData.userName" >
           </div>
           <div class="form-group">
             <label>휴대전화</label>
-            <input type="tel" :value="user?.phoneNumber || ''" >
+            <input type="tel" v-model="formData.phoneNumber" >
           </div>
           <div class="form-group">
             <label>이메일</label>
-            <input type="email" :value="user?.email || ''" >
+            <input type="email" v-model="formData.email" >
           </div>
         </div>
       </div>
@@ -109,17 +109,35 @@
         <!-- Terms -->
         <div class="terms-section">
           <div class="terms-item">
-            <input type="checkbox" id="agree-all" class="custom-checkbox">
+            <input 
+              type="checkbox" 
+              id="agree-all" 
+              class="custom-checkbox"
+              v-model="agreeAll"
+              @change="handleAgreeAllChange"
+            >
             <label for="agree-all" class="agree-all">전체 동의</label>
           </div>
           <div class="divider"></div>
           <div class="terms-item">
-            <input type="checkbox" id="agree-terms" class="custom-checkbox">
+            <input 
+              type="checkbox" 
+              id="agree-terms" 
+              class="custom-checkbox"
+              v-model="agreeTerms"
+              @change="updateAgreeAll"
+            >
             <label for="agree-terms">(필수) 개인정보 수집 및 이용 동의</label>
             <a href="#" class="view-terms">보기</a>
           </div>
           <div class="terms-item">
-            <input type="checkbox" id="agree-payment" class="custom-checkbox">
+            <input 
+              type="checkbox" 
+              id="agree-payment" 
+              class="custom-checkbox"
+              v-model="agreePayment"
+              @change="updateAgreeAll"
+            >
             <label for="agree-payment">(필수) 결제대행 서비스 이용약관 동의</label>
             <a href="#" class="view-terms">보기</a>
           </div>
@@ -130,7 +148,11 @@
     <!-- Action Buttons -->
     <div class="action-buttons">
       <button class="btn-cancel">취소</button>
-      <button class="btn-pay">결제하기</button>
+      <button 
+        class="btn-pay"
+        :disabled="!agreeAll"
+        @click="handlePayment"
+      >결제하기</button>
     </div>
   </div>
 </template>
@@ -138,45 +160,97 @@
 <script setup>
 import NavBar from '@/components/common/NavBar.vue';
 import FooterBar from '@/components/common/FooterBar.vue';
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, reactive } from 'vue';
+import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { API_CONFIG } from '@/config/api.config';
-import { enumToTeamName } from '@/utils/teamNameMap';
+import { enumToTeamName, getEnumTeamName } from '@/utils/teamNameMap';
 import { stadiumOfTeam } from '@/utils/teamStadium';
 import { formatDate } from '@/utils/dateUtils';
 import http from '@/utils/http';
+
+const route = useRoute()
 
 // 사용자 정보
 const user = ref(null)
 // 티켓 정보
 const ticket = ref(null)
 
+// 폼 데이터
+const formData = reactive({
+  userName: '',
+  phoneNumber: '',
+  email: ''
+})
 
-onMounted(() => {
+onMounted(async () => {
   const authStore = useAuthStore()
   authStore.getUserInfo()
   const userInfo = localStorage.getItem('user')
   if (userInfo) {
     user.value = JSON.parse(userInfo)
-    console.log(user.value)
+    formData.userName = user.value.userName || ''
+    formData.phoneNumber = user.value.phoneNumber || ''
+    formData.email = user.value.email || ''
   }
-  const response = http.get(API_CONFIG.TICKET.DETAIL, {
-    params: {
-      ticketId: this.$route.params.id
-    }
-  })
-  console.log(response)
-  ticket.value = response.data
+  console.log('user : ', user.value)
+  try {
+    const response = await http.get(API_CONFIG.TICKET.DETAIL(route.params.id))
+    ticket.value = response.data
+    console.log('ticket : ', ticket.value)
+  } catch (error) {
+    console.error('티켓 정보 요청 실패:', error)
+  }
 })
 
 const selectedPayment = ref('simple')
 const showSimplePayment = ref(true)
 const showBankTransfer = ref(false)
 
+// 체크박스 상태 관리
+const agreeAll = ref(false)
+const agreeTerms = ref(false)
+const agreePayment = ref(false)
+
+// 전체 동의 체크박스 변경 핸들러
+const handleAgreeAllChange = () => {
+  if (agreeAll.value) {
+    agreeTerms.value = true
+    agreePayment.value = true
+  }
+}
+
+// 결제 요청 핸들러
+const handlePayment = async () => {
+  try {
+    const paymentData = {
+      ticketId: route.params.id,
+      itemName: ticket.value.home + ' vs ' + ticket.value.away,
+      quantity: 1,
+      totalAmount: ticket.value.price
+    };
+    console.log('결제 데이터:', paymentData);
+    // 백엔드에 결제 준비 요청
+    const response = await http.post(API_CONFIG.USER.PAYMENT.KAKAO.READY, paymentData);
+    console.log('결제 준비 응답:', response.data);
+    // 결제 완료 페이지로 리디렉션
+    window.location.href = response.data.next_redirect_pc_url;
+    // 모바일: response.data.next_redirect_mobile_url
+    
+  } catch (error) {
+    console.error('결제 요청 실패:', error);
+    alert('결제 요청에 실패했습니다.');
+  }
+};
+
+// 개별 체크박스 변경 시 전체 동의 상태 업데이트
+const updateAgreeAll = () => {
+  agreeAll.value = agreeTerms.value && agreePayment.value
+}
+
 const togglePaymentSection = (type) => {
-      showSimplePayment.value = type === 'simple';
-      showBankTransfer.value = type === 'bank';
+  showSimplePayment.value = type === 'simple';
+  showBankTransfer.value = type === 'bank';
 }
 
 </script>
@@ -188,7 +262,7 @@ const togglePaymentSection = (type) => {
   align-items: flex-start;
   padding: 0 0 0 24px;
   width: 478px;
-  height: 270px;
+  height: auto;
   flex: none;
   order: 1;
   flex-grow: 0;
@@ -334,6 +408,7 @@ const togglePaymentSection = (type) => {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
+  color: #000000;
 }
 
 /* Payment Methods */
@@ -393,10 +468,11 @@ const togglePaymentSection = (type) => {
 
 .payment-details {
   margin-top: 1rem;
-  padding: 1.5rem;
+  padding: 1rem;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   background-color: #f8f9fa;
+  height: 188px;
 }
 
 .payment-buttons {
@@ -475,6 +551,10 @@ const togglePaymentSection = (type) => {
   padding: 0.75rem 0;
 }
 
+.terms-item input {
+
+}
+
 .terms-item label {
   margin-left: 0.5rem;
   color: #444;
@@ -520,7 +600,7 @@ const togglePaymentSection = (type) => {
 
 .btn-cancel {
   background: #f0f0f0;
-  color: #666;
+  color: #666666a4;
   width: 20%;
 }
 
