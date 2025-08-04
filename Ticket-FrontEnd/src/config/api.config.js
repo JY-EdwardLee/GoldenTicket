@@ -26,6 +26,16 @@ const USER = {
   PLATFORMS: `${API_BASE_URL}/users/platform-link`,
   CHANGE_PASSWORD: `${API_BASE_URL}/users/me/password`,
   DELETE_ACCOUNT: `${API_BASE_URL}/users/me`,
+  PAYMENT: {
+    KAKAO: {
+      READY: `${API_BASE_URL}/payment/kakao/ready`,
+      COMPLETE: `${API_BASE_URL}/payment/kakao/complete`,
+    },
+    NAVER: {
+      READY: `${API_BASE_URL}/payment/naver/ready`,
+      COMPLETE: `${API_BASE_URL}/payment/naver/complete`,
+    },
+  },
 };
 
 // 티켓 관련 엔드포인트

@@ -109,17 +109,35 @@
         <!-- Terms -->
         <div class="terms-section">
           <div class="terms-item">
-            <input type="checkbox" id="agree-all" class="custom-checkbox">
+            <input 
+              type="checkbox" 
+              id="agree-all" 
+              class="custom-checkbox"
+              v-model="agreeAll"
+              @change="handleAgreeAllChange"
+            >
             <label for="agree-all" class="agree-all">전체 동의</label>
           </div>
           <div class="divider"></div>
           <div class="terms-item">
-            <input type="checkbox" id="agree-terms" class="custom-checkbox">
+            <input 
+              type="checkbox" 
+              id="agree-terms" 
+              class="custom-checkbox"
+              v-model="agreeTerms"
+              @change="updateAgreeAll"
+            >
             <label for="agree-terms">(필수) 개인정보 수집 및 이용 동의</label>
             <a href="#" class="view-terms">보기</a>
           </div>
           <div class="terms-item">
-            <input type="checkbox" id="agree-payment" class="custom-checkbox">
+            <input 
+              type="checkbox" 
+              id="agree-payment" 
+              class="custom-checkbox"
+              v-model="agreePayment"
+              @change="updateAgreeAll"
+            >
             <label for="agree-payment">(필수) 결제대행 서비스 이용약관 동의</label>
             <a href="#" class="view-terms">보기</a>
           </div>
@@ -130,7 +148,11 @@
     <!-- Action Buttons -->
     <div class="action-buttons">
       <button class="btn-cancel">취소</button>
-      <button class="btn-pay">결제하기</button>
+      <button 
+        class="btn-pay"
+        :disabled="!agreeAll"
+        @click="handlePayment"
+      >결제하기</button>
     </div>
   </div>
 </template>
@@ -185,9 +207,50 @@ const selectedPayment = ref('simple')
 const showSimplePayment = ref(true)
 const showBankTransfer = ref(false)
 
+// 체크박스 상태 관리
+const agreeAll = ref(false)
+const agreeTerms = ref(false)
+const agreePayment = ref(false)
+
+// 전체 동의 체크박스 변경 핸들러
+const handleAgreeAllChange = () => {
+  if (agreeAll.value) {
+    agreeTerms.value = true
+    agreePayment.value = true
+  }
+}
+
+// 결제 요청 핸들러
+const handlePayment = async () => {
+  try {
+    const paymentData = {
+      ticketId: route.params.id,
+      itemName: ticket.value.home + ' vs ' + ticket.value.away,
+      quantity: 1,
+      totalAmount: ticket.value.price
+    };
+    console.log('결제 데이터:', paymentData);
+    // 백엔드에 결제 준비 요청
+    const response = await http.post(API_CONFIG.USER.PAYMENT.KAKAO.READY, paymentData);
+    console.log('결제 준비 응답:', response.data);
+    // 결제 완료 페이지로 리디렉션
+    window.location.href = response.data.next_redirect_pc_url;
+    // 모바일: response.data.next_redirect_mobile_url
+    
+  } catch (error) {
+    console.error('결제 요청 실패:', error);
+    alert('결제 요청에 실패했습니다.');
+  }
+};
+
+// 개별 체크박스 변경 시 전체 동의 상태 업데이트
+const updateAgreeAll = () => {
+  agreeAll.value = agreeTerms.value && agreePayment.value
+}
+
 const togglePaymentSection = (type) => {
-      showSimplePayment.value = type === 'simple';
-      showBankTransfer.value = type === 'bank';
+  showSimplePayment.value = type === 'simple';
+  showBankTransfer.value = type === 'bank';
 }
 
 </script>
@@ -488,6 +551,10 @@ const togglePaymentSection = (type) => {
   padding: 0.75rem 0;
 }
 
+.terms-item input {
+
+}
+
 .terms-item label {
   margin-left: 0.5rem;
   color: #444;
@@ -533,7 +600,7 @@ const togglePaymentSection = (type) => {
 
 .btn-cancel {
   background: #f0f0f0;
-  color: #666;
+  color: #666666a4;
   width: 20%;
 }
 
