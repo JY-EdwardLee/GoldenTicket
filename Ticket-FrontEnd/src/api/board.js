@@ -86,6 +86,7 @@ export const boardAPI = {
   getComments: async (postId) => {
     try {
       const response = await publicApiClient.get(`/boards/${postId}/comments`);
+      console.log(response.data);
       return response.data;
     } catch (error) {
       throw apiErrorHandler(error);

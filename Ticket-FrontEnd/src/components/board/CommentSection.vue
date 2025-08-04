@@ -6,16 +6,6 @@
         <button class="sort-btn">최신순</button>
         <button class="refresh-btn">🔄</button>
       </div>
-      
-      <div class="comment-settings">
-        <div class="notification-toggle">
-          <span>관심글 댓글 알림</span>
-          <label class="toggle-switch">
-            <input type="checkbox" v-model="notificationEnabled">
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-      </div>
     </div>
 
     <!-- 댓글 목록 -->
@@ -29,9 +19,9 @@
         <div class="comment-header">
           <div class="profile-icon">👤</div>
           <div class="comment-info">
-            <span class="commenter-name" :class="{ 'author': comment.isAuthor }">
+            <span class="commenter-name" :class="{ 'author': isCommentAuthor(comment) }">
               {{ comment.author }}
-              <span v-if="comment.isAuthor" class="author-badge">- 작성자</span>
+              <span v-if="isCommentAuthor(comment)" class="author-badge">- 작성자</span>
             </span>
             <span class="comment-date">{{ comment.date }}</span>
           </div>
@@ -42,8 +32,8 @@
         </div>
         
         <div class="comment-actions">
-          <button class="edit-btn" @click="openEditModal(comment)">수정</button>
-          <button class="delete-btn" @click="openDeleteModal(comment)">삭제</button>
+          <button class="edit-btn" @click="openEditModal(comment)" v-if="isCommentAuthor(comment)">수정</button>
+          <button class="delete-btn" @click="openDeleteModal(comment)" v-if="isCommentAuthor(comment)">삭제</button>
           <button class="like-btn" @click="toggleCommentLike(comment)">
             <span class="like-icon" :class="{ 'liked': comment.isLiked }">
               {{ comment.isLiked ? '❤️' : '🤍' }}
@@ -58,9 +48,9 @@
             <div class="reply-header">
               <div class="profile-icon small">👤</div>
               <div class="reply-info">
-                <span class="replyer-name" :class="{ 'author': reply.isAuthor }">
+                <span class="replyer-name" :class="{ 'author': isCommentAuthor(reply) }">
                   {{ reply.author }}
-                  <span v-if="reply.isAuthor" class="author-badge">- 작성자</span>
+                  <span v-if="isCommentAuthor(reply)" class="author-badge">- 작성자</span>
                 </span>
                 <span class="reply-date">{{ reply.date }}</span>
               </div>
@@ -71,6 +61,8 @@
             </div>
             
             <div class="reply-actions">
+              <button class="edit-btn small" @click="openEditModal(reply)" v-if="isCommentAuthor(reply)">수정</button>
+              <button class="delete-btn small" @click="openDeleteModal(reply)" v-if="isCommentAuthor(reply)">삭제</button>
               <button class="like-btn small">
                 <span class="like-icon">❤️</span>
               </button>
@@ -82,10 +74,11 @@
 
     <!-- 댓글 작성 -->
     <div class="comment-write">
-      <div class="comment-input-section">
+      <!-- 로그인한 사용자만 댓글 작성 가능 -->
+      <div v-if="authStore.isAuthenticated" class="comment-input-section">
         <div class="profile-icon">👤</div>
         <div class="input-container">
-          <div class="user-label">엄용</div>
+          <div class="user-label">{{ authStore.user?.nickName || authStore.user?.nickname || '사용자' }}</div>
           <textarea 
             v-model="newComment" 
             placeholder="댓글을 남겨보세요"
@@ -119,6 +112,18 @@
           </div>
         </div>
       </div>
+      
+      <!-- 비로그인 사용자 로그인 안내 -->
+      <div v-else class="login-guide">
+        <div class="login-guide-content">
+          <div class="guide-icon">🔒</div>
+          <div class="guide-text">
+            <h3>로그인이 필요합니다</h3>
+            <p>댓글을 작성하려면 로그인해주세요.</p>
+          </div>
+          <button class="login-btn" @click="goToLogin">로그인</button>
+        </div>
+      </div>
     </div>
     
     <!-- 댓글 수정 모달 -->
@@ -143,6 +148,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { boardAPI, validateCommentData } from '@/api/board.js';
 import { useAuthStore } from '@/stores/auth.js';
 import CommentEditModal from './CommentEditModal.vue';
@@ -161,15 +167,52 @@ const props = defineProps({
 
 const emit = defineEmits(['commentSubmit']);
 
+const router = useRouter();
 const authStore = useAuthStore();
 const newComment = ref('');
-const notificationEnabled = ref(false);
 const isInputActive = ref(false);
 const isSubmitting = ref(false);
 const isEditModalVisible = ref(false);
 const selectedComment = ref(null);
 const isDeleteModalVisible = ref(false);
 const isDeleting = ref(false);
+
+// 댓글 작성자 권한 확인
+const isCommentAuthor = (comment) => {
+  if (!authStore.isAuthenticated || !authStore.user) {
+    return false;
+  }
+  
+  console.log('권한 확인:', {
+    commentUserId: comment.userId,
+    currentUserId: authStore.user.userId,
+    commentAuthor: comment.author,
+    currentUserNickname: authStore.user.nickName || authStore.user.nickname
+  });
+  
+  // userId로 비교 (가장 정확한 방법)
+  if (comment.userId && authStore.user.userId) {
+    const isMatch = comment.userId === authStore.user.userId;
+    console.log('userId 비교 결과:', isMatch);
+    return isMatch;
+  }
+  
+  // 닉네임으로 비교 (백업 방법)
+  if (comment.author && authStore.user.nickName) {
+    const isMatch = comment.author === authStore.user.nickName;
+    console.log('nickName 비교 결과:', isMatch);
+    return isMatch;
+  }
+  
+  if (comment.author && authStore.user.nickname) {
+    const isMatch = comment.author === authStore.user.nickname;
+    console.log('nickname 비교 결과:', isMatch);
+    return isMatch;
+  }
+  
+  console.log('권한 확인 실패: 매칭되는 정보 없음');
+  return false;
+};
 
 const handleInputClick = () => {
   isInputActive.value = true;
@@ -421,6 +464,12 @@ const openEditModal = (comment) => {
     return;
   }
   
+  // 댓글 작성자 권한 확인
+  if (!isCommentAuthor(comment)) {
+    alert('본인이 작성한 댓글만 수정할 수 있습니다.');
+    return;
+  }
+  
   selectedComment.value = comment;
   isEditModalVisible.value = true;
 };
@@ -447,6 +496,12 @@ const openDeleteModal = (comment) => {
   // 로그인 상태 확인
   if (!authStore.isAuthenticated) {
     alert('로그인이 필요한 서비스입니다. 로그인 후 다시 시도해주세요.');
+    return;
+  }
+  
+  // 댓글 작성자 권한 확인
+  if (!isCommentAuthor(comment)) {
+    alert('본인이 작성한 댓글만 삭제할 수 있습니다.');
     return;
   }
   
@@ -535,6 +590,11 @@ const toggleCommentLike = async (comment) => {
     console.error('댓글 좋아요 토글 중 오류:', error);
     alert('좋아요 처리 중 오류가 발생했습니다.');
   }
+};
+
+// 로그인 페이지로 이동
+const goToLogin = () => {
+  router.push('/');
 };
 </script>
 
@@ -755,6 +815,11 @@ input:checked + .toggle-slider:before {
   cursor: pointer;
   border-radius: 4px;
   transition: background 0.2s;
+}
+
+.edit-btn.small, .delete-btn.small {
+  padding: 2px 6px;
+  font-size: 10px;
 }
 
 .edit-btn:hover {
@@ -1096,6 +1161,69 @@ input:checked + .toggle-slider:before {
   transform: scale(0.95);
 }
 
+/* 로그인 안내 스타일 */
+.login-guide {
+  margin-top: 24px;
+  padding: 0;
+}
+
+.login-guide-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 32px;
+  background: #f9fafb;
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.guide-icon {
+  font-size: 24px;
+  color: #6b7280;
+}
+
+.guide-text {
+  flex: 1;
+}
+
+.guide-text h3 {
+  margin: 0 0 8px 0;
+  color: #374151;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.guide-text p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.login-btn {
+  padding: 12px 24px;
+  background: #e11d48;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 100px;
+}
+
+.login-btn:hover {
+  background: #be185d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+}
+
+.login-btn:active {
+  transform: translateY(0);
+}
+
 /* 반응형 */
 @media (max-width: 768px) {
   .comments-section {
@@ -1106,6 +1234,20 @@ input:checked + .toggle-slider:before {
     flex-direction: column;
     gap: 16px;
     align-items: flex-start;
+  }
+  
+  .login-guide-content {
+    flex-direction: column;
+    gap: 20px;
+    padding: 24px;
+  }
+  
+  .guide-text h3 {
+    font-size: 16px;
+  }
+  
+  .guide-text p {
+    font-size: 13px;
   }
 }
 </style> 
