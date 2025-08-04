@@ -45,12 +45,11 @@ export const boardAPI = {
   getPostsByCategory: async (boardType) => {
     try {
       const response = await publicApiClient.get(`/boards/category/${boardType}`);
-      
       // 응답 데이터를 프론트엔드에서 사용하기 쉽게 변환
       const posts = response.data.map(post => ({
         id: post.postId,
         title: post.title,
-        author: post.nickname,
+        author: post.nickName,
         date: new Date(post.createdAt).toLocaleDateString('ko-KR'),
         views: post.viewCount,
         likes: post.likeCount,
@@ -105,7 +104,7 @@ export const boardAPI = {
       const posts = response.data.map(post => ({
         id: post.postId,
         title: post.title,
-        author: post.nickname,
+        author: post.nickName,
         date: new Date(post.createdAt).toLocaleDateString('ko-KR'),
         views: post.viewCount,
         likes: post.likeCount,
@@ -137,7 +136,7 @@ export const boardAPI = {
   getPostDetail: async (postId) => {
     try {
       const response = await publicApiClient.get(`/posts/${postId}`);
-      
+      console.log(response.data);
       // 응답 데이터를 프론트엔드에서 사용하기 쉽게 변환
       const postData = response.data;
       
