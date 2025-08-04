@@ -100,7 +100,7 @@ public class UserController {
 
             // 2) 회원가입 페이지로 리다이렉트하면서 tempUserId 전달
             return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http://:5173/signup?tempUserId=" + tempUserId)
+                .header("Location", "http:///signup?tempUserId=" + tempUserId)
                 .build();
         }
 
@@ -121,7 +121,7 @@ public class UserController {
 
         // 로그인 완료 후 프론트 리다이렉트 (인증 상태 확인 페이지)
         return ResponseEntity.status(HttpStatus.FOUND)
-            .header("Location", "http://i13a109.p.ssafy.io:5173/oauth/callback").build();
+            .header("Location", "http://i13a109.p.ssafy.io/oauth/callback").build();
     }
 
     /**
@@ -143,7 +143,7 @@ public class UserController {
 
             // 2. 회원가입 페이지로 리다이렉트 + tempUserId 쿼리파라미터로 전달
             return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http://i13a109.p.ssafy.io:5173/signup?tempUserId=" + tempUserId)
+                .header("Location", "http://i13a109.p.ssafy.io/signup?tempUserId=" + tempUserId)
                 .build();
         }
 
@@ -165,7 +165,7 @@ public class UserController {
 
         // 로그인 성공 후 프론트엔드로 리다이렉트
         return ResponseEntity.status(HttpStatus.FOUND)
-            .header("Location", "http://i13a109.p.ssafy.io:5173/oauth/callback").build();
+            .header("Location", "http://i13a109.p.ssafy.io/oauth/callback").build();
     }
 
     /**
