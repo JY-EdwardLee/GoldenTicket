@@ -143,23 +143,19 @@ const getStatusText = (status) => {
 // 결제/응모 취소
 const cancelPayment = async (id) => {
   try {
-    const applicationStatus = applications.value.find(app => app.id === id).status
     await http.delete(API_CONFIG.TICKET.CANCEL(id));
     await fetchApplications();  // 취소 후 응모 내역 다시 불러오기
-    if (applicationStatus === 'BEING_WAITING') {
-      console.log('응모 취소:', id);
-    } else {
-      console.log('결제 취소:', id);
-    }
+    activeTab.value = 'CANCEL_WAITING'
   } catch (error) {
     console.error('결제 취소 중 오류 발생:', error);
   }
 };
 
 // 결제 처리
-const processPayment = (applicationId) => {
+const processPayment = (id) => {
+  console.log(id)
   // 결제 페이지로 이동
-  router.push(`/payment/${applicationId}`)
+  router.push(`/payment/${id}`)
 }
 
 // 날짜 포맷팅 메서드

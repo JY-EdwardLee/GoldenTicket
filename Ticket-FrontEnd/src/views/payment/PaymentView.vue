@@ -8,11 +8,11 @@
           <h3 class="section-title">주문상품 정보</h3>
           <div class="order-detail">
             <div class="order-info">
-              <div class="order-title">{{ enumToTeamName[ticket?.homeTeamName] }} VS {{ enumToTeamName[ticket?.awayTeamName] }}</div>
+              <div class="order-title">{{ enumToTeamName[ticket?.game.home] }} VS {{ enumToTeamName[ticket?.game.away] }}</div>
               <div class="order-meta">
-                <span>{{ stadiumOfTeam[ticket?.homeTeamName] }}</span>
-                <span> {{ formatDate(ticket?.matchDate) }}</span>
-                <span>{{ ticket?.seatRow }} {{ ticket?.seatNumber }}석 {{ ticket?.quantity }}매</span>
+                <span>{{ stadiumOfTeam[ticket?.game.stadium] }}</span>
+                <span> {{ formatDate(ticket?.game.date) }}</span>
+                <span>{{ ticket?.seat }}석 </span>
               </div>
             </div>
             <div class="order-price">{{ ticket?.price }}원</div>
@@ -32,15 +32,15 @@
           <h3 class="section-title">주문자 정보</h3>
           <div class="form-group">
             <label>이름</label>
-            <input type="text" :value="user?.userName || ''" >
+            <input type="text" v-model="formData.userName" >
           </div>
           <div class="form-group">
             <label>휴대전화</label>
-            <input type="tel" :value="user?.phoneNumber || ''" >
+            <input type="tel" v-model="formData.phoneNumber" >
           </div>
           <div class="form-group">
             <label>이메일</label>
-            <input type="email" :value="user?.email || ''" >
+            <input type="email" v-model="formData.email" >
           </div>
         </div>
       </div>
@@ -138,8 +138,8 @@
 <script setup>
 import NavBar from '@/components/common/NavBar.vue';
 import FooterBar from '@/components/common/FooterBar.vue';
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, reactive } from 'vue';
+import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { API_CONFIG } from '@/config/api.config';
 import { enumToTeamName, getEnumTeamName } from '@/utils/teamNameMap';
@@ -147,27 +147,38 @@ import { stadiumOfTeam } from '@/utils/teamStadium';
 import { formatDate } from '@/utils/dateUtils';
 import http from '@/utils/http';
 
+const route = useRoute()
+
 // 사용자 정보
 const user = ref(null)
 // 티켓 정보
 const ticket = ref(null)
 
+// 폼 데이터
+const formData = reactive({
+  userName: '',
+  phoneNumber: '',
+  email: ''
+})
 
-onMounted(() => {
+onMounted(async () => {
   const authStore = useAuthStore()
   authStore.getUserInfo()
   const userInfo = localStorage.getItem('user')
   if (userInfo) {
     user.value = JSON.parse(userInfo)
-    console.log(user.value)
+    formData.userName = user.value.userName || ''
+    formData.phoneNumber = user.value.phoneNumber || ''
+    formData.email = user.value.email || ''
   }
-  const response = http.get(API_CONFIG.TICKET.DETAIL, {
-    params: {
-      ticketId: this.$route.params.id
-    }
-  })
-  console.log(response)
-  ticket.value = response.data
+  console.log('user : ', user.value)
+  try {
+    const response = await http.get(API_CONFIG.TICKET.DETAIL(route.params.id))
+    ticket.value = response.data
+    console.log('ticket : ', ticket.value)
+  } catch (error) {
+    console.error('티켓 정보 요청 실패:', error)
+  }
 })
 
 const selectedPayment = ref('simple')
@@ -188,7 +199,7 @@ const togglePaymentSection = (type) => {
   align-items: flex-start;
   padding: 0 0 0 24px;
   width: 478px;
-  height: 270px;
+  height: auto;
   flex: none;
   order: 1;
   flex-grow: 0;
@@ -334,6 +345,7 @@ const togglePaymentSection = (type) => {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
+  color: #000000;
 }
 
 /* Payment Methods */
@@ -393,10 +405,11 @@ const togglePaymentSection = (type) => {
 
 .payment-details {
   margin-top: 1rem;
-  padding: 1.5rem;
+  padding: 1rem;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   background-color: #f8f9fa;
+  height: 188px;
 }
 
 .payment-buttons {
