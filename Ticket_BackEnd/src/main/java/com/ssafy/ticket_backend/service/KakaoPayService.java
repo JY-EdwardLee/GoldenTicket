@@ -7,6 +7,7 @@ import com.ssafy.ticket_backend.mapper.TransactionMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.KakaoTransaction;
 import com.ssafy.ticket_backend.model.Ticket;
+import com.ssafy.ticket_backend.model.TicketStatus;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -134,7 +135,7 @@ public class KakaoPayService {
         kakaoTransaction.setBuyerId(ticket.getBuyerId());
         kakaoTransaction.setSellerId(ticket.getSellerId());
         kakaoTransaction.setTicketId(ticket.getTicketId());
-        kakaoTransaction.setTransactionStatus("거래 완료");
+        kakaoTransaction.setTransactionStatus(String.valueOf(TicketStatus.TRANSACTION_COMPLETE));
 
         transactionMapper.insertKakaoTransaction(kakaoTransaction);  // 거래 기록 추가
         transactionMapper.transactionComplete(ticket.getTicketId());  // 티켓의 거래 상태 변경
