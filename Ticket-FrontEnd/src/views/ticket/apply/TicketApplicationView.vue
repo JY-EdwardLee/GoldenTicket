@@ -375,7 +375,7 @@ function formatGameDateTime(dateTimeStr) {
   margin: 20px 0 20px 0;
   color: #222;
   letter-spacing: -1.5px;
-  text-align: left;
+  text-align: center;
   width: 100%;
   max-width: 700px;
 }
@@ -659,7 +659,6 @@ function formatGameDateTime(dateTimeStr) {
   height: 200px;
   box-shadow: 0 2px 16px 0 #f8bbd04d;
   padding: 20px 20px 16px 20px;
-  margin-bottom: 20px;
 }
 .selected-date-box b {
   color: #e57373;
@@ -687,7 +686,7 @@ function formatGameDateTime(dateTimeStr) {
   font-size: 16px;
 }
 .game-card {
-  margin-bottom: 16px;
+  margin: 16px 0;
   padding: 14px 18px;
   background: #fff3e0;
   border-radius: 10px;
