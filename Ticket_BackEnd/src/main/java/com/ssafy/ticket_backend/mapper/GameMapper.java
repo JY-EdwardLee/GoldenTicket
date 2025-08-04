@@ -2,6 +2,7 @@ package com.ssafy.ticket_backend.mapper;
 
 import com.ssafy.ticket_backend.model.BaseballTeams;
 import com.ssafy.ticket_backend.model.Game;
+import com.ssafy.ticket_backend.model.Waitlist;
 import java.time.LocalDate;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
@@ -20,7 +21,10 @@ public interface GameMapper {
     List<Game> selectGameByDate(@Param("gameDate") LocalDate gameDate);
 
     // 같은 날짜에 다른 게임에 응모하였는지 확인
-    boolean selectWaitlistsByUserIdAndGameId(@Param("userId") Long userId,
+    boolean checkWaitlistsByUserIdAndGameId(@Param("userId") Long userId,
+        @Param("gameId") Long gameId);
+
+    Waitlist selectWaitlistByUserIdAndGameId(@Param("userId") Long userId,
         @Param("gameId") Long gameId);
 
     // 대기열 추가
