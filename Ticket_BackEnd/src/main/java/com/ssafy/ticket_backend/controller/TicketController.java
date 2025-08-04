@@ -30,9 +30,9 @@ public class TicketController {
     @GetMapping("/transfer/{ticketId}")
     public ResponseEntity<Map<String, Object>> transferTicket(
         @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long ticketId) {
+        System.out.printf("들어감요");
         TicketResponse ticketResponse = ticketService.transferTicket(userDetails.getUsername(),
             ticketId);
-
 //        return ResponseEntity.ok(ticketResponse);
         return ResponseEntity.ok(Map.of("success", true, "message", "양도완료"));
     }
