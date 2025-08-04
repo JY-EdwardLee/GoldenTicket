@@ -10,7 +10,7 @@
           <div class="complete-card">
             <div class="match-info">
               <div class="match-title">
-                <span class="ssg">{{ pageText.homeTeam }}</span> vs <span class="kiwoom">{{ pageText.awayTeam }}</span>
+                <span :class="getTeamClass(selectedTicket)">{{ selectedTicket.homeKor || selectedTicket.game?.home }}</span> vs <span :class="getTeamClass({homeKor: selectedTicket.awayKor || selectedTicket.game?.away})">{{ selectedTicket.awayKor || selectedTicket.game?.away }}</span>
               </div>
               <div class="match-detail">
                 <span class="series">{{ pageText.seriesTitle }}</span>
@@ -34,44 +34,44 @@
       </div>
       <div v-else-if="showDetailPage && selectedTicket" class="detail-page-wrap">
         <div class="detail-card">
-          <div class="detail-header">
-            <div class="detail-header-logo">{{ pageText.detailHeaderLogo }}</div>
+          <div class="detail-header" :style="getTicketDetailStyle(selectedTicket)">
+            <div class="detail-header-logo">{{ getTeamLogoName(selectedTicket.homeKor || selectedTicket.game?.home) }}</div>
             <div class="detail-header-ticketid">TICKET ID<br /><span class="ticketid-value">#{{ selectedTicket.ticketId }}</span></div>
             <div class="detail-match-title">
               <div class="main-title">
-                <span class="main-title-landers">{{ pageText.mainTitleLanders }}</span><br />
+                <span class="main-title-home">{{ selectedTicket.homeKor || selectedTicket.game?.home }}</span><br />
                 <span class="main-title-vs">VS</span><br />
-                <span class="main-title-kiwoom">{{ pageText.mainTitleKiwoom }}</span>
+                <span class="main-title-away">{{ selectedTicket.awayKor || selectedTicket.game?.away }}</span>
               </div>
             </div>
-            <div class="detail-header-bg"><img src="/landers_bg.png" alt="landers" /></div>
+            <div class="detail-header-bg"><img :src="getTeamBackgroundImage(selectedTicket.homeKor || selectedTicket.game?.home)" :alt="selectedTicket.homeKor || selectedTicket.game?.home" /></div>
             <div class="detail-header-info-row">
               <div class="detail-header-info-line">
-                <div class="detail-header-info-col"><span class="info-icon">📅</span>{{ selectedTicket.date }}</div>
-                <div class="detail-header-info-col"><span class="info-icon">⏰</span>{{ selectedTicket.time }}</div>
+                <div class="detail-header-info-col"><span class="info-icon">📅</span>{{ selectedTicket.game?.date?.split('T')[0] || selectedTicket.date }}</div>
+                <div class="detail-header-info-col"><span class="info-icon">⏰</span>{{ selectedTicket.game?.date?.split('T')[1]?.slice(0,5) || selectedTicket.time }}</div>
               </div>
               <div class="detail-header-info-line">
-                <div class="detail-header-info-col"><span class="info-icon">📍</span>{{ selectedTicket.stadium }}</div>
-                <div class="detail-header-info-col"><span class="info-icon">🪑</span>{{ selectedTicket.provider }}</div>
+                <div class="detail-header-info-col"><span class="info-icon">📍</span>{{ truncateText(getStadiumName(selectedTicket.homeKor || selectedTicket.game?.home), 15) }}</div>
+                <div class="detail-header-info-col"><span class="info-icon">🪑</span>{{ getSeatTypeOnly(selectedTicket.seat) }}</div>
               </div>
             </div>
           </div>
           <div class="detail-price-row">
             <span class="detail-price">₩{{ selectedTicket.price?.toLocaleString() }}</span>
-            <span class="detail-gate">Gate <b>{{ selectedTicket.gate }}</b></span>
           </div>
+
           <div class="detail-seat-row">
             <div class="detail-seat-block">
-              <div class="seat-title">Section</div>
-              <div class="seat-value">{{ selectedTicket.section }}</div>
+              <div class="seat-title">구역</div>
+              <div class="seat-value">{{ truncateText(parseSeatInfo(selectedTicket.seat).section, 8) }}</div>
             </div>
             <div class="detail-seat-block">
-              <div class="seat-title">Row</div>
-              <div class="seat-value">{{ selectedTicket.row }}</div>
+              <div class="seat-title">열</div>
+              <div class="seat-value">{{ truncateText(parseSeatInfo(selectedTicket.seat).row, 6) }}</div>
             </div>
             <div class="detail-seat-block">
-              <div class="seat-title">Seat</div>
-              <div class="seat-value">{{ selectedTicket.seat }}</div>
+              <div class="seat-title">번</div>
+              <div class="seat-value">{{ truncateText(parseSeatInfo(selectedTicket.seat).seat, 6) }}</div>
             </div>
           </div>
           <div class="detail-apply-box">
@@ -114,8 +114,8 @@
         </div>
         <div v-else>
           <div class="ticket-tab-row">
-            <button :class="['ticket-tab', activeTab === 'NOL' ? 'active' : '']" @click="activeTab = 'NOL'">NOL</button>
-            <button :class="['ticket-tab', activeTab === '티켓링크' ? 'active' : '']" @click="activeTab = '티켓링크'">티켓링크</button>
+            <button :class="['ticket-tab', activeTab === 'NOL' ? 'active' : '']" @click="switchTab('NOL')">NOL</button>
+            <button :class="['ticket-tab', activeTab === '티켓링크' ? 'active' : '']" @click="switchTab('티켓링크')">티켓링크</button>
           </div>
           <div v-if="ticketLoading" class="ticket-list" style="justify-content:center;align-items:center;height:350px;">로딩중...</div>
           <div v-else-if="ticketError" class="ticket-list" style="justify-content:center;align-items:center;height:350px;">{{ ticketError }}</div>
@@ -169,6 +169,15 @@
                       <div class="block-title"><span class="block-icon">💰</span>가격</div>
                       <div class="block-content">₩{{ ticket.price.toLocaleString() }}</div>
                     </div>
+                  </div>
+                  <div class="ticket-detail-transfer-btn-row">
+                    <button 
+                      class="ticket-detail-transfer-btn" 
+                      :style="{ backgroundColor: getTeamColor(ticket.game.home) }"
+                      @click="handleApply(ticket)"
+                    >
+                      양도하기
+                    </button>
                   </div>
                 </div>
               </transition>
@@ -245,6 +254,7 @@ import { API_CONFIG } from '@/config/api.config.js';
 const { TICKET } = API_CONFIG;
 import { teamColortoEnum } from '@/utils/teamColor.js';
 import { getEnumTeamName, teamNameToEnum } from '@/utils/teamNameMap.js';
+import { stadiumNameToEnum } from '@/utils/teamStadium.js';
 import http from '@/utils/http'
 
 const tickets = ref([]);
@@ -268,6 +278,80 @@ const teamLogoMap = {
 // 팀명 정규화 함수 (공백 제거)
 const normalizeTeamName = (teamName) => {
   return teamName ? teamName.replace(/\s+/g, '') : ''
+}
+
+// 팀별 배경 이미지 매핑
+const getTeamBackgroundImage = (teamName) => {
+  const normalizedTeam = normalizeTeamName(teamName || '')
+  const teamBgMap = {
+    'kia타이거즈': '/kia_bg.png',
+    '삼성라이온즈': '/samsung_bg.png',
+    'lg트윈스': '/lg_bg.png',
+    '두산베어스': '/doosan_bg.png',
+    'kt위즈': '/kt_bg.png',
+    'ssg랜더스': '/landers_bg.png',
+    '롯데자이언츠': '/lotte_bg.png',
+    '한화이글스': '/hanwha_bg.png',
+    'nc다이노스': '/nc_bg.png',
+    '키움히어로즈': '/kiwoom_bg.png'
+  }
+  return teamBgMap[normalizedTeam] || '/landers_bg.png'
+}
+
+// 팀별 로고명 가져오기
+const getTeamLogoName = (teamName) => {
+  const normalizedTeam = normalizeTeamName(teamName || '')
+  const teamLogoNames = {
+    'kia타이거즈': 'KIA TIGERS',
+    '삼성라이온즈': 'SAMSUNG LIONS',
+    'lg트윈스': 'LG TWINS',
+    '두산베어스': 'DOOSAN BEARS',
+    'kt위즈': 'KT WIZ',
+    'ssg랜더스': 'SSG LANDERS',
+    '롯데자이언츠': 'LOTTE GIANTS',
+    '한화이글스': 'HANWHA EAGLES',
+    'nc다이노스': 'NC DINOS',
+    '키움히어로즈': 'KIWOOM HEROES'
+  }
+  return teamLogoNames[normalizedTeam] || teamName
+}
+
+// 좌석 정보 파싱 함수
+const parseSeatInfo = (seatString) => {
+  if (!seatString) return { section: '-', row: '-', seat: '-' }
+  
+  // "내야통로석 287구역 2열 10번" 형태를 파싱
+  const sectionMatch = seatString.match(/(\d+)구역/)
+  const rowMatch = seatString.match(/(\d+)열/)
+  const seatMatch = seatString.match(/(\d+)번/)
+  
+  return {
+    section: sectionMatch ? `${sectionMatch[1]}구역` : '-', // 숫자만 추출
+    row: rowMatch ? `${rowMatch[1]}열` : '-',
+    seat: seatMatch ? `${seatMatch[1]}번` : '-'
+  }
+}
+
+// 텍스트 길이에 따라 동적으로 줄이는 함수
+const truncateText = (text, maxLength = 8) => {
+  if (!text) return '-'
+  if (text.length <= maxLength) return text
+  return text.substring(0, maxLength - 1) + '…'
+}
+
+// 팀별 구단명 가져오기
+const getStadiumName = (teamName) => {
+  const normalizedTeam = normalizeTeamName(teamName || '')
+  return stadiumNameToEnum[normalizedTeam] || '경기장'
+}
+
+// 좌석 정보에서 '석'까지만 추출
+const getSeatTypeOnly = (seatString) => {
+  if (!seatString) return '좌석 정보'
+  
+  // '내야통로석 287구역 27열 16번'에서 '내야통로석'만 추출
+  const seatTypeMatch = seatString.match(/^(.+?석)/)
+  return seatTypeMatch ? seatTypeMatch[1] : seatString.split(' ')[0]
 }
 
 // 팀별 CSS 클래스명 생성 함수
@@ -298,9 +382,12 @@ const getTeamColor = (teamName) => {
 const getTicketDetailStyle = (ticket) => {
   const homeTeam = ticket.homeKor || ticket.game?.home || ''
   const teamColor = getTeamColor(homeTeam)
+  const darkerColor = getTeamColor(homeTeam).replace('#', '').match(/.{2}/g).map(hex => Math.max(0, parseInt(hex, 16) - 30).toString(16).padStart(2, '0')).join('')
   
   return {
-    background: `${teamColor}e8`, // 투명도 91% (e8 = 232/255)
+    '--team-color': teamColor,
+    '--team-color-dark': `#${darkerColor}`,
+    background: `linear-gradient(90deg, ${teamColor} 60%, #${darkerColor} 100%)`,
     color: '#fff'
   }
 }
@@ -385,15 +472,82 @@ async function fetchTickets(platform) {
   }
 }
 
+// 탭 전환 시 해당 플랫폼의 티켓을 가져오는 함수
+async function switchTab(platform) {
+  console.log(`탭 전환: ${platform}`);
+  activeTab.value = platform;
+  
+  // 플랫폼에 맞는 API 엔드포인트 결정
+  const apiPlatform = platform === 'NOL' ? 'NOL' : 'TICKETLINK';
+  
+  // 해당 플랫폼의 티켓 데이터 가져오기
+  ticketLoading.value = true;
+  ticketError.value = '';
+  
+  try {
+    console.log(`탭 전환 API 요청: tickets/platform/${apiPlatform}`);
+    const res = await http.get(`tickets/platform/${apiPlatform}`);
+    console.log(`탭 전환 API 응답:`, res.data);
+    
+    tickets.value = res.data.map(ticket => {
+      const homeKor = Object.keys(teamNameToEnum).find(
+        key => teamNameToEnum[key] === ticket.game.home
+      ) || ticket.game.home;
+      const awayKor = Object.keys(teamNameToEnum).find(
+        key => teamNameToEnum[key] === ticket.game.away
+      ) || ticket.game.away;
+      
+      // 정규화된 팀명으로 색상 확인
+      const normalizedHome = normalizeTeamName(homeKor);
+      const teamColor = teamColortoEnum[normalizedHome];
+      
+      const processedTicket = {
+        ...ticket,
+        homeKor,
+        awayKor,
+        color: teamColor ? `#${teamColor}` : '#395b8c',
+        header: `${awayKor} vs ${homeKor}`,
+        statusText: ticket.status === 'BEING_ASSIGNMENT' ? '응모 진행중' : ticket.status === 'TRANSACTION_COMPLETE' ? '응모 완료' : ticket.status === 'BEING_PAYING' ? '결제중' : '',
+      };
+      
+      return processedTicket;
+    });
+    
+    console.log(`탭 전환 완료 - ${platform} 티켓 ${tickets.value.length}개 로드됨`);
+  } catch (e) {
+    console.error(`탭 전환 중 티켓 불러오기 실패:`, e);
+    ticketError.value = '티켓 불러오기에 실패했습니다.';
+    tickets.value = [];
+  } finally {
+    ticketLoading.value = false;
+  }
+}
+
 const router = useRouter();
 
 function handleApply(ticket) {
   selectedTicket.value = ticket;
   showDetailPage.value = true;
 }
-function handleApplyComplete() {
-  // 완료 페이지 상태로 전환
-  showCompletePage.value = true;
+async function handleApplyComplete() {
+  try {
+    // 양도 API 호출
+    const response = await http.get(`tickets/transfer/${selectedTicket.value.ticketId}`);
+    
+    console.log('양도 API 응답:', response.data);
+    
+    if (response.data.success) {
+      // 성공 시 완료 페이지로 전환
+      showCompletePage.value = true;
+      console.log('양도 성공:', response.data.message);
+    } else {
+      // 실패 시 에러 메시지 표시
+      alert('양도 신청에 실패했습니다.');
+    }
+  } catch (error) {
+    console.error('양도 API 오류:', error);
+    alert('양도 신청 중 오류가 발생했습니다.');
+  }
 }
 function handleBack() {
   // 티켓 리스트(transfer-main)로 돌아가도록 상태만 복구
@@ -1002,7 +1156,6 @@ function handleCompleteConfirm() {
   margin-bottom: 40px;
 }
 .detail-header {
-  background: linear-gradient(90deg, #ce0e2d 60%, #b1002b 100%);
   color: #fff;
   padding: 32px 32px 54px 32px;
   position: relative;
@@ -1023,22 +1176,19 @@ function handleCompleteConfirm() {
 }
 .detail-header-info-line {
   display: flex;
+  justify-content: center;
   gap: 100px;
-  width: 100%;
+  width: 500px;
 }
 
 .detail-header-info-col {
   font-size: 16px;
   display: flex;
   align-items: center;
-  width: 220px;
+  width: auto;
+  min-width: 200px;
   gap: 6px;
   flex: 1;
-}
-.detail-header-info-col {
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 .info-icon {
   font-size: 18px;
@@ -1106,7 +1256,7 @@ function handleCompleteConfirm() {
 }
 .detail-price-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   padding: 0 32px 0 32px;
   margin-top: 6px;
@@ -1123,6 +1273,29 @@ function handleCompleteConfirm() {
   font-size: 14px;
   color: #222;
   font-weight: 600;
+}
+.detail-transfer-btn-row {
+  display: flex;
+  justify-content: center;
+  padding: 20px 32px;
+  margin-bottom: 10px;
+}
+.transfer-btn {
+  background: #ce0e2d;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 40px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(206, 14, 45, 0.3);
+}
+.transfer-btn:hover {
+  background: #b1002b;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(206, 14, 45, 0.4);
 }
 .detail-seat-row {
   display: flex;
@@ -1378,6 +1551,44 @@ function handleCompleteConfirm() {
 
 .ticket-detail-horizontal {
   overflow: hidden;
+}
+
+/* 호버 시 나타나는 양도하기 버튼 스타일 */
+.ticket-detail-transfer-btn-row {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+.ticket-detail-transfer-btn {
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: 600;
+  width: 200px;
+  height: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* 배경색은 인라인 스타일로 동적 설정 */
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.ticket-detail-transfer-btn:hover {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.ticket-detail-transfer-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  filter: brightness(0.8);
 }
 </style>
 
