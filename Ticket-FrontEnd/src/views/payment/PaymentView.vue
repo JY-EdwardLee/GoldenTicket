@@ -8,9 +8,9 @@
           <h3 class="section-title">주문상품 정보</h3>
           <div class="order-detail">
             <div class="order-info">
-              <div class="order-title">{{ enumToTeamName(ticket?.homeTeamName) }} VS {{ enumToTeamName(ticket?.awayTeamName) }}</div>
+              <div class="order-title">{{ enumToTeamName[ticket?.homeTeamName] }} VS {{ enumToTeamName[ticket?.awayTeamName] }}</div>
               <div class="order-meta">
-                <span>{{ stadiumNameOfTeam(ticket?.homeTeamName) }}</span>
+                <span>{{ stadiumOfTeam[ticket?.homeTeamName] }}</span>
                 <span> {{ formatDate(ticket?.matchDate) }}</span>
                 <span>{{ ticket?.seatRow }} {{ ticket?.seatNumber }}석 {{ ticket?.quantity }}매</span>
               </div>
@@ -142,7 +142,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { API_CONFIG } from '@/config/api.config';
-import { enumToTeamName } from '@/utils/teamNameMap';
+import { enumToTeamName, getEnumTeamName } from '@/utils/teamNameMap';
 import { stadiumOfTeam } from '@/utils/teamStadium';
 import { formatDate } from '@/utils/dateUtils';
 import http from '@/utils/http';

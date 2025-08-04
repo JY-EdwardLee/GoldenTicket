@@ -34,6 +34,7 @@ const TICKET = {
   DETAIL: (id) => `${API_BASE_URL}/tickets/${id}`,
   APPLY: `${API_BASE_URL}/tickets/apply`,
   GAMES: `${API_BASE_URL}/games`,   // 응모 - 경기 목록 불러오기(0729)
+  CANCEL: (id) => `${API_BASE_URL}/games/${id}/applications`,
   TRANSFER: `${API_BASE_URL}/tickets/transfer`,
   MY_TICKETS: `${API_BASE_URL}/tickets`,
 };
