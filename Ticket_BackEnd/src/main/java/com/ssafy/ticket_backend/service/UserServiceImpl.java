@@ -62,6 +62,8 @@ public class UserServiceImpl implements UserService {
     private final RedisTemplate<String, String> redisTemplate;
     private static final String TEMP_USER_KEY_PREFIX = "tempUser:";
 
+    private final NotificationService notificationService;
+
     // 카카오 api 키
     @Value("${kakao.rest.api.key}")
     private String kakaoApiKey;
@@ -182,9 +184,19 @@ public class UserServiceImpl implements UserService {
         String accessToken = jwtUtil.generateAccessToken(user.getEmail());
         String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
 
+        // ✅ 여기서 알림 전송
+        notificationService.sendDelayedNotification(
+            user.getEmail(),
+            "로그인 성공! 실시간 알림이 도착했습니다 🎉",
+            5000
+        );
+
+
         oauthUserResponse = OAuthUserResponse.builder().isRegistered(true)
             .token(new JwtTokenResponse(accessToken, refreshToken)).build();
         return oauthUserResponse;
+
+
     }
 
     /**

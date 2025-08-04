@@ -12,12 +12,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
-import axios from 'axios';
-import { API_CONFIG } from '@/config/api.config';
-import http from '@/utils/http';
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+import axios from "axios";
+import { API_CONFIG } from "@/config/api.config";
+import http from "@/utils/http";
+
+import { connectWebSocket, disconnectWebSocket } from "@/utils/socket.js";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -30,34 +32,37 @@ const handleOAuthCallback = async () => {
   try {
     // URL에서 쿼리 파라미터 파싱
     const urlParams = new URLSearchParams(window.location.search);
-    const redirect = urlParams.get('redirect') || '/';
+    const redirect = urlParams.get("redirect") || "/";
     // const token = authStore.getToken();
 
     // 필수 파라미터 검증
-    
+
     try {
       const response = await http.get(`${API_CONFIG.USER.LOGIN}`, {
-          withCredentials: true,
-        });
+        withCredentials: true,
+      });
 
-        console.log(response.data)
-        if (response.data || response.data.accessToken) {
-          // 사용자 정보를 store에 저장
-          authStore.setUser(response.data);
-          authStore.setToken(response.data.accessToken);
-          // 저장된 리다이렉트 경로 가져오기 (없으면 '/'로 기본값)
-          const redirectTo = authStore.getAndClearRedirectPath();
-          await router.push(redirectTo);
-        } else {
-          throw new Error('사용자 정보를 가져오는데 실패했습니다.');
-        }
+      console.log(response.data);
+      if (response.data || response.data.accessToken) {
+        // 사용자 정보를 store에 저장
+        authStore.setUser(response.data);
+        authStore.setToken(response.data.accessToken);
+
+        // 저장된 리다이렉트 경로 가져오기 (없으면 '/'로 기본값)
+        const redirectTo = authStore.getAndClearRedirectPath();
+        await router.push(redirectTo);
+      } else {
+        throw new Error("사용자 정보를 가져오는데 실패했습니다.");
+      }
     } catch (err) {
-      console.error('사용자 정보 요청 실패:', err);
-      throw new Error('로그인은 성공했지만 사용자 정보를 가져오는데 실패했습니다.');
+      console.error("사용자 정보 요청 실패:", err);
+      throw new Error(
+        "로그인은 성공했지만 사용자 정보를 가져오는데 실패했습니다."
+      );
     }
   } catch (err) {
-    console.error('소셜 로그인 처리 중 오류 발생:', err);
-    error.value = '로그인 처리 중 오류가 발생했습니다. ' + (err.message || '');
+    console.error("소셜 로그인 처리 중 오류 발생:", err);
+    error.value = "로그인 처리 중 오류가 발생했습니다. " + (err.message || "");
   } finally {
     isLoading.value = false;
   }
@@ -65,11 +70,11 @@ const handleOAuthCallback = async () => {
 
 const handleRetry = () => {
   // 에러 발생 시 로그인 페이지로 이동
-  router.push('/');
+  router.push("/");
 };
 
-onMounted(() => { 
-    handleOAuthCallback();
+onMounted(() => {
+  handleOAuthCallback();
 });
 </script>
 
@@ -97,8 +102,12 @@ onMounted(() => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-message {
