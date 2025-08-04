@@ -60,7 +60,7 @@ public class GameServiceImpl implements GameService {
             // 해당 날짜에 있는 게임 중 하나에 응모하였는지 확인
             List<Game> games = gameMapper.selectGameByDate(game.getGameDateTime().toLocalDate());
             for (Game g : games) {
-                if (gameMapper.selectWaitlistsByGameIdAndUserId(user.getUserId(), g.getGameId())) {
+                if (gameMapper.selectWaitlistsByUserIdAndGameId(user.getUserId(), g.getGameId())) {
                     throw new GameApplyException("이미 같은 날짜에 응모를 하셨습니다.");
                 }
             }
@@ -89,6 +89,33 @@ public class GameServiceImpl implements GameService {
             if (gameMapper.deleteWaitlist(user.getUserId(), gameId) == 0) {
                 throw new GameApplyException("취소 할 대기열이 없습니다.");
             }
+        } catch (GameApplyException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new GameApplyException("취소간 오류가 발생하였습니다.");
+        }
+    }
+
+    @Override
+    public void cancelPaying(String userEmail, Long gameId) {
+        try {
+            User user = userMapper.selectUserByEmail(userEmail);
+
+            // 게임이 있는지 확인
+            if (gameMapper.selectGameByGameId(gameId) == null) {
+                throw new GameApplyException("취소하려는 게임이 존재하지 않습니다.");
+            }
+
+            // 응모 목록에 있는지 확인
+            if (!gameMapper.selectWaitlistsByUserIdAndGameId(user.getUserId(), gameId)) {
+                throw new GameApplyException("응모 목록이 존재하지 않습니다.");
+            }
+
+            // 응모 취소
+            gameMapper.cancelWaiting(user.getUserId(), gameId);
+
+            // TODO ticket의 buyerId -> null
+            // TODO transaction status -> cancel & 새로 추첨
         } catch (GameApplyException e) {
             throw e;
         } catch (Exception e) {

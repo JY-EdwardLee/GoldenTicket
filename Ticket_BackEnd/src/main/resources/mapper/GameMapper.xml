@@ -62,4 +62,11 @@
     WHERE is_cancelled = FALSE AND is_ended = FALSE
   </select>
 
+  <update id="cancelWaiting" parameterType="map">
+    UPDATE waitlists
+    SET waitlist_status = 'CANCEL_WAITING'
+    WHERE user_id = #{userId}
+    AND game_id = #{gameId}
+  </update>
+
 </mapper>
