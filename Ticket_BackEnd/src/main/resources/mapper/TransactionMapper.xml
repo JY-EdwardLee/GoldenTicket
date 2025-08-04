@@ -51,4 +51,9 @@
     WHERE ts.transaction_id = #{transactionId}
   </select>
 
+  <update id="cancelTransactionByTransactionId" parameterType="long">
+    UPDATE transaction_stats
+    SET transaction_status = 'CANCEL_WAITING'
+    WHERE transaction_id = #{transactionId}
+  </update>
 </mapper>
