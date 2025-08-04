@@ -45,7 +45,7 @@
   <!-- 대기열 추가 -->
   <insert id="insertWaitlist">
     INSERT INTO waitlists (user_id, game_id, waitlist_status)
-    VALUES (#{userId}, #{gameId}, 'BEING_WAITING`)
+    VALUES (#{userId}, #{gameId}, 'BEING_WAITING')
   </insert>
 
   <!-- 대기열 삭제 -->
