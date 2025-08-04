@@ -125,7 +125,7 @@
           <div class="apply-info-row"><span>일시:</span> <span class="right">{{ selectedGame ? formatGameDateTime(selectedGame.gameDateTime) : '' }}</span></div>
           <div class="apply-info-row"><span>장소:</span> <span class="right">{{ stadiumNameToEnum[selectedTeam] }}</span></div>
         </div>
-        <button class="apply-confirm-btn" @click="step = 1">확인</button>
+        <button class="apply-confirm-btn" @click="goToMainPage">확인</button>
       </div>
     </div>
   </div>
@@ -138,6 +138,9 @@ import API_CONFIG from '@/config/api.config';
 import { stadiumNameToEnum } from '@/utils/teamStadium';
 import { teamNameToEnum, getEnumTeamName } from '@/utils/teamNameMap';
 import http from '@/utils/http'
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const teamRows = [
   ['SSG랜더스', '키움히어로즈', 'LG트윈스', 'KT위즈', 'NC다이노스'],
@@ -291,6 +294,11 @@ async function handleApplyClick(game) {
 
 function getTeamDisplayName(enumName) {
   return enumName ? enumName.replace(/_/g, ' ') : '';
+}
+
+function goToMainPage() {
+  // 메인 페이지로 이동
+  router.push('/');
 }
 
 function formatGameDateTime(dateTimeStr) {
