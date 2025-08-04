@@ -397,9 +397,11 @@ public class UserServiceImpl implements UserService {
 
         for (Waitlist waitlist : waitlists) {
             Game game = gameMapper.selectGameByGameId(waitlist.getGameId());
+            Ticket t = transactionMapper.selectTicketByTransactionId(waitlist.getTransactionId());
 
             MyApplicationResponse myApplicationResponse = new MyApplicationResponse();
 
+            myApplicationResponse.setTicketId(t.getTicketId());
             myApplicationResponse.waitlistToMyApplicationResponse(waitlist);
             myApplicationResponse.setGame(game.toGameResponse());
 
