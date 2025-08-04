@@ -52,6 +52,8 @@ dependencies {
     testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.4'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // 웹소켓
+    implementation 'org.springframework.boot:spring-boot-starter-websocket' // 웹소켓 의존성 추가
 }
 
 tasks.named('test') {
