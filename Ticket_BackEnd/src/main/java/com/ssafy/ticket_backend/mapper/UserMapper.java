@@ -25,8 +25,6 @@ public interface UserMapper {
     // 로그인한 유저 정보 조회
     LoginUserResponse selectLogingUserByEmail(String email);
 
-    ;
-
     // 마이페이지 조회
     MyPageResponse getMyPageByEmail(String email);
 

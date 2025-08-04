@@ -10,7 +10,7 @@
     WHERE email = #{email}
   </select>
 
-  <select id="selectUserByEmail" resultType="com.ssafy.ticket_backend.model.User">
+  <select id="selectUserByUserId" resultType="com.ssafy.ticket_backend.model.User">
     SELECT *
     FROM users
     WHERE user_id = #{userId}
