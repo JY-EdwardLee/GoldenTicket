@@ -76,7 +76,7 @@ public class UserController {
         String naverAuthUrl =
             "https://nid.naver.com/oauth2.0/authorize" + "?response_type=code" + "&client_id="
                 + NaverClientId + "&redirect_uri="
-                + "http://http://i13a109.p.ssafy.io:8080/users/auth/naver/callback" + "&state=" + state;
+                + "http://i13a109.p.ssafy.io:8080/users/auth/naver/callback" + "&state=" + state;
 
         return new RedirectView(naverAuthUrl);
     }
