@@ -109,7 +109,6 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import LoginModal from '@/components/common/LoginModal.vue';
 
 // 공통 컴포넌트 import
 import HeroCard from '../../components/ui/HeroCard.vue';
@@ -241,6 +240,12 @@ const services = ref([
     color: 'info'
   }
 ]);
+
+// onMounted(() => {
+//   const authStore = useAuthStore()
+//   authStore.verifyToken()
+// })
+
 </script>
 
 <style scoped>

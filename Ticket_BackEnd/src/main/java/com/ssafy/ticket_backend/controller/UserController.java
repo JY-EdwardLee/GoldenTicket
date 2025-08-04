@@ -74,6 +74,7 @@ public class UserController {
         String state = "random_state_string"; // CSRF 방지용 (랜덤 문자열 생성 권장)
 
         String naverAuthUrl =
+
             "https://nid.naver.com/oauth2.0/authorize" + "?response_type=code" + "&client_id="
                 + NaverClientId + "&redirect_uri="
                 + "http://i13a109.p.ssafy.io:8080/users/auth/naver/callback" + "&state=" + state;

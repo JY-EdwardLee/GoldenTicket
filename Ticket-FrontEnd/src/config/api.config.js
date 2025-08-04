@@ -28,14 +28,25 @@ const USER = {
   PLATFORMS: `${API_BASE_URL}/users/platform-link`,
   CHANGE_PASSWORD: `${API_BASE_URL}/users/me/password`,
   DELETE_ACCOUNT: `${API_BASE_URL}/users/me`,
+  PAYMENT: {
+    KAKAO: {
+      READY: `${API_BASE_URL}/payment/kakao/ready`,
+      COMPLETE: `${API_BASE_URL}/payment/kakao/complete`,
+    },
+    NAVER: {
+      READY: `${API_BASE_URL}/payment/naver/ready`,
+      COMPLETE: `${API_BASE_URL}/payment/naver/complete`,
+    },
+  },
 };
 
 // 티켓 관련 엔드포인트
 const TICKET = {
   LIST: `${API_BASE_URL}/tickets`,
-  DETAIL: (id) => `${API_BASE_URL}/tickets/${id}`,
+  DETAIL: (id) => `${API_BASE_URL}/tickets/details/${id}`,
   APPLY: `${API_BASE_URL}/tickets/apply`,
   GAMES: `${API_BASE_URL}/games`,   // 응모 - 경기 목록 불러오기(0729)
+  CANCEL: (id) => `${API_BASE_URL}/games/${id}/applications`,
   TRANSFER: `${API_BASE_URL}/tickets/transfer`,
   MY_TICKETS: `${API_BASE_URL}/tickets`,
 };
