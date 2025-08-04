@@ -30,7 +30,6 @@ public class GameServiceImpl implements GameService {
             return gameMapper.selectGameByDateAndTeam(gameCheckRequest.getDate(),
                 gameCheckRequest.getTeam());
         } catch (Exception e) {
-            //TODO
             e.printStackTrace();
             throw new RuntimeException("조회 간 오류가 발생하였습니다.");
         }

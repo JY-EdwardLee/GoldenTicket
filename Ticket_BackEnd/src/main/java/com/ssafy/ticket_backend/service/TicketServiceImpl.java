@@ -55,9 +55,9 @@ public class TicketServiceImpl implements TicketService {
             if (countWaitList > 0) {
                 List<Waitlist> waitlists = ticketMapper.selectWaitListByGameId(game.getGameId());
 
+                // 무작위 추첨
                 List<Long> randomPicks = new ArrayList<>();
-
-                for (Waitlist w : waitlists) {  // 대기열 추첨
+                for (Waitlist w : waitlists) {
                     User u = userMapper.selectUserByUserId(w.getUserId());
 
                     while (u.getWeight() > 0) {
@@ -70,7 +70,8 @@ public class TicketServiceImpl implements TicketService {
                 Long buyer = randomPicks.get(
                     ThreadLocalRandom.current().nextInt(randomPicks.size()));
 
-//                ticketMapper.deleteWaitListByUserIdAndGameId(buyer, game.getGameId());
+                // 가중치 감소
+                userMapper.decreaseWeightByUserId(buyer);
 
                 ticket.setBuyerId(buyer);
                 ticket.setTicketStatus(TicketStatus.BEING_PAYING);

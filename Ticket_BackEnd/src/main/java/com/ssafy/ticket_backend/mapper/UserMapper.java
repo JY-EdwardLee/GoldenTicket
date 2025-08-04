@@ -45,4 +45,8 @@ public interface UserMapper {
     List<String> getUserEmailForDummy();
 
     User selectUserByUserId(@Param("userId") Long userId);
+
+    void decreaseWeightByUserId(@Param("userId") Long userId);
+
+    void increaseWeightByUserId(@Param("userId") Long userId);
 }
