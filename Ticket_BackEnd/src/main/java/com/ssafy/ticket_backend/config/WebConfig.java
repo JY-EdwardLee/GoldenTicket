@@ -16,7 +16,7 @@ public class WebConfig {
                 registry.addMapping("/**") // 모든 API 경로
                     .allowedOrigins("http://localhost:5173", "http://i13a109.p.ssafy.io",
                         "http://i13a109.p.ssafy.io:8080") // Vue dev 서버 주소
-                    .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS").allowedHeaders("*")
+                    .allowedMethods("GET", "POST", "PUT", "PATCH" ,"DELETE", "OPTIONS").allowedHeaders("*")
                     .allowCredentials(true); // 필요시 쿠키 허용
             }
         };

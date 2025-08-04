@@ -43,14 +43,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // 토큰 유효성 검증 및 사용자 정보 추출
             try {
+                System.out.println("들어옴1");
                 if (jwtUtil.validateToken(jwt)) {
                     userEmail = jwtUtil.getUserEmail(jwt);
+                    System.out.println("들어옴2");
                 }
             } catch (ExpiredJwtException e) {
+                System.out.println("들어옴3");
+
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 response.getWriter().write("{\"message\": \"Access token expired\"}");
+                System.out.println("들어옴4");
                 return;
             }
         }

@@ -11,37 +11,35 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface PostMapper {
 
-    Long insertPost(PostRequest postRequest); // PostgreSQL에서 생성된 postId를 직접 반환
+  Long insertPost(PostRequest postRequest); // PostgreSQL에서 생성된 postId를 직접 반환
 
-    // 이미지 URL 업데이트 메서드 추가
-    int updatePostImage(@Param("postId") Long postId, @Param("imageUrl") String imageUrl);
+  // 이미지 URL 업데이트 메서드 추가
+  int updatePostImage(@Param("postId") Long postId, @Param("imageUrl") String imageUrl);
 
-    // 게시글 이미지 키 조회 메서드 추가
-    String getPostImageKey(@Param("postId") Long postId);
+  // 게시글 이미지 키 조회 메서드 추가
+  String getPostImageKey(@Param("postId") Long postId);
 
-    PostDetailResponse selectPostById(Long postId);
+  PostDetailResponse selectPostById(Long postId);
 
-    int plusView(Long post_id);
+  int plusView(Long post_id);
 
-    Long selectUserIdByPostId(Long postId);
+  Long selectUserIdByPostId(Long postId);
 
-    int deletePost(Long postId);
+  int updatePost(PostUpdateRequest postUpdateRequest);
 
-    int updatePost(PostUpdateRequest postUpdateRequest);
+  boolean selectLike(Long userId, Long postId);
 
-    boolean selectLike(Long userId, Long postId);
+  void plusLike(@Param("postId") Long postId);
 
-    void plusLike(@Param("postId") Long postId);
+  void insertPostLike(@Param("userId") Long userId, @Param("postId") Long postId);
 
-    void insertPostLike(@Param("userId") Long userId, @Param("postId") Long postId);
+  void minusLike(Long postId);
 
-    void minusLike(Long postId);
+  void deletePostLike(Long userId, Long postId);
 
-    void deletePostLike(Long userId, Long postId);
+  Long selectPostLike(Long postId);
 
-    Long selectPostLike(Long postId);
+  int deleteTrue(Long postId);
 
-    int deleteTrue(Long postId);
-
-    List<PostAllResponse> selectPostsByUserId(Long userId);
+  List<PostAllResponse> selectPostsByUserId(Long userId);
 }

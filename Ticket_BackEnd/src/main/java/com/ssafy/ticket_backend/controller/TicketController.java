@@ -4,6 +4,7 @@ import com.ssafy.ticket_backend.dto.response.TicketResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.TicketService;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,12 +28,13 @@ public class TicketController {
      * @return 티켓의 정보
      */
     @GetMapping("/transfer/{ticketId}")
-    public ResponseEntity<TicketResponse> transferTicket(
+    public ResponseEntity<Map<String, Object>> transferTicket(
         @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long ticketId) {
+        System.out.printf("들어감요");
         TicketResponse ticketResponse = ticketService.transferTicket(userDetails.getUsername(),
             ticketId);
-
-        return ResponseEntity.ok(ticketResponse);
+//        return ResponseEntity.ok(ticketResponse);
+        return ResponseEntity.ok(Map.of("success", true, "message", "양도완료"));
     }
 
     /**

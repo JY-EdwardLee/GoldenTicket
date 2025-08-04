@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,10 +60,18 @@ public class GameController {
      * @return
      */
     @DeleteMapping("/{gameId}/applications")
-    public ResponseEntity<?> cancelGame(@AuthenticationPrincipal CustomUserDetails userDetails,
-        @PathVariable Long gameId) {
+    public ResponseEntity<ApplicationGameResponse> cancelGame(
+        @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long gameId) {
         gameService.cancelGame(userDetails.getUsername(), gameId);
 
         return ResponseEntity.ok(new ApplicationGameResponse(true, "취소 완료"));
+    }
+
+    @PatchMapping("/{gameId}/applications")
+    public ResponseEntity<ApplicationGameResponse> cancelPaying(
+        @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long gameId) {
+        gameService.cancelPaying(userDetails.getUsername(), gameId);
+
+        return null;
     }
 }

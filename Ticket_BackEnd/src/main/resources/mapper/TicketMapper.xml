@@ -95,7 +95,23 @@
     WHERE seller_id = #{userId} or buyer_id = #{userId}
   </select>
 
-  <select id="selectWaitListByGameId" resultType="int">
+  <select id="selectWaitListByGameId" resultType="com.ssafy.ticket_backend.model.Waitlist"
+    parameterType="long">
+    SELECT
+    *
+    FROM waitlists
+    WHERE game_id = #{gameId}
+  </select>
+
+  <select id="selectWaitingWaitListByGameId" resultType="com.ssafy.ticket_backend.model.Waitlist"
+    parameterType="long">
+    SELECT
+    *
+    FROM waitlists
+    WHERE game_id = #{gameId} and waitlist_status = 'BEING_WAITING'
+  </select>
+
+  <select id="countWaitListByGameId" resultType="int">
     SELECT COUNT(*)
     FROM waitlists
     WHERE game_id = #{gameId}

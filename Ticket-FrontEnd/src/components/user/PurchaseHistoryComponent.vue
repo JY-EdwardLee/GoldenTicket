@@ -105,7 +105,7 @@ const fetchPurchases = async () => {
   try {
     isLoading.value = true
     const response = await http.get(API_CONFIG.USER.PAYMENTS)
-    // purchases.value = response.data
+    purchases.value = response.data
     console.log(purchases.value)
   } catch (error) {
     console.error('구매 내역 조회 중 오류 발생:', error)

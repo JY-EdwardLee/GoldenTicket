@@ -6,9 +6,25 @@
       @search="handleSearch"
     />
     
+    <!-- 로딩 상태 -->
+    <div v-if="isLoading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>공지사항을 불러오는 중...</p>
+    </div>
+    
+    <!-- 에러 상태 -->
+    <div v-else-if="error" class="error-container">
+      <p class="error-message">{{ error }}</p>
+      <button @click="loadPosts" class="retry-btn">다시 시도</button>
+    </div>
+    
+    <!-- 공지사항 목록 -->
     <BoardTable 
+      v-else
       :posts="noticePosts"
       boardType="notice"
+      :currentPage="currentPage"
+      :totalPosts="allPosts.length"
       @postClick="handlePostClick"
     />
     
@@ -22,49 +38,69 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import BoardHeader from './BoardHeader.vue';
 import BoardTable from './BoardTable.vue';
 import BoardPagination from './BoardPagination.vue';
+import { boardAPI, BOARD_TYPES } from '@/api/board.js';
 
 const searchValue = ref('');
 const currentPage = ref(1);
-const totalPages = ref(5);
+const itemsPerPage = 10; // 페이지당 게시글 수
+const isLoading = ref(false);
+const error = ref('');
 
-const noticePosts = ref([
-  {
-    id: 4,
-    title: '2024 시즌 티켓 교환 관련 공지사항',
-    author: '관리자',
-    date: '2024.01.15',
-    views: 1245,
-    likes: 23
-  },
-  {
-    id: 3,
-    title: '양도 시 유의사항 안내',
-    author: '관리자',
-    date: '2024.01.14',
-    views: 892,
-    likes: 15
-  },
-  {
-    id: 2,
-    title: '응모 시스템 업데이트 안내',
-    author: '관리자',
-    date: '2024.01.13',
-    views: 756,
-    likes: 8
-  },
-  {
-    id: 1,
-    title: '신규 회원 가입 이벤트',
-    author: '관리자',
-    date: '2024.01.12',
-    views: 634,
-    likes: 12
+const noticePosts = ref([]);
+const allPosts = ref([]); // 전체 게시글 저장
+
+// 게시글 목록 로드
+const loadPosts = async () => {
+  isLoading.value = true;
+  error.value = '';
+  
+  try {
+    const result = await boardAPI.getPostsByCategory(BOARD_TYPES.NOTICE);
+    
+    // 서버가 배열을 직접 반환하므로 result 자체가 배열
+    if (Array.isArray(result)) {
+      allPosts.value = result;
+      updateDisplayedPosts();
+      console.log('공지사항 목록 로드 성공:', result);
+    } else {
+      error.value = '데이터 형식이 올바르지 않습니다.';
+      console.error('공지사항 목록 로드 실패: 잘못된 데이터 형식');
+    }
+  } catch (err) {
+    error.value = '공지사항 목록을 불러오는 중 오류가 발생했습니다.';
+    console.error('공지사항 목록 로드 중 오류:', err);
+  } finally {
+    isLoading.value = false;
   }
-]);
+};
+
+// 페이지네이션 계산
+const totalPages = computed(() => {
+  return Math.ceil(allPosts.value.length / itemsPerPage);
+});
+
+// 현재 페이지의 게시글만 표시하는 함수 (최신순 정렬)
+const updateDisplayedPosts = () => {
+  // 게시글을 최신순으로 정렬 (createdAt 기준 내림차순)
+  const sortedPosts = [...allPosts.value].sort((a, b) => {
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
+    return dateB - dateA; // 최신순 (내림차순)
+  });
+  
+  const startIndex = (currentPage.value - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  noticePosts.value = sortedPosts.slice(startIndex, endIndex);
+};
+
+// 컴포넌트 마운트 시 게시글 목록 로드
+onMounted(() => {
+  loadPosts();
+});
 
 const handleSearch = () => {
   console.log('검색:', searchValue.value);
@@ -78,7 +114,63 @@ const handlePostClick = (post) => {
 
 const handlePageChange = (page) => {
   currentPage.value = page;
+  updateDisplayedPosts();
   console.log('페이지 변경:', page);
-  // TODO: 페이지 변경 로직 구현
 };
-</script> 
+</script>
+
+<style scoped>
+/* 로딩 스타일 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #e11d48;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 에러 스타일 */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #dc2626;
+}
+
+.error-message {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.retry-btn {
+  background: #e11d48;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.retry-btn:hover {
+  background: #be123c;
+}
+</style> 

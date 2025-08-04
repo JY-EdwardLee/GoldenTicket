@@ -1,7 +1,9 @@
 // API 기본 URL 설정
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
-import axios from 'axios';
+  // 임시 수정
+  import.meta.env.VITE_API_BASE_URL || "http://i13a109.p.ssafy.io:8080";
+// import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+import axios from "axios";
 axios.defaults.baseURL = API_BASE_URL;
 
 // 인증 관련 엔드포인트
@@ -33,9 +35,9 @@ const TICKET = {
   LIST: `${API_BASE_URL}/tickets`,
   DETAIL: (id) => `${API_BASE_URL}/tickets/${id}`,
   APPLY: `${API_BASE_URL}/tickets/apply`,
-  GAMES: `${API_BASE_URL}/games`,   // 응모 - 경기 목록 불러오기(0729)
+  GAMES: `${API_BASE_URL}/games`, // 응모 - 경기 목록 불러오기(0729)
   TRANSFER: `${API_BASE_URL}/tickets/transfer`,
-  MY_TICKETS: `${API_BASE_URL}/tickets/me`,
+  MY_TICKETS: `${API_BASE_URL}/tickets`,
 };
 
 // 게시판 관련 엔드포인트

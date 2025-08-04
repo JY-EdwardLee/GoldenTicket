@@ -13,7 +13,7 @@
   </delete>
 
   <update id="CommentDeleteTrue" parameterType="Long">
-    UPDATE posts
+    UPDATE comments
     SET is_delete = true
     WHERE comment_id = #{commentId}
   </update>

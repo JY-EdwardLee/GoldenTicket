@@ -30,9 +30,9 @@ public class S3PostServiceImpl implements S3PostService {
   private final PostMapper postMapper;
 
   /**
-   * 게시글 이미지 업로드 위한 key,url 발급 (key값 임시 값 , postId가 없음.)
+   * 게시글 이미지 업로드 위한 key,url 발급 수정 시에는 기존 키를 재사용하고, 신규 등록 시에는 새 키 생성 (임시 키)
    *
-   * @param refId    postId 임시 값.
+   * @param refId    postId
    * @param fileName 원본파일 이름
    * @return S3UploadUrlResponse
    */
@@ -50,25 +50,42 @@ public class S3PostServiceImpl implements S3PostService {
 
       String key;
       String existingKey = null;
-      // 업데이트 여부
       boolean isUpdate = false;
 
-      // 항상 새로운 key 생성 (임시 refId 이용)
-      key = generateKey(S3Type.PostImage.name(), refId, fileName);
-      System.out.println("새로운 key 생성: " + key);
+      try {
+
+        // 게시물 등록시에는 catch에 걸림 postId가 없음
+        existingKey = postMapper.getPostImageKey(refId);
+      } catch (Exception e) {
+        // 임시 ID인 경우 무시하고 새 키 생성
+        existingKey = null;
+
+      }
+
+      if (existingKey != null && !existingKey.trim().isEmpty()) {
+        // 기존 이미지가 있는 경우 (수정 시) - 기존 키 재사용
+        key = existingKey;
+        isUpdate = true;
+
+      } else {
+        // 기존 이미지가 없는 경우 (신규 등록 시) - 새 키 생성
+        key = generateKey(S3Type.PostImage.name(), refId, fileName);
+        isUpdate = false;
+
+      }
 
       String url = generatePresignedPutUrl(key);
 
       S3UploadUrlResponse response = new S3UploadUrlResponse();
       response.setKey(key);
       response.setPresignedUrl(url);
+      response.setUpdate(isUpdate); // 업데이트 여부 추가
 
-      System.out.println("1. URL 발급 성공적 (업데이트: " + isUpdate + ")");
       return response;
     } catch (IllegalArgumentException e) {
       throw e;
     } catch (Exception e) {
-      throw new PresignedUrlGenerationException("PresignedUpl 생성에 실패하였습니다.");
+      throw new PresignedUrlGenerationException("Presigned URL 생성에 실패하였습니다.");
     }
   }
 
@@ -101,7 +118,7 @@ public class S3PostServiceImpl implements S3PostService {
   }
 
   /**
-   * 게시글 수정 시에만 사용한다. (postId 값 존재하는 경우) 업로드 키 저장 (S3 업로드 성공 이후) - PostImage 전용
+   * 사용안함
    *
    * @param s3SaverRequest
    * @return S3SaveResponse
@@ -142,22 +159,11 @@ public class S3PostServiceImpl implements S3PostService {
         throw new SaveUploadKeyException("게시글 이미지 정보 저장에 실패하였습니다.");
       }
 
-      // 업데이트인 경우 기존 S3 객체 삭제
-      if (isUpdate && existingKey != null) {
-        try {
-          amazonS3.deleteObject(bucket, existingKey);   // 기존 값 삭제 for 캐싱문제
-          System.out.println("기존 S3 객체 삭제 완료: " + existingKey);
-        } catch (Exception e) {
-          // S3 삭제 실패는 치명적이지 않으므로 경고만 남기고 계속 진행
-          System.out.println("기존 S3 객체 삭제 실패 (무시): " + e.getMessage());
-        }
-      }
-
       S3SaveResponse response = new S3SaveResponse();
       response.setSuccess(true);
 
       if (isUpdate) {
-        response.setMessage("게시글 이미지 업데이트가 성공적으로 완료되었습니다. (기존 이미지 삭제됨)");
+        response.setMessage("게시글 이미지 업데이트가 성공적으로 완료되었습니다. (덮어쓰기 처리)");
       } else {
         response.setMessage("새로운 게시글 이미지 업로드가 성공적으로 완료되었습니다.");
       }
@@ -199,7 +205,6 @@ public class S3PostServiceImpl implements S3PostService {
       String postImageKey;
       try {
         postImageKey = postMapper.getPostImageKey(request.getRefId());
-        System.out.println("DB에서 게시글 이미지 키 조회: " + postImageKey);
       } catch (Exception e) {
         response.setDownloadUrl(null);
         response.setMessage("게시글 정보 조회에 실패하였습니다.");
@@ -212,7 +217,7 @@ public class S3PostServiceImpl implements S3PostService {
           String downloadUrl = generatePresignedGetUrl(postImageKey);
           response.setDownloadUrl(downloadUrl);
           response.setMessage("게시글 이미지 URL 생성 성공");
-          System.out.println("게시글 이미지 다운로드 URL 생성: " + downloadUrl);
+
         } catch (Exception e) {
           response.setDownloadUrl(null);
           response.setMessage("이미지 URL 생성에 실패하였습니다.");
@@ -277,7 +282,6 @@ public class S3PostServiceImpl implements S3PostService {
       // 임시 파일 삭제
       amazonS3.deleteObject(bucket, tempKey);
 
-      System.out.println("키 변경 완료: " + tempKey + " -> " + newKey);
       return newKey;
     } catch (Exception e) {
       throw new RuntimeException("키 변경에 실패하였습니다: " + e.getMessage());

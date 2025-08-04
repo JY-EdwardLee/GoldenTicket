@@ -62,6 +62,8 @@ public class UserServiceImpl implements UserService {
     private final RedisTemplate<String, String> redisTemplate;
     private static final String TEMP_USER_KEY_PREFIX = "tempUser:";
 
+    private final NotificationService notificationService;
+
     // 카카오 api 키
     @Value("${kakao.rest.api.key}")
     private String kakaoApiKey;
@@ -137,7 +139,7 @@ public class UserServiceImpl implements UserService {
         MultiValueMap<String, String> tokenParams = new LinkedMultiValueMap<>();
         tokenParams.add("grant_type", "authorization_code");
         tokenParams.add("client_id", kakaoApiKey);
-        tokenParams.add("redirect_uri", "http://localhost:8080/users/auth/kakao/callback");
+        tokenParams.add("redirect_uri", "http://i13a109.p.ssafy.io:8080/users/auth/kakao/callback");
         tokenParams.add("code", code);
 
         HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(tokenParams,
@@ -182,9 +184,19 @@ public class UserServiceImpl implements UserService {
         String accessToken = jwtUtil.generateAccessToken(user.getEmail());
         String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
 
+        // ✅ 여기서 알림 전송
+        notificationService.sendDelayedNotification(
+            user.getEmail(),
+            "로그인 성공! 실시간 알림이 도착했습니다 🎉",
+            5000
+        );
+
+
         oauthUserResponse = OAuthUserResponse.builder().isRegistered(true)
             .token(new JwtTokenResponse(accessToken, refreshToken)).build();
         return oauthUserResponse;
+
+
     }
 
     /**
@@ -400,6 +412,11 @@ public class UserServiceImpl implements UserService {
 
             MyApplicationResponse myApplicationResponse = new MyApplicationResponse();
 
+            if (waitlist.getTransactionId() != null) {
+                myApplicationResponse.setTicketId(
+                    transactionMapper.selectTicketByTransactionId(waitlist.getTransactionId())
+                        .getTicketId());
+            }
             myApplicationResponse.waitlistToMyApplicationResponse(waitlist);
             myApplicationResponse.setGame(game.toGameResponse());
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // 환경 변수에서 API 기본 URL 가져오기
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://i13a109.p.ssafy.io:8080';
 
 // JWT 토큰을 헤더에 포함하는 API 클라이언트 (인증이 필요한 요청용)
 export const authApiClient = axios.create({
@@ -71,8 +71,14 @@ export const tokenUtils = {
 authApiClient.interceptors.request.use(
   (config) => {
     const token = tokenUtils.getToken();
+    console.log('토큰 확인:', token ? '토큰 존재' : '토큰 없음');
+    console.log('토큰 유효성:', tokenUtils.isTokenValid());
+    
     if (token && tokenUtils.isTokenValid()) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('Authorization 헤더 설정됨:', config.headers.Authorization);
+    } else {
+      console.log('토큰이 없거나 유효하지 않음');
     }
     return config;
   },
