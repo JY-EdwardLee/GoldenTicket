@@ -20,7 +20,12 @@
 
     <!-- 댓글 목록 -->
     <div class="comments-list">
-      <div v-for="comment in comments" :key="comment.id" class="comment-item">
+      <div 
+        v-for="comment in comments" 
+        :key="comment.id || comment.commentId" 
+        class="comment-item"
+        :class="{ 'new-comment': comment.isNew }"
+      >
         <div class="comment-header">
           <div class="profile-icon">👤</div>
           <div class="comment-info">
@@ -37,11 +42,13 @@
         </div>
         
         <div class="comment-actions">
-          <button class="reply-btn">답글쓰기</button>
           <button class="edit-btn" @click="openEditModal(comment)">수정</button>
           <button class="delete-btn" @click="openDeleteModal(comment)">삭제</button>
-          <button class="like-btn">
-            <span class="like-icon">❤️</span>
+          <button class="like-btn" @click="toggleCommentLike(comment)">
+            <span class="like-icon" :class="{ 'liked': comment.isLiked }">
+              {{ comment.isLiked ? '❤️' : '🤍' }}
+            </span>
+            <span v-if="comment.likeCount > 0" class="like-count">{{ comment.likeCount }}</span>
           </button>
         </div>
         
@@ -102,8 +109,11 @@
               class="submit-btn" 
               @click="submitComment"
               :disabled="!newComment.trim() || isSubmitting"
+              :class="{ 'submitting': isSubmitting }"
             >
-              <span v-if="isSubmitting">등록 중...</span>
+              <span v-if="isSubmitting" class="loading-text">
+                <span class="loading-dots">등록 중</span>
+              </span>
               <span v-else>등록</span>
             </button>
           </div>
@@ -115,6 +125,7 @@
     <CommentEditModal
       :isVisible="isEditModalVisible"
       :comment="selectedComment"
+      :postId="postId"
       @confirm="handleEditConfirm"
       @cancel="handleEditCancel"
     />
@@ -133,6 +144,7 @@
 <script setup>
 import { ref } from 'vue';
 import { boardAPI, validateCommentData } from '@/api/board.js';
+import { useAuthStore } from '@/stores/auth.js';
 import CommentEditModal from './CommentEditModal.vue';
 import CommentDeleteModal from './CommentDeleteModal.vue';
 
@@ -149,6 +161,7 @@ const props = defineProps({
 
 const emit = defineEmits(['commentSubmit']);
 
+const authStore = useAuthStore();
 const newComment = ref('');
 const notificationEnabled = ref(false);
 const isInputActive = ref(false);
@@ -340,6 +353,12 @@ const submitComment = async () => {
     return;
   }
 
+  // 로그인 상태 확인
+  if (!authStore.isAuthenticated) {
+    alert('로그인이 필요한 서비스입니다. 로그인 후 다시 시도해주세요.');
+    return;
+  }
+
   // 클라이언트 측 유효성 검사
   const validation = validateCommentData({
     postId: props.postId,
@@ -354,14 +373,24 @@ const submitComment = async () => {
   isSubmitting.value = true;
   
   try {
-    const result = await boardAPI.createComment({
-      postId: props.postId,
+    const result = await boardAPI.createComment(props.postId, {
       content: newComment.value.trim()
     });
     
     if (result.success) {
-      // 성공 시 부모 컴포넌트에 댓글 작성 완료 알림
-      emit('commentSubmit', newComment.value);
+      // 성공 시 부모 컴포넌트에 댓글 작성 완료 알림 (새 댓글 정보 포함)
+      const newCommentData = {
+        commentId: Date.now(), // 임시 ID (서버에서 실제 ID를 반환하지 않으므로)
+        content: newComment.value.trim(),
+        createdAt: new Date().toISOString(),
+        author: authStore.user?.nickname || '사용자',
+        isAuthor: true,
+        likeCount: 0,
+        isLiked: false,
+        isNew: true // 새 댓글 표시
+      };
+      
+      emit('commentSubmit', newCommentData);
       newComment.value = '';
       isInputActive.value = false;
       
@@ -372,7 +401,13 @@ const submitComment = async () => {
     }
   } catch (error) {
     console.error('댓글 작성 실패:', error);
-    alert('댓글 작성 중 오류가 발생했습니다. 다시 시도해주세요.');
+    
+    // 권한 오류인 경우 로그인 안내
+    if (error.response?.status === 403 || error.response?.status === 401) {
+      alert('로그인이 필요한 서비스입니다. 로그인 후 다시 시도해주세요.');
+    } else {
+      alert('댓글 작성 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
   } finally {
     isSubmitting.value = false;
   }
@@ -380,14 +415,23 @@ const submitComment = async () => {
 
 // 댓글 수정 모달 열기
 const openEditModal = (comment) => {
+  // 로그인 상태 확인
+  if (!authStore.isAuthenticated) {
+    alert('로그인이 필요한 서비스입니다. 로그인 후 다시 시도해주세요.');
+    return;
+  }
+  
   selectedComment.value = comment;
   isEditModalVisible.value = true;
 };
 
 // 댓글 수정 완료
 const handleEditConfirm = (editData) => {
+  // 댓글 ID를 안전하게 가져오기
+  const commentId = selectedComment.value.id || selectedComment.value.commentId;
+  
   // 부모 컴포넌트에 댓글 수정 완료 알림
-  emit('commentEdit', editData);
+  emit('commentEdit', { ...editData, commentId: commentId });
   isEditModalVisible.value = false;
   selectedComment.value = null;
 };
@@ -400,6 +444,12 @@ const handleEditCancel = () => {
 
 // 댓글 삭제 모달 열기
 const openDeleteModal = (comment) => {
+  // 로그인 상태 확인
+  if (!authStore.isAuthenticated) {
+    alert('로그인이 필요한 서비스입니다. 로그인 후 다시 시도해주세요.');
+    return;
+  }
+  
   selectedComment.value = comment;
   isDeleteModalVisible.value = true;
 };
@@ -411,18 +461,33 @@ const handleDeleteConfirm = async () => {
   isDeleting.value = true;
   
   try {
-    const result = await boardAPI.deleteComment(selectedComment.value.id);
+    // 댓글 ID를 안전하게 가져오기
+    const commentId = selectedComment.value.id || selectedComment.value.commentId;
+    
+    if (!commentId) {
+      alert('댓글 ID를 찾을 수 없습니다.');
+      return;
+    }
+    
+    console.log('삭제할 댓글 ID:', commentId);
+    const result = await boardAPI.deleteComment(commentId);
     
     if (result.success) {
       // 부모 컴포넌트에 댓글 삭제 완료 알림
-      emit('commentDelete', { commentId: selectedComment.value.id });
+      emit('commentDelete', { commentId: commentId });
       console.log('댓글 삭제 성공:', result.message);
     } else {
       alert(result.message || '댓글 삭제에 실패했습니다.');
     }
   } catch (error) {
     console.error('댓글 삭제 실패:', error);
-    alert('댓글 삭제 중 오류가 발생했습니다. 다시 시도해주세요.');
+    
+    // 권한 오류인 경우 로그인 안내
+    if (error.response?.status === 403 || error.response?.status === 401) {
+      alert('로그인이 필요한 서비스입니다. 로그인 후 다시 시도해주세요.');
+    } else {
+      alert('댓글 삭제 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
   } finally {
     isDeleting.value = false;
     isDeleteModalVisible.value = false;
@@ -434,6 +499,42 @@ const handleDeleteConfirm = async () => {
 const handleDeleteCancel = () => {
   isDeleteModalVisible.value = false;
   selectedComment.value = null;
+};
+
+// 댓글 좋아요 토글
+const toggleCommentLike = async (comment) => {
+  // 로그인 확인
+  if (!authStore.isAuthenticated) {
+    alert('로그인이 필요한 서비스입니다.');
+    return;
+  }
+  
+  try {
+    // 댓글 ID를 안전하게 가져오기
+    const commentId = comment.id || comment.commentId;
+    
+    if (!commentId) {
+      console.error('댓글 ID를 찾을 수 없습니다.');
+      return;
+    }
+    
+    const result = await boardAPI.likeComment(commentId);
+    
+    console.log('댓글 좋아요 토글 결과:', result);
+    
+    if (result) {
+      // 좋아요 상태와 개수 업데이트
+      comment.isLiked = result.isLiked;
+      comment.likeCount = result.likeCount;
+      
+      console.log('댓글 좋아요 토글 성공:', result);
+    } else {
+      console.error('댓글 좋아요 토글 실패: 응답이 없습니다.');
+    }
+  } catch (error) {
+    console.error('댓글 좋아요 토글 중 오류:', error);
+    alert('좋아요 처리 중 오류가 발생했습니다.');
+  }
 };
 </script>
 
@@ -559,6 +660,32 @@ input:checked + .toggle-slider:before {
 .comment-item {
   padding: 20px 0;
   border-bottom: 1px solid #f3f4f6;
+  transition: all 0.3s ease;
+}
+
+.comment-item.new-comment {
+  animation: slideInFromTop 0.5s ease-out;
+  background: linear-gradient(135deg, #fef7f0 0%, #fff5f5 100%);
+  border-left: 4px solid #e11d48;
+  margin-left: -4px;
+  padding-left: 16px;
+}
+
+@keyframes slideInFromTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+    background: linear-gradient(135deg, #fef7f0 0%, #fff5f5 100%);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    background: linear-gradient(135deg, #fef7f0 0%, #fff5f5 100%);
+  }
 }
 
 .comment-header {
@@ -619,7 +746,7 @@ input:checked + .toggle-slider:before {
   gap: 12px;
 }
 
-.reply-btn, .edit-btn, .delete-btn {
+.edit-btn, .delete-btn {
   padding: 4px 8px;
   border: none;
   background: none;
@@ -630,7 +757,7 @@ input:checked + .toggle-slider:before {
   transition: background 0.2s;
 }
 
-.reply-btn:hover, .edit-btn:hover {
+.edit-btn:hover {
   background: #f3f4f6;
 }
 
@@ -652,11 +779,11 @@ input:checked + .toggle-slider:before {
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  /* border: 1px solid #e5e7eb; */
   background: white;
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s;
+  border: 1px solid #e5e7eb;
 }
 
 .like-btn:hover {
@@ -664,8 +791,27 @@ input:checked + .toggle-slider:before {
   border-color: #e11d48;
 }
 
+.like-btn .like-icon.liked {
+  animation: heartBeat 0.6s ease-in-out;
+}
+
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.2); }
+  50% { transform: scale(0.9); }
+  75% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
 .like-icon {
   font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.like-count {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
 }
 
 /* 답글 스타일 */
@@ -849,6 +995,33 @@ input:checked + .toggle-slider:before {
   background: #d1d5db;
   color: #9ca3af;
   cursor: not-allowed;
+}
+
+.submit-btn.submitting {
+  background: linear-gradient(135deg, #e11d48 0%, #f97316 100%);
+  animation: pulse 1.5s infinite;
+}
+
+.loading-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-dots {
+  position: relative;
+}
+
+.loading-dots::after {
+  content: '';
+  animation: loadingDots 1.5s infinite;
+}
+
+@keyframes loadingDots {
+  0%, 20% { content: ''; }
+  40% { content: '.'; }
+  60% { content: '..'; }
+  80%, 100% { content: '...'; }
 }
 
 /* 이모지 팔레트 스타일 */

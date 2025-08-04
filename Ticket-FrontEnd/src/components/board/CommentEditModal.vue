@@ -61,6 +61,10 @@ const props = defineProps({
   comment: {
     type: Object,
     default: null
+  },
+  postId: {
+    type: [String, Number],
+    required: true
   }
 });
 
@@ -112,7 +116,10 @@ const handleSubmit = async () => {
   isSubmitting.value = true;
   
   try {
-    const result = await boardAPI.updateComment(props.comment.id, {
+    // commentId가 id인지 commentId인지 확인
+    const commentId = props.comment.id || props.comment.commentId;
+    
+    const result = await boardAPI.updateComment(commentId, {
       content: editContent.value.trim()
     });
     
@@ -127,7 +134,13 @@ const handleSubmit = async () => {
     }
   } catch (error) {
     console.error('댓글 수정 실패:', error);
-    alert('댓글 수정 중 오류가 발생했습니다. 다시 시도해주세요.');
+    
+    // 권한 오류인 경우 로그인 안내
+    if (error.response?.status === 403 || error.response?.status === 401) {
+      alert('로그인이 필요한 서비스입니다. 로그인 후 다시 시도해주세요.');
+    } else {
+      alert('댓글 수정 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
   } finally {
     isSubmitting.value = false;
   }
