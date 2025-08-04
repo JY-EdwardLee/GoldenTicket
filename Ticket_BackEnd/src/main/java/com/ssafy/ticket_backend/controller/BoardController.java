@@ -18,35 +18,35 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/boards")
 public class BoardController {
 
-    private final BoardService boardService;
+  private final BoardService boardService;
 
-    /**
-     * 게시판별 게시글 조회
-     *
-     * @param boardType
-     * @return List<PostAllResponse>
-     */
-    @GetMapping("category/{boardType}")
-    public ResponseEntity<List<PostAllResponse>> getPostsByCategory(
-        @PathVariable BoardType boardType) {
-        List<PostAllResponse> postAllResponses = boardService.getPostsByCategory(boardType);
+  /**
+   * 게시판별 게시글 조회
+   *
+   * @param boardType
+   * @return List<PostAllResponse>
+   */
+  @GetMapping("category/{boardType}")
+  public ResponseEntity<List<PostAllResponse>> getPostsByCategory(
+      @PathVariable BoardType boardType) {
+    List<PostAllResponse> postAllResponses = boardService.getPostsByCategory(boardType);
 
-        return ResponseEntity.status(HttpStatus.OK).body(postAllResponses);
-    }
+    return ResponseEntity.status(HttpStatus.OK).body(postAllResponses);
+  }
 
-    /**
-     * 게시판별 게시글 검색 title : 제목 content : 게시글 내용 writer : 작성자
-     *
-     * @param boardType
-     * @return List<PostAllResponse>
-     */
-    @GetMapping("/{boardType}")
-    public ResponseEntity<List<PostAllResponse>> searchPosts(@PathVariable BoardType boardType,
-        @RequestParam(required = false) String title,
-        @RequestParam(required = false) String content,
-        @RequestParam(required = false) String writer) {
-        List<PostAllResponse> list = boardService.searchPostBy(boardType, title, content, writer);
+  /**
+   * 게시판별 게시글 검색 title : 제목 content : 게시글 내용 writer : 작성자
+   *
+   * @param boardType
+   * @return List<PostAllResponse>
+   */
+  @GetMapping("/{boardType}")
+  public ResponseEntity<List<PostAllResponse>> searchPosts(@PathVariable BoardType boardType,
+      @RequestParam(required = false) String title,
+      @RequestParam(required = false) String content,
+      @RequestParam(required = false) String writer) {
+    List<PostAllResponse> list = boardService.searchPostBy(boardType, title, content, writer);
 
-        return ResponseEntity.status(HttpStatus.OK).body(list);
-    }
+    return ResponseEntity.status(HttpStatus.OK).body(list);
+  }
 }

@@ -21,6 +21,7 @@ import { useRoute } from 'vue-router';
 import NoticeBoard from '@/components/board/NoticeBoard.vue';
 import FreeBoard from '@/components/board/FreeBoard.vue';
 import GroupBoard from '@/components/board/GroupBoard.vue';
+import { boardAPI } from '@/api/board.js';
 
 const route = useRoute();
 const selectedTab = ref('notice');

@@ -32,27 +32,23 @@ public class S3Controller {
 
   /*
   [정리]
-  [업로드]
-  front 업로드 url 요청 ->
-  back 키 발급과 url 발급 ->
-  front url통해서 s3에 업로드 -> front 업로드 성공시 key를 재전송 -> back db에 저장
+  [마이페이지 업로드]
+  front 업로드 url 요청 -> Front에서 S3 업로드 및 덮어쓰기 -> Save로직 DB 저장->
+  보여주기용도 Download 메서드 사용 or 서비스 단에서 로직처리
 
 
- [게시물 로직]
-  게시물 최초 입력시 -> post_id 기본키가 없다.
-  (front)임시 refId값 만들어서 전송 ->  (back) 키,url 발급 -> front(s3 업로드 이후 키 전송)
-  -> 서버단에서 postId 생성이후 해당 postId로 수정 후 db에 키값 정상저장.
+  [게시물 로직]
+  1. 게시물 (수정, 업로드) 시  getPresignedUploadUrl
+  게시물 첫 등록 시 임시 RefId 값 전송 -> postService단에서 수정
+  게시물 수정 시 덮어쓰기 위해 PUT요청을 위한 KEY, URL 발급 -> Front에서 수정시 덮어쓰기 작업
+  게시물 보여주기용도 PostService단에서 Download 메서드 이용해 URL 발급
 
-  게시물 업데이트 시
-  user 로직 그대로 활용해도 될듯
-
-  [조회]
-  타입과 id를 통해 key db에서 조회 -> 조회한걸로 url 발급 -> front에서 이미지 보기 끝.
+  캐싱문제는 front단에서 쿼리로 해결
    */
 
 
   /**
-   * 이미지 업로드 수정을 위한 임시 Presigned URL요청
+   * 이미지 업로드, 수정을 위한 임시 Presigned URL요청
    *
    * @param type     UserProfile or PostImage
    * @param refId    userId or postId
@@ -88,7 +84,7 @@ public class S3Controller {
   }
 
   /**
-   * Key값 데이터베이스 저장요청 front에서 S3 업로드 성공 후 요청
+   * Key값 데이터베이스 저장요청 front에서 S3 업로드 성공 후 요청 사용x
    *
    * @param s3SaveRequest 키값 업로드 정보
    * @return S3SaveResponse

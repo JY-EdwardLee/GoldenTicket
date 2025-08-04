@@ -34,7 +34,7 @@ public class S3UserServiceImpl implements S3UserService {
   private final UserMapper userMapper;
 
   /**
-   * 이미지 업로드 수정을 위한 임시 Presigned URL요청
+   * 이미지 업로드, 수정을 위한 임시 Presigned URL요청
    *
    * @param refId    userId or postId
    * @param fileName 원본파일 이름
@@ -196,7 +196,7 @@ public class S3UserServiceImpl implements S3UserService {
     userMapper.updateUserProfileImage(refId, key);
   }
 
-  // Presigned Download URL 생성 - UserProfile 전용
+  // Presigned Download URL 생성 - UserProfileㄴ 전용
 
 
   /**

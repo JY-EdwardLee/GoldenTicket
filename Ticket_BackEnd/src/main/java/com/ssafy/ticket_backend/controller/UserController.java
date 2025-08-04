@@ -58,7 +58,7 @@ public class UserController {
     public RedirectView redirectToKakaoLogin() {
         String kakaoAuthUrl =
             "https://kauth.kakao.com/oauth/authorize" + "?client_id=" + KakaoRestApiKey
-                + "&redirect_uri=" + "http://localhost:8080" + "/users/auth/kakao/callback"
+                + "&redirect_uri=" + "http://i13a109.p.ssafy.io:8080" + "/users/auth/kakao/callback"
                 + "&response_type=code";
 
         return new RedirectView(kakaoAuthUrl);
@@ -76,7 +76,7 @@ public class UserController {
         String naverAuthUrl =
             "https://nid.naver.com/oauth2.0/authorize" + "?response_type=code" + "&client_id="
                 + NaverClientId + "&redirect_uri="
-                + "http://http://localhost:8080/users/auth/naver/callback" + "&state=" + state;
+                + "http://i13a109.p.ssafy.io:8080/users/auth/naver/callback" + "&state=" + state;
 
         return new RedirectView(naverAuthUrl);
     }
@@ -99,7 +99,7 @@ public class UserController {
 
             // 2) 회원가입 페이지로 리다이렉트하면서 tempUserId 전달
             return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http://localhost:5173/signup?tempUserId=" + tempUserId)
+                .header("Location", "http://i13a109.p.ssafy.io/signup?tempUserId=" + tempUserId)
                 .build();
         }
 
@@ -120,7 +120,7 @@ public class UserController {
 
         // 로그인 완료 후 프론트 리다이렉트 (인증 상태 확인 페이지)
         return ResponseEntity.status(HttpStatus.FOUND)
-            .header("Location", "http://localhost:5173/oauth/callback").build();
+            .header("Location", "http://i13a109.p.ssafy.io/oauth/callback").build();
     }
 
     /**
@@ -142,7 +142,7 @@ public class UserController {
 
             // 2. 회원가입 페이지로 리다이렉트 + tempUserId 쿼리파라미터로 전달
             return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http://localhost:5173/signup?tempUserId=" + tempUserId)
+                .header("Location", "http://i13a109.p.ssafy.io/signup?tempUserId=" + tempUserId)
                 .build();
         }
 
@@ -164,7 +164,7 @@ public class UserController {
 
         // 로그인 성공 후 프론트엔드로 리다이렉트
         return ResponseEntity.status(HttpStatus.FOUND)
-            .header("Location", "http://localhost:5173/oauth/callback").build();
+            .header("Location", "http://i13a109.p.ssafy.io/oauth/callback").build();
     }
 
     /**

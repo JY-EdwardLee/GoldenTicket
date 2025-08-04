@@ -71,8 +71,14 @@ export const tokenUtils = {
 authApiClient.interceptors.request.use(
   (config) => {
     const token = tokenUtils.getToken();
+    console.log('토큰 확인:', token ? '토큰 존재' : '토큰 없음');
+    console.log('토큰 유효성:', tokenUtils.isTokenValid());
+    
     if (token && tokenUtils.isTokenValid()) {
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('Authorization 헤더 설정됨:', config.headers.Authorization);
+    } else {
+      console.log('토큰이 없거나 유효하지 않음');
     }
     return config;
   },

@@ -24,6 +24,8 @@
       v-else
       :posts="groupPosts"
       boardType="group"
+      :currentPage="currentPage"
+      :totalPosts="allPosts.length"
       @postClick="handlePostClick"
     />
     
@@ -44,7 +46,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import BoardHeader from './BoardHeader.vue';
 import BoardTable from './BoardTable.vue';
 import BoardPagination from './BoardPagination.vue';
@@ -54,13 +56,14 @@ import { boardAPI, BOARD_TYPES } from '@/api/board.js';
 const router = useRouter();
 const searchValue = ref('');
 const currentPage = ref(1);
-const totalPages = ref(5);
+const itemsPerPage = 10; // 페이지당 게시글 수
 const isLoading = ref(false);
 const error = ref('');
 const searchType = ref('title');
 const searchResultMessage = ref('');
 
 const groupPosts = ref([]);
+const allPosts = ref([]); // 전체 게시글 저장
 
 // 게시글 목록 로드
 const loadPosts = async () => {
@@ -69,14 +72,16 @@ const loadPosts = async () => {
   searchResultMessage.value = '';
   
   try {
-    const result = await boardAPI.getPostsByCategory(BOARD_TYPES.GROUP);
+    const result = await boardAPI.getPostsByCategory(BOARD_TYPES.GROUPVIEW);
     
-    if (result.success) {
-      groupPosts.value = result.data;
-      console.log('게시글 목록 로드 성공:', result.data);
+    // 서버가 배열을 직접 반환하므로 result 자체가 배열
+    if (Array.isArray(result)) {
+      allPosts.value = result;
+      updateDisplayedPosts();
+      console.log('게시글 목록 로드 성공:', result);
     } else {
-      error.value = result.message;
-      console.error('게시글 목록 로드 실패:', result.message);
+      error.value = '데이터 형식이 올바르지 않습니다.';
+      console.error('게시글 목록 로드 실패: 잘못된 데이터 형식');
     }
   } catch (err) {
     error.value = '게시글 목록을 불러오는 중 오류가 발생했습니다.';
@@ -84,6 +89,25 @@ const loadPosts = async () => {
   } finally {
     isLoading.value = false;
   }
+};
+
+// 페이지네이션 계산
+const totalPages = computed(() => {
+  return Math.ceil(allPosts.value.length / itemsPerPage);
+});
+
+// 현재 페이지의 게시글만 표시하는 함수 (최신순 정렬)
+const updateDisplayedPosts = () => {
+  // 게시글을 최신순으로 정렬 (createdAt 기준 내림차순)
+  const sortedPosts = [...allPosts.value].sort((a, b) => {
+    const dateA = new Date(a.createdAt);
+    const dateB = new Date(b.createdAt);
+    return dateB - dateA; // 최신순 (내림차순)
+  });
+  
+  const startIndex = (currentPage.value - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  groupPosts.value = sortedPosts.slice(startIndex, endIndex);
 };
 
 // 컴포넌트 마운트 시 게시글 목록 로드
@@ -109,16 +133,19 @@ const handleSearch = async (searchTypeParam = null) => {
   
   try {
     const type = searchTypeParam || searchType.value;
-    const result = await boardAPI.searchPosts(BOARD_TYPES.GROUP, type, searchValue.value.trim());
+    const result = await boardAPI.searchPosts(BOARD_TYPES.GROUPVIEW, type, searchValue.value.trim());
     
-    if (result.success) {
-      groupPosts.value = result.data;
-      searchResultMessage.value = result.message;
-      console.log('검색 성공:', result.data);
+    // 서버가 배열을 직접 반환하므로 result 자체가 배열
+    if (Array.isArray(result)) {
+      allPosts.value = result;
+      currentPage.value = 1; // 검색 시 첫 페이지로 이동
+      updateDisplayedPosts();
+      searchResultMessage.value = `검색 결과: ${result.length}건`;
+      console.log('검색 성공:', result);
     } else {
-      error.value = result.message;
+      error.value = '데이터 형식이 올바르지 않습니다.';
       searchResultMessage.value = '';
-      console.error('검색 실패:', result.message);
+      console.error('검색 실패: 잘못된 데이터 형식');
     }
   } catch (err) {
     error.value = '검색 중 오류가 발생했습니다.';
@@ -136,8 +163,8 @@ const handlePostClick = (post) => {
 
 const handlePageChange = (page) => {
   currentPage.value = page;
+  updateDisplayedPosts();
   console.log('페이지 변경:', page);
-  // TODO: 페이지 변경 로직 구현
 };
 
 const handleWriteClick = () => {
