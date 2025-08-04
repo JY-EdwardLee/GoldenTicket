@@ -11,8 +11,11 @@ import com.ssafy.ticket_backend.model.OtherPlatformTicket;
 import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.TicketStatus;
 import com.ssafy.ticket_backend.model.User;
+import com.ssafy.ticket_backend.model.Waitlist;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,11 +32,11 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public TicketResponse transferTicket(String userEmail, Long ticketId) {
         try {
-            User user = userMapper.selectUserByEmail(userEmail);
+            User seller = userMapper.selectUserByEmail(userEmail);
             Ticket ticket = ticketMapper.selectTicketByTicketId(ticketId);
             Game game = gameMapper.selectGameByGameId(ticket.getGameId());
 
-            if (!user.getUserId().equals(ticket.getSellerId())) {  // 판매자의 티켓이 아니라면
+            if (!seller.getUserId().equals(ticket.getSellerId())) {  // 판매자의 티켓이 아니라면
                 throw new TicketTransferException("잘못된 티켓입니다.");
             }
 
@@ -46,9 +49,39 @@ public class TicketServiceImpl implements TicketService {
                 throw new TicketTransferException("이미 종료된 경기입니다.");
             }
 
-            ticket.setTicketStatus(TicketStatus.BEING_ASSIGNMENT);
+            int countWaitList = ticketMapper.countWaitListByGameId(game.getGameId());
 
-            ticketMapper.updateTicket(ticket);
+            // 대기열이 있다면
+            if (countWaitList > 0) {
+                List<Waitlist> waitlists = ticketMapper.selectWaitListByGameId(game.getGameId());
+
+                List<Long> randomPicks = new ArrayList<>();
+
+                for (Waitlist w : waitlists) {  // 대기열 추첨
+                    User u = userMapper.selectUserByUserId(w.getUserId());
+
+                    while (u.getWeight() > 0) {
+                        randomPicks.add(u.getUserId());
+
+                        u.setWeight(u.getWeight() / 10);
+                    }
+                }
+
+                Long buyer = randomPicks.get(
+                    ThreadLocalRandom.current().nextInt(randomPicks.size()));
+
+//                ticketMapper.deleteWaitListByUserIdAndGameId(buyer, game.getGameId());
+
+                ticket.setBuyerId(buyer);
+                ticket.setTicketStatus(TicketStatus.BEING_PAYING);
+                ticket.setMatchedDate(LocalDateTime.now());
+
+                ticketMapper.updateTicket(ticket);
+            } else {
+                ticket.setTicketStatus(TicketStatus.BEING_ASSIGNMENT);
+
+                ticketMapper.updateTicket(ticket);
+            }
 
             TicketResponse ticketResponse = new TicketResponse(ticket);
             ticketResponse.setGame(
@@ -121,7 +154,7 @@ public class TicketServiceImpl implements TicketService {
             TicketResponse ticketResponse = new TicketResponse(ticket);
             ticketResponse.setGame(game.toGameResponse());
 
-            ticketResponse.setWaitNumber(ticketMapper.selectWaitListByGameId(game.getGameId()));
+            ticketResponse.setWaitNumber(ticketMapper.countWaitListByGameId(game.getGameId()));
 
             ticketResponses.add(ticketResponse);
         }

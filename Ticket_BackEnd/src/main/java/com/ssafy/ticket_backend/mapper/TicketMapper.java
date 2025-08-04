@@ -24,7 +24,9 @@ public interface TicketMapper {
 
     List<Ticket> selectTicketsByUserId(Long userId);
 
-    int selectWaitListByGameId(Long gameId);
+    List<Waitlist> selectWaitListByGameId(@Param("gameId") Long gameId);
+
+    int countWaitListByGameId(Long gameId);
 
     List<Waitlist> selectWaitlistByUserId(@Param("userId") Long userId);
 
@@ -34,4 +36,6 @@ public interface TicketMapper {
     int insertOtherPlatformTicket(OtherPlatformTicket otherPlatformTicket);
 
     Ticket selectTicketByGame(Long gameId, String seat, Long userId);
+
+    void deleteWaitListByUserIdAndGameId(@Param("buyer") Long buyer, @Param("gameId") Long gameId);
 }
