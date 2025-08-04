@@ -1,8 +1,8 @@
 <template>
   <div class="ticket-detail">
     <div class="ticket-header">
-      <h2>SSG 랜더스</h2>
-      <div class="ticket-status">이용 완료</div>
+      <h2>{{ ticketDetail.game.home }}</h2>
+      <div class="ticket-status">{{ ticketDetail.status }}</div>
     </div>
     
     <div class="player-info">
@@ -72,7 +72,7 @@
     </div>
 
     <div class="team-logo">
-      <img src="@/assets/ssg_landers_logo.png" alt="SSG Landers">
+      <img src="@/assets/logo/SSG.svg" alt="SSG Landers">
       <p>NO LIMITS, AMAZING LANDERS</p>
     </div>
   </div>
@@ -82,34 +82,24 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import http from '@/utils/http'
-const route = useRoute();
-const ticketId = route.params.id;
+import { API_CONFIG } from '@/config/api.config'
 
 // 변수 선언
-const route
+const route = useRoute();
+const ticketId = route.params.id;
+const ticketDetail = ref(null)
 
-
-// Fetch ticket details based on ticketId
-const ticketDetails = ref({
-  homeTeam: 'SSG 랜더스',
-  awayTeam: '키움 히어로즈',
-  date: '2025-07-24T19:00:00',
-  stadium: '인천 SSG 랜더스필드',
-  section: '네이 1루석',
-  row: 'A',
-  seat: '15-16',
-  gate: '메인 게이트',
-  entryTime: '18:00',
-  price: 14000,
-  ticketNumber: 'T240724001',
-  status: 'used' // 'used', 'upcoming', 'cancelled'
-});
+const fetchTicketDetails = async () => {
+  try {
+    const response = await http.get(API_CONFIG.TICKET_DETAIL(ticketId));
+    ticketDetail.value = response.data;
+  } catch (error) {
+    console.error('Error fetching ticket details:', error);
+  }
+};
 
 onMounted(() => {
-  // Fetch ticket details from API using ticketId
-  const respone = Http.get(API_CONFIG.TICKET_DETAIL(ticketId))
-  console.log(respone)
-  // fetchTicketDetails(ticketId);
+  fetchTicketDetails(ticketId);
 });
 </script>
 

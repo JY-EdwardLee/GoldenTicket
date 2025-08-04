@@ -17,6 +17,7 @@ import MyPostsComponent from '../components/user/MyPostsComponent.vue';
 import PurchaseHistoryComponent from '../components/user/PurchaseHistoryComponent.vue';
 import PurchaseDetailComponent from '../components/user/PurchaseDetailComponent.vue';
 import PaymentView from '../views/payment/PaymentView.vue';
+import MyTicketDetailComponent from '../components/user/MyTicketDetailComponent.vue';
 
 //  Lazy load views for better performance
 const SignupView = () => import('@/views/signup/SignupView.vue');
@@ -75,6 +76,7 @@ const routes = [
       { path: '', name: 'UserInfo', component: UserInfoComponent },
       { path: 'applications', name: 'MyApplications', component: MyApplicationsComponent },
       { path: 'tickets', name: 'MyTickets', component: MyTicketsComponent },
+      { path: 'tickets/:id', name: 'MyTicketDetail', component: MyTicketDetailComponent },
       { path: 'posts', name: 'MyPosts', component: MyPostsComponent },
       { path: 'purchase', name: 'PurchaseHistory', component: PurchaseHistoryComponent },
       { path: 'purchase/:id', name: 'PurchaseDetail', component: PurchaseDetailComponent }
