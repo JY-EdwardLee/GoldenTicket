@@ -46,19 +46,58 @@
           <label class="form-label">내용</label>
           
           <div class="editor-wrapper" id="editor-container">
-            <QuillEditor
-              v-model:content="formData.content"
-              theme="snow"
-              :options="editorOptions"
-              placeholder="내용을 입력하세요..."
-              @ready="onEditorReady"
-            />
+                         <QuillEditor
+               ref="quillEditor"
+               v-model:content="formData.content"
+               theme="snow"
+               :options="editorOptions"
+               placeholder="내용을 입력하세요..."
+               @ready="onEditorReady"
+             />
           </div>
           
           <!-- 간단한 사용법 텍스트 -->
           <div class="editor-help-text">
-            <p class="help-main">💡 <strong>글 작성 팁:</strong> 굵게(Ctrl+B), 기울임(Ctrl+I), 밑줄(Ctrl+U) | 제목은 드롭다운에서 선택 | 목록, 링크, 이미지 버튼 활용</p>
+            <p class="help-main">💡 <strong>글 작성 팁:</strong> 굵게(Ctrl+B), 기울임(Ctrl+I), 밑줄(Ctrl+U) | 제목은 드롭다운에서 선택 | 목록, 링크 활용</p>
             <p class="help-sub">📝 중요한 내용은 굵게 표시하고, 여러 항목은 목록으로 정리하세요. 서식 지우기 버튼으로 꾸밈을 제거할 수 있습니다.</p>
+          </div>
+        </div>
+
+        <!-- 이미지 업로드 -->
+        <div class="form-group">
+          <label class="form-label">이미지 첨부</label>
+          <div class="image-upload-section">
+            <div class="image-upload-area" @click="triggerFileInput">
+              <div v-if="!selectedImage" class="upload-placeholder">
+                <div class="upload-icon">📷</div>
+                <p class="upload-text">이미지를 선택하세요</p>
+                <p class="upload-hint">클릭하여 파일 선택 (최대 1개)</p>
+              </div>
+              <div v-else class="image-preview">
+                <img :src="imagePreviewUrl" alt="미리보기" class="preview-image" />
+                <div class="image-info">
+                  <p class="image-name">{{ selectedImage.name }}</p>
+                  <p class="image-size">{{ formatFileSize(selectedImage.size) }}</p>
+                </div>
+              </div>
+            </div>
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/*"
+              @change="handleImageSelect"
+              style="display: none;"
+            />
+            <div class="image-actions">
+              <button
+                v-if="selectedImage"
+                type="button"
+                @click="removeImage"
+                class="btn btn-danger btn-sm"
+              >
+                이미지 제거
+              </button>
+            </div>
           </div>
         </div>
 
@@ -90,10 +129,12 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
-import { boardAPI, validatePostData, BOARD_TYPES } from '@/api/board.js';
+import { boardAPI, validatePostData, BOARD_TYPES, uploadImageToS3 } from '@/api/board.js';
+import { useAuthStore } from '@/stores/auth.js';
 
 const router = useRouter();
 const route = useRoute();
+const authStore = useAuthStore();
 
 // 폼 데이터
 const formData = ref({
@@ -104,6 +145,17 @@ const formData = ref({
 
 const isSubmitting = ref(false);
 
+// 이미지 관련 변수들
+const selectedImage = ref(null);
+const imagePreviewUrl = ref('');
+const fileInput = ref(null);
+const quillEditor = ref(null);
+
+// 임시 postId 생성 함수
+const generateRandomLong = () => {
+  return Math.floor(Math.random() * 1000000) + 100000; // 100000 ~ 1099999 범위
+};
+
 // 에디터 설정 (시니어 친화적으로 간소화)
 const editorOptions = ref({
   modules: {
@@ -112,7 +164,7 @@ const editorOptions = ref({
       [{ 'header': [1, 2, false] }], // 제목 (큰 글씨, 중간 글씨, 일반)
       [{ 'list': 'ordered'}, { 'list': 'bullet' }], // 번호 목록, 글머리 목록
       ['blockquote'], // 인용문
-      ['link', 'image'], // 링크, 이미지
+      ['link'], // 링크만 (이미지는 별도 버튼으로)
       ['clean'] // 서식 지우기
     ]
   },
@@ -129,8 +181,15 @@ const isFormValid = computed(() => {
          contentText.trim().length > 0;
 });
 
-// 마운트 시 게시판 타입 자동 설정
+// 마운트 시 인증 상태 확인 및 게시판 타입 자동 설정
 onMounted(() => {
+  // 인증 상태 확인
+  if (!authStore.isAuthenticated) {
+    alert('로그인이 필요한 서비스입니다.');
+    router.push('/');
+    return;
+  }
+  
   const boardType = route.query.type;
   if (boardType && ['free', 'group'].includes(boardType)) {
     // 쿼리 파라미터의 타입을 BOARD_TYPES 상수에 맞게 변환
@@ -186,7 +245,35 @@ const addKoreanLabels = () => {
   });
 };
 
-// content를 텍스트로 변환하는 헬퍼 함수
+// content를 HTML로 변환하는 헬퍼 함수
+const getContentHtml = (content) => {
+  if (!content) return '';
+  
+  if (typeof content === 'string') {
+    // 이미 HTML 문자열인 경우
+    return content;
+  } else {
+    // Delta 객체인 경우 - Quill 에디터에서 HTML 추출
+    try {
+      // Quill 에디터 인스턴스를 통해 HTML 추출
+      if (quillEditor.value && quillEditor.value.getHTML) {
+        return quillEditor.value.getHTML();
+      }
+      // 대안: DOM에서 직접 추출
+      const editorElement = document.querySelector('#editor-container .ql-editor');
+      if (editorElement) {
+        return editorElement.innerHTML;
+      }
+      // 마지막 대안: content를 문자열로 변환
+      return String(content);
+    } catch (error) {
+      console.error('HTML 변환 실패:', error);
+      return String(content);
+    }
+  }
+};
+
+// content를 텍스트로 변환하는 헬퍼 함수 (유효성 검사용)
 const getContentText = (content) => {
   if (!content) return '';
   
@@ -201,12 +288,73 @@ const getContentText = (content) => {
   }
 };
 
+// 이미지 관련 함수들
+const triggerFileInput = () => {
+  fileInput.value?.click();
+};
+
+const handleImageSelect = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // 파일 타입 검증
+  if (!file.type.startsWith('image/')) {
+    alert('이미지 파일만 선택할 수 있습니다.');
+    return;
+  }
+
+  // 파일 크기 검증 (5MB 제한)
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (file.size > maxSize) {
+    alert('파일 크기는 5MB 이하여야 합니다.');
+    return;
+  }
+
+  selectedImage.value = file;
+  
+  // 미리보기 URL 생성
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    imagePreviewUrl.value = e.target.result;
+  };
+  reader.readAsDataURL(file);
+};
+
+const removeImage = () => {
+  selectedImage.value = null;
+  imagePreviewUrl.value = '';
+  if (fileInput.value) {
+    fileInput.value.value = '';
+  }
+};
+
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
 // 폼 제출
 const handleSubmit = async () => {
+  // 인증 상태 재확인
+  if (!authStore.isAuthenticated) {
+    alert('로그인이 필요한 서비스입니다.');
+    router.push('/');
+    return;
+  }
+  
   if (!isFormValid.value) return;
 
-  // 클라이언트 측 유효성 검사
-  const validation = validatePostData(formData.value);
+  // content를 안전하게 처리
+  const contentText = getContentText(formData.value.content);
+  
+  // 클라이언트 측 유효성 검사 (텍스트로 변환된 content 사용)
+  const validation = validatePostData({
+    ...formData.value,
+    content: contentText
+  });
   if (!validation.isValid) {
     alert(validation.errors.join('\n'));
     return;
@@ -215,15 +363,42 @@ const handleSubmit = async () => {
   isSubmitting.value = true;
   
   try {
-    // content를 안전하게 처리
-    const contentText = getContentText(formData.value.content);
+    // 임시 postId 생성
+    const tempPostId = generateRandomLong();
+    console.log('임시 postId 생성:', tempPostId);
+    
+    // 이미지 업로드 처리
+    let imageUrl = null;
+    if (selectedImage.value) {
+      try {
+        console.log('이미지 업로드 시작:', selectedImage.value.name);
+        const uploadResult = await uploadImageToS3(selectedImage.value, tempPostId);
+        imageUrl = uploadResult.imageUrl;
+        console.log('이미지 업로드 완료:', imageUrl);
+      } catch (uploadError) {
+        console.error('이미지 업로드 실패:', uploadError);
+        
+        // 인증 관련 오류인 경우
+        if (uploadError.message && (
+          uploadError.message.includes('인증이 필요합니다') ||
+          uploadError.message.includes('로그인이 만료되었습니다')
+        )) {
+          alert(uploadError.message);
+          router.push('/');
+          return;
+        }
+        
+        alert('이미지 업로드에 실패했습니다. 다시 시도해주세요.');
+        return;
+      }
+    }
     
     // API 호출로 게시글 저장
     const result = await boardAPI.createPost({
       boardType: formData.value.boardType,
       title: formData.value.title.trim(),
-      content: contentText.trim(),
-      imageUrl: null // 현재는 이미지 업로드 기능 없음
+      content: getContentHtml(formData.value.content), // HTML 형태로 변환해서 전송
+      imageUrl: imageUrl
     });
     
     if (result.success) {
@@ -516,6 +691,100 @@ const handleCancel = () => {
   color: white;
 }
 
+/* 이미지 업로드 스타일 */
+.image-upload-section {
+  margin-top: 8px;
+}
+
+.image-upload-area {
+  border: 2px dashed #d1d5db;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #f9fafb;
+}
+
+.image-upload-area:hover {
+  border-color: #e11d48;
+  background: #fef2f2;
+}
+
+.upload-placeholder {
+  color: #6b7280;
+}
+
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.upload-text {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #374151;
+}
+
+.upload-hint {
+  font-size: 14px;
+  color: #9ca3af;
+  margin: 0;
+}
+
+.image-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.preview-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+}
+
+.image-info {
+  flex: 1;
+  text-align: left;
+}
+
+.image-name {
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 4px 0;
+  font-size: 14px;
+}
+
+.image-size {
+  color: #6b7280;
+  margin: 0;
+  font-size: 12px;
+}
+
+.image-actions {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 14px;
+  min-width: auto;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
 .button-group {
   display: flex;
   gap: 12px;
@@ -615,6 +884,37 @@ const handleCancel = () => {
   /* 모바일에서 툴바 높이 조정 */
   :deep(.ql-toolbar) {
     padding-bottom: 24px;
+  }
+  
+  /* 모바일에서 이미지 업로드 영역 조정 */
+  .image-upload-area {
+    padding: 16px;
+  }
+  
+  .upload-icon {
+    font-size: 36px;
+  }
+  
+  .upload-text {
+    font-size: 14px;
+  }
+  
+  .upload-hint {
+    font-size: 12px;
+  }
+  
+  .image-preview {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .preview-image {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .image-info {
+    text-align: center;
   }
 }
 </style> 

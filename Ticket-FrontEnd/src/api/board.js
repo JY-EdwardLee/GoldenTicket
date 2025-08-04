@@ -2,408 +2,181 @@ import { authApiClient, publicApiClient, apiErrorHandler } from './index.js';
 
 // 게시판 관련 API
 export const boardAPI = {
-  // 게시글 작성
-  createPost: async (postData) => {
-    try {
-      const response = await authApiClient.post('/posts', {
-        title: postData.title,
-        content: postData.content,
-        boardType: postData.boardType,
-        imageUrl: postData.imageUrl || null
-      });
-      
-      // 성공 응답 처리
-      if (response.data.success) {
-        return {
-          success: true,
-          message: response.data.message || '게시글 작성 성공'
-        };
-      } else {
-        return {
-          success: false,
-          message: response.data.message || '게시글 작성에 실패했습니다.'
-        };
-      }
-    } catch (error) {
-      // 에러 응답 처리
-      const errorResult = apiErrorHandler(error);
-      
-      // 403 에러 특별 처리 (차단된 사용자)
-      if (error.response?.status === 403) {
-        return {
-          success: false,
-          errorCode: 'Post_Create_Fail',
-          message: error.response.data.message || '차단된 사용자는 글을 작성할 수 없습니다.'
-        };
-      }
-      
-      return errorResult;
-    }
-  },
-
-  // 카테고리별 게시글 목록 조회 (JWT 불필요)
+  // 게시판별 게시글 조회 (카테고리별)
   getPostsByCategory: async (boardType) => {
     try {
       const response = await publicApiClient.get(`/boards/category/${boardType}`);
-      
-      // 응답 데이터를 프론트엔드에서 사용하기 쉽게 변환
-      const posts = response.data.map(post => ({
-        id: post.postId,
-        title: post.title,
-        author: post.nickname,
-        date: new Date(post.createdAt).toLocaleDateString('ko-KR'),
-        views: post.viewCount,
-        likes: post.likeCount,
-        content: post.content,
-        imageUrl: post.imageUrl,
-        boardType: post.boardId,
-        userId: post.userId,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        isDeleted: post.delete
-      }));
-
-      return {
-        success: true,
-        data: posts,
-        message: '게시글 목록을 성공적으로 조회했습니다.'
-      };
+      return response.data;
     } catch (error) {
-      const errorResult = apiErrorHandler(error);
-      return {
-        success: false,
-        data: [],
-        message: errorResult.message || '게시글 목록 조회에 실패했습니다.'
-      };
+      throw apiErrorHandler(error);
     }
   },
 
-  // 게시글 검색 (JWT 불필요)
-  searchPosts: async (boardType, searchType, searchTerm) => {
+  // 게시글 목록 조회 (페이징 포함)
+  getPosts: async (params = {}) => {
     try {
-      let url = `/boards/${boardType}`;
-      
-      // 검색 타입에 따라 쿼리 파라미터 설정
-      switch (searchType) {
-        case 'title':
-          url += `?title=${encodeURIComponent(searchTerm)}`;
-          break;
-        case 'content':
-          url += `?content=${encodeURIComponent(searchTerm)}`;
-          break;
-        case 'writer':
-          url += `?writer=${encodeURIComponent(searchTerm)}`;
-          break;
-        default:
-          // 검색 타입이 지정되지 않은 경우 제목으로 검색
-          url += `?title=${encodeURIComponent(searchTerm)}`;
-      }
-
-      const response = await publicApiClient.get(url);
-      
-      // 응답 데이터를 프론트엔드에서 사용하기 쉽게 변환
-      const posts = response.data.map(post => ({
-        id: post.postId,
-        title: post.title,
-        author: post.nickname,
-        date: new Date(post.createdAt).toLocaleDateString('ko-KR'),
-        views: post.viewCount,
-        likes: post.likeCount,
-        content: post.content,
-        imageUrl: post.imageUrl,
-        boardType: post.boardId,
-        userId: post.userId,
-        createdAt: post.createdAt,
-        updatedAt: post.updatedAt,
-        isDeleted: post.delete
-      }));
-
-      return {
-        success: true,
-        data: posts,
-        message: `검색 결과 ${posts.length}건을 찾았습니다.`
-      };
+      const response = await publicApiClient.get('/boards', { params });
+      return response.data;
     } catch (error) {
-      const errorResult = apiErrorHandler(error);
-      return {
-        success: false,
-        data: [],
-        message: errorResult.message || '검색에 실패했습니다.'
-      };
+      throw apiErrorHandler(error);
     }
   },
 
-  // 게시글 상세 조회 (JWT 불필요)
+  // 게시글 상세 조회
   getPostDetail: async (postId) => {
     try {
       const response = await publicApiClient.get(`/posts/${postId}`);
-      
-      // 응답 데이터를 프론트엔드에서 사용하기 쉽게 변환
-      const postData = response.data;
-      
-      const post = {
-        id: postData.postId,
-        title: postData.title,
-        content: postData.content,
-        imageUrl: postData.imageUrl,
-        boardType: postData.boardId,
-        views: postData.viewCount,
-        likes: postData.likeCount,
-        createdAt: postData.createdAt,
-        updatedAt: postData.updatedAt,
-        isDeleted: postData.delete,
-        author: {
-          id: postData.postUser?.userId,
-          nickname: postData.postUser?.nickname
-        },
-        comments: postData.commentList?.map(comment => ({
-          id: comment.commentId,
-          content: comment.content,
-          authorId: comment.userId,
-          likes: comment.likeCount,
-          createdAt: comment.createdAt,
-          updatedAt: comment.updatedAt,
-          isDeleted: comment.delete
-        })) || []
-      };
-
-      return {
-        success: true,
-        data: post,
-        message: '게시글을 성공적으로 조회했습니다.'
-      };
+      return response.data;
     } catch (error) {
-      const errorResult = apiErrorHandler(error);
-      return {
-        success: false,
-        data: null,
-        message: errorResult.message || '게시글 조회에 실패했습니다.'
-      };
+      throw apiErrorHandler(error);
     }
   },
 
-  // 게시글 수정 (JWT 필요)
-  updatePost: async (postId, postData) => {
-    try {
-      const response = await authApiClient.patch(`/posts/${postId}`, {
-        title: postData.title,
-        content: postData.content
-      });
-      
-      // 성공 응답 처리
-      if (response.data.success) {
-        return {
-          success: true,
-          message: response.data.message || '게시글 수정 성공'
-        };
-      } else {
-        return {
-          success: false,
-          message: response.data.message || '게시글 수정에 실패했습니다.'
-        };
-      }
-    } catch (error) {
-      // 에러 응답 처리
-      const errorResult = apiErrorHandler(error);
-      
-      // 403 에러 특별 처리 (권한 없음)
-      if (error.response?.status === 403) {
-        return {
-          success: false,
-          errorCode: 'Post_Update_Fail',
-          message: error.response.data.message || '권한이 없습니다.'
-        };
-      }
-      
-      return errorResult;
-    }
-  },
-
-  // 게시글 삭제 (JWT 필요)
-  deletePost: async (postId) => {
-    try {
-      const response = await authApiClient.delete(`/posts/${postId}`);
-      
-      // 성공 응답 처리
-      if (response.data.success) {
-        return {
-          success: true,
-          message: response.data.message || '게시글 삭제 성공'
-        };
-      } else {
-        return {
-          success: false,
-          message: response.data.message || '게시글 삭제에 실패했습니다.'
-        };
-      }
-    } catch (error) {
-      // 에러 응답 처리
-      const errorResult = apiErrorHandler(error);
-      
-      // 403 에러 특별 처리 (권한 없음)
-      if (error.response?.status === 403) {
-        return {
-          success: false,
-          errorCode: 'Post_Delete_Fail',
-          message: error.response.data.message || '권한이 없습니다.'
-        };
-      }
-      
-      return errorResult;
-    }
-  },
-
-  // 게시글 좋아요 토글 (JWT 필요)
+  // 게시글 좋아요 토글
   togglePostLike: async (postId) => {
     try {
       const response = await authApiClient.post(`/posts/${postId}/like`);
-      
-      // 응답 데이터 반환 (postId와 likeCount 포함)
-      return {
-        success: true,
-        data: {
-          postId: response.data.postId,
-          likeCount: response.data.likeCount
-        },
-        message: '좋아요가 성공적으로 처리되었습니다.'
-      };
+      return response.data;
     } catch (error) {
-      // 에러 응답 처리
-      const errorResult = apiErrorHandler(error);
-      
-      // 403 에러 특별 처리 (권한 없음)
-      if (error.response?.status === 403) {
-        return {
-          success: false,
-          errorCode: 'Post_Like_Fail',
-          message: error.response.data.message || '권한이 없습니다.'
-        };
-      }
-      
-      return errorResult;
+      throw apiErrorHandler(error);
     }
   },
 
-  // 댓글 작성 (JWT 필요)
-  createComment: async (commentData) => {
+  // 게시글 작성 (인증 필요)
+  createPost: async (postData) => {
     try {
-      const response = await authApiClient.post('/comments', {
-        postId: commentData.postId,
+      const response = await authApiClient.post('/posts', postData);
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
+  },
+
+  // 게시글 수정 (인증 필요)
+  updatePost: async (postId, postData) => {
+    try {
+      const response = await authApiClient.patch(`/posts/${postId}`, postData);
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
+  },
+
+  // 게시글 삭제 (인증 필요)
+  deletePost: async (postId) => {
+    try {
+      const response = await authApiClient.delete(`/posts/${postId}`);
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
+  },
+
+  // 게시글 좋아요 (인증 필요)
+  likePost: async (postId) => {
+    try {
+      const response = await authApiClient.post(`/posts/${postId}/like`);
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
+  },
+
+  // 댓글 목록 조회
+  getComments: async (postId) => {
+    try {
+      const response = await publicApiClient.get(`/boards/${postId}/comments`);
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
+  },
+
+  // 댓글 작성 (인증 필요)
+  createComment: async (postId, commentData) => {
+    try {
+      const response = await authApiClient.post(`/comments`, {
+        postId: postId,
         content: commentData.content
       });
-      
-      // 성공 응답 처리
-      if (response.data.success) {
-        return {
-          success: true,
-          message: response.data.message || '댓글 작성 성공'
-        };
-      } else {
-        return {
-          success: false,
-          message: response.data.message || '댓글 작성에 실패했습니다.'
-        };
-      }
+      return response.data;
     } catch (error) {
-      // 에러 응답 처리
-      const errorResult = apiErrorHandler(error);
-      
-      // 403 에러 특별 처리 (차단된 사용자)
-      if (error.response?.status === 403) {
-        return {
-          success: false,
-          errorCode: 'Comment_Create_Fail',
-          message: error.response.data.message || '차단된 사용자는 댓글을 작성할 수 없습니다.'
-        };
-      }
-      
-      return errorResult;
+      throw apiErrorHandler(error);
     }
   },
 
-  // 댓글 수정 (JWT 필요)
+  // 댓글 수정 (인증 필요)
   updateComment: async (commentId, commentData) => {
     try {
-      const response = await authApiClient.patch(`/comments/${commentId}`, {
-        content: commentData.content
-      });
-      
-      // 성공 응답 처리
-      if (response.data.success) {
-        return {
-          success: true,
-          message: response.data.message || '댓글 수정 성공'
-        };
-      } else {
-        return {
-          success: false,
-          message: response.data.message || '댓글 수정에 실패했습니다.'
-        };
-      }
+      const response = await authApiClient.patch(`/comments/${commentId}`, commentData);
+      return response.data;
     } catch (error) {
-      // 에러 응답 처리
-      const errorResult = apiErrorHandler(error);
-      
-      // 403 에러 특별 처리 (권한 없음)
-      if (error.response?.status === 403) {
-        return {
-          success: false,
-          errorCode: 'Comment_Update_Fail',
-          message: error.response.data.message || '권한이 없습니다.'
-        };
-      }
-      
-      return errorResult;
+      throw apiErrorHandler(error);
     }
   },
 
-  // 댓글 삭제 (JWT 필요)
+  // 댓글 삭제 (인증 필요)
   deleteComment: async (commentId) => {
     try {
       const response = await authApiClient.delete(`/comments/${commentId}`);
-      
-      // 성공 응답 처리
-      if (response.data.success) {
-        return {
-          success: true,
-          message: response.data.message || '댓글 삭제 성공'
-        };
-      } else {
-        return {
-          success: false,
-          message: response.data.message || '댓글 삭제에 실패했습니다.'
-        };
-      }
+      return response.data;
     } catch (error) {
-      // 에러 응답 처리
-      const errorResult = apiErrorHandler(error);
+      throw apiErrorHandler(error);
+    }
+  },
+
+  // 댓글 좋아요 (인증 필요)
+  likeComment: async (commentId) => {
+    try {
+      const response = await authApiClient.post(`/comments/${commentId}/like`);
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
+  },
+
+  // Presigned URL 요청 (S3 업로드용)
+  getPresignedUploadUrl: async (type, refId, fileName) => {
+    try {
+      const response = await authApiClient.get('/s3/upload-url', {
+        params: {
+          type,
+          refId,
+          fileName
+        }
+      });
       
-      // 403 에러 특별 처리 (권한 없음)
+      return response.data;
+    } catch (error) {
+      console.error('Presigned URL 요청 실패:', error);
+      
+      // 403 Forbidden 오류인 경우 인증 문제로 처리
       if (error.response?.status === 403) {
-        return {
-          success: false,
-          errorCode: 'Comment_Delete_Fail',
-          message: error.response.data.message || '권한이 없습니다.'
-        };
+        throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
       }
       
-      return errorResult;
+      // 401 Unauthorized 오류인 경우도 인증 문제로 처리
+      if (error.response?.status === 401) {
+        throw new Error('로그인이 만료되었습니다. 다시 로그인해주세요.');
+      }
+      
+      throw apiErrorHandler(error);
     }
   }
 };
 
-// 게시판 타입 상수
+// 게시판 타입 매핑
 export const BOARD_TYPES = {
   NOTICE: 'NOTICE',
-  FREE: 'FREE',
-  GROUP: 'GROUPVIEW'
+  FREE: 'FREE', 
+  GROUPVIEW: 'GROUPVIEW'
 };
 
 // 게시판 타입 한글명
 export const BOARD_TYPE_NAMES = {
   [BOARD_TYPES.NOTICE]: '공지사항',
   [BOARD_TYPES.FREE]: '자유게시판',
-  [BOARD_TYPES.GROUP]: '단체 관련 게시판'
+  [BOARD_TYPES.GROUPVIEW]: '단체 관련 게시판'
 };
 
 // 검색 타입 상수
@@ -428,7 +201,18 @@ export const validatePostData = (postData) => {
     errors.push('제목을 입력해주세요.');
   }
 
-  if (!postData.content || postData.content.trim() === '') {
+  // content가 문자열이 아닐 수 있으므로 안전하게 처리
+  let contentText = '';
+  if (postData.content) {
+    if (typeof postData.content === 'string') {
+      contentText = postData.content.trim();
+    } else {
+      // Delta 객체나 다른 형태인 경우 문자열로 변환
+      contentText = String(postData.content).trim();
+    }
+  }
+
+  if (!contentText) {
     errors.push('내용을 입력해주세요.');
   }
 
@@ -458,6 +242,104 @@ export const validateCommentData = (commentData) => {
     isValid: errors.length === 0,
     errors
   };
+};
+
+// S3 업로드 관련 함수들
+export const getS3UploadUrl = async (type, refId, fileName) => {
+  try {
+    console.log('S3 업로드 URL 요청 시작:', { type, refId, fileName });
+    
+    const response = await authApiClient.get('/s3/upload-url', {
+      params: {
+        type,
+        refId,
+        fileName
+      }
+    });
+    
+    console.log('S3 업로드 URL 요청 성공:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('S3 업로드 URL 요청 실패:', error);
+    console.error('에러 응답:', error.response);
+    console.error('에러 상태:', error.response?.status);
+    console.error('에러 데이터:', error.response?.data);
+    
+    // 403 Forbidden 오류인 경우 인증 문제로 처리
+    if (error.response?.status === 403) {
+      throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+    }
+    
+    // 401 Unauthorized 오류인 경우도 인증 문제로 처리
+    if (error.response?.status === 401) {
+      throw new Error('로그인이 만료되었습니다. 다시 로그인해주세요.');
+    }
+    
+    throw error;
+  }
+};
+
+
+
+// S3에 직접 업로드하는 함수 (Presigned URL 사용)
+export const uploadToS3 = async (putUrl, file) => {
+  try {
+    const uploadResponse = await fetch(putUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type
+      }
+    });
+    
+    if (!uploadResponse.ok) {
+      const errorText = await uploadResponse.text();
+      console.error('S3 업로드 실패 응답:', errorText);
+      throw new Error(`S3 업로드에 실패했습니다. 상태: ${uploadResponse.status}`);
+    }
+    
+    return {
+      success: true
+    };
+    
+  } catch (error) {
+    console.error('S3 직접 업로드 실패:', error);
+    throw error;
+  }
+};
+
+// 이미지 업로드 함수 (기존 호환성 유지)
+export const uploadImageToS3 = async (file, postId) => {
+  try {
+    // 1. S3 업로드 URL 요청
+    const uploadUrlResponse = await getS3UploadUrl('PostImage', postId, file.name);
+    
+    console.log('S3 업로드 URL 응답:', uploadUrlResponse);
+    
+    // 2. S3에 직접 업로드 (presignedUrl 사용)
+    const uploadResponse = await fetch(uploadUrlResponse.presignedUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type
+      }
+    });
+    
+    if (!uploadResponse.ok) {
+      throw new Error('S3 업로드에 실패했습니다.');
+    }
+    
+    console.log('S3 업로드 성공, key:', uploadUrlResponse.key);
+    
+    return {
+      success: true,
+      imageUrl: uploadUrlResponse.key // key 값을 imageUrl로 사용
+    };
+    
+  } catch (error) {
+    console.error('이미지 업로드 실패:', error);
+    throw error;
+  }
 };
 
 export default boardAPI;

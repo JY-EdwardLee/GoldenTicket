@@ -13,6 +13,8 @@ import lombok.ToString;
 public class TicketResponse {
 
     private Long ticketId;  // 티켓 ID
+    private Long sellerId;
+    private Long buyerId;
     private TicketStatus status;  // 티켓 상태
     private int price;  // 가격
     private String seat;  // 좌석 정보
@@ -22,6 +24,8 @@ public class TicketResponse {
 
     public TicketResponse(Ticket ticket) {
         this.ticketId = ticket.getTicketId();
+        this.sellerId = ticket.getSellerId();
+        this.buyerId = ticket.getBuyerId();
         this.status = ticket.getTicketStatus();
         this.price = ticket.getPrice();
         this.seat = ticket.getSeat();

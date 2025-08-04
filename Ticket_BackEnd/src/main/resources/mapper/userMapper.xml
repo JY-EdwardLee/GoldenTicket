@@ -10,10 +10,16 @@
     WHERE email = #{email}
   </select>
 
+  <select id="selectUserByUserId" resultType="com.ssafy.ticket_backend.model.User">
+    SELECT *
+    FROM users
+    WHERE user_id = #{userId}
+  </select>
+
   <!-- 게시판번호로 유저 조회 (커뮤니티 용)-->
   <select id="selectUserByPostId" parameterType="Long"
     resultType="PostUserResponse">
-    SELECT user_id, nickname
+    SELECT user_id, nick_name
     FROM users
     WHERE user_id = #{userId}
   </select>
@@ -127,5 +133,21 @@
     WHERE is_block = FALSE AND is_delete = FALSE
   </select>
 
+  <delete id="deleteWaitListByUserIdAndGameId" parameterType="map">
+    DELETE FROM waitlists
+    WHERE user_id = #{buyer}
+    AND game_id = #{gameId}
+  </delete>
 
+  <update id="decreaseWeightByUserId" parameterType="Long">
+    UPDATE users
+    SET weight = ROUND(GREATEST(weight * 0.9, 0)::numeric, 2)
+    WHERE user_id = #{userId}
+  </update>
+
+  <update id="increaseWeightByUserId" parameterType="Long">
+    UPDATE users
+    SET weight = ROUND(GREATEST(COALESCE(weight, 0) * 1.1, 0), 2)
+    WHERE user_id = #{userId}
+  </update>
 </mapper>

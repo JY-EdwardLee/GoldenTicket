@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class MyApplicationResponse {
 
     private Long waitlist_id;
+    private Long ticketId;
     private WaitlistStatus status;
     private LocalDateTime date;
     private LocalDateTime matchedDate;
