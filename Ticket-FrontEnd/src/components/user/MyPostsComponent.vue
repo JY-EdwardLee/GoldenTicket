@@ -40,7 +40,7 @@
               </td>
               <td class="number-column">{{ post.postId }}</td>
               <td class="title-column">
-                <router-link :to="`/bulletin/${post.postId}`" class="post-title">
+                <router-link :to="`/bulletin/detail/${post.postId}`" class="post-title">
                   {{ post.title }}
                 </router-link>
               </td>
@@ -116,22 +116,7 @@ import http from '@/utils/http'
 import router from '@/router'
 
 // 게시글 데이터 (실제로는 API에서 가져올 데이터)
-const posts = ref([
-  {
-    "postId": 1,
-    "boardId": "free",
-    "userId": 1001,
-    "createdAt": "2025-07-29T10:00:00",
-    "updatedAt": "2025-07-29T10:30:00",
-    "viewCount": 123,
-    "title": "첫 번째 게시글",
-    "content": "이것은 게시글 내용입니다.",
-    "imageUrl": "https://example.com/image1.jpg",
-    "likeCount": 5,
-    "isDelete": false,
-    "nickName": "홍길동"
-  }
-])
+const posts = ref([])
 
 // 선택된 게시글 관리
 const selectedPosts = ref([])

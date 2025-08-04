@@ -114,12 +114,13 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
+import http from '@/utils/http'
+import { API_CONFIG } from '@/config/api.config'
 
-const router = useRouter()
 const route = useRoute()
 
-const orderNumber = ref('P20250730001')
+const orderNumber = ref(route.params.id)
 
 // 티켓 상세 정보 (실제로는 API에서 가져올 데이터)
 const ticketDetail = ref({
@@ -162,9 +163,13 @@ const requestRefund = () => {
 
 onMounted(() => {
   const purchaseId = route.params.id
-
-
-  console.log('Loading purchase detail for ID:', purchaseId)
+  try {
+    const response = http.get(API_CONFIG.TICKET.DETAIL(purchaseId))
+    
+    ticketDetail.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch ticket detail:', error)
+  }
 })
 </script>
 
