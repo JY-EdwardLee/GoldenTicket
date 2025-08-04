@@ -76,7 +76,7 @@ public class PaymentController {
     public ResponseEntity<String> kakaoCancel() {
         // TODO: 결제 취소 시 처리할 비즈니스 로직 (예: DB 주문 상태 변경)
         // 프론트엔드의 결제 취소 페이지로 리다이렉트
-        return ResponseEntity.status(HttpStatus.OK).body("결제 취소");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("결제 취소");
     }
 
     /**
@@ -86,7 +86,7 @@ public class PaymentController {
     public ResponseEntity<String> kakaoFail() {
         // TODO: 결제 실패 시 처리할 비즈니스 로직 (예: DB 주문 상태 변경)
         // 프론트엔드의 결제 실패 페이지로 리다이렉트
-        return ResponseEntity.status(HttpStatus.OK).body("결제 실패");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("결제 실패");
     }
 
     @PostMapping("/toss/ready")
