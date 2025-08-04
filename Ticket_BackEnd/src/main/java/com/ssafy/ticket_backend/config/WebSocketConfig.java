@@ -38,5 +38,4 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // 유저 대상 메시지 전송 시 사용하는 prefix
         registry.setUserDestinationPrefix("/user");
     }
-
 }
