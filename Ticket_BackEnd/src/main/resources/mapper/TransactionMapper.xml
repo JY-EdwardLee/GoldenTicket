@@ -28,7 +28,7 @@
 
   <update id="transactionComplete" parameterType="long">
     UPDATE tickets
-    SET ticket_status = '거래 완료'
+    SET ticket_status = 'TRANSACTION_COMPLETE'
     WHERE ticket_id = #{ticketId}
   </update>
 
