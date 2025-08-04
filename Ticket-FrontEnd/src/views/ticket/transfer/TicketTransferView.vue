@@ -2,6 +2,11 @@
   <div class="transfer-root">
     <!-- Header -->
 
+    <!-- 응모 진행중 상태 표시 -->
+    <div v-if="isApplying" class="applying-status">
+      <div class="applying-message">응모 진행중입니다.</div>
+    </div>
+
     <!-- Main -->
     <main class="transfer-main">
       <div v-if="showCompletePage">
@@ -22,19 +27,41 @@
               <div class="sub-message">{{ pageText.completeSubMessage }}</div>
               <button class="confirm-btn" @click="handleCompleteConfirm">{{ pageText.confirmButtonText }}</button>
             </div>
+            
+            <!-- 주의사항 섹션을 complete-card 내부로 이동 -->
+            <div class="detail-notice-box" style="margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
+              <div class="notice-title" style="font-size: 18px; font-weight: 700; color: #ce0e2d; margin-bottom: 15px;">양도 신청 주의사항</div>
+              <div class="notice-content" style="font-size: 14px; color: #333; line-height: 1.8;">
+                <div style="margin-bottom: 8px;">• 양도 신청 후 취소는 불가능합니다.</div>
+                <div style="margin-bottom: 8px;">• 매칭 완료 시 알림이 전송됩니다.</div>
+                <div style="margin-bottom: 8px;">• 양도료는 경기 시작 후 지급됩니다.</div>
+              </div>
+            </div>
           </div>
-          <div class="process-info">
-            <div class="process-title">{{ pageText.processTitle }}</div>
-            <ul class="process-list">
-              <li v-for="(msg, idx) in pageText.processList" :key="idx"><span class="num">{{ idx+1 }}</span> {{ msg }}</li>
-            </ul>
-          </div>
-          <button class="back-btn" @click="handleCompleteBack">이전 페이지로</button>
         </div>
       </div>
       <div v-else-if="showDetailPage && selectedTicket" class="detail-page-wrap">
-        <div class="detail-card">
-          <div class="detail-header" :style="getTicketDetailStyle(selectedTicket)">
+        <div class="detail-card" style="position: relative;">
+          <!-- 팀 로고 배경 비활성화 -->
+          <!-- <div class="detail-team-logo" 
+               :style="{ 
+                 backgroundImage: selectedTicket ? (getTeamLogo(selectedTicket.homeKor || selectedTicket.game?.home) ? `url(${getTeamLogo(selectedTicket.homeKor || selectedTicket.game?.home)})` : 'none') : 'none',
+                 opacity: 0.1,
+                 position: 'absolute',
+                 top: '0',
+                 left: '0',
+                 right: '0',
+                 bottom: '0',
+                 width: '100%',
+                 height: '100%',
+                 backgroundSize: 'contain',
+                 backgroundRepeat: 'no-repeat',
+                 backgroundPosition: 'center',
+                 pointerEvents: 'none',
+                 zIndex: 1
+               }">
+          </div> -->
+          <div class="detail-header" :style="getTicketDetailStyle(selectedTicket)" style="position: relative; z-index: 3;">
             <div class="detail-header-logo">{{ getTeamLogoName(selectedTicket.homeKor || selectedTicket.game?.home) }}</div>
             <div class="detail-header-ticketid">TICKET ID<br /><span class="ticketid-value">#{{ selectedTicket.ticketId }}</span></div>
             <div class="detail-match-title">
@@ -44,7 +71,7 @@
                 <span class="main-title-away">{{ selectedTicket.awayKor || selectedTicket.game?.away }}</span>
               </div>
             </div>
-            <div class="detail-header-bg"><img :src="getTeamBackgroundImage(selectedTicket.homeKor || selectedTicket.game?.home)" :alt="selectedTicket.homeKor || selectedTicket.game?.home" /></div>
+            <div class="detail-header-bg"><img :src="getTeamLogo(selectedTicket.homeKor || selectedTicket.game?.home)" :alt="selectedTicket.homeKor || selectedTicket.game?.home" /></div>
             <div class="detail-header-info-row">
               <div class="detail-header-info-line">
                 <div class="detail-header-info-col"><span class="info-icon">📅</span>{{ selectedTicket.game?.date?.split('T')[0] || selectedTicket.date }}</div>
@@ -56,11 +83,11 @@
               </div>
             </div>
           </div>
-          <div class="detail-price-row">
+          <div class="detail-price-row" style="position: relative; z-index: 3;">
             <span class="detail-price">₩{{ selectedTicket.price?.toLocaleString() }}</span>
           </div>
 
-          <div class="detail-seat-row">
+          <div class="detail-seat-row" style="position: relative; z-index: 3; background-color: rgba(255, 255, 255, 0.95); margin: 10px 20px; border-radius: 8px; padding: 15px;">
             <div class="detail-seat-block">
               <div class="seat-title">구역</div>
               <div class="seat-value">{{ truncateText(parseSeatInfo(selectedTicket.seat).section, 8) }}</div>
@@ -74,14 +101,14 @@
               <div class="seat-value">{{ truncateText(parseSeatInfo(selectedTicket.seat).seat, 6) }}</div>
             </div>
           </div>
-          <div class="detail-apply-box">
+          <div class="detail-apply-box" style="position: relative; z-index: 3;">
             <div class="apply-title">{{ pageText.applyTitle }}</div>
             <div class="apply-btns">
               <button class="apply-yes" @click="handleApplyComplete">{{ pageText.applyYesText }}</button>
               <button class="apply-no" @click="handleBack">{{ pageText.applyNoText }}</button>
             </div>
           </div>
-          <div class="detail-notice-box">
+          <div class="detail-notice-box" style="position: relative; z-index: 3;">
             <div class="notice-title">{{ pageText.noticeTitle }}</div>
             <ul class="notice-list">
               <li v-for="notice in selectedTicket.transferNotice" :key="notice">{{ notice }}</li>
@@ -122,7 +149,7 @@
           <div v-else-if="tickets.length === 0" class="ticket-list" style="justify-content:center;align-items:center;height:350px;">
             <div style="font-size:32px;font-weight:700;color:#969696;text-align:center;">현재 보유하고 있는 티켓이 없습니다.</div>
           </div>
-          <div v-else class="ticket-list" style="max-height:600px;overflow-y:auto;">
+          <div v-else class="ticket-list" style="max-height:600px;overflow-y:auto;padding:0 50px;">
             <div
               v-for="(ticket, idx) in tickets"
               :key="ticket.ticketId"
@@ -147,7 +174,39 @@
               </div>
               <!-- 상세 정보: hover 시에만 표시 -->
               <transition name="fade">
-                <div v-if="hoveredTicket === ticket.ticketId" class="ticket-detail ticket-detail-horizontal" :style="getTicketDetailStyle(ticket)">
+                <!-- 응모 진행중 상태일 때 -->
+                <div v-if="hoveredTicket === ticket.ticketId && (ticket.status === 'BEING_ASSIGNMENT' || ticket.statusText === '응모 진행중')" 
+                     class="ticket-detail ticket-detail-horizontal ticket-detail-being-assignment" 
+                     :style="getTicketDetailStyle(ticket)">
+                  <div class="ticket-detail-being-assignment-content">
+                    <div class="being-assignment-icon">⏳</div>
+                    <div class="being-assignment-text">응모 진행중입니다</div>
+                  </div>
+                </div>
+                <!-- 결제중 상태일 때 -->
+                <div v-else-if="hoveredTicket === ticket.ticketId && (ticket.status === 'BEING_PAYING' || ticket.statusText === '결제중')" 
+                     class="ticket-detail ticket-detail-horizontal ticket-detail-being-assignment" 
+                     :style="getTicketDetailStyle(ticket)">
+                  <div class="ticket-detail-being-assignment-content">
+                    <div class="being-assignment-icon">💳</div>
+                    <div class="being-assignment-text">결제중입니다</div>
+                  </div>
+                </div>
+                <!-- 거래 완료 상태일 때 -->
+                <div v-else-if="hoveredTicket === ticket.ticketId && (ticket.status === 'TRANSACTION_COMPLETE' || ticket.statusText === '거래 완료')" 
+                     class="ticket-detail ticket-detail-horizontal ticket-detail-being-assignment" 
+                     :style="getTicketDetailStyle(ticket)">
+                  <div class="ticket-detail-being-assignment-content">
+                    <div class="being-assignment-icon">✅</div>
+                    <div class="being-assignment-text">거래 완료</div>
+                  </div>
+                </div>
+                <!-- 일반 상태일 때 -->
+                <div v-else-if="hoveredTicket === ticket.ticketId" class="ticket-detail ticket-detail-horizontal" :style="getTicketDetailStyle(ticket)">
+                  <!-- 팀 로고 배경 -->
+                  <div class="ticket-detail-bg">
+                    <img :src="getTeamLogo(ticket.homeKor || ticket.game?.home)" :alt="ticket.homeKor || ticket.game?.home" />
+                  </div>
                   <div class="ticket-detail-header-row">
                     <span class="ticket-detail-title">{{ ticket.header }}</span>
                   </div>
@@ -158,8 +217,8 @@
                   </div>
                   <div class="ticket-detail-horizontal-row-centered">
                     <div class="ticket-detail-block block-horizontal">
-                      <div class="block-title"><span class="block-icon">🏟️</span>경기장</div>
-                      <div class="block-content">{{ ticket.game.home }} 홈</div>
+                      <div class="block-title"><span class="block-icon">🏦</span>경기장</div>
+                      <div class="block-content">{{ getStadiumName(ticket.homeKor || ticket.game?.home) }}</div>
                     </div>
                     <div class="ticket-detail-block block-horizontal">
                       <div class="block-title"><span class="block-icon">🪑</span>좌석</div>
@@ -188,25 +247,14 @@
       </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="transfer-footer">
-      <div class="footer-inner">
-        <img src="/footer_logo.png" alt="logo" class="footer-logo-img" />
-        <div class="footer-desc">Building amazing digital experiences<br />with modern design and technology.</div>
-        <div class="footer-icons">
-          <span class="footer-icon">⚫</span>
-          <span class="footer-icon">⚫</span>
-          <span class="footer-icon">⚫</span>
-          <span class="footer-icon">⚫</span>
-        </div>
-      </div>
-    </footer>
+
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { teamColortoEnum } from '@/utils/teamColor.js';
 // 화면 렌더에 필요한 기본 변수 선언 (없으면 추가)
 
 
@@ -246,13 +294,13 @@ const pageText = {
 const showTickets = ref(false);
 const activeTab = ref('NOL');
 const hoveredTicket = ref(null);
+const isApplying = ref(false); // 응모 진행중 상태
 
 
 
 import axios from 'axios';
 import { API_CONFIG } from '@/config/api.config.js';
 const { TICKET } = API_CONFIG;
-import { teamColortoEnum } from '@/utils/teamColor.js';
 import { getEnumTeamName, teamNameToEnum } from '@/utils/teamNameMap.js';
 import { stadiumNameToEnum } from '@/utils/teamStadium.js';
 import http from '@/utils/http'
@@ -354,40 +402,57 @@ const getSeatTypeOnly = (seatString) => {
   return seatTypeMatch ? seatTypeMatch[1] : seatString.split(' ')[0]
 }
 
+// 팀 로고 이미지 경로를 가져오는 함수 (getTeamBackgroundImage와 동일한 방식 사용)
+const getTeamLogo = (teamName) => {
+  const normalizedTeam = normalizeTeamName(teamName || '').toLowerCase()
+  
+  // 디버그: 팀명 로그 출력
+  console.log('Original teamName:', teamName)
+  console.log('Normalized teamName:', normalizedTeam)
+  
+  // 팀별 로고 매핑 - public 폴더의 로고 파일 사용 (소문자로 통일)
+  const teamLogoMap = {
+    'kia타이거즈': '/kia.svg',
+    '삼성라이온즈': '/samsung.svg',
+    'lg트윈스': '/LG.svg',
+    '두산베어스': '/DOOSAN.svg',
+    'kt위즈': '/KT.svg',
+    'ssg랜더스': '/SSG.svg',
+    '롯데자이언츠': '/LOTTE.svg',
+    '한화이글스': '/HanWha.svg',
+    'nc다이노스': '/NC.svg',
+    '키움히어로즈': '/KIWOOM.svg'
+  }
+  
+  const logoPath = teamLogoMap[normalizedTeam]
+  console.log('Logo path for', normalizedTeam, ':', logoPath)
+  
+  return logoPath || null
+}
+
 // 팀별 CSS 클래스명 생성 함수
 const getTeamClass = (ticket) => {
   const homeTeam = normalizeTeamName(ticket.homeKor || ticket.game?.home || '')
-  return homeTeam ? `team-${homeTeam.toLowerCase()}` : 'team-default'
+  // teamColortoEnum의 키와 일치하는 팀명 사용
+  return homeTeam ? `team-${homeTeam}` : 'team-default'
 }
 
 // 팀별 색상 매핑
 const getTeamColor = (teamName) => {
   const normalizedTeam = normalizeTeamName(teamName || '')
-  const teamColors = {
-    'kia타이거즈': '#EA0029',
-    '삼성라이온즈': '#074CA1',
-    'lg트윈스': '#C30452',
-    '두산베어스': '#1A1748',
-    'kt위즈': '#000000',
-    'ssg랜더스': '#CE0E2D',
-    '롯데자이언츠': '#041E42',
-    '한화이글스': '#FC4E00',
-    'nc다이노스': '#315288',
-    '키움히어로즈': '#570514'
-  }
-  return teamColors[normalizedTeam] || '#395b8c'
+  // teamColortoEnum의 색상 값에 # 추가
+  const colorCode = teamColortoEnum[normalizedTeam]
+  return colorCode ? `#${colorCode}` : '#395b8c'
 }
 
 // 티켓 디테일 스타일 생성 함수
 const getTicketDetailStyle = (ticket) => {
   const homeTeam = ticket.homeKor || ticket.game?.home || ''
   const teamColor = getTeamColor(homeTeam)
-  const darkerColor = getTeamColor(homeTeam).replace('#', '').match(/.{2}/g).map(hex => Math.max(0, parseInt(hex, 16) - 30).toString(16).padStart(2, '0')).join('')
   
   return {
     '--team-color': teamColor,
-    '--team-color-dark': `#${darkerColor}`,
-    background: `linear-gradient(90deg, ${teamColor} 60%, #${darkerColor} 100%)`,
+    backgroundColor: teamColor,
     color: '#fff'
   }
 }
@@ -395,10 +460,12 @@ const getTicketDetailStyle = (ticket) => {
 // 티켓 스타일 생성 함수 (기본 스타일만)
 const getTicketStyle = (ticket) => {
   const logoPath = teamLogoMap[normalizeTeamName(ticket.homeKor || ticket.game?.home || '')]
+  const teamColor = getTeamColor(ticket.homeKor || ticket.game?.home || '')
   
   let style = {
     transition: 'all 0.3s ease',
-    position: 'relative'
+    position: 'relative',
+    backgroundColor: teamColor // 모든 팀에 대해 배경색 적용
   }
   
   // 호버 상태일 때 로고 배경 추가
@@ -531,6 +598,9 @@ function handleApply(ticket) {
 }
 async function handleApplyComplete() {
   try {
+    // 응모 진행중 상태로 변경
+    isApplying.value = true;
+    
     // 양도 API 호출
     const response = await http.get(`tickets/transfer/${selectedTicket.value.ticketId}`);
     
@@ -538,14 +608,17 @@ async function handleApplyComplete() {
     
     if (response.data.success) {
       // 성공 시 완료 페이지로 전환
+      isApplying.value = false;
       showCompletePage.value = true;
       console.log('양도 성공:', response.data.message);
     } else {
       // 실패 시 에러 메시지 표시
+      isApplying.value = false;
       alert('양도 신청에 실패했습니다.');
     }
   } catch (error) {
     console.error('양도 API 오류:', error);
+    isApplying.value = false;
     alert('양도 신청 중 오류가 발생했습니다.');
   }
 }
@@ -560,11 +633,14 @@ function handleCompleteBack() {
   showDetailPage.value = true;
 }
 function handleCompleteConfirm() {
-  // 완료 → 티켓 목록(카드 리스트) 상태로 이동
+  // 완료 → NOL/티켓링크 바로가기 버튼이 있는 초기 화면으로 이동
   showCompletePage.value = false;
   showDetailPage.value = false;
-  showTickets.value = true;
+  showTickets.value = false;
   selectedTicket.value = null;
+  // 티켓 데이터 초기화
+  tickets.value = [];
+  activeTab.value = 'NOL';
 }
 
 </script>
@@ -632,7 +708,7 @@ function handleCompleteConfirm() {
   background: #fafbfc;
   border-radius: 18px;
   border: 1.5px solid #e5e7eb;
-  width: 700px;
+  width: 800px; /* 스크롤바까지 포함하여 너비 확장 */
   max-width: 95vw;
   margin: 48px 0 64px 0;
   display: flex;
@@ -801,14 +877,14 @@ function handleCompleteConfirm() {
   transition: box-shadow 0.3s ease, background 0.3s ease, height 0.3s ease, min-height 0.3s ease;
   position: relative;
   cursor: pointer;
-  overflow: visible;
+  overflow: hidden; /* ticket-detail이 카드 내부에 포함되도록 */
   height: 130px;
   min-height: 130px;
   max-height: 400px;
 }
 
 /* 팀별 색상 클래스 */
-.ticket-card.team-kia타이거즈 {
+.ticket-card.team-KIA타이거즈 {
   background-color: #EA0029 !important;
 }
 
@@ -816,7 +892,7 @@ function handleCompleteConfirm() {
   background-color: #074CA1 !important;
 }
 
-.ticket-card.team-lg트윈스 {
+.ticket-card.team-LG트윈스 {
   background-color: #C30452 !important;
 }
 
@@ -824,11 +900,11 @@ function handleCompleteConfirm() {
   background-color: #1A1748 !important;
 }
 
-.ticket-card.team-kt위즈 {
+.ticket-card.team-KT위즈 {
   background-color: #000000 !important;
 }
 
-.ticket-card.team-ssg랜더스 {
+.ticket-card.team-SSG랜더스 {
   background-color: #CE0E2D !important;
 }
 
@@ -840,7 +916,7 @@ function handleCompleteConfirm() {
   background-color: #FC4E00 !important;
 }
 
-.ticket-card.team-nc다이노스 {
+.ticket-card.team-NC다이노스 {
   background-color: #315288 !important;
 }
 
@@ -853,7 +929,7 @@ function handleCompleteConfirm() {
 }
 
 /* hover 시 팀 색상 유지 및 그림자 효과 */
-.ticket-card.highlighted.team-kia타이거즈 {
+.ticket-card.highlighted.team-KIA타이거즈 {
   box-shadow: 0 12px 48px 0 #EA002955 !important;
 }
 
@@ -861,7 +937,7 @@ function handleCompleteConfirm() {
   box-shadow: 0 12px 48px 0 #074CA155 !important;
 }
 
-.ticket-card.highlighted.team-lg트윈스 {
+.ticket-card.highlighted.team-LG트윈스 {
   box-shadow: 0 12px 48px 0 #C3045255 !important;
 }
 
@@ -869,11 +945,11 @@ function handleCompleteConfirm() {
   box-shadow: 0 12px 48px 0 #1A174855 !important;
 }
 
-.ticket-card.highlighted.team-kt위즈 {
+.ticket-card.highlighted.team-KT위즈 {
   box-shadow: 0 12px 48px 0 #00000055 !important;
 }
 
-.ticket-card.highlighted.team-ssg랜더스 {
+.ticket-card.highlighted.team-SSG랜더스 {
   box-shadow: 0 12px 48px 0 #CE0E2D55 !important;
 }
 
@@ -885,7 +961,7 @@ function handleCompleteConfirm() {
   box-shadow: 0 12px 48px 0 #FC4E0055 !important;
 }
 
-.ticket-card.highlighted.team-nc다이노스 {
+.ticket-card.highlighted.team-NC다이노스 {
   box-shadow: 0 12px 48px 0 #31528855 !important;
 }
 
@@ -960,7 +1036,7 @@ function handleCompleteConfirm() {
 }
 .ticket-card .ticket-detail {
   position: absolute;
-  left: 0; right: 0; top: 0; bottom: 0;
+  left: -5px; right: -5px; top: -5px; bottom: -5px; /* 카드를 완전히 덮도록 훨씬 확장 */
   background: rgba(206,14,45,0.91);
   border-radius: 8px;
   display: flex;
@@ -968,11 +1044,14 @@ function handleCompleteConfirm() {
   justify-content: flex-start;
   align-items: flex-start;
   padding: 24px 32px 18px 32px;
-  z-index: 10;
+  z-index: 100;
   color: #fff;
   font-size: 18px;
   font-weight: 600;
   animation: fadeIn 0.3s;
+  overflow: hidden;
+  margin: 0;
+  box-shadow: none; /* box-shadow 제거로 경계 명확히 */
 }
 .ticket-detail-header-row {
   width: 100%;
@@ -1035,6 +1114,8 @@ function handleCompleteConfirm() {
   align-items: center;
   gap: 6px;
   white-space: nowrap;
+  position: relative;
+  z-index: 10;
 }
 .ticket-detail-block.block-horizontal .block-content {
   font-size: 15px;
@@ -1044,6 +1125,8 @@ function handleCompleteConfirm() {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  position: relative;
+  z-index: 10;
 }
 .ticket-detail-block.block-horizontal .block-icon {
   font-size: 18px;
@@ -1072,6 +1155,45 @@ function handleCompleteConfirm() {
   color: #fff;
 }
 
+/* 응모 진행중 상태 스타일 */
+.ticket-detail-being-assignment {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 160px;
+  padding: 20px;
+}
+
+.ticket-detail-being-assignment-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 16px;
+}
+
+.being-assignment-icon {
+  font-size: 40px;
+  opacity: 0.9;
+  animation: pulse 2s infinite;
+}
+
+.being-assignment-text {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 0.6; }
+}
+
 .ticket-detail-bg {
   position: absolute;
   left: 0; right: 0; top: 0; bottom: 0;
@@ -1080,6 +1202,7 @@ function handleCompleteConfirm() {
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none; /* 배경이 클릭을 방해하지 않도록 */
 }
 .ticket-detail-bg img {
   width: 80%;
@@ -1577,6 +1700,8 @@ function handleCompleteConfirm() {
   /* 배경색은 인라인 스타일로 동적 설정 */
   margin-left: auto;
   flex-shrink: 0;
+  z-index: 200; /* 매우 높은 z-index로 설정하여 클릭 가능하도록 */
+  position: relative;
 }
 
 .ticket-detail-transfer-btn:hover {
@@ -1589,6 +1714,89 @@ function handleCompleteConfirm() {
   transform: translateY(0);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   filter: brightness(0.8);
+}
+
+/* 응모 진행중 상태 스타일 */
+.applying-status {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999; /* 더 높은 z-index로 설정 */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 15px 0;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.3s ease-out;
+}
+
+.applying-message {
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* 응모 진행중일 때 메인 컨텐츠에 여백 추가 */
+.transfer-root:has(.applying-status) .transfer-main {
+  margin-top: 60px;
+}
+
+/* 주의사항 스타일 - 강력한 선택자 사용 */
+.complete-root .detail-notice-box {
+  margin-top: 20px !important;
+  padding: 20px !important;
+  background-color: #f8f9fa !important;
+  border-radius: 8px !important;
+  border: 1px solid #e9ecef !important;
+  display: block !important;
+  visibility: visible !important;
+}
+
+.complete-root .detail-notice-box .notice-title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #ce0e2d !important;
+  margin-bottom: 15px !important;
+  display: block !important;
+}
+
+.complete-root .detail-notice-box .notice-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: block !important;
+}
+
+.complete-root .detail-notice-box .notice-list li {
+  display: block !important;
+  margin-bottom: 8px !important;
+  font-size: 14px !important;
+  color: #333 !important;
+  line-height: 1.5 !important;
+  padding-left: 15px !important;
+  position: relative !important;
+}
+
+.complete-root .detail-notice-box .notice-list li:before {
+  content: '•' !important;
+  color: #ce0e2d !important;
+  font-weight: bold !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
 }
 </style>
 

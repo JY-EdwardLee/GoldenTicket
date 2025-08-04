@@ -42,14 +42,30 @@
     </div>
     <div v-else-if="step === 2" class="game-select-main">
       <div class="calendar-area">
-        <div class="calendar-title">{{ pageText.calendarTitle }}</div>
+        <div class="calendar-header-section">
+          <button class="month-nav-btn" @click="previousMonth">‹</button>
+          <div class="calendar-title">{{ currentYear }}년 {{ currentMonth }}월</div>
+          <button class="month-nav-btn" @click="nextMonth">›</button>
+        </div>
         <div class="calendar-grid">
           <div class="calendar-header" v-for="d in days" :key="d">{{ d }}</div>
+          <!-- 이전 달의 빈 칸들 -->
           <div
-            v-for="date in calendarDates"
+            v-for="blank in firstDayOfMonth"
+            :key="'blank-' + blank"
+            class="calendar-cell blank"
+          >
+          </div>
+          <!-- 현재 달의 날짜들 -->
+          <div
+            v-for="date in daysInCurrentMonth"
             :key="date"
             class="calendar-cell"
-            :class="{ selected: selectedDate === date }"
+            :class="{ 
+              selected: selectedDate === date,
+              past: isPastDate(date),
+              today: isToday(date)
+            }"
             @click="selectDate(date)"
           >
             {{ date }}
@@ -132,22 +148,35 @@ const selectedTeam = ref('');
 const bgHover = ref(false);
 const step = ref(1);
 const days = ['일', '월', '화', '수', '목', '금', '토'];
-const calendarDates = Array.from({ length: 31 }, (_, i) => i + 1);
 const selectedDate = ref(null);
 const selectedTime = ref(null);
 const gamesOnDate = ref([]);
 const selectedGame = ref(null);
-import { computed } from 'vue';
+
+// 달력 관련 변수들
+const currentYear = 2025;
+const currentMonth = ref(8); // 8월부터 시작
+const today = new Date(2025, 7, 4); // 2025-08-04 (월은 0부터 시작)
+import { computed, onMounted } from 'vue';
+
+// 달력 computed 속성들
+const daysInCurrentMonth = computed(() => {
+  return new Date(currentYear, currentMonth.value, 0).getDate();
+});
+
+const firstDayOfMonth = computed(() => {
+  return new Date(currentYear, currentMonth.value - 1, 1).getDay();
+});
+
 const filteredGamesOnDate = computed(() => {
   if (!selectedTeam.value) return [];
   const teamEnum = teamNameToEnum[selectedTeam.value];
   return gamesOnDate.value.filter(game => game.homeTeam === teamEnum || game.awayTeam === teamEnum);
 });
-const currentYear = 2025; // 시스템 기준 연도
-const selectedMonth = ref(7); // 기본 7월, 필요시 동적 할당 가능
+// 기존 변수들을 제거하고 새로운 달력 로직 사용
 function getFormattedDate() {
   if (!selectedDate.value) return '';
-  return `${currentYear}년 ${String(selectedMonth.value).padStart(2, '0')}월 ${String(selectedDate.value).padStart(2, '0')}일`;
+  return `${currentYear}년 ${String(currentMonth.value).padStart(2, '0')}월 ${String(selectedDate.value).padStart(2, '0')}일`;
 }
 
 const pageText = {
@@ -170,10 +199,67 @@ const pageText = {
 function selectTeam(team) {
   selectedTeam.value = team;
 }
+
+// 달력 관련 함수들
+function isPastDate(date) {
+  const checkDate = new Date(currentYear, currentMonth.value - 1, date);
+  return checkDate < today;
+}
+
+function isToday(date) {
+  const checkDate = new Date(currentYear, currentMonth.value - 1, date);
+  return checkDate.getTime() === today.getTime();
+}
+
+function previousMonth() {
+  if (currentMonth.value > 1) {
+    currentMonth.value--;
+    selectedDate.value = null; // 월 변경 시 선택된 날짜 초기화
+    gamesOnDate.value = [];
+  }
+}
+
+function nextMonth() {
+  if (currentMonth.value < 12) {
+    currentMonth.value++;
+    selectedDate.value = null; // 월 변경 시 선택된 날짜 초기화
+    gamesOnDate.value = [];
+  }
+}
+
+// 컴포넌트 마운트 시 현재 날짜 자동 선택 및 경기 로드
+onMounted(async () => {
+  if (currentMonth.value === 8) { // 현재 월이 8월인 경우
+    selectedDate.value = 4; // 현재 날짜 자동 선택
+    
+    // 선택된 팀이 있는 경우에만 경기 로드
+    if (selectedTeam.value) {
+      const formattedDate = `${currentYear}-${String(currentMonth.value).padStart(2, '0')}-${String(4).padStart(2, '0')}`;
+      const teamEnum = teamNameToEnum[selectedTeam.value];
+      
+      try {
+        const { data } = await axios.post(API_CONFIG.TICKET.GAMES, {
+          date: formattedDate,
+          team: teamEnum
+        });
+        gamesOnDate.value = data;
+      } catch (error) {
+        console.error('자동 경기 로드 에러:', error);
+        gamesOnDate.value = [];
+      }
+    }
+  }
+});
+
 async function selectDate(date) {
+  // 과거 날짜는 선택할 수 없음
+  if (isPastDate(date)) {
+    return;
+  }
+  
   selectedDate.value = date;
   // 날짜 형식 YYYY-MM-DD
-  const formattedDate = `${currentYear}-${String(selectedMonth.value).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
+  const formattedDate = `${currentYear}-${String(currentMonth.value).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
   // 팀 ENUM 변환
   const teamEnum = teamNameToEnum[selectedTeam.value];
   // POST: 응모하기
@@ -190,13 +276,16 @@ async function selectDate(date) {
 }
 async function handleApplyClick(game) {
   selectedGame.value = game;
-  step.value = 3;
-  console.log('응모 클릭됨됨')
+  console.log('응모 클릭됨')
   try {
     const { data } = await http.post(`/games/${game.gameId}/applications`);
     console.log('응모 결과:', data);
+    // 성공 시에만 3단계로 이동
+    step.value = 3;
   } catch (error) {
     console.error('응모 요청 실패:', error);
+    // 에러 발생 시 중복 응모 경고창 표시
+    alert('이미 진행한 응모입니다.');
   }
 }
 
@@ -389,7 +478,7 @@ function formatGameDateTime(dateTimeStr) {
 }
 .calendar-area {
   width: 500px;
-  height: 500px;
+  height: 550px;
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 2px 16px 0 #f8bbd04d;
@@ -398,11 +487,54 @@ function formatGameDateTime(dateTimeStr) {
   flex-direction: column;
   align-items: center;
 }
+.calendar-header-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
 .calendar-title {
-  font-size: 40px;
+  font-size: 30px;
   font-weight: 700;
   color: #e57373;
-  margin-bottom: 16px;
+  text-align: center;
+  min-width: 200px;
+}
+.month-nav-btn {
+  background: #e57373;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+  flex-basis: 40px !important;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+  padding: 0 !important;
+  margin: 0 !important;
+  line-height: 1;
+  text-align: center;
+}
+.month-nav-btn:hover {
+  background: #d32f2f;
+}
+.month-nav-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
 }
 .calendar-grid {
   display: grid;
@@ -425,32 +557,85 @@ function formatGameDateTime(dateTimeStr) {
   color: #444;
   font-size: 23px;
   font-weight: 500;
-  text-align: center;
-  line-height: 36px;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition: all 0.2s ease;
   user-select: none;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 .calendar-cell.selected {
-  background: #e57373;
-  color: #fff;
+  background: #d32f2f !important;
+  color: #fff !important;
+  border: none;
+  box-sizing: border-box;
+  transform: scale(1.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.calendar-cell:hover {
+.calendar-cell:hover:not(.past):not(.blank) {
   background: #f8bbd0;
   color: #fff;
 }
+.calendar-cell.past {
+  color: #ccc;
+  cursor: not-allowed;
+}
+.calendar-cell.past:hover {
+  background: transparent;
+  color: #ccc;
+}
+.calendar-cell.today {
+  background: #fff3e0;
+  border: 2px solid #e57373;
+  font-weight: bold;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.calendar-cell.today.selected {
+  background: #d32f2f !important;
+  color: #fff !important;
+  border: none;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(1.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
+  font-weight: 600;
+}
+.calendar-cell.blank {
+  cursor: default;
+}
+.calendar-cell.blank:hover {
+  background: transparent;
+}
 .calendar-logo {
-  margin-top: 12px;
+  margin-top: auto;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   width: 100%;
+  padding-bottom: 10px;
+  padding-left: 20px;
 }
 .calendar-logo img {
   height: 36px;
   width: auto;
-  margin-left: 40px;
+  margin-left: 0;
   display: block;
 }
 .info-area {
