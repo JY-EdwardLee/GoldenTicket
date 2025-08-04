@@ -26,7 +26,7 @@
   </select>
 
   <!-- 같은 날짜에 다른 게임에 응모하였는지 확인 -->
-  <select id="checkWaitlistsByGameIdAndUserId" resultType="boolean">
+  <select id="checkWaitlistsByUserIdAndGameId" resultType="boolean">
     SELECT EXISTS (
     SELECT 1
     FROM waitlists
