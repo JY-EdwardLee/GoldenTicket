@@ -20,4 +20,6 @@ public interface TransactionMapper {
     List<Transaction> selectBuyListByUserId(Long userId);
 
     Ticket selectTicketByTransactionId(Long transactionId);
+
+    void cancelTransactionByTransactionId(@Param("transactionId") Long transactionId);
 }

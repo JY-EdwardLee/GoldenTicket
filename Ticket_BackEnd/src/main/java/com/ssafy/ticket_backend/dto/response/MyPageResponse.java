@@ -1,6 +1,6 @@
 package com.ssafy.ticket_backend.dto.response;
 
-import com.ssafy.ticket_backend.model.BoardType;
+import com.ssafy.ticket_backend.model.UserRole;
 import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +16,7 @@ public class MyPageResponse {
     String profilePhotoUrl;
     String myTeam;
     String phoneNumber;
-    BoardType userRole;
+    UserRole userRole;
     Date birthDate;
     int transferNumber;
     int receiveNumber;

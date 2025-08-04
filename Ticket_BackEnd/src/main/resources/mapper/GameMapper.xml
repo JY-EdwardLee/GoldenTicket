@@ -26,7 +26,7 @@
   </select>
 
   <!-- 같은 날짜에 다른 게임에 응모하였는지 확인 -->
-  <select id="selectWaitlistsByGameIdAndUserId" resultType="boolean">
+  <select id="checkWaitlistsByUserIdAndGameId" resultType="boolean">
     SELECT EXISTS (
     SELECT 1
     FROM waitlists
@@ -35,10 +35,17 @@
     )
   </select>
 
+  <select id="selectWaitlistByUserIdAndGameId" resultType="boolean">
+    SELECT *
+    FROM waitlists
+    WHERE user_id = #{userId}
+    AND game_id = #{gameId}
+  </select>
+
   <!-- 대기열 추가 -->
   <insert id="insertWaitlist">
     INSERT INTO waitlists (user_id, game_id, waitlist_status)
-    VALUES (#{userId}, #{gameId}, 'BEING_WAITING`)
+    VALUES (#{userId}, #{gameId}, 'BEING_WAITING')
   </insert>
 
   <!-- 대기열 삭제 -->
@@ -61,5 +68,12 @@
     FROM games
     WHERE is_cancelled = FALSE AND is_ended = FALSE
   </select>
+
+  <update id="cancelWaiting" parameterType="map">
+    UPDATE waitlists
+    SET waitlist_status = 'CANCEL_WAITING'
+    WHERE user_id = #{userId}
+    AND game_id = #{gameId}
+  </update>
 
 </mapper>

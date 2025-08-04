@@ -37,19 +37,32 @@
               <div class="profile-section">
                 <div class="profile-icon">👤</div>
                 <div class="author-details">
-                  <span class="author-name">{{ post.author?.nickname || '알 수 없음' }}</span>
+                  <span class="author-name">{{ post.postUser?.nickname || '알 수 없음' }}</span>
                   <div class="post-stats">
                     <span class="date">{{ formatDate(post.createdAt) }}</span>
-                    <span class="views">조회 {{ post.views?.toLocaleString() || 0 }}</span>
+                    <span class="views">조회 {{ post.viewCount?.toLocaleString() || 0 }}</span>
                   </div>
                 </div>
               </div>
             </div>
             
             <div class="post-actions">
-              <span class="comments-count">댓글 {{ post.comments?.length || 0 }}</span>
+              <span class="comments-count">댓글 {{ post.commentList?.length || 0 }}</span>
               <button class="action-btn more-btn">⋮</button>
             </div>
+          </div>
+        </div>
+
+        <!-- 게시글 이미지 섹션 -->
+        <div v-if="post.postImageUrl" class="post-image-section">
+          <div class="image-container">
+            <img 
+              :src="post.postImageUrl" 
+              :alt="post.title"
+              class="post-image"
+              @error="handleImageError"
+              @load="handleImageLoad"
+            />
           </div>
         </div>
 
@@ -61,7 +74,7 @@
         <!-- 작성자 섹션 -->
         <div class="author-section">
           <div class="profile-icon">👤</div>
-          <span class="author-more">{{ post.author?.nickname || '알 수 없음' }}님의 게시글 더보기 ></span>
+          <span class="author-more">{{ post.postUser?.nickname || '알 수 없음' }}님의 게시글 더보기 ></span>
         </div>
 
         <!-- 참여 섹션 -->
@@ -77,11 +90,11 @@
                           {{ isLiked ? '❤️' : '🤍' }}
                         </span>
                         <span class="like-count">
-                          좋아요 {{ post.likes?.toLocaleString() || 0 }}
+                          좋아요 {{ post.likeCount?.toLocaleString() || 0 }}
                         </span>
                         <span v-if="isLiking" class="like-loading">...</span>
                       </button>
-                      <span class="comments-count">💬 댓글 {{ post.comments?.length || 0 }}</span>
+                      <span class="comments-count">💬 댓글 {{ post.commentList?.length || 0 }}</span>
                     </div>
           
           <div class="engagement-right">
@@ -90,18 +103,29 @@
         </div>
 
         <!-- 댓글 섹션 -->
-                            <CommentSection 
-                      :comments="post.comments || []"
-                      :postId="route.params.id"
-                      @commentSubmit="handleCommentSubmit"
-                      @commentEdit="handleCommentEdit"
-                      @commentDelete="handleCommentDelete"
-                    />
+        <CommentSection 
+          :comments="post.commentList || []"
+          :postId="route.params.id"
+          @commentSubmit="handleCommentSubmit"
+          @commentEdit="handleCommentEdit"
+          @commentDelete="handleCommentDelete"
+        />
         
         <!-- 작성자 전용 버튼 -->
         <div v-if="isAuthor" class="author-actions-section">
-          <button class="edit-btn" @click="editPost">글 수정</button>
-          <button class="delete-btn" @click="deletePost">글 삭제</button>
+          <div class="action-buttons">
+            <button class="edit-btn" @click="editPost">
+              <span class="btn-icon">✏️</span>
+              <span class="btn-text">글 수정</span>
+            </button>
+            <button class="delete-btn" @click="deletePost">
+              <span class="btn-icon">🗑️</span>
+              <span class="btn-text">글 삭제</span>
+            </button>
+          </div>
+          <div class="action-info">
+            <span class="info-text">작성자만 볼 수 있는 메뉴입니다</span>
+          </div>
         </div>
       </div>
     </div>
@@ -122,9 +146,11 @@ import { useRoute, useRouter } from 'vue-router';
 import CommentSection from '@/components/board/CommentSection.vue';
 import DeleteConfirmModal from '@/components/board/DeleteConfirmModal.vue';
 import { boardAPI, BOARD_TYPES, BOARD_TYPE_NAMES } from '@/api/board.js';
+import { useAuthStore } from '@/stores/auth.js';
 
 const route = useRoute();
 const router = useRouter();
+const authStore = useAuthStore();
 
 // 상태 관리
 const isLoading = ref(false);
@@ -138,44 +164,86 @@ const isLiked = ref(false);
 
 // 게시판 타입 이름
 const boardTypeName = computed(() => {
-  return BOARD_TYPE_NAMES[post.value.boardType] || '일반';
+  // API 응답의 boardId를 BOARD_TYPES 상수로 매핑
+  let boardType = post.value.boardType;
+  
+  if (post.value.boardId === 'FREE') {
+    boardType = BOARD_TYPES.FREE;
+  } else if (post.value.boardId === 'GROUP') {
+    boardType = BOARD_TYPES.GROUP;
+  } else if (post.value.boardId === 'NOTICE') {
+    boardType = BOARD_TYPES.NOTICE;
+  }
+  
+  return BOARD_TYPE_NAMES[boardType] || '일반';
 });
 
-// 게시글 상세 조회
-const loadPostDetail = async () => {
+// 게시글 상세 조회 (로딩 상태 포함)
+const loadPostDetail = async (showLoading = true) => {
   const postId = route.params.id;
   if (!postId) {
     error.value = '게시글 ID가 없습니다.';
     return;
   }
 
-  isLoading.value = true;
+  if (showLoading) {
+    isLoading.value = true;
+  }
   error.value = '';
   
   try {
     const result = await boardAPI.getPostDetail(postId);
     
-    if (result.success) {
-      post.value = result.data;
-      console.log('게시글 상세 조회 성공:', result.data);
+    console.log('게시글 상세 조회 결과:', result);
+    
+    // 백엔드에서 직접 PostDetailResponse 객체를 반환하므로 result 자체가 데이터
+    if (result) {
+      post.value = result;
+      console.log('게시글 상세 조회 성공:', result);
+      console.log('이미지 URL 상세 분석:', {
+        postImageUrl: result.postImageUrl,
+        imageUrl: result.imageUrl,
+        hasPostImage: !!result.postImageUrl,
+        hasUserImage: !!result.imageUrl,
+        postImageUrlType: typeof result.postImageUrl,
+        imageUrlType: typeof result.imageUrl
+      });
       
-      // 작성자 판별 (임시로 하드코딩, 실제로는 로그인된 사용자와 비교)
-      // TODO: 실제 로그인된 사용자 정보와 비교
-      isAuthor.value = post.value.author?.nickname === '닉네임';
+      // 작성자 판별 (로그인된 사용자와 비교)
+      if (authStore.isAuthenticated && authStore.user) {
+        // userId 또는 nickName으로 작성자 판별
+        const isUserIdMatch = post.value.postUser?.userId === authStore.user.userId;
+        const isNicknameMatch = post.value.postUser?.nickname === authStore.user.nickName;
+        
+        isAuthor.value = isUserIdMatch || isNicknameMatch;
+        
+        console.log('작성자 판별:', {
+          postAuthor: post.value.postUser,
+          currentUser: authStore.user,
+          isUserIdMatch,
+          isNicknameMatch,
+          isAuthor: isAuthor.value
+        });
+      }
       
-      // 좋아요 상태 초기화 (임시로 랜덤하게 설정, 실제로는 API에서 받아와야 함)
-      // TODO: 실제 좋아요 상태를 API에서 받아와서 설정
-      // 현재는 테스트를 위해 좋아요 수가 0보다 크면 좋아요를 눌렀다고 가정
-      isLiked.value = (post.value.likes || 0) > 0;
+      // 좋아요 상태는 서버에서 받아와야 하지만, 현재는 기본값으로 설정
+      // TODO: 서버에서 사용자의 좋아요 상태를 함께 반환하도록 수정 필요
+      isLiked.value = false; // 기본값
     } else {
-      error.value = result.message;
-      console.error('게시글 상세 조회 실패:', result.message);
+      if (showLoading) {
+        error.value = '게시글을 불러올 수 없습니다.';
+      }
+      console.error('게시글 상세 조회 실패: 데이터가 없습니다.');
     }
   } catch (err) {
-    error.value = '게시글을 불러오는 중 오류가 발생했습니다.';
+    if (showLoading) {
+      error.value = '게시글을 불러오는 중 오류가 발생했습니다.';
+    }
     console.error('게시글 상세 조회 중 오류:', err);
   } finally {
-    isLoading.value = false;
+    if (showLoading) {
+      isLoading.value = false;
+    }
   }
 };
 
@@ -190,6 +258,29 @@ const formatDate = (dateString) => {
     hour: '2-digit',
     minute: '2-digit'
   });
+};
+
+// 이미지 로드 성공 핸들러
+const handleImageLoad = (event) => {
+  console.log('이미지 로드 성공:', {
+    src: event.target.src,
+    alt: event.target.alt,
+    naturalWidth: event.target.naturalWidth,
+    naturalHeight: event.target.naturalHeight,
+    currentSrc: event.target.currentSrc
+  });
+};
+
+// 이미지 에러 핸들러
+const handleImageError = (event) => {
+  console.error('이미지 로드 실패:', {
+    src: event.target.src,
+    alt: event.target.alt,
+    naturalWidth: event.target.naturalWidth,
+    naturalHeight: event.target.naturalHeight,
+    currentSrc: event.target.currentSrc
+  });
+  event.target.style.display = 'none';
 };
 
 // 컴포넌트 마운트 시 게시글 조회
@@ -208,22 +299,17 @@ const goToNext = () => {
   // TODO: 다음글 로직
 };
 
-const goToBoardList = () => {
+const goToList = () => {
   // 게시판 타입에 따라 올바른 탭으로 이동
   let tabType = 'free'; // 기본값
   
-  switch (post.value.boardType) {
-    case BOARD_TYPES.FREE:
-      tabType = 'free';
-      break;
-    case BOARD_TYPES.GROUP:
-      tabType = 'group';
-      break;
-    case BOARD_TYPES.NOTICE:
-      tabType = 'notice';
-      break;
-    default:
-      tabType = 'free';
+  // API 응답의 boardId를 기반으로 탭 결정
+  if (post.value.boardId === 'FREE') {
+    tabType = 'free';
+  } else if (post.value.boardId === 'GROUP') {
+    tabType = 'group';
+  } else if (post.value.boardId === 'NOTICE') {
+    tabType = 'notice';
   }
   
   router.push({
@@ -235,29 +321,35 @@ const goToBoardList = () => {
 const toggleLike = async () => {
   if (isLiking.value) return; // 중복 클릭 방지
   
+  // 로그인 확인
+  if (!authStore.isAuthenticated) {
+    alert('로그인이 필요한 서비스입니다.');
+    return;
+  }
+  
   isLiking.value = true;
   
   try {
     const result = await boardAPI.togglePostLike(route.params.id);
     
-    if (result.success) {
+    console.log('좋아요 토글 결과:', result);
+    
+    // 백엔드에서 PostLikeResponse 객체를 직접 반환
+    if (result) {
       // 좋아요 수 업데이트
-      post.value.likes = result.data.likeCount;
+      post.value.likeCount = result.likeCount;
       
-      // 좋아요 상태 토글 (현재 좋아요 수가 이전보다 많으면 좋아요 추가, 적으면 좋아요 취소)
-      const previousLikes = (post.value.likes || 0) - (isLiked.value ? 1 : 0);
-      isLiked.value = result.data.likeCount > previousLikes;
+      // 좋아요 상태 토글 (서버에서 현재 사용자의 좋아요 상태를 반환해야 함)
+      // 현재는 간단히 토글
+      isLiked.value = !isLiked.value;
       
-      console.log('좋아요 토글 성공:', result.data);
+      console.log('좋아요 토글 성공:', result);
     } else {
-      console.error('좋아요 토글 실패:', result.message);
-      // 에러 시 사용자에게 알림 (선택사항)
-      // alert(result.message);
+      console.error('좋아요 토글 실패: 응답이 없습니다.');
     }
   } catch (error) {
     console.error('좋아요 토글 중 오류:', error);
-    // 에러 시 사용자에게 알림 (선택사항)
-    // alert('좋아요 처리 중 오류가 발생했습니다.');
+    alert('좋아요 처리 중 오류가 발생했습니다.');
   } finally {
     isLiking.value = false;
   }
@@ -265,7 +357,7 @@ const toggleLike = async () => {
 
 const editPost = () => {
   console.log('글 수정');
-  // 게시글 수정 페이지로 이동
+  // 게시글 수정 페이지로 이동 (게시판 타입은 변경하지 않으므로 전달하지 않음)
   router.push(`/bulletin/edit/${route.params.id}`);
 };
 
@@ -279,12 +371,15 @@ const handleDeleteConfirm = async () => {
   try {
     const result = await boardAPI.deletePost(route.params.id);
     
-    if (result.success) {
+    console.log('게시글 삭제 결과:', result);
+    
+    // 백엔드에서 PostResponse 객체를 직접 반환
+    if (result && result.success) {
       alert(result.message || '게시글이 성공적으로 삭제되었습니다.');
       // 성공 시 해당 게시판 목록으로 이동
       goToList();
     } else {
-      alert(result.message || '게시글 삭제에 실패했습니다.');
+      alert(result?.message || '게시글 삭제에 실패했습니다.');
     }
   } catch (error) {
     console.error('게시글 삭제 실패:', error);
@@ -299,28 +394,86 @@ const handleDeleteCancel = () => {
   isDeleteModalVisible.value = false;
 };
 
-const handleCommentSubmit = async (commentText) => {
-  // 댓글 작성 완료 후 게시글을 다시 로드하여 최신 댓글 목록을 가져옴
-  console.log('댓글 작성 완료:', commentText);
+const handleCommentSubmit = async (newCommentData) => {
+  // 댓글 작성 완료 후 즉시 화면에 추가
+  console.log('댓글 작성 완료:', newCommentData);
   
-  // 게시글 상세 정보를 다시 로드
-  await loadPostDetail();
+  // 새 댓글을 목록 맨 위에 추가
+  if (post.value.commentList) {
+    post.value.commentList.unshift(newCommentData);
+  } else {
+    post.value.commentList = [newCommentData];
+  }
+  
+  // 댓글 수 업데이트
+  const commentCount = post.value.commentList.length;
+  
+  // 애니메이션 완료 후 isNew 플래그 제거
+  setTimeout(() => {
+    if (post.value.commentList && post.value.commentList.length > 0) {
+      const firstComment = post.value.commentList[0];
+      if (firstComment.isNew) {
+        delete firstComment.isNew;
+      }
+    }
+  }, 2000); // 2초 후 애니메이션 효과 제거
+  
+  // 백그라운드에서 서버 데이터와 동기화 (실제 댓글 ID 획득)
+  try {
+    await loadPostDetail(false); // 로딩 상태 없이 백그라운드에서만 실행
+    console.log('댓글 작성 후 서버 데이터 동기화 완료');
+  } catch (error) {
+    console.error('댓글 작성 후 서버 동기화 실패:', error);
+  }
 };
 
 const handleCommentEdit = async (editData) => {
-  // 댓글 수정 완료 후 게시글을 다시 로드하여 최신 댓글 목록을 가져옴
+  // 댓글 수정 완료 후 즉시 화면에 반영
   console.log('댓글 수정 완료:', editData);
   
-  // 게시글 상세 정보를 다시 로드
-  await loadPostDetail();
+  // 해당 댓글 찾아서 내용 업데이트
+  if (post.value.commentList) {
+    const commentIndex = post.value.commentList.findIndex(
+      comment => comment.id === editData.commentId || comment.commentId === editData.commentId
+    );
+    
+    if (commentIndex !== -1) {
+      post.value.commentList[commentIndex].content = editData.content;
+      post.value.commentList[commentIndex].updatedAt = new Date().toISOString();
+    }
+  }
+  
+  // 백그라운드에서 서버 데이터와 동기화
+  try {
+    await loadPostDetail(false); // 로딩 상태 없이 백그라운드에서만 실행
+    console.log('댓글 수정 후 서버 데이터 동기화 완료');
+  } catch (error) {
+    console.error('댓글 수정 후 서버 동기화 실패:', error);
+  }
 };
 
 const handleCommentDelete = async (deleteData) => {
-  // 댓글 삭제 완료 후 게시글을 다시 로드하여 최신 댓글 목록을 가져옴
+  // 댓글 삭제 완료 후 즉시 화면에서 제거
   console.log('댓글 삭제 완료:', deleteData);
   
-  // 게시글 상세 정보를 다시 로드
-  await loadPostDetail();
+  // 해당 댓글을 목록에서 제거
+  if (post.value.commentList) {
+    const commentIndex = post.value.commentList.findIndex(
+      comment => comment.id === deleteData.commentId || comment.commentId === deleteData.commentId
+    );
+    
+    if (commentIndex !== -1) {
+      post.value.commentList.splice(commentIndex, 1);
+    }
+  }
+  
+  // 백그라운드에서 서버 데이터와 동기화
+  try {
+    await loadPostDetail(false); // 로딩 상태 없이 백그라운드에서만 실행
+    console.log('댓글 삭제 후 서버 데이터 동기화 완료');
+  } catch (error) {
+    console.error('댓글 삭제 후 서버 동기화 실패:', error);
+  }
 };
 </script>
 
@@ -545,6 +698,31 @@ const handleCommentDelete = async (deleteData) => {
   white-space: pre-line;
 }
 
+/* 게시글 이미지 섹션 */
+.post-image-section {
+  padding: 0 30px;
+}
+
+.image-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin: 20px 0;
+}
+
+.post-image {
+  max-width: 400px;
+  max-height: 280px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.post-image:hover {
+  transform: scale(1.05);
+}
+
 /* 작성자 섹션 */
 .author-section {
   padding: 20px 30px;
@@ -670,38 +848,98 @@ const handleCommentDelete = async (deleteData) => {
   border-top: 1px solid #e5e7eb;
   background: #f9fafb;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-buttons {
+  display: flex;
   gap: 12px;
 }
 
 .edit-btn, .delete-btn {
-  padding: 10px 20px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border: 2px solid;
+  border-radius: 8px;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
-  min-width: 100px;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
 }
 
 .edit-btn {
-  background: #e11d48;
+  background: linear-gradient(135deg, #e11d48 0%, #f97316 100%);
   color: white;
   border-color: #e11d48;
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.2);
 }
 
 .edit-btn:hover {
-  background: #be185d;
+  background: linear-gradient(135deg, #be185d 0%, #ea580c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+}
+
+.edit-btn:active {
+  transform: translateY(0);
 }
 
 .delete-btn {
   background: white;
   color: #dc2626;
   border-color: #dc2626;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
 }
 
 .delete-btn:hover {
   background: #fef2f2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+  border-color: #b91c1c;
+}
+
+.delete-btn:active {
+  transform: translateY(0);
+}
+
+.btn-icon {
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.edit-btn:hover .btn-icon {
+  transform: rotate(-10deg);
+}
+
+.delete-btn:hover .btn-icon {
+  transform: scale(1.1);
+}
+
+.btn-text {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.action-info {
+  margin-top: 8px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.info-text {
+  padding: 4px 8px;
+  background: rgba(107, 114, 128, 0.1);
+  border-radius: 4px;
 }
 
 /* 반응형 */
@@ -714,6 +952,15 @@ const handleCommentDelete = async (deleteData) => {
   .post-header,
   .post-content {
     padding: 20px;
+  }
+  
+  .post-image-section {
+    padding: 0 20px;
+  }
+  
+  .post-image {
+    max-width: 320px;
+    max-height: 200px;
   }
   
   .post-title {
@@ -736,9 +983,24 @@ const handleCommentDelete = async (deleteData) => {
     padding: 15px 20px;
   }
   
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+  
   .edit-btn, .delete-btn {
-    min-width: 80px;
-    padding: 8px 16px;
+    min-width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+  
+  .btn-icon {
+    font-size: 18px;
+  }
+  
+  .action-info {
+    margin-top: 12px;
   }
 }
 </style> 

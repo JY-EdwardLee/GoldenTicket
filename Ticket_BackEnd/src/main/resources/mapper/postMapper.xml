@@ -56,10 +56,6 @@
     WHERE post_id = #{postId}
   </select>
 
-  <delete id="deletePost" parameterType="Long">
-    DELETE FROM posts WHERE post_id = #{postId}
-  </delete>
-
   <update id="deleteTrue" parameterType="Long">
     UPDATE posts
     SET is_delete = true
@@ -97,6 +93,25 @@
     INSERT INTO posts_like (user_id, post_id)
     VALUES (#{userId}, #{postId})
   </insert>
+
+  <!-- 좋아요 수 감소 -->
+  <update id="minusLike">
+    UPDATE posts
+    SET like_count = like_count - 1
+    WHERE post_id = #{postId}
+  </update>
+
+  <!-- 좋아요 관계 삭제 -->
+  <delete id="deletePostLike">
+    DELETE FROM posts_like
+    WHERE user_id = #{userId} AND post_id = #{postId}
+  </delete>
+
+  <!-- 좋아요 수 조회 -->
+  <select id="selectPostLike" parameterType="Long" resultType="Long">
+    SELECT like_count FROM posts
+    WHERE post_id = #{postId}
+  </select>
 
   <select id="selectPostsByUserId" parameterType="long"
     resultType="com.ssafy.ticket_backend.dto.response.PostAllResponse">
