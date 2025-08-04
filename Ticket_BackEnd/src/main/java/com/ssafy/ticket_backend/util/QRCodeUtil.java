@@ -21,7 +21,7 @@ public class QRCodeUtil {
     public static String generateQRCodeImage(String text, int width, int height, String logoPath)
         throws IOException, WriterException {
         Hashtable<EncodeHintType, ErrorCorrectionLevel> hintMap = new Hashtable<>();
-        hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
+        hintMap.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, width, height, hintMap);
 
