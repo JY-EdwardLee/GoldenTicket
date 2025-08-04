@@ -70,6 +70,8 @@ public class TicketServiceImpl implements TicketService {
                 Long buyer = randomPicks.get(
                     ThreadLocalRandom.current().nextInt(randomPicks.size()));
 
+//                ticketMapper.deleteWaitListByUserIdAndGameId(buyer, game.getGameId());
+
                 ticket.setBuyerId(buyer);
                 ticket.setTicketStatus(TicketStatus.BEING_PAYING);
                 ticket.setMatchedDate(LocalDateTime.now());

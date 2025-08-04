@@ -133,5 +133,9 @@
     WHERE is_block = FALSE AND is_delete = FALSE
   </select>
 
-
+  <delete id="deleteWaitListByUserIdAndGameId" parameterType="map">
+    DELETE FROM waitlists
+    WHERE user_id = #{buyer}
+    AND game_id = #{gameId}
+  </delete>
 </mapper>
