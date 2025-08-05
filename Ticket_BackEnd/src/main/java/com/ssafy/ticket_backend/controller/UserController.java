@@ -49,30 +49,30 @@ public class UserController {
     @Value("${naver.client.id}")
     private String NaverClientId;
 
-  @Value("${VITE_PROD_API_URL}")
-  private String Prod_api_url;
+    @Value("${VITE_PROD_API_URL}")
+    private String Prod_api_url;
 
-  @Value("${VITE_PROD_FRONT_URL}")
-  private String Prod_front_url;
+    @Value("${VITE_PROD_FRONT_URL}")
+    private String Prod_front_url;
 
-  @Value("${VITE_DEV_API_URL}")
-  private String Local_api_url;
+    @Value("${VITE_DEV_API_URL}")
+    private String Local_api_url;
 
-  @Value("${VITE_DEV_FRONT_URL}")
-  private String Local_front_url;
+    @Value("${VITE_DEV_FRONT_URL}")
+    private String Local_front_url;
 
 
-  /**
-   * 카카오 로그인 페이지로 리다이렉트
-   *
-   * @return RedirectView 카카오 인증 URL로 리다이렉션
-   */
-  @GetMapping("/auth/kakao")
-  public RedirectView redirectToKakaoLogin() {
-    String kakaoAuthUrl =
-        "https://kauth.kakao.com/oauth/authorize" + "?client_id=" + KakaoRestApiKey
-            + "&redirect_uri=" + Prod_api_url + "/users/auth/kakao/callback"
-            + "&response_type=code";
+    /**
+     * 카카오 로그인 페이지로 리다이렉트
+     *
+     * @return RedirectView 카카오 인증 URL로 리다이렉션
+     */
+    @GetMapping("/auth/kakao")
+    public RedirectView redirectToKakaoLogin() {
+        String kakaoAuthUrl =
+            "https://kauth.kakao.com/oauth/authorize" + "?client_id=" + KakaoRestApiKey
+                + "&redirect_uri=" + Prod_api_url + "/users/auth/kakao/callback"
+                + "&response_type=code";
 
         return new RedirectView(kakaoAuthUrl);
     }
@@ -88,9 +88,9 @@ public class UserController {
 
         String naverAuthUrl =
 
-        "https://nid.naver.com/oauth2.0/authorize" + "?response_type=code" + "&client_id="
-            + NaverClientId + "&redirect_uri="
-            + Prod_api_url + "/users/auth/naver/callback" + "&state=" + state;
+            "https://nid.naver.com/oauth2.0/authorize" + "?response_type=code" + "&client_id="
+                + NaverClientId + "&redirect_uri=" + Prod_api_url + "/users/auth/naver/callback"
+                + "&state=" + state;
 
         return new RedirectView(naverAuthUrl);
     }
@@ -131,10 +131,10 @@ public class UserController {
         response.addHeader("Set-Cookie", accessCookie.toString());
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
-    // 로그인 완료 후 프론트 리다이렉트 (인증 상태 확인 페이지)
-    return ResponseEntity.status(HttpStatus.FOUND)
-        .header("Location", Prod_front_url + "/oauth/callback").build();
-  }
+        // 로그인 완료 후 프론트 리다이렉트 (인증 상태 확인 페이지)
+        return ResponseEntity.status(HttpStatus.FOUND)
+            .header("Location", Prod_front_url + "/oauth/callback").build();
+    }
 
     /**
      * 네이버 로그인 콜백 처리
@@ -153,11 +153,10 @@ public class UserController {
             // 1. 비회원인 경우, Redis에 임시 유저 정보 저장
             String tempUserId = userService.storeTempUserInfo(userResponse);
 
-      // 2. 회원가입 페이지로 리다이렉트 + tempUserId 쿼리파라미터로 전달
-      return ResponseEntity.status(HttpStatus.FOUND)
-          .header("Location", Prod_front_url + "/signup?tempUserId=" + tempUserId)
-          .build();
-    }
+            // 2. 회원가입 페이지로 리다이렉트 + tempUserId 쿼리파라미터로 전달
+            return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", Prod_front_url + "/signup?tempUserId=" + tempUserId).build();
+        }
 
         // 이미 가입된 회원이라면 토큰을 쿠키에 저장
         JwtTokenResponse tokens = userResponse.getToken();
@@ -175,10 +174,10 @@ public class UserController {
         response.addHeader("Set-Cookie", accessCookie.toString());
         response.addHeader("Set-Cookie", refreshCookie.toString());
 
-    // 로그인 성공 후 프론트엔드로 리다이렉트
-    return ResponseEntity.status(HttpStatus.FOUND)
-        .header("Location", Prod_front_url + "/oauth/callback").build();
-  }
+        // 로그인 성공 후 프론트엔드로 리다이렉트
+        return ResponseEntity.status(HttpStatus.FOUND)
+            .header("Location", Prod_front_url + "/oauth/callback").build();
+    }
 
     /**
      * 로그인 유저 정보 반환

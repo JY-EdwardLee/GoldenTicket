@@ -108,4 +108,29 @@
     WHERE waitlist_id = #{id}
   </update>
 
+  <select id="selectTransactionByTicketId" parameterType="long"
+    resultType="com.ssafy.ticket_backend.model.Transaction">
+    SELECT *
+    FROM transaction_states
+    WHERE ticket_id = #{ticketId}
+  </select>
+
+  <update id="updateTransaction" parameterType="com.ssafy.ticket_backend.model.Transaction">
+    UPDATE transaction_states
+    <set>
+      <if test="ticketId != null">
+        ticket_id = #{ticketId},
+      </if>
+      <if test="sellerId != null">
+        seller_id = #{sellerId},
+      </if>
+      <if test="buyerId != null">
+        buyer_id = #{buyerId},
+      </if>
+      <if test="transactionStatus != null">
+        transaction_status = #{transactionStatus},
+      </if>
+    </set>
+    WHERE transaction_id = #{transactionId}
+  </update>
 </mapper>

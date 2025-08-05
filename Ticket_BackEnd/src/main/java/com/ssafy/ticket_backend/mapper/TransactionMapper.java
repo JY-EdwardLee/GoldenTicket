@@ -30,4 +30,8 @@ public interface TransactionMapper {
         @Param("gameId") Long gameId);
 
     void updateWaitlist(Waitlist waitlist);
+
+    Transaction selectTransactionByTicketId(@Param("ticketId") Long ticketId);
+
+    void updateTransaction(Transaction transaction);
 }
