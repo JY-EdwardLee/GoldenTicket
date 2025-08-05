@@ -3,12 +3,9 @@ package com.ssafy.ticket_backend.controller;
 import com.ssafy.ticket_backend.dto.request.KakaoPayRequest;
 import com.ssafy.ticket_backend.dto.response.KakaoPayApproveResponse;
 import com.ssafy.ticket_backend.dto.response.KakaoPayReadyResponse;
-import com.ssafy.ticket_backend.dto.response.TossPayReadyResponse;
-import com.ssafy.ticket_backend.dto.response.TossPayResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.KakaoPayService;
 import com.ssafy.ticket_backend.service.TicketService;
-import com.ssafy.ticket_backend.service.TossPayService;
 import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +27,6 @@ public class PaymentController {
 
     private final TicketService ticketService;
     private final KakaoPayService kakaoPayService;
-    private final TossPayService tossPayService;
 
     /**
      * 결제 준비 요청
@@ -96,29 +92,5 @@ public class PaymentController {
         headers.setLocation(URI.create("http://localhost:3000/payment/cancel"));
 
         return new ResponseEntity<>(headers, HttpStatus.BAD_REQUEST);
-    }
-
-    @PostMapping("/toss/ready")
-    public ResponseEntity<TossPayReadyResponse> readyTossPayment() {
-        String orderId = "toss-" + UUID.randomUUID().toString();
-
-        // TODO: request에서 받은 상품 정보로 금액(amount) 및 주문명(orderName) 설정
-        // TODO: 현재 로그인한 사용자 정보로 고객명(customerName) 설정
-
-        TossPayReadyResponse readyResponse = tossPayService.readyPayment(orderId, "샘플 주문", 0,
-            "SSAFY");
-
-        return ResponseEntity.ok(readyResponse);
-    }
-
-    @PostMapping("/toss/confirm")
-    public ResponseEntity<TossPayResponse> confirmTossPayment(
-        @RequestParam("paymentKey") String paymentKey, @RequestParam("orderId") String orderId,
-        @RequestParam("amount") int amount) {
-
-        TossPayResponse approvalResponse = tossPayService.confirmPayment(paymentKey, orderId,
-            amount);
-
-        return ResponseEntity.ok(approvalResponse);
     }
 }
