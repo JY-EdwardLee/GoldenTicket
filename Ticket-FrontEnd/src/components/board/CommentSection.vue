@@ -252,6 +252,8 @@ const restoreCommentLikeStates = () => {
 
 // 댓글 작성자 권한 확인
 const isCommentAuthor = (comment) => {
+  console.log(comment);
+  console.log(authStore.user);
   return false;
 };
 
