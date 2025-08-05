@@ -9,29 +9,23 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig {
 
-  @Value("${fe_base_url}")
-  private String fe_base_url;
+    @Value("${FE_BASE_URL}")
+    private String FE_BASE_URL;
 
-  @Value("${be_base_url}")
-  private String be_base_url;
+    @Value("${BE_BASE_URL}")
+    private String BE_BASE_URL;
 
-  @Value("${fe_local_url}")
-  private String fe_local_url;
-
-  @Value("${be_local_url}")
-  private String be_local_url;
-
-  @Bean
-  public WebMvcConfigurer corsConfigurer() {
-    return new WebMvcConfigurer() {
-      @Override
-      public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // 모든 API 경로
-            .allowedOrigins(fe_local_url, fe_base_url,
-                be_base_url) // Vue dev 서버 주소
-            .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS").allowedHeaders("*")
-            .allowCredentials(true); // 필요시 쿠키 허용
-      }
-    };
-  }
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**") // 모든 API 경로
+                    .allowedOrigins("http://localhost:8080/", FE_BASE_URL,
+                        BE_BASE_URL) // Vue dev 서버 주소
+                    .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                    .allowedHeaders("*").allowCredentials(true); // 필요시 쿠키 허용
+            }
+        };
+    }
 }
