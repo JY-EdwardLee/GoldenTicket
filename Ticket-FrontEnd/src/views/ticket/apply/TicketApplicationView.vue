@@ -210,8 +210,11 @@ function isPastDate(date) {
 }
 
 function isToday(date) {
+  const today = new Date();
   const checkDate = new Date(currentYear, currentMonth.value - 1, date);
-  return checkDate.getTime() === today.getTime();
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const compareDate = new Date(checkDate.getFullYear(), checkDate.getMonth(), checkDate.getDate());
+  return compareDate.getTime() === todayDate.getTime();
 }
 
 function previousMonth() {
@@ -232,12 +235,17 @@ function nextMonth() {
 
 // 컴포넌트 마운트 시 현재 날짜 자동 선택 및 경기 로드
 onMounted(async () => {
-  if (currentMonth.value === 8) { // 현재 월이 8월인 경우
-    selectedDate.value = 4; // 현재 날짜 자동 선택
+  // 현재 날짜 가져오기
+  const today = new Date();
+  const currentDay = today.getDate();
+  const todayMonth = today.getMonth() + 1; // 0부터 시작하므로 +1
+  
+  if (currentMonth.value === todayMonth) { // 현재 월인 경우
+    selectedDate.value = currentDay; // 실제 현재 날짜 자동 선택
     
     // 선택된 팀이 있는 경우에만 경기 로드
     if (selectedTeam.value) {
-      const formattedDate = `${currentYear}-${String(currentMonth.value).padStart(2, '0')}-${String(4).padStart(2, '0')}`;
+      const formattedDate = `${currentYear}-${String(currentMonth.value).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`;
       const teamEnum = teamNameToEnum[selectedTeam.value];
       
       try {
@@ -372,7 +380,7 @@ function formatGameDateTime(dateTimeStr) {
 .title {
   font-size: 28px;
   font-weight: 700;
-  margin: 20px 0 20px 0;
+  margin: 0px 0 30px 0;
   color: #222;
   letter-spacing: -1.5px;
   text-align: center;
@@ -382,16 +390,17 @@ function formatGameDateTime(dateTimeStr) {
 .team-bg-container {
   width: 600px;
   height: 100px;
-  margin: 0 auto 28px auto;
+  margin: 0 auto 30px auto;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .team-bg-image {
-  width: 800px;
-  height: 120px;
+  width: 600px;
+  height: 130px;
   border-radius: 16px;
-  background: url('/landers_bg2.png') center/cover no-repeat;
+  background: url('/org_logo/image 3.svg') center no-repeat;
+  background-size: cover;
   opacity: 0.25;
   transition: opacity 0.3s;
 }
