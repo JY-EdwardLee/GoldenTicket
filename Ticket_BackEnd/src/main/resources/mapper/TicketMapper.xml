@@ -151,7 +151,7 @@
 
   <!-- 티켓 양도 -->
   <update id="transferTicket">
-    UPDATE ticket
+    UPDATE tickets
     SET buyer_id = #{userId},
     matched_date = NOW()
     WHERE ticket_id = #{ticketId}

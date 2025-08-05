@@ -9,6 +9,7 @@ import com.ssafy.ticket_backend.service.TicketService;
 import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,9 @@ public class PaymentController {
 
     private final TicketService ticketService;
     private final KakaoPayService kakaoPayService;
+
+    @Value("${FE_BASE_URL}")
+    private String FE_BASE_URL;
 
     /**
      * 결제 준비 요청
@@ -48,7 +52,7 @@ public class PaymentController {
      * 결제 성공 카카오페이에서 리다이렉트되어 호출되는 엔드포인트
      */
     @GetMapping("/kakao/success")
-    public ResponseEntity<KakaoPayApproveResponse> kakaoAfterPayRequest(
+    public ResponseEntity<Void> kakaoAfterPayRequest(
         @RequestParam("pg_token") String pgToken,
         @RequestParam("partner_order_id") String partnerOrderId) {
 
@@ -61,14 +65,14 @@ public class PaymentController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(URI.create(
-                "http://i13a109.p.ssafy.io/mypage/tickets/" + approveResponse.getItem_code()));
-//                "http://localhost:5173/mypage/tickets/" + approveResponse.getItem_code()));
+                FE_BASE_URL + "/mypage/tickets/" + approveResponse.getItem_code()));
 
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
         } catch (IllegalStateException e) {
             // Redis에서 데이터를 찾지 못한 경우 (만료 또는 잘못된 요청)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(null); // Or a proper error response
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(URI.create(FE_BASE_URL + "/payment/fail?reason=expired"));
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
         }
     }
 
@@ -76,21 +80,21 @@ public class PaymentController {
      * 결제 취소
      */
     @GetMapping("/kakao/cancel")
-    public ResponseEntity<String> kakaoCancel() {
+    public ResponseEntity<Void> kakaoCancel() {
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create("http://localhost:3000/payment/cancel"));
+        headers.setLocation(URI.create(FE_BASE_URL + "/payment/cancel"));
 
-        return new ResponseEntity<>(headers, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 
     /**
      * 결제 실패
      */
     @GetMapping("/kakao/fail")
-    public ResponseEntity<String> kakaoFail() {
+    public ResponseEntity<Void> kakaoFail() {
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create("http://localhost:3000/payment/cancel"));
+        headers.setLocation(URI.create(FE_BASE_URL + "/payment/fail"));
 
-        return new ResponseEntity<>(headers, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 }

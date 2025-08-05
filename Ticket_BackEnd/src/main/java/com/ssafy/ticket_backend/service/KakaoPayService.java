@@ -38,6 +38,8 @@ public class KakaoPayService {
     private String readyUrl;
     @Value("${BE_BASE_URL}")
     private String BE_BASE_URL;
+    @Value("${FE_BASE_URL}")
+    private String FE_BASE_URL;
 
     private final RestTemplate restTemplate;
     private final RedisTemplate<String, Object> redisTemplate;
