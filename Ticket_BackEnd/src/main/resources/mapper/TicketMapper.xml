@@ -133,7 +133,7 @@
   <select id="countWaitListByGameId" resultType="int">
     SELECT COUNT(*)
     FROM waitlists
-    WHERE game_id = #{gameId}
+    WHERE game_id = #{gameId} and waitlist_status = 'BEING_WAITING'
   </select>
 
   <select id="selectWaitlistByUserId" resultType="com.ssafy.ticket_backend.model.Waitlist">
