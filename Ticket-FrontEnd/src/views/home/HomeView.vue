@@ -131,6 +131,7 @@ function closeLoginModal() {
 
 // 메인 페이지 로직
 const goToApply = () => {
+  console.log(authStore.isAuthenticated)
   // 로그인 상태 확인
   if (!authStore.isAuthenticated) {
     showLoginModal.value = true;
