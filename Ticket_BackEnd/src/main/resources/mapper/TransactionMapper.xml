@@ -40,7 +40,7 @@
     FROM
     transaction_states
     WHERE
-    buyer_id = #{userId}
+    buyer_id = #{userId} and transaction_status = 'TRANSACTION_COMPLETE'
   </select>
 
   <select id="selectTicketByTransactionId" resultType="com.ssafy.ticket_backend.model.Ticket"
