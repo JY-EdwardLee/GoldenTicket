@@ -207,6 +207,7 @@ public class PostServiceImpl implements PostService {
   @Transactional
   @Override
   public void deletePost(String email, Long PostId) {
+
     try {
       User user = userMapper.selectUserByEmail(email);
 

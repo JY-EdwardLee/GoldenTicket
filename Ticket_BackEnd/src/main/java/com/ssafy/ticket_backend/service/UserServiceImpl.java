@@ -263,7 +263,7 @@ public class UserServiceImpl implements UserService {
 
         oauthUserResponse = OAuthUserResponse.builder().isRegistered(true)
             .token(new JwtTokenResponse(accessToken, refreshToken)).build();
-        
+
         return oauthUserResponse;
     }
 
@@ -438,7 +438,6 @@ public class UserServiceImpl implements UserService {
         List<TransactionResponse> transactionResponses = new ArrayList<>();
 
         for (Transaction transaction : transactions) {
-            System.out.println(transaction.toString());
             TransactionResponse transactionResponse = new TransactionResponse();
 
             Ticket ticket = ticketMapper.selectTicketByTicketId(transaction.getTicketId());

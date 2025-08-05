@@ -108,7 +108,7 @@ public class S3PostServiceImpl implements S3PostService {
   }
 
   private String generatePresignedPutUrl(String key) {
-    Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 5); // 5분
+    Date expiration = new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 10); // 10시간
     // 해당 bucket에 key에 대해서 PUT(업로드) 요청 5분간 허용 URL 생성
     GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket, key)
         .withMethod(HttpMethod.PUT)
@@ -240,7 +240,7 @@ public class S3PostServiceImpl implements S3PostService {
   }
 
   private String generatePresignedGetUrl(String key) {
-    Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 3); // 3분
+    Date expiration = new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 10); // 10시간 임시방편..
     GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket, key)
         .withMethod(HttpMethod.GET)
         .withExpiration(expiration);
