@@ -63,6 +63,7 @@
   <select id="selectLogingUserByEmail"
     resultType="com.ssafy.ticket_backend.dto.response.LoginUserResponse">
     SELECT
+    user_id,
     user_name,
     email,
     nick_name,
