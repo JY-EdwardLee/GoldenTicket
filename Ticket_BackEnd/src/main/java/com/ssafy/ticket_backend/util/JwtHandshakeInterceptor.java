@@ -27,7 +27,6 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         WebSocketHandler wsHandler,
         Map<String, Object> attributes
     ) {
-        System.out.println("웹소켓 핸드쉐이크 인터셉터 진입");
         // HTTP 요청 객체로 캐스팅
         if (request instanceof ServletServerHttpRequest servletRequest) {
             HttpServletRequest httpRequest = servletRequest.getServletRequest();
@@ -54,7 +53,6 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         }
         return false; // 검증 실패 → 연결 거부
     }
-
 
 
     private String extractAccessTokenFromCookie(String cookieHeader) {

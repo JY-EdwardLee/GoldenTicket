@@ -12,17 +12,36 @@
 
   <!-- 티켓 정보 업데이트 -->
   <update id="updateTicket" parameterType="com.ssafy.ticket_backend.mapper.TicketMapper">
-    UPDATE tickets
-    SET
-    ticket_status = #{ticketStatus},
-    price = #{price},
-    game_id = #{gameId},
-    seat = #{seat},
-    seller_id = #{sellerId},
-    buyer_id = #{buyerId},
-    transaction_date = #{transactionDate},
-    matched_date = #{matchedDate},
-    image = #{image}
+    UPDATE public.tickets
+    <set>
+      <if test="ticketStatus != null">
+        ticket_status = #{ticketStatus},
+      </if>
+      <if test="price != null">
+        price = #{price},
+      </if>
+      <if test="gameId != null">
+        game_id = #{gameId},
+      </if>
+      <if test="seat != null">
+        seat = #{seat},
+      </if>
+      <if test="sellerId != null">
+        seller_id = #{sellerId},
+      </if>
+      <if test="buyerId != null">
+        buyer_id = #{buyerId},
+      </if>
+      <if test="transactionDate != null">
+        transaction_date = #{transactionDate},
+      </if>
+      <if test="matchedDate != null">
+        matched_date = #{matchedDate},
+      </if>
+      <if test="image != null">
+        image = #{image},
+      </if>
+    </set>
     WHERE ticket_id = #{ticketId}
   </update>
 
@@ -79,7 +98,7 @@
     )
   </select>
 
-  <select id="selectTicketsByUserId" resultType="com.ssafy.ticket_backend.model.Ticket">
+  <select id="selectTicketsByBuyerId" resultType="com.ssafy.ticket_backend.model.Ticket">
     SELECT
     ticket_id,
     ticket_status,
@@ -92,7 +111,7 @@
     matched_date,
     image
     FROM tickets
-    WHERE seller_id = #{userId} or buyer_id = #{userId}
+    WHERE buyer_id = #{userId}
   </select>
 
   <select id="selectWaitListByGameId" resultType="com.ssafy.ticket_backend.model.Waitlist"

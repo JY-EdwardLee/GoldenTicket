@@ -111,8 +111,7 @@ public class S3UserServiceImpl implements S3UserService {
 
   private String generatePresignedPutUrl(String key) {
     try {
-      Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 5); // 5분
-      // 해당 bucket에 key에 대해서 PUT(업로드) 요청 5분간 허용 URL 생성
+      Date expiration = new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 10); // 10시간
       GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket, key)
           .withMethod(HttpMethod.PUT)
           .withExpiration(expiration);
@@ -256,7 +255,7 @@ public class S3UserServiceImpl implements S3UserService {
 
   private String generatePresignedGetUrl(String key) {
     try {
-      Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 3); // 3분
+      Date expiration = new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 10); // 10시간 임시방편
       GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket, key)
           .withMethod(HttpMethod.GET)
           .withExpiration(expiration);

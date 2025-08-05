@@ -19,18 +19,12 @@ public class NotificationServiceImpl implements NotificationService {
     // 비동기 알림 (5초 지연 후 전송)
     @Async
     public void sendDelayedNotification(String userEmail, String message, long delayMillis) {
-
         message = "실시간 알림 테스트!";
-
-//        System.out.println("알림 예약됨: " + userEmail + ", 메시지: " + message);
-
 
         try {
             Thread.sleep(delayMillis);
-//            System.out.println("[sendDelayedNotification] 지연 완료, 알림 전송 시작: " + userEmail);
 
             sendNotificationToUser(userEmail, message);
-//            System.out.println("[sendDelayedNotification] 알림 전송 완료: " + userEmail);
 
         } catch (InterruptedException e) {
             e.printStackTrace();
