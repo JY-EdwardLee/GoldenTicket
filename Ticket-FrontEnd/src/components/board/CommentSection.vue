@@ -1,21 +1,33 @@
 <template>
   <div class="comments-section">
     <div class="comments-header">
-      <div class="sort-options">
-        <button class="sort-btn active">등록순</button>
-        <button class="sort-btn">최신순</button>
-        <button class="refresh-btn">🔄</button>
-      </div>
+             <div class="sort-options">
+         <button 
+           class="sort-btn" 
+           :class="{ active: sortType === 'oldest' }"
+           @click="changeSortType('oldest')"
+         >
+           등록순
+         </button>
+         <button 
+           class="sort-btn" 
+           :class="{ active: sortType === 'newest' }"
+           @click="changeSortType('newest')"
+         >
+           최신순
+         </button>
+         <button class="refresh-btn" @click="refreshComments">🔄</button>
+       </div>
     </div>
 
-    <!-- 댓글 목록 -->
-    <div class="comments-list">
-      <div 
-        v-for="comment in comments" 
-        :key="comment.id || comment.commentId" 
-        class="comment-item"
-        :class="{ 'new-comment': comment.isNew }"
-      >
+         <!-- 댓글 목록 -->
+     <div class="comments-list">
+       <div 
+         v-for="comment in sortedComments" 
+         :key="comment.id || comment.commentId" 
+         class="comment-item"
+         :class="{ 'new-comment': comment.isNew }"
+       >
         <div class="comment-header">
           <div class="profile-icon">👤</div>
           <div class="comment-info">
@@ -23,7 +35,7 @@
               {{ comment.author }}
               <span v-if="isCommentAuthor(comment)" class="author-badge">- 작성자</span>
             </span>
-            <span class="comment-date">{{ comment.date }}</span>
+                         <span class="comment-date">{{ formatCommentDate(comment.createdAt || comment.date) }}</span>
           </div>
         </div>
         
@@ -52,7 +64,7 @@
                   {{ reply.author }}
                   <span v-if="isCommentAuthor(reply)" class="author-badge">- 작성자</span>
                 </span>
-                <span class="reply-date">{{ reply.date }}</span>
+                                 <span class="reply-date">{{ formatCommentDate(reply.createdAt || reply.date) }}</span>
               </div>
             </div>
             
@@ -63,8 +75,11 @@
             <div class="reply-actions">
               <button class="edit-btn small" @click="openEditModal(reply)" v-if="isCommentAuthor(reply)">수정</button>
               <button class="delete-btn small" @click="openDeleteModal(reply)" v-if="isCommentAuthor(reply)">삭제</button>
-              <button class="like-btn small">
-                <span class="like-icon">❤️</span>
+              <button class="like-btn small" @click="toggleCommentLike(reply)">
+                <span class="like-icon" :class="{ 'liked': reply.isLiked }">
+                  {{ reply.isLiked ? '❤️' : '🤍' }}
+                </span>
+                <span v-if="reply.likeCount > 0" class="like-count">{{ reply.likeCount }}</span>
               </button>
             </div>
           </div>
@@ -89,15 +104,10 @@
             @blur="handleInputBlur"
             :class="{ 'active': isInputActive }"
           ></textarea>
-          <div class="comment-actions-bottom">
-            <div class="action-icons">
-              <button class="icon-btn" @click="attachFile">
-                📷
-              </button>
-              <button class="icon-btn" @click="insertEmoji">
-                😊
-              </button>
-            </div>
+                     <div class="comment-actions-bottom">
+             <div class="action-icons">
+               <!-- 아이콘 버튼들 제거 -->
+             </div>
             <button 
               class="submit-btn" 
               @click="submitComment"
@@ -147,7 +157,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { boardAPI, validateCommentData } from '@/api/board.js';
 import { useAuthStore } from '@/stores/auth.js';
@@ -165,7 +175,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['commentSubmit']);
+const emit = defineEmits(['commentSubmit', 'refresh']);
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -176,41 +186,72 @@ const isEditModalVisible = ref(false);
 const selectedComment = ref(null);
 const isDeleteModalVisible = ref(false);
 const isDeleting = ref(false);
+const sortType = ref('oldest'); // 기본값: 등록순
+
+// 정렬된 댓글 목록 계산
+const sortedComments = computed(() => {
+  if (!props.comments || !Array.isArray(props.comments)) {
+    return [];
+  }
+  
+  const comments = [...props.comments]; // 원본 배열 복사
+  
+  return comments.sort((a, b) => {
+    const dateA = new Date(a.createdAt || a.date || 0);
+    const dateB = new Date(b.createdAt || b.date || 0);
+    
+    if (sortType.value === 'oldest') {
+      // 등록순: 오래된 것부터 (오름차순)
+      return dateA - dateB;
+    } else {
+      // 최신순: 최신 것부터 (내림차순)
+      return dateB - dateA;
+    }
+  });
+});
+
+// 정렬 타입 변경
+const changeSortType = (type) => {
+  sortType.value = type;
+};
+
+// 댓글 새로고침
+const refreshComments = () => {
+  // 부모 컴포넌트에 새로고침 이벤트 발생
+  emit('refresh');
+};
+
+// 댓글 좋아요 상태 복원
+const restoreCommentLikeStates = () => {
+  if (!authStore.isAuthenticated) return;
+  
+  // 모든 댓글과 답글에 대해 좋아요 상태 복원
+  const processComments = (comments) => {
+    if (!comments || !Array.isArray(comments)) return;
+    
+    comments.forEach(comment => {
+      const commentId = comment.id || comment.commentId;
+      if (commentId) {
+        const storageKey = `comment_like_${commentId}_${authStore.user?.userId || 'guest'}`;
+        const storedLiked = localStorage.getItem(storageKey);
+        
+        if (storedLiked !== null) {
+          comment.isLiked = storedLiked === 'true';
+        }
+      }
+      
+      // 답글도 처리
+      if (comment.replies && Array.isArray(comment.replies)) {
+        processComments(comment.replies);
+      }
+    });
+  };
+  
+  processComments(props.comments);
+};
 
 // 댓글 작성자 권한 확인
 const isCommentAuthor = (comment) => {
-  if (!authStore.isAuthenticated || !authStore.user) {
-    return false;
-  }
-  
-  console.log('권한 확인:', {
-    commentUserId: comment.userId,
-    currentUserId: authStore.user.userId,
-    commentAuthor: comment.author,
-    currentUserNickname: authStore.user.nickName || authStore.user.nickname
-  });
-  
-  // userId로 비교 (가장 정확한 방법)
-  if (comment.userId && authStore.user.userId) {
-    const isMatch = comment.userId === authStore.user.userId;
-    console.log('userId 비교 결과:', isMatch);
-    return isMatch;
-  }
-  
-  // 닉네임으로 비교 (백업 방법)
-  if (comment.author && authStore.user.nickName) {
-    const isMatch = comment.author === authStore.user.nickName;
-    console.log('nickName 비교 결과:', isMatch);
-    return isMatch;
-  }
-  
-  if (comment.author && authStore.user.nickname) {
-    const isMatch = comment.author === authStore.user.nickname;
-    console.log('nickname 비교 결과:', isMatch);
-    return isMatch;
-  }
-  
-  console.log('권한 확인 실패: 매칭되는 정보 없음');
   return false;
 };
 
@@ -229,166 +270,58 @@ const handleInputBlur = () => {
   }
 };
 
-const attachFile = () => {
-  console.log('파일 첨부');
-  // TODO: 파일 첨부 로직
-};
 
-const insertEmoji = () => {
-  // 텍스트 영역에 포커스
-  const textarea = document.querySelector('.comment-input');
-  if (!textarea) return;
+
+// 댓글 날짜 포맷팅 함수
+const formatCommentDate = (dateString) => {
+  if (!dateString) return '';
   
-  textarea.focus();
-  
-  // Windows 이모지 선택기 열기
-  if (navigator.userAgent.includes('Windows')) {
-    try {
-      // 방법 1: 직접 Win + . 단축키 시뮬레이션
-      const winKeyDown = new KeyboardEvent('keydown', {
-        key: 'Meta',
-        code: 'MetaLeft',
-        keyCode: 91,
-        which: 91,
-        ctrlKey: false,
-        altKey: false,
-        shiftKey: false,
-        metaKey: true,
-        bubbles: true,
-        cancelable: true
-      });
-      
-      const periodKeyDown = new KeyboardEvent('keydown', {
-        key: '.',
-        code: 'Period',
-        keyCode: 190,
-        which: 190,
-        ctrlKey: false,
-        altKey: false,
-        shiftKey: false,
-        metaKey: true,
-        bubbles: true,
-        cancelable: true
-      });
-      
-      // 이벤트 발생
-      document.dispatchEvent(winKeyDown);
-      document.dispatchEvent(periodKeyDown);
-      
-      // 키 업 이벤트
-      setTimeout(() => {
-        const winKeyUp = new KeyboardEvent('keyup', {
-          key: 'Meta',
-          code: 'MetaLeft',
-          keyCode: 91,
-          which: 91,
-          ctrlKey: false,
-          altKey: false,
-          shiftKey: false,
-          metaKey: false,
-          bubbles: true,
-          cancelable: true
-        });
-        
-        const periodKeyUp = new KeyboardEvent('keyup', {
-          key: '.',
-          code: 'Period',
-          keyCode: 190,
-          which: 190,
-          ctrlKey: false,
-          altKey: false,
-          shiftKey: false,
-          metaKey: false,
-          bubbles: true,
-          cancelable: true
-        });
-        
-        document.dispatchEvent(periodKeyUp);
-        document.dispatchEvent(winKeyUp);
-      }, 100);
-      
-      // 방법 2: 대안으로 커스텀 팔레트도 함께 표시 (Windows 이모지 선택기가 작동하지 않을 경우)
-      setTimeout(() => {
-        // Windows 이모지 선택기가 열리지 않았을 경우를 대비해 커스텀 팔레트도 표시
-        const hasEmojiPanel = document.querySelector('[data-testid="emoji-panel"]') || 
-                             document.querySelector('.emoji-panel') ||
-                             document.querySelector('[role="dialog"]');
-        
-        if (!hasEmojiPanel) {
-          console.log('Windows 이모지 선택기가 열리지 않았습니다. 커스텀 팔레트를 표시합니다.');
-          showEmojiPalette();
-        }
-      }, 500);
-      
-    } catch (error) {
-      console.log('Windows 이모지 선택기 열기 실패:', error);
-      showEmojiPalette();
+  try {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now - date;
+    const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    
+    // 1분 미만
+    if (diffInMinutes < 1) {
+      return '방금 전';
     }
-  } else {
-    // 다른 OS에서는 커스텀 이모지 팔레트 표시
-    showEmojiPalette();
+    // 1시간 미만
+    else if (diffInMinutes < 60) {
+      return `${diffInMinutes}분 전`;
+    }
+    // 24시간 미만
+    else if (diffInHours < 24) {
+      return `${diffInHours}시간 전`;
+    }
+    // 7일 미만
+    else if (diffInDays < 7) {
+      return `${diffInDays}일 전`;
+    }
+    // 7일 이상 - 상세 날짜 표시
+    else {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      
+      // 올해가 아닌 경우 년도 포함
+      if (year !== now.getFullYear()) {
+        return `${year}.${month}.${day} ${hours}:${minutes}`;
+      } else {
+        return `${month}.${day} ${hours}:${minutes}`;
+      }
+    }
+  } catch (error) {
+    console.error('날짜 포맷팅 오류:', error);
+    return dateString; // 원본 문자열 반환
   }
 };
 
-const showEmojiPalette = () => {
-  // 간단한 이모지 팔레트 (임시 구현)
-  const emojis = ['😊', '😂', '❤️', '👍', '🎉', '🔥', '😍', '🤔', '😭', '😡', '🥳', '🤗'];
-  
-  // 이모지 선택 다이얼로그 생성
-  const dialog = document.createElement('div');
-  dialog.className = 'emoji-palette';
-  dialog.innerHTML = `
-    <div class="emoji-palette-content">
-      <div class="emoji-palette-header">
-        <span>이모지 선택</span>
-        <button class="close-btn" onclick="this.parentElement.parentElement.parentElement.remove()">×</button>
-      </div>
-      <div class="emoji-grid">
-        ${emojis.map(emoji => `<button class="emoji-btn" onclick="insertEmojiToTextarea('${emoji}')">${emoji}</button>`).join('')}
-      </div>
-    </div>
-  `;
-  
-  // 스타일 추가
-  dialog.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  `;
-  
-  // 전역 함수로 이모지 삽입 함수 등록
-  window.insertEmojiToTextarea = (emoji) => {
-    const textarea = document.querySelector('.comment-input');
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const text = newComment.value;
-      const newText = text.substring(0, start) + emoji + text.substring(end);
-      newComment.value = newText;
-      
-      // 커서 위치 조정
-      textarea.focus();
-      textarea.setSelectionRange(start + emoji.length, start + emoji.length);
-    }
-    dialog.remove();
-  };
-  
-  document.body.appendChild(dialog);
-  
-  // 배경 클릭 시 닫기
-  dialog.addEventListener('click', (e) => {
-    if (e.target === dialog) {
-      dialog.remove();
-    }
-  });
-};
+
 
 const submitComment = async () => {
   if (!newComment.value.trim()) {
@@ -422,16 +355,17 @@ const submitComment = async () => {
     
     if (result.success) {
       // 성공 시 부모 컴포넌트에 댓글 작성 완료 알림 (새 댓글 정보 포함)
-      const newCommentData = {
-        commentId: Date.now(), // 임시 ID (서버에서 실제 ID를 반환하지 않으므로)
-        content: newComment.value.trim(),
-        createdAt: new Date().toISOString(),
-        author: authStore.user?.nickname || '사용자',
-        isAuthor: true,
-        likeCount: 0,
-        isLiked: false,
-        isNew: true // 새 댓글 표시
-      };
+             const newCommentData = {
+         commentId: Date.now(), // 임시 ID (서버에서 실제 ID를 반환하지 않으므로)
+         content: newComment.value.trim(),
+         createdAt: new Date().toISOString(),
+         date: new Date().toISOString(), // 호환성을 위해 date 필드도 추가
+         author: authStore.user?.nickName || authStore.user?.nickname || '사용자',
+         isAuthor: true,
+         likeCount: 0,
+         isLiked: false,
+         isNew: true // 새 댓글 표시
+       };
       
       emit('commentSubmit', newCommentData);
       newComment.value = '';
@@ -575,14 +509,36 @@ const toggleCommentLike = async (comment) => {
     
     const result = await boardAPI.likeComment(commentId);
     
-    console.log('댓글 좋아요 토글 결과:', result);
-    
     if (result) {
-      // 좋아요 상태와 개수 업데이트
-      comment.isLiked = result.isLiked;
-      comment.likeCount = result.likeCount;
+      // 서버에서 반환하는 좋아요 상태 사용
+      let newLikedState = false;
       
-      console.log('댓글 좋아요 토글 성공:', result);
+      if (result.isLiked !== undefined) {
+        newLikedState = result.isLiked;
+      } else if (result.liked !== undefined) {
+        newLikedState = result.liked;
+      } else if (result.userLiked !== undefined) {
+        newLikedState = result.userLiked;
+      } else {
+        // 서버에서 좋아요 상태를 반환하지 않는 경우 토글
+        newLikedState = !comment.isLiked;
+      }
+      
+      // 상태 업데이트
+      comment.isLiked = newLikedState;
+      comment.likeCount = result.likeCount || 0;
+      
+      // localStorage에 저장
+      const storageKey = `comment_like_${commentId}_${authStore.user?.userId || 'guest'}`;
+      localStorage.setItem(storageKey, newLikedState.toString());
+      
+      console.log('댓글 좋아요 토글 성공:', {
+        commentId: commentId,
+        isLiked: newLikedState,
+        likeCount: comment.likeCount,
+        serverResponse: result,
+        localStorageKey: storageKey
+      });
     } else {
       console.error('댓글 좋아요 토글 실패: 응답이 없습니다.');
     }
@@ -596,6 +552,16 @@ const toggleCommentLike = async (comment) => {
 const goToLogin = () => {
   router.push('/');
 };
+
+// 댓글이 변경될 때마다 좋아요 상태 복원
+watch(() => props.comments, () => {
+  restoreCommentLikeStates();
+}, { deep: true });
+
+// 컴포넌트 마운트 시 좋아요 상태 복원
+onMounted(() => {
+  restoreCommentLikeStates();
+});
 </script>
 
 <style scoped>
@@ -986,8 +952,8 @@ input:checked + .toggle-slider:before {
 .comment-input {
   width: 100%;
   padding: 12px;
-  border: none;
-  background: transparent;
+  border: 1px solid #d1d5db;
+  background: white;
   border-radius: 8px;
   font-size: 14px;
   resize: none;
@@ -999,11 +965,13 @@ input:checked + .toggle-slider:before {
 
 .comment-input:focus {
   background: white;
+  border-color: #e11d48;
   box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.1);
 }
 
 .comment-input.active {
   background: white;
+  border-color: #e11d48;
 }
 
 .comment-input::placeholder {
@@ -1089,77 +1057,7 @@ input:checked + .toggle-slider:before {
   80%, 100% { content: '...'; }
 }
 
-/* 이모지 팔레트 스타일 */
-.emoji-palette-content {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  max-width: 400px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-}
 
-.emoji-palette-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.emoji-palette-header span {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 16px;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 20px;
-  color: #6b7280;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.close-btn:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.emoji-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-}
-
-.emoji-btn {
-  background: none;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 20px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.emoji-btn:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-  transform: scale(1.05);
-}
-
-.emoji-btn:active {
-  transform: scale(0.95);
-}
 
 /* 로그인 안내 스타일 */
 .login-guide {
