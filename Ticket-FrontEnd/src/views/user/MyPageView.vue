@@ -29,7 +29,7 @@
               >
             </div>
             <div class="team-info">
-              <p class="team">{{ themeStore.selectedTeam.value || '관심 야구팀' }}</p>
+              <p class="team">{{ enumToTeamName[themeStore.selectedTeam.value] || '관심 야구팀' }}</p>
               <span class="tag">NO LIMITS</span>
             </div>
           </div>
@@ -131,7 +131,7 @@
 import { ref, onActivated, computed } from 'vue'
 import { useDeleteUserModal } from '../../composables/useDeleteUserModal.js'
 import { useTeamThemeStore } from '../../stores/teamTheme.js'
-import { useAuthStore } from '../../stores/auth.js'
+import { enumToTeamName, teamNameToLogo } from '@/utils/teamNameMap'
 
 const user = ref(null)
 user.value = JSON.parse(localStorage.getItem('user'))

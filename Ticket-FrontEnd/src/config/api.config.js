@@ -44,6 +44,7 @@ const USER = {
 const TICKET = {
   LIST: `${API_BASE_URL}/tickets`,
   DETAIL: (id) => `${API_BASE_URL}/tickets/details/${id}`,
+  QR: (id) => `${API_BASE_URL}/qrcode/${id}`,
   APPLY: `${API_BASE_URL}/tickets/apply`,
   GAMES: `${API_BASE_URL}/games`,   // 응모 - 경기 목록 불러오기(0729)
   CANCEL: (id) => `${API_BASE_URL}/games/${id}/applications`,

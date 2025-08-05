@@ -7,17 +7,17 @@
           <span class="back-icon">‹</span>
           구매 상세 정보
         </button>
-        <div class="order-number">주문번호: </div>
+        <div class="order-number">주문번호: {{ purchaseData?.transactionId }}</div>
       </div>
 
       <!-- 티켓 배너 -->
       <div class="ticket-banner">
         <div class="banner-content">
           <div class="team-logo">
-            <img src="" alt="ticketDetail.gameTitle">
+            <img :src="homeTeamLogoPath" alt="ticketDetail.gameTitle">
           </div>
           <div class="game-info">
-            <h2 class="game-title">{{ ticketDetail?.game?.away || '-' }} vs {{ ticketDetail?.game?.home || '-' }}</h2>
+            <h2 class="game-title">{{ enumToTeamName[ticketDetail?.game?.away] }} vs {{ enumToTeamName[ticketDetail?.game?.home] }}</h2>
             <div class="game-subtitle">2025 KBO</div>
           </div>
           <div class="purchase-status-tag">구매 완료</div>
@@ -30,7 +30,7 @@
         <div class="info-grid">
           <div class="info-item">
             <span class="label">경기 시간</span>
-            <span class="value">{{ ticketDetail?.game?.time }}</span>
+            <span class="value">{{ formatDate(ticketDetail?.game?.date) }}</span>
           </div>
           <div class="info-item">
             <span class="label">경기장</span>
@@ -62,6 +62,10 @@
             <span class="label">티켓 가격</span>
             <span class="value">{{ ticketDetail?.price }}</span>
           </div>
+          <div class="payment-row">
+            <span class="label">매수</span>
+            <span class="value">1</span>
+          </div>
           <div class="payment-row total">
             <span class="label">총 결제 금액</span>
             <span class="value">{{ ticketDetail?.price }}</span>
@@ -78,25 +82,17 @@
           </div>
         </div>
       </div>
-
-      <!-- 액션 버튼 -->
-      <div class="action-buttons">
-        <button class="cancel-btn" @click="requestCancel">
-          응모 취소
-        </button>
-        <button class="refund-btn" @click="requestRefund">
-          환불 요청
-        </button>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import http from '@/utils/http'
 import { API_CONFIG } from '@/config/api.config'
+import { enumToTeamName, teamNameToLogo } from '@/utils/teamNameMap'
+import { formatDate } from '@/utils/dateUtils'
 
 const route = useRoute()
 const router = useRouter()
@@ -107,25 +103,20 @@ let purchaseData = ref(null)
 const ticketDetail = ref(null)
 const ticketId = ref(null)
 
+// 홈 팀 로고 경로를 동적으로 생성하는 computed 속성
+const homeTeamLogoPath = computed(() => {
+  if (ticketDetail.value?.game?.home && teamNameToLogo[ticketDetail.value.game.home]) {
+    const logoFileName = teamNameToLogo[ticketDetail.value.game.home]
+    return `/src/assets/logo/${logoFileName}.svg`
+  }
+  return ''
+})
+
 // 티켓 상세 정보 - 라우트 state에서 가져오거나 API로 조회
 
 // 뒤로 가기
 const goBack = () => {
   router.go(-1)
-}
-
-// 응모 취소
-const requestCancel = () => {
-  if (confirm('응모를 취소하시겠습니까?')) {
-    alert('응모 취소 요청이 접수되었습니다.')
-  }
-}
-
-// 환불 요청
-const requestRefund = () => {
-  if (confirm('환불을 요청하시겠습니까?')) {
-    alert('환불 요청이 접수되었습니다.')
-  }
 }
 
 const fetchTicketDetail = async () => {
@@ -156,7 +147,6 @@ onMounted(() => {
     }
     ticketId.value = purchaseData.value.ticket.ticketId
     fetchTicketDetail()
-    console.log("ticketDetail.value",ticketDetail.value)
 })
 </script>
 
@@ -224,7 +214,6 @@ onMounted(() => {
   height: 50px;
   border-radius: 8px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.1);
 }
 
 .team-logo img {

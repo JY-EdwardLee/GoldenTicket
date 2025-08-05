@@ -16,21 +16,17 @@
           <!-- 구매 완료 태그 -->
           <div class="purchase-status">구매 완료</div>
           
-          <!-- 티켓 이미지 -->
-          <div class="ticket-image">
-            <img src="">  
-          </div>
           
           <!-- 티켓 정보 -->
           <div class="ticket-info">
             <div class="game-details">
               <div class="detail-row">
-                <span class="icon">좌석</span>
-                <span class="label">{{ purchase.ticket.seat }}</span>
+                <span class="label">좌석</span>
+                <span class="value">{{ purchase.ticket.seat }}</span>
               </div>
               <div class="detail-row">
-                <span class="icon">가격</span>
-                <span class="label">{{ purchase.ticket.price }}</span>
+                <span class="label">가격</span>
+                <span class="value">{{ purchase.ticket.price }}</span>
               </div>
             </div>
             

@@ -102,22 +102,7 @@ const stadiumOfTeam = {
 }
 
 // 티켓 데이터 (실제로는 API에서 가져올 데이터)
-const tickets = ref([
-  {
-    id: 1,
-    game: {
-      id: 1,
-      away: 'SSG 랜더스',
-      home: 'KIA 타이거즈',
-      date: '2024.01.15',  
-      stadium: '인천 문학경기장',
-      },
-    time: '18:30',
-    seat: '1루석 A구역 15열 8번',
-    price: '25,000',
-    status: 'BEING_ASSIGNMENT'
-  },
-])
+const tickets = ref([])
 
 // 상태 텍스트 반환
 const getStatusText = (status) => {

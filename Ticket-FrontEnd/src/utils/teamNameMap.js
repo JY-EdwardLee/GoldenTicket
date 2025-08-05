@@ -25,6 +25,18 @@ export const enumToTeamName = {
   'KIWOOM_HEROES': '키움히어로즈',
 };
 
+export const teamNameToLogo = {
+  'KIA_TIGERS': 'kia',
+  'SAMSUNG_LIONS': 'samsung',
+  'LG_TWINS': 'LG',
+  'DOOSAN_BEARS': 'DOOSAN',
+  'KT_WIZ': 'KT',
+  'SSG_LANDERS': 'SSG',
+  'LOTTE_GIANTS': 'LOTTE',
+  'HANHWA_EAGLES': 'HanWha',
+  'NC_DINOS': 'NC',
+  'KIWOOM_HEROES': 'KIWOOM',
+}
 
 export function getEnumTeamName(korName) {
   return teamNameToEnum[korName] || korName;
