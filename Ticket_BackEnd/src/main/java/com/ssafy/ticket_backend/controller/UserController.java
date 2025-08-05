@@ -66,7 +66,7 @@ public class UserController {
             "https://kauth.kakao.com/oauth/authorize" + "?client_id=" + KakaoRestApiKey
                 + "&redirect_uri=" + BE_BASE_URL + "/users/auth/kakao/callback"
                 + "&response_type=code";
-
+        System.out.println("Kakao Redirect URL: " + kakaoAuthUrl);
         return new RedirectView(kakaoAuthUrl);
     }
 
@@ -197,7 +197,6 @@ public class UserController {
         return ResponseEntity.ok(loginUserResponse);
     }
 
-
     /**
      * tempUserId로 Redis에 저장된 임시 사용자 정보 조회
      *
@@ -209,7 +208,6 @@ public class UserController {
         OAuthUserResponse oAuthUserResponse = userService.getTempUserInfo(tempUserId);
         return ResponseEntity.ok(oAuthUserResponse);
     }
-
 
     /**
      * 리프레시 토큰으로 JWT 재발급
