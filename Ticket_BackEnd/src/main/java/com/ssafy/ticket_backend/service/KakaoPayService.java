@@ -5,7 +5,6 @@ import com.ssafy.ticket_backend.dto.response.KakaoPayApproveResponse;
 import com.ssafy.ticket_backend.dto.response.KakaoPayReadyResponse;
 import com.ssafy.ticket_backend.mapper.TransactionMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
-import com.ssafy.ticket_backend.model.KakaoTransaction;
 import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.TicketStatus;
 import com.ssafy.ticket_backend.model.Transaction;
@@ -129,7 +128,6 @@ public class KakaoPayService {
      */
     @Transactional
     public void insertKakaoTransaction(KakaoPayApproveResponse approveResponse) {
-        KakaoTransaction kakaoTransaction = new KakaoTransaction();
         Ticket ticket = transactionMapper.selectTicketByTicketId(
             Long.parseLong(approveResponse.getItem_code()));
 
