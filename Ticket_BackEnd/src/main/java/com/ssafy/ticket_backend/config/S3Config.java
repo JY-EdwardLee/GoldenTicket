@@ -22,10 +22,13 @@ public class S3Config {
 
   @Bean
   public AmazonS3 amazonS3() {
-    BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
+    BasicAWSCredentials credentials = new BasicAWSCredentials("AKIAVWABJXVPSPQQNQ2U",
+        "df1/j5LgdZuOKF3MJXe8pwgAm+HFIloK8JTld77o");
     return AmazonS3ClientBuilder.standard()
-        .withRegion(region)
+        .withRegion("ap-northeast-2")
         .withCredentials(new AWSStaticCredentialsProvider(credentials))
         .build();
   }
 }
+
+// 하드코딩 Test
