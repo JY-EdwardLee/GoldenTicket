@@ -36,12 +36,10 @@ public class KakaoPayService {
     private String host;
     @Value("${kakaopay.ready-url}")
     private String readyUrl;
-    @Value("${kakaopay.base-url}")
-    private String baseUrl;
-    @Value("${kakaopay.cancel-url}")
-    private String cancelUrl;
-    @Value("${kakaopay.fail-url}")
-    private String failUrl;
+    @Value("${BE_BASE_URL}")
+    private String BE_BASE_URL;
+    @Value("${FE_BASE_URL}")
+    private String FE_BASE_URL;
 
     private final RestTemplate restTemplate;
     private final RedisTemplate<String, Object> redisTemplate;
@@ -54,8 +52,8 @@ public class KakaoPayService {
         headers.add("Authorization", "KakaoAK " + apiKey);
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
-        // The success_url needs to include the partner_order_id to retrieve context later
-        String successUrl = baseUrl + "/payment/kakao/success?partner_order_id=" + partnerOrderId;
+        String successUrl =
+            BE_BASE_URL + "/payment/kakao/success?partner_order_id=" + partnerOrderId;
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("cid", cid);
@@ -67,8 +65,8 @@ public class KakaoPayService {
         params.add("total_amount", String.valueOf(kakaoPayRequest.getTotalAmount()));
         params.add("tax_free_amount", "0");
         params.add("approval_url", successUrl);
-        params.add("cancel_url", baseUrl + cancelUrl);
-        params.add("fail_url", baseUrl + failUrl);
+        params.add("cancel_url", BE_BASE_URL + "/payment/kakao/cancel");
+        params.add("fail_url", BE_BASE_URL + "/payment/kakao/fail");
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
 

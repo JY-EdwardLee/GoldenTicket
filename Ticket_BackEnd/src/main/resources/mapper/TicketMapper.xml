@@ -111,7 +111,7 @@
     matched_date,
     image
     FROM tickets
-    WHERE buyer_id = #{userId}
+    WHERE buyer_id = #{userId} and ticket_status = 'TRANSACTION_COMPLETE'
   </select>
 
   <select id="selectWaitListByGameId" resultType="com.ssafy.ticket_backend.model.Waitlist"
@@ -151,7 +151,7 @@
 
   <!-- 티켓 양도 -->
   <update id="transferTicket">
-    UPDATE ticket
+    UPDATE tickets
     SET buyer_id = #{userId},
     matched_date = NOW()
     WHERE ticket_id = #{ticketId}
