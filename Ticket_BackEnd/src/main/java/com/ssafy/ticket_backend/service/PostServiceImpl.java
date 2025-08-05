@@ -121,6 +121,11 @@ public class PostServiceImpl implements PostService {
 
       // 댓글
       List<CommentDetailResponse> comments = commentMapper.getComments(postId);
+      for (CommentDetailResponse cd : comments) {
+        String nickName = userMapper.getNickNameByUserId(cd.getUserId());
+        cd.setNickName(nickName);
+      }
+
       postDetailResponse.setCommentList(comments);
 
       // 사용자 정보

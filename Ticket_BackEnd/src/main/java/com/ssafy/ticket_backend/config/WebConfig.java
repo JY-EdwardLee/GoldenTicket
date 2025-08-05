@@ -9,17 +9,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig {
 
-  @Value("${VITE_PROD_API_URL}")
-  private String Prod_api_url;
+  @Value("${fe_base_url}")
+  private String fe_base_url;
 
-  @Value("${VITE_PROD_FRONT_URL}")
-  private String Prod_front_url;
+  @Value("${be_base_url}")
+  private String be_base_url;
 
-  @Value("${VITE_DEV_API_URL}")
-  private String Local_api_url;
+  @Value("${fe_local_url}")
+  private String fe_local_url;
 
-  @Value("${VITE_DEV_FRONT_URL}")
-  private String Local_front_url;
+  @Value("${be_local_url}")
+  private String be_local_url;
 
   @Bean
   public WebMvcConfigurer corsConfigurer() {
@@ -27,8 +27,8 @@ public class WebConfig {
       @Override
       public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // 모든 API 경로
-            .allowedOrigins(Local_front_url, Prod_front_url,
-                Prod_api_url) // Vue dev 서버 주소
+            .allowedOrigins(fe_local_url, fe_base_url,
+                be_base_url) // Vue dev 서버 주소
             .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS").allowedHeaders("*")
             .allowCredentials(true); // 필요시 쿠키 허용
       }

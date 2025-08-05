@@ -111,7 +111,12 @@ public class S3UserServiceImpl implements S3UserService {
 
   private String generatePresignedPutUrl(String key) {
     try {
-      Date expiration = new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 10); // 10시간
+      // UTC 시간대를 명시적으로 사용
+      java.util.Calendar cal = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+      cal.add(java.util.Calendar.HOUR, 10); // 10시간 후로 설정
+      Date expiration = cal.getTime();
+      
+      // 해당 bucket에 key에 대해서 PUT(업로드) 요청 10시간간 허용 URL 생성
       GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket, key)
           .withMethod(HttpMethod.PUT)
           .withExpiration(expiration);
@@ -255,7 +260,11 @@ public class S3UserServiceImpl implements S3UserService {
 
   private String generatePresignedGetUrl(String key) {
     try {
-      Date expiration = new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 10); // 10시간 임시방편
+      // UTC 시간대를 명시적으로 사용
+      java.util.Calendar cal = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"));
+      cal.add(java.util.Calendar.HOUR, 10); // 10시간 후로 설정
+      Date expiration = cal.getTime();
+      
       GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket, key)
           .withMethod(HttpMethod.GET)
           .withExpiration(expiration);
