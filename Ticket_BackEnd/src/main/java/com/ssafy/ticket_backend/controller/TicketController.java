@@ -47,7 +47,6 @@ public class TicketController {
     @GetMapping("/platform/{platform}")
     public ResponseEntity<List<TicketResponse>> getTicketsFromOtherPlatform(
         @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable String platform) {
-        System.out.println("가~~~~~져옴");
         List<TicketResponse> TicketResponse = ticketService.getTicketsFromOtherPlatform(
             userDetails.getUsername(), platform);
 
