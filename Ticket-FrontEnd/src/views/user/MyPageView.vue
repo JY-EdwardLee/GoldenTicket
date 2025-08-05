@@ -20,9 +20,9 @@
         <div class="user-info">
           <h3 class="username">{{ user?.userName || '' }}</h3>
           <div class="team-section">
-            <div class="team-logo-container" v-if="user?.myTeam">
+            <div class="team-logo-container" v-if="themeStore.selectedTeam.value">
               <img
-                :src="themeStore.currentTheme.value.logo"
+                :src="themeStore.currentTheme.value?.logo"
                 :alt="themeStore.selectedTeam.value"
                 class="team-logo"
                 @error="handleLogoError"
@@ -137,15 +137,20 @@ const user = ref(null)
 user.value = JSON.parse(localStorage.getItem('user'))
 console.log("user", user.value)
 
+// 팀 테마 스토어 (이미 인스턴스로 export됨)
+const themeStore = useTeamThemeStore
+
+// 사용자의 선택된 팀으로 테마 초기화
+if (user.value?.myTeam) {
+  themeStore.setSelectedTeam(user.value.myTeam)
+  console.log('Selected team:', user.value.myTeam)
+}
 
 // 사이드바 열림/닫힘 상태
 const isSidebarOpen = ref(false)
 
 // 회원탈퇴 모달 관리
 const { isDeleteUserModalVisible, openDeleteUserModal, closeDeleteUserModal, handleDeleteUser } = useDeleteUserModal()
-
-// 팀 테마 스토어
-const themeStore = useTeamThemeStore
 
 // 사이드바 토글 함수
 const toggleSidebar = () => {
