@@ -98,7 +98,7 @@
     )
   </select>
 
-  <select id="selectTicketsByUserId" resultType="com.ssafy.ticket_backend.model.Ticket">
+  <select id="selectTicketsByBuyerId" resultType="com.ssafy.ticket_backend.model.Ticket">
     SELECT
     ticket_id,
     ticket_status,
@@ -111,7 +111,7 @@
     matched_date,
     image
     FROM tickets
-    WHERE seller_id = #{userId} or buyer_id = #{userId}
+    WHERE buyer_id = #{userId}
   </select>
 
   <select id="selectWaitListByGameId" resultType="com.ssafy.ticket_backend.model.Waitlist"

@@ -185,18 +185,13 @@ public class UserServiceImpl implements UserService {
         String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
 
         // ✅ 여기서 알림 전송
-        notificationService.sendDelayedNotification(
-            user.getEmail(),
-            "로그인 성공! 실시간 알림이 도착했습니다 🎉",
-            5000
-        );
-
+        notificationService.sendDelayedNotification(user.getEmail(), "로그인 성공! 실시간 알림이 도착했습니다 🎉",
+            5000);
 
         oauthUserResponse = OAuthUserResponse.builder().isRegistered(true)
             .token(new JwtTokenResponse(accessToken, refreshToken)).build();
+
         return oauthUserResponse;
-
-
     }
 
     /**
@@ -268,6 +263,7 @@ public class UserServiceImpl implements UserService {
 
         oauthUserResponse = OAuthUserResponse.builder().isRegistered(true)
             .token(new JwtTokenResponse(accessToken, refreshToken)).build();
+        
         return oauthUserResponse;
     }
 
@@ -442,12 +438,15 @@ public class UserServiceImpl implements UserService {
         List<TransactionResponse> transactionResponses = new ArrayList<>();
 
         for (Transaction transaction : transactions) {
+            System.out.println(transaction.toString());
             TransactionResponse transactionResponse = new TransactionResponse();
 
             Ticket ticket = ticketMapper.selectTicketByTicketId(transaction.getTicketId());
 
             transactionResponse.setTransactionId(transaction.getTransactionId());
             transactionResponse.setTicket(new TicketResponse(ticket));
+
+            transactionResponses.add(transactionResponse);
         }
 
         return transactionResponses;
@@ -458,7 +457,7 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.selectUserByEmail(email);
         List<TicketResponse> ticketResponses = new ArrayList<>();
 
-        for (Ticket ticket : ticketMapper.selectTicketsByUserId(user.getUserId())) {
+        for (Ticket ticket : ticketMapper.selectTicketsByBuyerId(user.getUserId())) {
             TicketResponse ticketResponse = new TicketResponse(ticket);
 
             Game game = gameMapper.selectGameByGameId(ticket.getGameId());

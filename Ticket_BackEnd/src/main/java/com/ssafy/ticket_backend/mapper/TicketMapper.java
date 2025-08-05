@@ -21,7 +21,7 @@ public interface TicketMapper {
 
     boolean checkTicketByGame(Long gameId, String seat, Long userId);
 
-    List<Ticket> selectTicketsByUserId(Long userId);
+    List<Ticket> selectTicketsByBuyerId(Long userId);
 
     List<Waitlist> selectWaitListByGameId(@Param("gameId") Long gameId);
 

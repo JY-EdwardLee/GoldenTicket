@@ -100,8 +100,7 @@ public class UserController {
 
             // 2) 회원가입 페이지로 리다이렉트하면서 tempUserId 전달
             return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http:///signup?tempUserId=" + tempUserId)
-                .build();
+                .header("Location", "http:///signup?tempUserId=" + tempUserId).build();
         }
 
         // 이미 가입된 유저라면 JWT를 HttpOnly 쿠키에 저장
@@ -343,6 +342,7 @@ public class UserController {
     @GetMapping("/me/payments")
     public ResponseEntity<List<TransactionResponse>> getMyPayments(
         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        System.out.println("asdfasdf");
         List<TransactionResponse> transactionResponses = userService.selectBuyListByUserId(
             userDetails.getUsername());
 
