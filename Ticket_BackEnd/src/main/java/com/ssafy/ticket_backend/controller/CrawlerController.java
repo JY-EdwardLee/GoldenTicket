@@ -30,12 +30,10 @@ public class CrawlerController {
     // 팀 이름을 BaseballTeams enum으로 매핑하는 메서드
     private BaseballTeams mapTeamName(String teamName) {
         if (teamName == null || teamName.isEmpty()) {
-            System.out.println("팀 이름이 null이거나 비어있음");
             return null;
         }
 
         String trimmedTeamName = teamName.trim();
-        System.out.println("팀 이름 매핑 시도: '" + trimmedTeamName + "'");
 
         switch (trimmedTeamName) {
             case "KIA":
@@ -59,7 +57,6 @@ public class CrawlerController {
             case "키움":
                 return BaseballTeams.KIWOOM_HEROES;
             default:
-                System.out.println("알 수 없는 팀 이름: '" + trimmedTeamName + "'");
                 return null;
         }
     }
@@ -67,12 +64,10 @@ public class CrawlerController {
     // 경기장 이름을 Stadium enum으로 매핑하는 메서드
     private Stadium mapStadiumName(String stadiumName) {
         if (stadiumName == null || stadiumName.isEmpty()) {
-            System.out.println("경기장 이름이 null이거나 비어있음");
             return null;
         }
 
         String trimmedStadiumName = stadiumName.trim();
-        System.out.println("경기장 이름 매핑 시도: '" + trimmedStadiumName + "'");
 
         switch (trimmedStadiumName) {
             case "잠실":

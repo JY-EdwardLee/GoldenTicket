@@ -65,7 +65,6 @@ const loadPosts = async () => {
     if (Array.isArray(result)) {
       allPosts.value = result;
       updateDisplayedPosts();
-      console.log('공지사항 목록 로드 성공:', result);
     } else {
       error.value = '데이터 형식이 올바르지 않습니다.';
       console.error('공지사항 목록 로드 실패: 잘못된 데이터 형식');

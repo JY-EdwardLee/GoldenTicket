@@ -40,7 +40,7 @@
     FROM
     transaction_states
     WHERE
-    buyer_id = #{userId}
+    buyer_id = #{userId} and transaction_status = 'TRANSACTION_COMPLETE'
   </select>
 
   <select id="selectTicketByTransactionId" resultType="com.ssafy.ticket_backend.model.Ticket"
@@ -54,6 +54,83 @@
   <update id="cancelTransactionByTransactionId" parameterType="long">
     UPDATE transaction_stats
     SET transaction_status = 'CANCEL_WAITING'
+    WHERE transaction_id = #{transactionId}
+  </update>
+
+  <insert id="insertTransaction" parameterType="com.ssafy.ticket_backend.model.Transaction">
+    <selectKey keyProperty="transactionId" resultType="long" order="BEFORE">
+      SELECT nextval('transaction_states_transaction_id_seq')
+    </selectKey>
+
+    INSERT INTO transaction_states (transaction_id,
+    ticket_id,
+    seller_id,
+    buyer_id,
+    transaction_status)
+    VALUES (
+    #{transactionId},
+    #{ticketId},
+    #{sellerId},
+    #{buyerId},
+    #{transactionStatus}
+    )
+  </insert>
+
+  <resultMap id="WaitlistResult" type="com.ssafy.ticket_backend.model.Waitlist">
+    <id property="id" column="waitlist_id"/>
+    <result property="userId" column="user_id"/>
+    <result property="gameId" column="game_id"/>
+    <result property="createdAt" column="created_at"/>
+    <result property="status" column="waitlist_status"/>
+    <result property="transactionId" column="transaction_id"/>
+  </resultMap>
+
+  <select id="selectWaitlistByUserIdAndGameId"
+    resultMap="WaitlistResult"
+    parameterType="map">
+    SELECT *
+    FROM waitlists
+    WHERE user_id = #{userId}
+    AND game_id = #{gameId}
+    LIMIT 1
+  </select>
+
+  <update id="updateWaitlist" parameterType="com.ssafy.ticket_backend.model.Waitlist">
+    UPDATE waitlists
+    <set>
+      <if test="status != null">
+        waitlist_status = #{status},
+      </if>
+      <if test="transactionId != null">
+        transaction_id = #{transactionId},
+      </if>
+    </set>
+    WHERE waitlist_id = #{id}
+  </update>
+
+  <select id="selectTransactionByTicketId" parameterType="long"
+    resultType="com.ssafy.ticket_backend.model.Transaction">
+    SELECT *
+    FROM transaction_states
+    WHERE ticket_id = #{ticketId}
+  </select>
+
+  <update id="updateTransaction" parameterType="com.ssafy.ticket_backend.model.Transaction">
+    UPDATE transaction_states
+    <set>
+      <if test="ticketId != null">
+        ticket_id = #{ticketId},
+      </if>
+      <if test="sellerId != null">
+        seller_id = #{sellerId},
+      </if>
+      <if test="buyerId != null">
+        buyer_id = #{buyerId},
+      </if>
+      <if test="transactionStatus != null">
+        transaction_status = #{transactionStatus},
+      </if>
+    </set>
     WHERE transaction_id = #{transactionId}
   </update>
 </mapper>

@@ -41,7 +41,7 @@
       @pageChange="handlePageChange"
     />
     
-    <button class="write-btn" @click="handleWriteClick">글쓰기</button>
+    <button v-if="authStore.isAuthenticated" class="write-btn" @click="handleWriteClick">글쓰기</button>
   </div>
 </template>
 
@@ -55,6 +55,7 @@ import { boardAPI, BOARD_TYPES } from '@/api/board.js';
 import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const searchValue = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 10; // 페이지당 게시글 수
@@ -79,7 +80,6 @@ const loadPosts = async () => {
     if (Array.isArray(result)) {
       allPosts.value = result;
       updateDisplayedPosts();
-      console.log('게시글 목록 로드 성공:', result);
     } else {
       error.value = '데이터 형식이 올바르지 않습니다.';
       console.error('게시글 목록 로드 실패: 잘못된 데이터 형식');

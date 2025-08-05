@@ -272,7 +272,9 @@ const handleImageError = (event) => {
 
 // 컴포넌트 마운트 시 테마 초기화
 onMounted(async () => {
+  
   await authStore.getUserInfo()
+  
   // 저장된 팀이 있으면 해당 팀으로 설정
   const userInfo = localStorage.getItem('user')
   console.log('userInfo : ', userInfo)

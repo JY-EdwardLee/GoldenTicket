@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 // 로그인한 유저 응답  DTO
 public class LoginUserResponse {
 
+    private Long userId;
     private String accessToken;
     private String userName;
     private String email;

@@ -14,7 +14,6 @@ public interface TicketMapper {
 
     void updateTicket(Ticket ticket);
 
-    // TODO 오류날 가능성 높음. 테스트 불가능한 상황
     List<OtherPlatformTicket> selectTicketsFromOtherPlatform(@Param("userEmail") String userEmail,
         @Param("platform") String platform);
 
@@ -22,7 +21,7 @@ public interface TicketMapper {
 
     boolean checkTicketByGame(Long gameId, String seat, Long userId);
 
-    List<Ticket> selectTicketsByUserId(Long userId);
+    List<Ticket> selectTicketsByBuyerId(Long userId);
 
     List<Waitlist> selectWaitListByGameId(@Param("gameId") Long gameId);
 
