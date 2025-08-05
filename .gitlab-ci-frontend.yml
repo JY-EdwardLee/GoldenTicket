@@ -6,29 +6,37 @@ frontend_build:
   image: node:24
   stage: build
   script:
+    # - echo "🏗️ Building frontend..."
+    # - cd $FRONTEND_DIR
+    
+    # # 완전 초기화
+    # - rm -rf node_modules package-lock.json
+    # - npm cache clean --force
+    
+    # # 아키텍처 정보 확인
+    # - uname -a
+    # - node -e "console.log(process.platform, process.arch)"
+    
+    # # 의존성 설치
+    # - npm install
+    
+    # # rollup 바이너리 강제 설치
+    # - npm install @rollup/rollup-linux-x64-gnu --save-dev --force
+    
+    # # 또는 전체 rollup 재설치
+    # - npm uninstall rollup
+    # - npm install rollup --force
+    
+    # - npm run build 
     - echo "🏗️ Building frontend..."
     - cd $FRONTEND_DIR
-    
-    # 완전 초기화
-    - rm -rf node_modules package-lock.json
-    - npm cache clean --force
-    
-    # 아키텍처 정보 확인
-    - uname -a
-    - node -e "console.log(process.platform, process.arch)"
-    
-    # 의존성 설치
-    - npm install
-    
-    # rollup 바이너리 강제 설치
-    - npm install @rollup/rollup-linux-x64-gnu --save-dev --force
-    
-    # 또는 전체 rollup 재설치
-    - npm uninstall rollup
-    - npm install rollup --force
-    
-    - npm run build 
-    
+
+    # 초기화는 하되, lock 파일은 유지
+    - rm -rf node_modules
+    - npm ci   # <-- 핵심
+
+    # 빌드 실행
+    - npm run build
   artifacts:
     paths:
       - $FRONTEND_DIR/$BUILD_DIR/
