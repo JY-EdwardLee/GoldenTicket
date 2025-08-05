@@ -4,92 +4,92 @@ import { ref, computed } from 'vue'
 const createTeamThemeStore = () => {
   // KBO 팀별 색상 및 로고 정의
   const teamColors = {
-    '삼성 라이온즈': {
+    'SAMSUNG_LIONS': {
       primary: '#1f4788',
       secondary: '#ffffff',
       accent: '#1f4788',
       gradient: 'linear-gradient(135deg, #1f4788 0%, #2856a3 100%)',
-      logo: new URL('../assets/logo/samsung.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/samsung.svg', import.meta.url).href,
       stadium: '대구 삼성 라이온즈 파크'
     },
-    '키움 히어로즈': {
+    'KIWOOM_HEROES': {
       primary: '#820024',
       secondary: '#ffd700',
       accent: '#820024',
       gradient: 'linear-gradient(135deg, #820024 0%, #a0002d 100%)',
-      logo: new URL('../assets/logo/KIWOOM.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/KIWOOM.svg', import.meta.url).href,
       stadium: '고척 스카이돔'
     },
-    'LG 트윈스': {
+    'LG_TWINS': {
       primary: '#c70025',
       secondary: '#000000',
       accent: '#c70025',
       gradient: 'linear-gradient(135deg, #c70025 0%, #e6002d 100%)',
-      logo: new URL('../assets/logo/LG.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/LG.svg', import.meta.url).href,
       stadium: '서울종합운동장 야구장'
     },
-    '두산 베어스': {
+    'DOOSAN_BEAR': {
       primary: '#131230',
       secondary: '#d4af37',
       accent: '#131230',
       gradient: 'linear-gradient(135deg, #131230 0%, #1a1a4a 100%)',
-      logo: new URL('../assets/logo/DOOSAN.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/DOOSAN.svg', import.meta.url).href,
       stadium: '서울종합운동장 야구장'
     },
-    'KT 위즈': {
+    'KT_WIZ': {
       primary: '#000000',
       secondary: '#ff0000',
       accent: '#ff0000',
       gradient: 'linear-gradient(135deg, #000000 0%, #333333 100%)',
-      logo: new URL('../assets/logo/KT.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/KT.svg', import.meta.url).href,
       stadium: '수원 케이티 위즈 파크'
     },
-    'SSG 랜더스': {
+    'SSG_LANDERS': {
       primary: '#ce0e2d',
       secondary: '#ffffff',
       accent: '#ce0e2d',
       gradient: 'linear-gradient(135deg, #ce0e2d 0%, #e51c3a 100%)',
-      logo: new URL('../assets/logo/SSG.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/SSG.svg', import.meta.url).href,
       stadium: '인천 SSG 랜더스필드'
     },
-    'NC 다이노스': {
+    'NC_DINOS': {
       primary: '#315288',
       secondary: '#d4af37',
       accent: '#315288',
       gradient: 'linear-gradient(135deg, #315288 0%, #3d639c 100%)',
-      logo: new URL('../assets/logo/NC.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/NC.svg', import.meta.url).href,
       stadium: '창원NC파크'
     },
-    '기아 타이거즈': {
+    'KIA_TIGERS': {
       primary: '#000000',
       secondary: '#ff0000',
       accent: '#ea1538',
       gradient: 'linear-gradient(135deg, #000000 0%, #ea1538 100%)',
-      logo: new URL('../assets/logo/kia.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/kia.svg', import.meta.url).href,
       stadium: '광주 기아 챔피언스 필드'
     },
-    '롯데 자이언츠': {
+    'LOTTE_GIANTS': {
       primary: '#041e42',
       secondary: '#c5002b',
       accent: '#041e42',
       gradient: 'linear-gradient(135deg, #041e42 0%, #0b2d5a 100%)',
-      logo: new URL('../assets/logo/LOTTE.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/LOTTE.svg', import.meta.url).href,
       stadium: '사직 야구장'
     },
-    '한화 이글스': {
+    'HANHWA_EAGLES': {
       primary: '#ff6600',
       secondary: '#000000',
       accent: '#ff6600',
       gradient: 'linear-gradient(135deg, #ff6600 0%, #ff7a1a 100%)',
-      logo: new URL('../assets/logo/HanWha.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/HanWha.svg', import.meta.url).href,
       stadium: '대전 한화생명 볼파크'
     },
-    'KIA 타이거즈': {
+    'KIA_TIGERS': {
       primary: '#ea1538',
       secondary: '#000000',
       accent: '#ea1538',
       gradient: 'linear-gradient(135deg, #ea1538 0%, #ff1c3f 100%)',
-      logo: new URL('../assets/logo/kia.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/kia.svg', import.meta.url).href,
       stadium: '고척 스카이돔'
     }
   }
