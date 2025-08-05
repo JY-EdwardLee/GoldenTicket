@@ -165,7 +165,6 @@ onMounted(() => {
   const purchaseId = route.params.id
   try {
     const response = http.get(API_CONFIG.TICKET.DETAIL(purchaseId))
-    
     ticketDetail.value = response.data
   } catch (error) {
     console.error('Failed to fetch ticket detail:', error)

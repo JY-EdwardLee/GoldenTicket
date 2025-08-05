@@ -72,7 +72,7 @@
     </div>
 
     <div class="team-logo">
-      <img src="@/assets/ssg_landers_logo.png" alt="SSG Landers">
+      <img src="@/assets/logo/SSG.svg" alt="SSG Landers">
       <p>NO LIMITS, AMAZING LANDERS</p>
     </div>
   </div>
@@ -83,10 +83,6 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import http from '@/utils/http'
 const route = useRoute();
-const ticketId = route.params.id;
-
-// 변수 선언
-const route
 
 
 // Fetch ticket details based on ticketId
@@ -106,8 +102,9 @@ const ticketDetails = ref({
 });
 
 onMounted(() => {
+  ticketId.value = route.params.id
   // Fetch ticket details from API using ticketId
-  const respone = Http.get(API_CONFIG.TICKET_DETAIL(ticketId))
+  const respone = http.get(API_CONFIG.TICKET_DETAIL(ticketId.value))
   console.log(respone)
   // fetchTicketDetails(ticketId);
 });
