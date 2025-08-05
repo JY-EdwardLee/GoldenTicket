@@ -16,6 +16,8 @@ import com.ssafy.ticket_backend.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -62,11 +64,14 @@ public class UserController {
      */
     @GetMapping("/auth/kakao")
     public RedirectView redirectToKakaoLogin() {
-        String kakaoAuthUrl =
-            "https://kauth.kakao.com/oauth/authorize" + "?client_id=" + KakaoRestApiKey
-                + "&redirect_uri=" + BE_BASE_URL + "/users/auth/kakao/callback"
-                + "&response_type=code";
-        System.out.println("Kakao Redirect URL: " + kakaoAuthUrl);
+        String encodedRedirectUri = URLEncoder.encode(BE_BASE_URL + "/users/auth/kakao/callback",
+            StandardCharsets.UTF_8);
+
+        String kakaoAuthUrl = "https://kauth.kakao.com/oauth/authorize"
+            + "?client_id=" + KakaoRestApiKey
+            + "&redirect_uri=" + encodedRedirectUri
+            + "&response_type=code";
+        
         return new RedirectView(kakaoAuthUrl);
     }
 
