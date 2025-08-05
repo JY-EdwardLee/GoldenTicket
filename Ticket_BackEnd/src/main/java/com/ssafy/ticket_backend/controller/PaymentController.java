@@ -3,14 +3,13 @@ package com.ssafy.ticket_backend.controller;
 import com.ssafy.ticket_backend.dto.request.KakaoPayRequest;
 import com.ssafy.ticket_backend.dto.response.KakaoPayApproveResponse;
 import com.ssafy.ticket_backend.dto.response.KakaoPayReadyResponse;
-import com.ssafy.ticket_backend.dto.response.TossPayReadyResponse;
-import com.ssafy.ticket_backend.dto.response.TossPayResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.KakaoPayService;
 import com.ssafy.ticket_backend.service.TicketService;
-import com.ssafy.ticket_backend.service.TossPayService;
+import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,7 +27,6 @@ public class PaymentController {
 
     private final TicketService ticketService;
     private final KakaoPayService kakaoPayService;
-    private final TossPayService tossPayService;
 
     /**
      * 결제 준비 요청
@@ -61,7 +59,12 @@ public class PaymentController {
             ticketService.transferTicketToBuyer(approveResponse.getItem_code(),
                 approveResponse.getPartner_user_id());
 
-            return ResponseEntity.ok(approveResponse);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(URI.create(
+                "http://i13a109.p.ssafy.io/mypage/tickets/" + approveResponse.getItem_code()));
+//                "http://localhost:5173/mypage/tickets/" + approveResponse.getItem_code()));
+
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
         } catch (IllegalStateException e) {
             // Redis에서 데이터를 찾지 못한 경우 (만료 또는 잘못된 요청)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -74,9 +77,10 @@ public class PaymentController {
      */
     @GetMapping("/kakao/cancel")
     public ResponseEntity<String> kakaoCancel() {
-        // TODO: 결제 취소 시 처리할 비즈니스 로직 (예: DB 주문 상태 변경)
-        // 프론트엔드의 결제 취소 페이지로 리다이렉트
-        return ResponseEntity.status(HttpStatus.OK).body("결제 취소");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create("http://localhost:3000/payment/cancel"));
+
+        return new ResponseEntity<>(headers, HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -84,32 +88,9 @@ public class PaymentController {
      */
     @GetMapping("/kakao/fail")
     public ResponseEntity<String> kakaoFail() {
-        // TODO: 결제 실패 시 처리할 비즈니스 로직 (예: DB 주문 상태 변경)
-        // 프론트엔드의 결제 실패 페이지로 리다이렉트
-        return ResponseEntity.status(HttpStatus.OK).body("결제 실패");
-    }
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create("http://localhost:3000/payment/cancel"));
 
-    @PostMapping("/toss/ready")
-    public ResponseEntity<TossPayReadyResponse> readyTossPayment() {
-        String orderId = "toss-" + UUID.randomUUID().toString();
-
-        // TODO: request에서 받은 상품 정보로 금액(amount) 및 주문명(orderName) 설정
-        // TODO: 현재 로그인한 사용자 정보로 고객명(customerName) 설정
-
-        TossPayReadyResponse readyResponse = tossPayService.readyPayment(orderId, "샘플 주문", 0,
-            "SSAFY");
-
-        return ResponseEntity.ok(readyResponse);
-    }
-
-    @PostMapping("/toss/confirm")
-    public ResponseEntity<TossPayResponse> confirmTossPayment(
-        @RequestParam("paymentKey") String paymentKey, @RequestParam("orderId") String orderId,
-        @RequestParam("amount") int amount) {
-
-        TossPayResponse approvalResponse = tossPayService.confirmPayment(paymentKey, orderId,
-            amount);
-
-        return ResponseEntity.ok(approvalResponse);
+        return new ResponseEntity<>(headers, HttpStatus.BAD_REQUEST);
     }
 }

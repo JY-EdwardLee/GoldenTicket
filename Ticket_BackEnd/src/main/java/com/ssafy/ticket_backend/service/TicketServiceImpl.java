@@ -5,13 +5,16 @@ import com.ssafy.ticket_backend.dto.response.TicketResponse;
 import com.ssafy.ticket_backend.exception.TicketTransferException;
 import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.TicketMapper;
+import com.ssafy.ticket_backend.mapper.TransactionMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.Game;
 import com.ssafy.ticket_backend.model.OtherPlatformTicket;
 import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.TicketStatus;
+import com.ssafy.ticket_backend.model.Transaction;
 import com.ssafy.ticket_backend.model.User;
 import com.ssafy.ticket_backend.model.Waitlist;
+import com.ssafy.ticket_backend.model.WaitlistStatus;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +30,7 @@ public class TicketServiceImpl implements TicketService {
     private final UserMapper userMapper;
     private final TicketMapper ticketMapper;
     private final GameMapper gameMapper;
+    private final TransactionMapper transactionMapper;
 
     @Transactional
     @Override
@@ -48,9 +52,7 @@ public class TicketServiceImpl implements TicketService {
             if (game.isEnded()) {  // 이미 끝난 경기라면
                 throw new TicketTransferException("이미 종료된 경기입니다.");
             }
-
             List<Waitlist> waitlists = ticketMapper.selectWaitingWaitListByGameId(game.getGameId());
-
             // 대기열이 있다면
             if (!waitlists.isEmpty()) {
                 // 무작위 추첨
@@ -58,28 +60,43 @@ public class TicketServiceImpl implements TicketService {
                 for (Waitlist w : waitlists) {
                     User u = userMapper.selectUserByUserId(w.getUserId());
 
-                    while (u.getWeight() > 0) {
+                    do {
                         randomPicks.add(u.getUserId());
 
                         u.setWeight(u.getWeight() / 10);
-                    }
+                    } while (u.getWeight() > 0);
                 }
 
                 Long buyer = randomPicks.get(
                     ThreadLocalRandom.current().nextInt(randomPicks.size()));
 
-                // 가중치 감소
-                userMapper.decreaseWeightByUserId(buyer);
-
+                Waitlist waitlist = transactionMapper.selectWaitlistByUserIdAndGameId(buyer,
+                    game.getGameId());
+                
                 ticket.setBuyerId(buyer);
                 ticket.setTicketStatus(TicketStatus.BEING_PAYING);
                 ticket.setMatchedDate(LocalDateTime.now());
 
-                ticketMapper.updateTicket(ticket);
-            } else {
-                ticket.setTicketStatus(TicketStatus.BEING_ASSIGNMENT);
+                Transaction transaction = new Transaction();
+                transaction.setTicketId(ticket.getTicketId());
+                transaction.setBuyerId(ticket.getBuyerId());
+                transaction.setSellerId(ticket.getSellerId());
+                transaction.setTransactionStatus("WAITING_PAYING");
 
                 ticketMapper.updateTicket(ticket);
+                userMapper.decreaseWeightByUserId(buyer);  // 가중치 감소
+
+                transactionMapper.insertTransaction(transaction);
+                Long transactionId = transaction.getTransactionId();
+
+                waitlist.setStatus(WaitlistStatus.WAITING_PAYING);
+                waitlist.setTransactionId(transactionId);
+                transactionMapper.updateWaitlist(waitlist);
+            } else {  // 대기열이 없다면
+                throw new TicketTransferException("응모자가 없습니다.");
+//                ticket.setTicketStatus(TicketStatus.BEING_ASSIGNMENT);
+//
+//                ticketMapper.updateTicket(ticket);
             }
 
             TicketResponse ticketResponse = new TicketResponse(ticket);
@@ -91,6 +108,7 @@ public class TicketServiceImpl implements TicketService {
         } catch (TicketTransferException e) {
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new TicketTransferException("티켓 양도 중 오류가 발생했습니다.");
         }
     }

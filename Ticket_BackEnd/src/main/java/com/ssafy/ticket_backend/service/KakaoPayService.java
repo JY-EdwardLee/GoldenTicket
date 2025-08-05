@@ -5,9 +5,9 @@ import com.ssafy.ticket_backend.dto.response.KakaoPayApproveResponse;
 import com.ssafy.ticket_backend.dto.response.KakaoPayReadyResponse;
 import com.ssafy.ticket_backend.mapper.TransactionMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
-import com.ssafy.ticket_backend.model.KakaoTransaction;
 import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.TicketStatus;
+import com.ssafy.ticket_backend.model.Transaction;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -128,16 +128,15 @@ public class KakaoPayService {
      */
     @Transactional
     public void insertKakaoTransaction(KakaoPayApproveResponse approveResponse) {
-        KakaoTransaction kakaoTransaction = new KakaoTransaction();
         Ticket ticket = transactionMapper.selectTicketByTicketId(
             Long.parseLong(approveResponse.getItem_code()));
 
-        kakaoTransaction.setBuyerId(ticket.getBuyerId());
-        kakaoTransaction.setSellerId(ticket.getSellerId());
-        kakaoTransaction.setTicketId(ticket.getTicketId());
-        kakaoTransaction.setTransactionStatus(String.valueOf(TicketStatus.TRANSACTION_COMPLETE));
+        // 거래 기록 갱신
+        Transaction transaction = transactionMapper.selectTransactionByTicketId(
+            ticket.getTicketId());
+        transaction.setTransactionStatus(String.valueOf(TicketStatus.TRANSACTION_COMPLETE));
+        transactionMapper.updateTransaction(transaction);
 
-        transactionMapper.insertKakaoTransaction(kakaoTransaction);  // 거래 기록 추가
         transactionMapper.transactionComplete(ticket.getTicketId());  // 티켓의 거래 상태 변경
     }
 }
