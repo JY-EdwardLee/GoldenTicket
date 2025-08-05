@@ -1,8 +1,8 @@
 <template>
   <div class="ticket-detail">
     <div class="ticket-header">
-      <h2>SSG 랜더스</h2>
-      <div class="ticket-status">이용 완료</div>
+      <h2>{{ ticketDetails.homeTeam }}</h2>
+      <div class="ticket-status">{{ ticketDetails.status }}</div>
     </div>
     
     <div class="player-info">
@@ -20,35 +20,31 @@
 
     <div class="match-info">
       <div class="teams">
-        <span class="home-team">SSG 랜더스</span>
+        <span class="home-team">{{ ticketDetails.game.home }}</span>
         <span class="vs">VS</span>
-        <span class="away-team">키움 히어로즈</span>
+        <span class="away-team">{{ ticketDetails.game.away }}</span>
       </div>
       
       <div class="match-details">
         <div class="detail-row">
           <span class="label">경기일시</span>
-          <span class="value">2025년 7월 24일 (목) 19:00 경기시작</span>
+          <span class="value">{{ ticketDetails.game.date }}</span>
         </div>
         <div class="detail-row">
           <span class="label">경기장소</span>
-          <span class="value">인천 SSG 랜더스필드, 미추홀구 인천</span>
+          <span class="value">{{ ticketDetails.game.stadium }}</span>
         </div>
         <div class="detail-row">
           <span class="label">좌석정보</span>
-          <span class="value">네이 1루석 A열 15-16</span>
-        </div>
-        <div class="detail-row">
-          <span class="label">입장안내</span>
-          <span class="value">메인 게이트 / 18:00 입장가능</span>
+          <span class="value">{{ ticketDetails.seat }}</span>
         </div>
         <div class="detail-row">
           <span class="label">티켓가격</span>
-          <span class="value">일반석 14,000원</span>
+          <span class="value">{{ ticketDetails.price }}</span>
         </div>
         <div class="detail-row">
           <span class="label">티켓번호</span>
-          <span class="value">#T240724001</span>
+          <span class="value">{{ ticketDetails.ticketId }}</span>
         </div>
       </div>
     </div>
@@ -82,31 +78,27 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import http from '@/utils/http'
+import { API_CONFIG } from '@/config/api.config'
 const route = useRoute();
-
+const ticketId = ref(route.params.id);
 
 // Fetch ticket details based on ticketId
-const ticketDetails = ref({
-  homeTeam: 'SSG 랜더스',
-  awayTeam: '키움 히어로즈',
-  date: '2025-07-24T19:00:00',
-  stadium: '인천 SSG 랜더스필드',
-  section: '네이 1루석',
-  row: 'A',
-  seat: '15-16',
-  gate: '메인 게이트',
-  entryTime: '18:00',
-  price: 14000,
-  ticketNumber: 'T240724001',
-  status: 'used' // 'used', 'upcoming', 'cancelled'
-});
+const ticketDetails = ref({});
+
+const fetchTicketDetails = async () => {
+  try {
+    const response = await http.get(API_CONFIG.TICKET.DETAIL(ticketId.value))
+    ticketDetails.value = response.data
+    console.log(ticketDetails.value)
+  } catch (error) {
+    console.error('Error fetching ticket details:', error)
+  }
+}
 
 onMounted(() => {
   ticketId.value = route.params.id
   // Fetch ticket details from API using ticketId
-  const respone = http.get(API_CONFIG.TICKET_DETAIL(ticketId.value))
-  console.log(respone)
-  // fetchTicketDetails(ticketId);
+  fetchTicketDetails(ticketId.value)
 });
 </script>
 
