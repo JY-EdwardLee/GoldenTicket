@@ -50,7 +50,6 @@ public class TicketServiceImpl implements TicketService {
             }
 
             List<Waitlist> waitlists = ticketMapper.selectWaitingWaitListByGameId(game.getGameId());
-
             // 대기열이 있다면
             if (!waitlists.isEmpty()) {
                 // 무작위 추첨
@@ -76,10 +75,11 @@ public class TicketServiceImpl implements TicketService {
                 ticket.setMatchedDate(LocalDateTime.now());
 
                 ticketMapper.updateTicket(ticket);
-            } else {
-                ticket.setTicketStatus(TicketStatus.BEING_ASSIGNMENT);
-
-                ticketMapper.updateTicket(ticket);
+            } else {  // 대기열이 없다면
+                throw new TicketTransferException("응모자가 없습니다.");
+//                ticket.setTicketStatus(TicketStatus.BEING_ASSIGNMENT);
+//
+//                ticketMapper.updateTicket(ticket);
             }
 
             TicketResponse ticketResponse = new TicketResponse(ticket);

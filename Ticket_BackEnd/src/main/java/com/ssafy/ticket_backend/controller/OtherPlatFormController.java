@@ -61,10 +61,7 @@ public class OtherPlatFormController {
     public String generateDummyData() {
         try {
             List<String> emailList = userMapper.getUserEmailForDummy();
-            System.out.println("사용자 수: " + emailList.size());
-
             List<Game> gameList = gameMapper.getAllGame();
-            System.out.println("게임 수: " + gameList.size());
 
             int generatedCount = 0;
 
