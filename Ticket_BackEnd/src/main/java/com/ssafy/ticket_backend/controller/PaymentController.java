@@ -9,8 +9,10 @@ import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.KakaoPayService;
 import com.ssafy.ticket_backend.service.TicketService;
 import com.ssafy.ticket_backend.service.TossPayService;
+import java.net.URI;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -61,7 +63,12 @@ public class PaymentController {
             ticketService.transferTicketToBuyer(approveResponse.getItem_code(),
                 approveResponse.getPartner_user_id());
 
-            return ResponseEntity.ok(approveResponse);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(URI.create(
+//                "http://i13a109.p.ssafy.io/mypage/tickets/" + approveResponse.getItem_code()));
+                "http://localhost:5173/mypage/tickets/" + approveResponse.getItem_code()));
+
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
         } catch (IllegalStateException e) {
             // Redis에서 데이터를 찾지 못한 경우 (만료 또는 잘못된 요청)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -74,9 +81,10 @@ public class PaymentController {
      */
     @GetMapping("/kakao/cancel")
     public ResponseEntity<String> kakaoCancel() {
-        // TODO: 결제 취소 시 처리할 비즈니스 로직 (예: DB 주문 상태 변경)
-        // 프론트엔드의 결제 취소 페이지로 리다이렉트
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("결제 취소");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create("http://localhost:3000/payment/cancel"));
+
+        return new ResponseEntity<>(headers, HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -84,9 +92,10 @@ public class PaymentController {
      */
     @GetMapping("/kakao/fail")
     public ResponseEntity<String> kakaoFail() {
-        // TODO: 결제 실패 시 처리할 비즈니스 로직 (예: DB 주문 상태 변경)
-        // 프론트엔드의 결제 실패 페이지로 리다이렉트
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("결제 실패");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create("http://localhost:3000/payment/cancel"));
+
+        return new ResponseEntity<>(headers, HttpStatus.BAD_REQUEST);
     }
 
     @PostMapping("/toss/ready")
