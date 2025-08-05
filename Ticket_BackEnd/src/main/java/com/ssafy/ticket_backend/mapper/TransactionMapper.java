@@ -1,6 +1,5 @@
 package com.ssafy.ticket_backend.mapper;
 
-import com.ssafy.ticket_backend.model.KakaoTransaction;
 import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.Transaction;
 import com.ssafy.ticket_backend.model.Waitlist;
@@ -10,9 +9,6 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface TransactionMapper {
-
-    void insertKakaoTransaction(
-        @Param("kakaoPayApproveResponse") KakaoTransaction kakaoTransaction);
 
     Ticket selectTicketByTicketId(@Param("ticketId") long ticketId);
 

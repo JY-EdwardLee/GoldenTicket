@@ -61,8 +61,8 @@ public class PaymentController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(URI.create(
-//                "http://i13a109.p.ssafy.io/mypage/tickets/" + approveResponse.getItem_code()));
-                "http://localhost:5173/mypage/tickets/" + approveResponse.getItem_code()));
+                "http://i13a109.p.ssafy.io/mypage/tickets/" + approveResponse.getItem_code()));
+//                "http://localhost:5173/mypage/tickets/" + approveResponse.getItem_code()));
 
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
         } catch (IllegalStateException e) {
