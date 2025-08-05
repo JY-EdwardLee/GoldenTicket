@@ -20,19 +20,19 @@
 
     <div class="match-info">
       <div class="teams">
-        <span class="home-team">{{ ticketDetails.game.home }}</span>
+        <span class="home-team">{{ enumToTeamName(ticketDetails.game.home) }}</span>
         <span class="vs">VS</span>
-        <span class="away-team">{{ ticketDetails.game.away }}</span>
+        <span class="away-team">{{ enumToTeamName(ticketDetails.game.away) }}</span>
       </div>
       
       <div class="match-details">
         <div class="detail-row">
           <span class="label">경기일시</span>
-          <span class="value">{{ ticketDetails.game.date }}</span>
+          <span class="value">{{ formatDate(ticketDetails.game.date) }}</span>
         </div>
         <div class="detail-row">
           <span class="label">경기장소</span>
-          <span class="value">{{ ticketDetails.game.stadium }}</span>
+          <span class="value">{{ stadiumOfTeam(ticketDetails.game.home) }}</span>
         </div>
         <div class="detail-row">
           <span class="label">좌석정보</span>
@@ -79,6 +79,9 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import http from '@/utils/http'
 import { API_CONFIG } from '@/config/api.config'
+import { formatDate } from '@/utils/formatDate'
+import { enumToTeamName } from '@/utils/teamNameMap'
+import {stadiumOfTeam} from '@/utils/teamStadium'
 const route = useRoute();
 const ticketId = ref(route.params.id);
 

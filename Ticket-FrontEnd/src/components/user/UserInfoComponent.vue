@@ -17,7 +17,7 @@
           <label>이름</label>
           <div class="input-wrapper">
             <div class="input-icon">👤</div>
-            <input type="text" :value="user?.userName || ''" readonly>
+            <input type="text" :value="user?.userName || ''">
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -39,7 +39,7 @@
           <label>닉네임</label>
           <div class="input-wrapper">
             <div class="input-icon">🏷️</div>
-            <input type="text" :value="user?.nickName || ''" readonly>
+            <input type="text" :value="user?.nickName || ''">
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -50,7 +50,7 @@
           <label>전화번호</label>
           <div class="input-wrapper">
             <div class="input-icon">📱</div>
-            <input type="tel" :value="user?.phoneNumber || ''" readonly>
+            <input type="tel" :value="user?.phoneNumber || ''">
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -61,7 +61,7 @@
           <label>생년월일</label>
           <div class="input-wrapper">
             <div class="input-icon">🎂</div>
-            <input type="date" :value="user?.birthDate || ''">
+            <input type="date" :value="user?.birthDate || ''" readonly>
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -175,7 +175,6 @@ import { useAuthStore } from '../../stores/auth.js'
 // 테마 스토어 사용
 const themeStore = useTeamThemeStore
 const authStore = useAuthStore()
-const userInfo = localStorage.getItem('userInfo')
 const user = ref(null)
 
 // 팀 정보 데이터
@@ -275,9 +274,7 @@ onMounted(async () => {
   await authStore.getUserInfo()
   // 저장된 팀이 있으면 해당 팀으로 설정
   const userInfo = localStorage.getItem('user')
-  console.log('userInfo : ', userInfo)
   const savedTeam = authStore.user.value?.myTeam
-  console.log('savedTeam : ', savedTeam)
   if (userInfo) {
     user.value = JSON.parse(userInfo)
   if (savedTeam) {

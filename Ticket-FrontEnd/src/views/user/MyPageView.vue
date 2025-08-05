@@ -18,9 +18,9 @@
           <div class="avatar-icon">👤</div>
         </div>
         <div class="user-info">
-          <h3 class="username">홍길동</h3>
+          <h3 class="username">{{ user?.userName || '' }}</h3>
           <div class="team-section">
-            <div class="team-logo-container" v-if="themeStore.selectedTeam.value">
+            <div class="team-logo-container" v-if="user?.myTeam">
               <img
                 :src="themeStore.currentTheme.value.logo"
                 :alt="themeStore.selectedTeam.value"
@@ -128,9 +128,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onActivated, computed } from 'vue'
 import { useDeleteUserModal } from '../../composables/useDeleteUserModal.js'
 import { useTeamThemeStore } from '../../stores/teamTheme.js'
+import { useAuthStore } from '../../stores/auth.js'
+
+const user = ref(null)
+user.value = JSON.parse(localStorage.getItem('user'))
+console.log("user", user.value)
+
 
 // 사이드바 열림/닫힘 상태
 const isSidebarOpen = ref(false)
@@ -161,6 +167,7 @@ const handleOpenDeleteUserModal = () => {
 const handleLogoError = (event) => {
   event.target.src = 'https://via.placeholder.com/30x30/cccccc/666666?text=⚾'
 }
+
 </script>
 
 <style scoped>

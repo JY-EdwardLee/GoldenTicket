@@ -7,7 +7,7 @@
           <span class="back-icon">‹</span>
           구매 상세 정보
         </button>
-        <div class="order-number">주문번호: {{ orderNumber }}</div>
+        <div class="order-number">주문번호: {{ purchaseData.transactionId }}</div>
       </div>
 
       <!-- 티켓 배너 -->
@@ -17,8 +17,8 @@
             <img src="" alt="ticketDetail.gameTitle">
           </div>
           <div class="game-info">
-            <h2 class="game-title">{{ ticketDetail.gameTitle }}</h2>
-            <div class="game-subtitle">{{ ticketDetail.season }} {{ ticketDetail.league }}</div>
+            <h2 class="game-title">{{ ticketDetail.away }} vs {{ ticketDetail.home }}</h2>
+            <div class="game-subtitle">2025 KBO</div>
           </div>
           <div class="purchase-status-tag">구매 완료</div>
         </div>
@@ -33,20 +33,8 @@
             <span class="value">{{ ticketDetail.gameDateTime }}</span>
           </div>
           <div class="info-item">
-            <span class="label">장소</span>
-            <span class="value">{{ ticketDetail.venue }}</span>
-          </div>
-          <div class="info-item">
             <span class="label">경기장</span>
             <span class="value">{{ ticketDetail.stadium }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">좌석</span>
-            <span class="value">{{ ticketDetail.seatInfo }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">티켓 가격</span>
-            <span class="value price">{{ ticketDetail.ticketPrice }}</span>
           </div>
         </div>
       </div>
@@ -57,19 +45,19 @@
         <div class="info-grid">
           <div class="info-item">
             <span class="label">티켓 번호</span>
-            <span class="value">{{ ticketDetail.ticketNumber }}</span>
+            <span class="value">{{ purchaseData.ticket.ticketNumber }}</span>
           </div>
           <div class="info-item">
             <span class="label">좌석</span>
-            <span class="value">{{ ticketDetail.seatDetail }}</span>
+            <span class="value">{{ purchaseData.ticket.seatDetail }}</span>
           </div>
           <div class="info-item">
             <span class="label">구역</span>
-            <span class="value">{{ ticketDetail.section }}</span>
+            <span class="value">{{ purchaseData.ticket.section }}</span>
           </div>
           <div class="info-item">
             <span class="label">좌석 번호</span>
-            <span class="value">{{ ticketDetail.seatNumber }}</span>
+            <span class="value">{{ purchaseData.ticket.seatNumber }}</span>
           </div>
         </div>
       </div>
@@ -80,20 +68,20 @@
         <div class="payment-summary">
           <div class="payment-row">
             <span class="label">티켓 가격</span>
-            <span class="value">{{ ticketDetail.ticketPrice }}</span>
+            <span class="value">{{ purchaseData.ticket.price }}</span>
           </div>
           <div class="payment-row total">
             <span class="label">총 결제 금액</span>
-            <span class="value">{{ ticketDetail.totalPrice }}</span>
+            <span class="value">{{ purchaseData.ticket.price }}</span>
           </div>
           <div class="payment-details">
             <div class="payment-method">
               <span class="label">결제 방법</span>
-              <span class="value">{{ ticketDetail.paymentMethod }}</span>
+              <span class="value">{{ purchaseData.paymentMethod }}</span>
             </div>
             <div class="payment-date">
               <span class="label">결제 일시</span>
-              <span class="value">{{ ticketDetail.paymentDateTime }}</span>
+              <span class="value">{{ purchaseData.transactionDate }}</span>
             </div>
           </div>
         </div>
@@ -114,33 +102,37 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import http from '@/utils/http'
 import { API_CONFIG } from '@/config/api.config'
 
 const route = useRoute()
+const router = useRouter()
 
-const orderNumber = ref(route.params.id)
+// sessionStorage에서 전체 purchase 데이터 가져오기
+const transactionId = route.params.id
+let purchaseData = ref(null)
 
-// 티켓 상세 정보 (실제로는 API에서 가져올 데이터)
-const ticketDetail = ref({
-  gameTitle: 'SSG 랜더스 vs KIA 타이거즈',
-  season: '2025 KBO',
-  league: '정규시즌',
-  gameDateTime: '2025.07.30 18:30',
-  venue: '인천 문학경기장',
-  stadium: 'SSG 랜더스',
-  seatInfo: 'KIA 타이거즈',
-  ticketPrice: '25,000원',
-  ticketNumber: 'T20250730001',
-  seatDetail: '304구역 1열',
-  section: '1루',
-  seatNumber: '15-16번',
-  totalPrice: '25,000원',
-  paymentMethod: '신용카드 (***1234)',
-  paymentDateTime: '2025.07.25 14:32',
-  bannerImage: 'https://via.placeholder.com/400x150/8B1538/ffffff?text=NO+LIMITS+AMAZING+LANDERS'
-})
+// sessionStorage에서 데이터 로드
+try {
+  const storedPurchase = sessionStorage.getItem('selectedPurchase')
+  if (storedPurchase) {
+    purchaseData.value = JSON.parse(storedPurchase)
+    console.log('세션스토리지:', purchaseData.value)
+    // 사용 후 sessionStorage 정리
+    sessionStorage.removeItem('selectedPurchase')
+  }
+} catch (error) {
+  purchaseData.value = null
+  console.log('세션스토리지 없음:', error)
+}
+
+const ticketId = purchaseData.value?.ticket?.ticketId
+
+const orderNumber = ref(transactionId)
+
+// 티켓 상세 정보 - 라우트 state에서 가져오거나 API로 조회
+const ticketDetail = ref(purchaseData.value?.ticket)
 
 // 뒤로 가기
 const goBack = () => {
@@ -161,13 +153,32 @@ const requestRefund = () => {
   }
 }
 
-onMounted(() => {
-  const purchaseId = route.params.id
+const fetchTicketDetail = async (ticketId) => {
   try {
-    const response = http.get(API_CONFIG.TICKET.DETAIL(purchaseId))
+    const response = await http.get(API_CONFIG.TICKET.DETAIL(ticketId))
     ticketDetail.value = response.data
   } catch (error) {
     console.error('Failed to fetch ticket detail:', error)
+  }
+}
+
+const fetchPurchaseDetail = async (transactionId) => {
+  try {
+    const response = await http.get(API_CONFIG.USER.PAYMENT.DETAIL(transactionId))
+    purchaseDetail.value = response.data
+  } catch (error) {
+    console.error('Failed to fetch purchase detail:', error)
+  }
+}
+
+onMounted(() => {
+  // 라우트 state에 데이터가 있으면 사용하고, 없으면 API로 조회
+  if (purchaseData.value) {
+    // 필요시 추가 데이터 처리
+    if (purchaseData.value.ticket) {
+      fetchTicketDetail(purchaseData.value.ticket.ticketId)
+      console.log("ticketDetail.value",ticketDetail.value)
+    }
   }
 })
 </script>
