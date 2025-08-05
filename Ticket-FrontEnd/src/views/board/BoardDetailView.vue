@@ -378,12 +378,7 @@ const toggleLike = async () => {
       const storageKey = `post_like_${route.params.id}_${authStore.user?.userId || 'guest'}`;
       localStorage.setItem(storageKey, newLikedState.toString());
       
-      console.log('좋아요 토글 성공:', {
-        likeCount: result.likeCount,
-        isLiked: isLiked.value,
-        serverResponse: result,
-        localStorageKey: storageKey
-      });
+      
     } else {
       console.error('좋아요 토글 실패: 응답이 없습니다.');
     }

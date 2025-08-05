@@ -32,10 +32,10 @@
           <div class="profile-icon">👤</div>
           <div class="comment-info">
             <span class="commenter-name" :class="{ 'author': isCommentAuthor(comment) }">
-              {{ comment.author }}
+              {{ comment.nickName || comment.author || '알 수 없음' }}
               <span v-if="isCommentAuthor(comment)" class="author-badge">- 작성자</span>
             </span>
-                         <span class="comment-date">{{ formatCommentDate(comment.createdAt || comment.date) }}</span>
+            <span class="comment-date">{{ formatCommentDate(comment.createdAt || comment.date) }}</span>
           </div>
         </div>
         
@@ -61,10 +61,10 @@
               <div class="profile-icon small">👤</div>
               <div class="reply-info">
                 <span class="replyer-name" :class="{ 'author': isCommentAuthor(reply) }">
-                  {{ reply.author }}
+                  {{ reply.nickName || reply.author || '알 수 없음' }}
                   <span v-if="isCommentAuthor(reply)" class="author-badge">- 작성자</span>
                 </span>
-                                 <span class="reply-date">{{ formatCommentDate(reply.createdAt || reply.date) }}</span>
+                <span class="reply-date">{{ formatCommentDate(reply.createdAt || reply.date) }}</span>
               </div>
             </div>
             
@@ -252,9 +252,20 @@ const restoreCommentLikeStates = () => {
 
 // 댓글 작성자 권한 확인
 const isCommentAuthor = (comment) => {
-  console.log(comment);
-  console.log(authStore.user);
-  return false;
+  // 로그인하지 않은 경우
+  if (!authStore.isAuthenticated || !authStore.user) {
+    console.log('로그인 상태 확인 실패:', {
+      isAuthenticated: authStore.isAuthenticated,
+      user: authStore.user
+    });
+    return false;
+  }
+  
+  // 댓글의 userId와 현재 사용자의 userId 비교
+  const commentUserId = comment.userId;
+  const currentUserId = authStore.user.userId;
+  
+  return commentUserId === currentUserId;
 };
 
 const handleInputClick = () => {
@@ -363,6 +374,7 @@ const submitComment = async () => {
          createdAt: new Date().toISOString(),
          date: new Date().toISOString(), // 호환성을 위해 date 필드도 추가
          author: authStore.user?.nickName || authStore.user?.nickname || '사용자',
+         nickName: authStore.user?.nickName || authStore.user?.nickname || '사용자',
          isAuthor: true,
          likeCount: 0,
          isLiked: false,
@@ -560,8 +572,25 @@ watch(() => props.comments, () => {
   restoreCommentLikeStates();
 }, { deep: true });
 
-// 컴포넌트 마운트 시 좋아요 상태 복원
-onMounted(() => {
+// authStore 상태 변화 감지
+watch(() => authStore.user, (newUser) => {
+  if (newUser && newUser.userId) {
+    restoreCommentLikeStates();
+  }
+}, { deep: true });
+
+// 컴포넌트 마운트 시 좋아요 상태 복원 및 authStore 상태 확인
+onMounted(async () => {
+  // authStore 상태 확인 및 필요시 사용자 정보 재조회
+  if (authStore.isAuthenticated && (!authStore.user || !authStore.user.userId)) {
+    try {
+      await authStore.getUserInfo();
+      console.log('사용자 정보 재조회 완료:', authStore.user);
+    } catch (error) {
+      console.error('사용자 정보 재조회 실패:', error);
+    }
+  }
+  
   restoreCommentLikeStates();
 });
 </script>
