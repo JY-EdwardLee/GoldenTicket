@@ -111,7 +111,7 @@
     matched_date,
     image
     FROM tickets
-    WHERE buyer_id = #{userId}
+    WHERE buyer_id = #{userId} and ticket_status = 'TRANSACTION_COMPLETE'
   </select>
 
   <select id="selectWaitListByGameId" resultType="com.ssafy.ticket_backend.model.Waitlist"
