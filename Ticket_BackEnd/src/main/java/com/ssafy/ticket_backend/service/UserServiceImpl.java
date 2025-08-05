@@ -142,11 +142,7 @@ public class UserServiceImpl implements UserService {
         MultiValueMap<String, String> tokenParams = new LinkedMultiValueMap<>();
         tokenParams.add("grant_type", "authorization_code");
         tokenParams.add("client_id", kakaoApiKey);
-<<<<<<< HEAD
-        tokenParams.add("redirect_uri", "http://localhost:8080/users/auth/kakao/callback");
-=======
         tokenParams.add("redirect_uri", BE_BASE_URL + "/users/auth/kakao/callback");
->>>>>>> 250b8b74bc0fae172f90cb3209f87963ebf8f8e0
         tokenParams.add("code", code);
 
         HttpEntity<MultiValueMap<String, String>> tokenRequest = new HttpEntity<>(tokenParams,
