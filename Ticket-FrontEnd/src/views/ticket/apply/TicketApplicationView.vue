@@ -44,9 +44,9 @@
     <div v-else-if="step === 2" class="game-select-main">
       <div class="calendar-area">
         <div class="calendar-header-section">
-          <button class="month-nav-btn" @click="previousMonth">‹</button>
+          <button class="month-nav-btn" @click="previousMonth"><</button>
           <div class="calendar-title">{{ currentYear }}년 {{ currentMonth }}월</div>
-          <button class="month-nav-btn" @click="nextMonth">›</button>
+          <button class="month-nav-btn" @click="nextMonth">></button>
         </div>
         <div class="calendar-grid">
           <div class="calendar-header" v-for="d in days" :key="d">{{ d }}</div>
@@ -73,7 +73,7 @@
           </div>
         </div>
         <div class="calendar-logo">
-          <img :src="`/${selectedTeam}.png`" alt="landers logo" />
+          <img :src="`@/assets/logo/${user.myTeam}.png`" alt="landers logo" />
         </div>
       </div>
       <div class="info-area">
@@ -111,7 +111,7 @@
           <div class="bar"></div>
           <div class="step active"><span>2</span><div>경기 선택</div></div>
           <div class="bar"></div>
-          <div class="step active"><span>3</span><div style="color:#e57373;">응모하기</div></div>
+          <div class="step active"><span>3</span><div style="color:var(--theme-gradient, #e57373);">응모하기</div></div>
           <div class="bar"></div>
           <div class="step"><span>4</span><div>결제</div></div>
         </div>
@@ -410,6 +410,11 @@ function formatGameDateTime(dateTimeStr) {
   align-items: center;
   justify-content: center;
 }
+
+.team-bg-container.active {
+  border: 2px solid var(--theme-gradient, #e57373) !important;
+}
+
 .team-bg-image {
   width: 600px;
   height: 200px !important;
@@ -685,7 +690,7 @@ function formatGameDateTime(dateTimeStr) {
   padding: 20px 20px 16px 20px;
 }
 .selected-date-box b {
-  color: #e57373;
+  color: var(--theme-primary, #e57373);
   font-size: 30px;
 }
 .selected-team {
@@ -694,7 +699,7 @@ function formatGameDateTime(dateTimeStr) {
   color: #888;
 }
 .selected-team-name {
-  color: #e57373;
+  color: var(--theme-primary, #e57373);
   font-weight: bold;
 }
 .game-list-box {
@@ -706,7 +711,7 @@ function formatGameDateTime(dateTimeStr) {
   height: 260px;
 }
 .game-list-box b {
-  color: #e57373;
+  color: var(--theme-primary, #e57373);
   font-size: 16px;
 }
 .game-card {
@@ -722,7 +727,7 @@ function formatGameDateTime(dateTimeStr) {
 .game-title {
   font-size: 19px;
   font-weight: 700;
-  color: #e57373;
+  color: var(--theme-primary, #e57373);
 }
 .game-desc {
   font-size: 18px;
@@ -732,7 +737,7 @@ function formatGameDateTime(dateTimeStr) {
 .apply-btn {
   margin-top: 30px;
   padding: 7px 20px;
-  background: #e57373;
+  background: var(--theme-gradient, #e57373);
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -742,7 +747,9 @@ function formatGameDateTime(dateTimeStr) {
   transition: background 0.2s;
 }
 .apply-btn:hover {
-  background: #b71c1c;
+  background: var(--theme-gradient, #e57373);
+  box-shadow: 0 10px 20px 0 #f8bbd04d;
+  transform: translateY(-2px);
 }
 .no-game {
   color: #bbb;
@@ -789,7 +796,7 @@ function formatGameDateTime(dateTimeStr) {
   font-weight: 500;
 }
 .apply-complete-stepper .step.active {
-  color: #e57373;
+  color: var(--theme-gradient, #e57373);
 }
 .apply-complete-stepper .step span {
   display: inline-flex;
@@ -798,19 +805,19 @@ function formatGameDateTime(dateTimeStr) {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #f8bbd0;
+  background: var(--theme-primary, #e57373);
   color: #fff;
   font-weight: bold;
   margin-bottom: 4px;
   font-size: 15px;
 }
 .apply-complete-stepper .step.active span {
-  background: #e57373;
+  background: var(--theme-gradient, #e57373);
 }
 .apply-complete-stepper .bar {
   width: 36px;
   height: 3px;
-  background: #f8bbd0;
+  background: var(--theme-gradient, #e57373);
   border-radius: 2px;
 }
 .apply-icon-box {
@@ -820,7 +827,7 @@ function formatGameDateTime(dateTimeStr) {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #e57373;
+  background: var(--theme-gradient, #e57373);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -842,7 +849,7 @@ function formatGameDateTime(dateTimeStr) {
   text-align: center;
 }
 .apply-info-card {
-  background: #e53935;
+  background: var(--theme-gradient, #e57373);
   border-radius: 10px;
   padding: 18px 18px 10px 18px;
   margin-bottom: 18px;
@@ -889,7 +896,7 @@ function formatGameDateTime(dateTimeStr) {
 .apply-confirm-btn {
   width: 20%;
   padding: 11px 0;
-  background: #e57373;
+  background: var(--theme-gradient, #e57373);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -900,7 +907,7 @@ function formatGameDateTime(dateTimeStr) {
   transition: background 0.2s;
 }
 .apply-confirm-btn:hover {
-  background: #b71c1c;
+  background: var(--theme-gradient, #e57373);
 }
 .no-game-centered {
   display: flex;
