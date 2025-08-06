@@ -11,7 +11,7 @@ stages:
 variables:
   JAR_NAME: goldenticketBE.jar
   EC2_USER: ubuntu
-  EC2_HOST: i13a109.p.ssafy.io
+  EC2_HOST: $SPRING_EC2_URL
   DEPLOY_PATH: /home/ubuntu/app
   # SSH_KEY_PATH는 before_script에서 동적으로 설정되므로, 여기서는 제거하거나 주석 처리해도 무방합니다.
 
