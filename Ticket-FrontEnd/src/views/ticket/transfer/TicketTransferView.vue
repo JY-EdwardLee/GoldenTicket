@@ -252,6 +252,22 @@
       </div>
     </main>
 
+    <!-- 경고 모달 -->
+    <div v-if="showWarningModal" class="warning-modal-overlay" @click="closeWarningModal">
+      <div class="warning-modal-container" @click.stop>
+        <div class="warning-modal-content">
+          <div class="warning-modal-icon">⚠️</div>
+          <div class="warning-modal-title">양도 신청 불가</div>
+          <div class="warning-modal-message">
+            현재 응모 인원이 0명이라<br>
+            양도 신청을 할 수 없습니다
+          </div>
+          <button class="warning-modal-confirm-btn" @click="closeWarningModal">
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
 
   </div>
 </template>
@@ -291,6 +307,7 @@ const showTickets = ref(false);
 const activeTab = ref('NOL');
 const hoveredTicket = ref(null);
 const isApplying = ref(false); // 응모 진행중 상태
+const showWarningModal = ref(false); // 경고 모달 표시 상태
 
 
 
@@ -626,6 +643,12 @@ async function switchTab(platform) {
 const router = useRouter();
 
 function handleApply(ticket) {
+  // 응모 인원이 0명인 경우 경고 모달 표시
+  if (ticket.waitNumber === 0) {
+    showWarningModal.value = true;
+    return;
+  }
+  
   selectedTicket.value = ticket;
   showDetailPage.value = true;
 }
@@ -674,6 +697,11 @@ function handleCompleteConfirm() {
   // 티켓 데이터 초기화
   tickets.value = [];
   activeTab.value = 'NOL';
+}
+
+// 경고 모달 닫기 함수
+function closeWarningModal() {
+  showWarningModal.value = false;
 }
 
 </script>
@@ -1682,6 +1710,69 @@ function handleCompleteConfirm() {
 .fade-enter-to, .fade-leave-from {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* 경고 모달 스타일 */
+.warning-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.warning-modal-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 0;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.warning-modal-content {
+  text-align: center;
+  padding: 40px 30px 30px 30px;
+}
+
+.warning-modal-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.warning-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ce0e2d;
+  margin-bottom: 15px;
+}
+
+.warning-modal-message {
+  font-size: 16px;
+  color: #333;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.warning-modal-confirm-btn {
+  background-color: #ce0e2d;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 40px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.warning-modal-confirm-btn:hover {
+  background-color: #b50c29;
 }
 
 /* Ticket detail styling improvements */

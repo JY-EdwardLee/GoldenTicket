@@ -17,7 +17,7 @@
           <label>이름</label>
           <div class="input-wrapper">
             <div class="input-icon">👤</div>
-            <input type="text" :value="user?.userName || ''" readonly>
+            <input type="text" :value="user?.userName || ''">
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -39,7 +39,7 @@
           <label>닉네임</label>
           <div class="input-wrapper">
             <div class="input-icon">🏷️</div>
-            <input type="text" :value="user?.nickName || ''" readonly>
+            <input type="text" :value="user?.nickName || ''">
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -50,7 +50,7 @@
           <label>전화번호</label>
           <div class="input-wrapper">
             <div class="input-icon">📱</div>
-            <input type="tel" :value="user?.phoneNumber || ''" readonly>
+            <input type="tel" :value="user?.phoneNumber || ''">
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -61,7 +61,7 @@
           <label>생년월일</label>
           <div class="input-wrapper">
             <div class="input-icon">🎂</div>
-            <input type="date" :value="user?.birthDate || ''">
+            <input type="date" :value="user?.birthDate || ''" readonly>
             <button class="edit-btn">
               <span class="edit-icon">✏️</span>
             </button>
@@ -82,8 +82,8 @@
           <div class="service-header">
             <div class="service-icon">🏟️</div>
             <div class="service-info">
-              <span class="service-name">SSG 랜더스 공식 앱</span>
-              <span class="service-description">야구 경기 정보 및 티켓 연동</span>
+              <span class="service-name">티켓링크</span>
+              <span class="service-description">티켓 정보 연동하기</span>
             </div>
             <div class="service-status connected">
               <span class="status-dot"></span>
@@ -98,7 +98,7 @@
             <div class="service-icon">🎫</div>
             <div class="service-info">
               <span class="service-name">인터파크 티켓</span>
-              <span class="service-description">티켓 예매 및 결제 연동</span>
+              <span class="service-description">티켓 정보 연동하기</span>
             </div>
             <div class="service-status connected">
               <span class="status-dot"></span>
@@ -171,16 +171,17 @@
 import { ref, computed, onMounted } from 'vue'
 import { useTeamThemeStore } from '../../stores/teamTheme.js'
 import { useAuthStore } from '../../stores/auth.js'
+import { API_CONFIG } from '../../config/api.config.js'
+import http from '../../utils/http.js'
 
 // 테마 스토어 사용
 const themeStore = useTeamThemeStore
 const authStore = useAuthStore()
-const userInfo = localStorage.getItem('userInfo')
 const user = ref(null)
 
 // 팀 정보 데이터
 const teams = {
-  SSG_: {
+  ssg: {
     name: 'SSG_LANDERS',
     logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/SSG_Landers_logo.svg/1200px-SSG_Landers_logo.svg.png',
     color: '#CE0E2D'
@@ -233,17 +234,24 @@ const teams = {
 }
 
 // 현재 선택된 팀 (기본값: SSG)
-const selectedTeam = ref('SSG_')
+const selectedTeam = ref(null)
 
 // 현재 팀 정보
-const currentTeam = computed(() => teams[selectedTeam.value] || teams.SSG_)
+const currentTeam = computed(() => teams[selectedTeam.value] || teams[user?.myTeam])
 
 // 관심 팀 변경 함수
 const changeFavoriteTeam = () => {
   if (selectedTeam.value) {
     const teamName = currentTeam.value.name
     console.log('관심 팀이 변경되었습니다:', teamName)
-    
+    const requestForm = {
+      "nickName": user.value.nickName,
+      "profilePhotoUrl": user.value.profilePhotoUrl,
+      "myTeam": teamName,
+      "gender": user.value.gender
+    }
+    const ans = http.patch(API_CONFIG.USER.PROFILE, requestForm)
+    console.log(ans)
     // 테마 색상 변경
     themeStore.setSelectedTeam(teamName)
     
@@ -272,12 +280,12 @@ const handleImageError = (event) => {
 
 // 컴포넌트 마운트 시 테마 초기화
 onMounted(async () => {
+  
   await authStore.getUserInfo()
+  
   // 저장된 팀이 있으면 해당 팀으로 설정
   const userInfo = localStorage.getItem('user')
-  console.log('userInfo : ', userInfo)
   const savedTeam = authStore.user.value?.myTeam
-  console.log('savedTeam : ', savedTeam)
   if (userInfo) {
     user.value = JSON.parse(userInfo)
   if (savedTeam) {
@@ -677,7 +685,7 @@ onMounted(async () => {
   border-radius: 8px;
   font-size: 14px;
   background: white;
-  color: #1a1a1a;
+  color: #313131;
   cursor: pointer;
   transition: all 0.2s ease;
   font-weight: 500;

@@ -29,12 +29,12 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="post in posts" :key="post.id" class="post-row">
+            <tr v-for="post in posts" :key="post.postId" class="post-row">
               <td class="checkbox-column">
                 <input 
                   type="checkbox" 
-                  :checked="selectedPosts.includes(post.id)"
-                  @change="togglePostSelection(post.id)"
+                  :checked="selectedPosts.includes(post.postId)"
+                  @change="togglePostSelection(post.postId)"
                   class="post-checkbox"
                 >
               </td>
@@ -67,9 +67,6 @@
             @click="deletePosts"
           >
             삭제 ({{ selectedPosts.length }})
-          </button>
-          <button class="write-btn" @click="goToWrite">
-            글쓰기
           </button>
         </div>
       </div>
@@ -141,7 +138,7 @@ const toggleAllPosts = () => {
   if (allSelected.value) {
     selectedPosts.value = []
   } else {
-    selectedPosts.value = posts.value.map(post => post.id)
+    selectedPosts.value = posts.value.map(post => post.postId)
   }
 }
 
@@ -170,18 +167,55 @@ const changePage = (page) => {
   }
 }
 
-// 선택된 게시글 삭제
-const deletePosts = () => {
-  if (selectedPosts.value.length === 0) return
-  
-  if (confirm(`선택한 ${selectedPosts.value.length}개의 게시글을 삭제하시겠습니까?`)) {
-    // 선택된 게시글들을 posts 배열에서 제거
-    posts.value = posts.value.filter(post => !selectedPosts.value.includes(post.id))
-    // 선택 목록 초기화
-    selectedPosts.value = []
-    alert('게시글이 삭제되었습니다.')
+const fetchDeletePost = async (postId) => {
+  try {
+    await http.delete(API_CONFIG.BOARD.DELETE(postId));
+    return { success: true };
+  } catch (error) {
+    console.error('게시글 삭제 중 오류 발생:', error);
+    return { success: false, error };
   }
-}
+};
+
+// 선택된 게시글 삭제
+const deletePosts = async () => {
+  // Proxy 객체에서 실제 배열을 추출
+  const selectedPostIds = [...selectedPosts.value];
+  console.log('선택된 게시글 ID들:', selectedPostIds);
+  
+  if (selectedPostIds.length === 0) return;
+  
+  if (!confirm(`선택한 ${selectedPostIds.length}개의 게시글을 삭제하시겠습니까?`)) {
+    return;
+  }
+
+  const results = [];
+  
+  // 순차적으로 삭제 요청 보내기
+  for (const postId of selectedPostIds) {
+    const result = await fetchDeletePost(postId);
+    results.push({ postId, ...result });
+  }
+
+  // 성공/실패 결과 확인
+  const successCount = results.filter(r => r.success).length;
+  const failCount = results.length - successCount;
+  
+  // 목록 새로고침
+  await fetchPosts();
+  
+  // 선택 목록 초기화
+  selectedPosts.value = [];
+  
+  // 결과 알림
+  if (failCount === 0) {
+    alert(`${successCount}개의 게시글이 성공적으로 삭제되었습니다.`);
+  } else if (successCount === 0) {
+    alert('게시글 삭제에 실패했습니다. 다시 시도해주세요.');
+  } else {
+    alert(`${successCount}개 성공, ${failCount}개 실패했습니다.`);
+  }
+};
 
 // 글쓰기 페이지로 이동
 const goToWrite = () => {

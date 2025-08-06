@@ -5,95 +5,65 @@
         <h1>나의 티켓</h1>
       </div>
 
-    <!-- 티켓 목록 -->
-    <div class="tickets-list">
-      <router-link
-        v-for="ticket in tickets"
-        :key="ticket.id"
-        :to="`/mypage/tickets/${ticket.id}`"
-        class="ticket-card"
-        :style="{ backgroundImage: `url(${generateTicketBackground(ticket.id)})` }"
-      >
-        <div class="ticket-header">
-          <div class="ticket-info">
-            <div class="team-icon">⚾</div>
-            <div class="game-details">
-              <h3 class="game-title">{{ enumToTeamName[ticket.game.away] }} vs {{ enumToTeamName[ticket.game.home] }}</h3>
-              <p class="stadium">{{ stadiumOfTeam[ticket.game.stadium] }}</p>
+      <!-- 티켓 목록 -->
+      <div class="tickets-list">
+        <router-link
+          v-for="ticket in tickets"
+          :key="ticket.id"
+          :to="`/mypage/tickets/${ticket.ticketId}`"
+          class="ticket-card"
+          :style="{ backgroundImage: `url(${generateTicketBackground(ticket.ticketId)})` }"
+        >
+          <div class="ticket-header">
+            <div class="ticket-info">
+              <div class="team-icon">⚾</div>
+              <div class="game-details">
+                <h3 class="game-title">{{ enumToTeamName[ticket.game.away] }} vs {{ enumToTeamName[ticket.game.home] }}</h3>
+                <p class="stadium">{{ stadiumOfTeam[ticket.game.stadium] }}</p>
+              </div>
+            </div>
+            <div class="ticket-status" :class="ticket.status">
+              {{ getStatusText(ticket.status) }}
             </div>
           </div>
-          <div class="ticket-status" :class="ticket.status">
-            {{ getStatusText(ticket.status) }}
-          </div>
-        </div>
-        
-        <div class="ticket-body">
-          <div class="ticket-details">
-            <div class="detail-item">
-              <span class="label">경기시간:</span>
-              <span class="value">{{ ticket.game.time }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">경기일:</span>
-              <span class="value">{{ ticket.game.date }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">좌석:</span>
-              <span class="value">{{ ticket.seat }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">티켓 번호:</span>
-              <span class="value">{{ ticket.ticketId }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">구매일:</span>
-              <span class="value">{{ formatDate(ticket.transactionDate) }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">구매 금액:</span>
-              <span class="value price">{{ ticket.price }}원</span>
+          
+          <div class="ticket-body">
+            <div class="ticket-details">
+              <div class="detail-item">
+                <span class="label">경기시간:</span>
+                <span class="value">{{ ticket.game.time }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">경기일:</span>
+                <span class="value">{{ ticket.game.date }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">좌석:</span>
+                <span class="value">{{ ticket.seat }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">티켓 번호:</span>
+                <span class="value">{{ ticket.ticketId }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">구매일:</span>
+                <span class="value">{{ formatDate(ticket.transactionDate) }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="label">구매 금액:</span>
+                <span class="value price">{{ ticket.price }}원</span>
+              </div>
             </div>
           </div>
-        </div>
+          <div class="ticket-actions">
+          </div>
+        </router-link>
 
-        <div class="ticket-actions">
-          <button 
-            v-if="ticket.status === 'TRANSACTION_COMPLETE'" 
-            class="qr-btn"
-            @click.stop="showQRCode($event, ticket)"
-          >
-            QR코드
-          </button>
-        </div>
-      </router-link>
-
-      <!-- 티켓이 없을 때 -->
-      <div v-if="tickets.length === 0" class="empty-state">
-        <div class="empty-icon">🎟️</div>
-        <h3>보유한 티켓이 없습니다</h3>
-        <p>아직 구매한 티켓이 없습니다. 티켓 응모를 시작해보세요!</p>
-      </div>
-    </div>
-  </div>
-
-    <!-- QR코드 모달 -->
-    <div v-if="showModal" class="modal-overlay" @click="closeModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h3>티켓 QR코드</h3>
-          <button class="modal-close-btn" @click="closeModal">✕</button>
-        </div>
-        <div class="modal-body">
-          <div class="qr-container">
-            <canvas ref="qrCanvas" class="qr-code"></canvas>
-          </div>
-          <div class="ticket-info-modal">
-            <h4>{{ enumToTeamName[selectedTicket?.game.away] }} vs {{ enumToTeamName[selectedTicket?.game.home] }}</h4>
-            <p>{{ stadiumOfTeam[selectedTicket?.game.stadium] }}</p>
-            <p>경기일: {{ selectedTicket?.game.date }}</p>
-            <p>좌석: {{ selectedTicket?.seat }}</p>
-            <p>티켓번호: {{ selectedTicket?.ticketId }}</p>
-          </div>
+        <!-- 티켓이 없을 때 -->
+        <div v-if="tickets.length === 0" class="empty-state">
+          <div class="empty-icon">🎟️</div>
+          <h3>보유한 티켓이 없습니다</h3>
+          <p>아직 구매한 티켓이 없습니다. 티켓 응모를 시작해보세요!</p>
         </div>
       </div>
     </div>
@@ -101,9 +71,8 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import QRCode from 'qrcode'
 import { API_CONFIG } from '@/config/api.config'
 import http from '@/utils/http'
 import { formatDate } from '@/utils/dateUtils'
@@ -113,10 +82,10 @@ const isLoading = ref(false)
 const router = useRouter()
 
 const ticketStatus = {
-    BEFORE_ASSIGNMENT: '양도 전',
-    BEING_ASSIGNMENT: '양도 중',
-    BEING_PAYING: '결제 중',
-    TRANSACTION_COMPLETE: '거래 완료'
+  BEFORE_ASSIGNMENT: '양도 전',
+  BEING_ASSIGNMENT: '양도 중',
+  BEING_PAYING: '결제 중',
+  TRANSACTION_COMPLETE: '거래 완료'
 }
 
 const stadiumOfTeam = {
@@ -133,33 +102,13 @@ const stadiumOfTeam = {
 }
 
 // 티켓 데이터 (실제로는 API에서 가져올 데이터)
-const tickets = ref([
-  {
-    id: 1,
-    game: {
-      id: 1,
-      away: 'SSG 랜더스',
-      home: 'KIA 타이거즈',
-      date: '2024.01.15',  
-      stadium: '인천 문학경기장',
-      },
-    time: '18:30',
-    seat: '1루석 A구역 15열 8번',
-    price: '25,000',
-    status: 'BEING_ASSIGNMENT'
-  },
-])
+const tickets = ref([])
 
 // 상태 텍스트 반환
 const getStatusText = (status) => {
   const statusMap = ticketStatus
   return statusMap[status]
 }
-
-// QR코드 모달 관련 상태
-const showModal = ref(false)
-const selectedTicket = ref(null)
-const qrCanvas = ref(null)
 
 // 티켓 배경 이미지 생성 함수
 const generateTicketBackground = (ticketId) => {
@@ -173,46 +122,6 @@ const generateTicketBackground = (ticketId) => {
   
   // 매우 흐린 배경 이미지로 텍스트 가독성 보장
   return `https://picsum.photos/seed/ticket-${ticketId}-${pattern}/400/200?blur=8`
-}
-
-// QR코드 표시 함수
-const showQRCode = async (event, ticket) => {
-  // Prevent the click from bubbling up to the router-link
-  event.stopPropagation()
-  selectedTicket.value = ticket
-  showModal.value = true
-  
-  // QR코드 생성
-  await nextTick()
-  if (qrCanvas.value) {
-    try {
-      // QR코드에 포함할 데이터 (티켓 정보)
-      const qrData = JSON.stringify({
-        ticketNumber: ticket.ticketNumber,
-        gameTitle: ticket.gameTitle,
-        gameDate: ticket.gameDate,
-        seatInfo: ticket.seatInfo,
-        stadium: ticket.stadium
-      })
-      
-      await QRCode.toCanvas(qrCanvas.value, qrData, {
-        width: 200,
-        margin: 2,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        }
-      })
-    } catch (error) {
-      console.error('QR코드 생성 실패:', error)
-    }
-  }
-}
-
-// 모달 닫기 함수
-const closeModal = () => {
-  showModal.value = false
-  selectedTicket.value = null
 }
 
 const fetchTickets = async () => {
@@ -419,114 +328,6 @@ a.ticket-card:active {
   justify-content: flex-end;
 }
 
-.qr-btn {
-  padding: 10px 20px;
-  background: #17a2b8;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s ease;
-}
-
-.qr-btn:hover {
-  background: #138496;
-}
-
-/* 모달 스타일 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 25px;
-  border-bottom: 1px solid #eee;
-}
-
-.modal-header h3 {
-  margin: 0;
-  color: #333;
-  font-size: 20px;
-}
-
-.modal-close-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #666;
-  padding: 0;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background 0.3s ease;
-}
-
-.modal-close-btn:hover {
-  background: #f5f5f5;
-}
-
-.modal-body {
-  padding: 25px;
-}
-
-.qr-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 8px;
-}
-
-.qr-code {
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  background: white;
-}
-
-.ticket-info-modal {
-  text-align: center;
-}
-
-.ticket-info-modal h4 {
-  color: #333;
-  margin: 0 0 10px 0;
-  font-size: 18px;
-}
-
-.ticket-info-modal p {
-  color: #666;
-  margin: 5px 0;
-  font-size: 14px;
-}
-
 .empty-state {
   text-align: center;
   padding: 60px 20px;
@@ -558,19 +359,5 @@ a.ticket-card:active {
   .ticket-actions {
     flex-direction: column;
   }
-  
-  .modal-content {
-    width: 95%;
-    margin: 20px;
-  }
-  
-  .qr-container {
-    padding: 15px;
-  }
-  
-  .qr-code {
-    width: 150px;
-    height: 150px;
-  }
 }
-</style> 
+</style>

@@ -9,44 +9,30 @@
       <div class="purchase-list">
         <div 
           v-for="purchase in purchases" 
-          :key="purchase.id"
+          :key="purchase.transactionId"
           class="purchase-card"
-          @click="goToPurchaseDetail(purchase.id)"
+          @click="goToPurchaseDetail(purchase)"
         >
           <!-- 구매 완료 태그 -->
           <div class="purchase-status">구매 완료</div>
           
-          <!-- 티켓 이미지 -->
-          <div class="ticket-image">
-            <img :src="purchase.ticket.image" :alt="purchase.ticket.game.title">
-          </div>
           
           <!-- 티켓 정보 -->
           <div class="ticket-info">
-            <h3 class="game-title">{{ purchase.ticket.game.title }}</h3>
             <div class="game-details">
               <div class="detail-row">
-                <span class="icon">📅</span>
-                <span class="label">{{ purchase.ticket.game.date }}</span>
-                <span class="value">{{ purchase.ticket.game.time }}</span>
+                <span class="label">좌석</span>
+                <span class="value">{{ purchase.ticket.seat }}</span>
               </div>
               <div class="detail-row">
-                <span class="icon">📍</span>
-                <span class="label">{{ purchase.ticket.game.home }}</span>
-              </div>
-              <div class="detail-row">
-                <span class="icon">🎟️</span>
-                <span class="label">{{ purchase.ticket.seat }}</span>
-              </div>
-              <div class="detail-row">
-                <span class="icon">💰</span>
-                <span class="label">{{ purchase.ticket.price }}</span>
+                <span class="label">가격</span>
+                <span class="value">{{ purchase.ticket.price }}</span>
               </div>
             </div>
             
             <!-- 구매 정보 -->
             <div class="purchase-info">
-              <div class="purchase-date">구매일: {{ purchase.purchaseDate }}</div>
+              <div class="purchase-date">구매일: {{ purchase.ticket.transactionDate?.toLocaleString() }}</div>
             </div>
           </div>
           
@@ -76,27 +62,17 @@ import http from '@/utils/http'
 const router = useRouter()
 
 // 구매 내역 데이터 (실제로는 API에서 가져올 데이터)
-const purchases = ref([
-      { "transactionId": 8,
-        "ticket": {
-            "ticketId": 225,
-            "image": '/src/assets/logo/KT.svg',
-            "status": "BEFORE_ASSIGNMENT",
-            "price": 15499,
-            "game": {
-                "id": 22,
-                "date": "2025-08-03T17:00:00",
-                "home": "SAMSUNG_LIONS",
-                "away": "SSG_LANDERS"
-            },
-            "seat": "내야 178구역 2열 10번",
-            "waitNumber": 0
-        }},
-])
+const purchases = ref([])
 
-// 상세 페이지로 이동
-const goToPurchaseDetail = (purchaseId) => {
-  router.push(`/mypage/purchase/${purchaseId}`)
+
+// 상세 페이지로 이동 - sessionStorage로 전체 purchase 데이터 전달
+const goToPurchaseDetail = (purchase) => {
+  // sessionStorage에 전체 purchase 데이터 저장
+  sessionStorage.setItem('selectedPurchase', JSON.stringify(purchase))
+  
+  router.push({
+    path: `/mypage/purchase/${purchase.transactionId}`
+  })
 }
 
 const isLoading = ref(false)
@@ -106,7 +82,7 @@ const fetchPurchases = async () => {
     isLoading.value = true
     const response = await http.get(API_CONFIG.USER.PAYMENTS)
     purchases.value = response.data
-    console.log(purchases.value)
+    console.log("purchases.value", purchases.value)
   } catch (error) {
     console.error('구매 내역 조회 중 오류 발생:', error)
   } finally {

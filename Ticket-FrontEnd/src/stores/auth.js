@@ -59,8 +59,22 @@ export const useAuthStore = defineStore('auth', () => {
   async function getUserInfo() {
     try {
       const response = await http.get(API_CONFIG.USER.PROFILE);
-      setUser(response.data);
-      console.log(user.value);
+      
+      // 기존 사용자 정보에서 userId 보존
+      const currentUser = user.value;
+      const serverUserData = response.data;
+      
+      // 서버 응답에 userId가 없고 기존에 userId가 있었다면 보존
+      if (!serverUserData.userId && currentUser && currentUser.userId) {
+        const mergedUserData = {
+          ...serverUserData,
+          userId: currentUser.userId
+        };
+        setUser(mergedUserData);
+      } else {
+        setUser(serverUserData);
+      }
+      
     } catch (error) {
       console.error('Failed to fetch user info:', error);
     }

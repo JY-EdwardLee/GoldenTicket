@@ -207,9 +207,57 @@ const loadPostDetail = async (showLoading = true) => {
         
       }
       
-      // 좋아요 상태는 서버에서 받아와야 하지만, 현재는 기본값으로 설정
-      // TODO: 서버에서 사용자의 좋아요 상태를 함께 반환하도록 수정 필요
-      isLiked.value = false; // 기본값
+      // 서버에서 받아온 좋아요 상태 설정
+      // 서버 응답에 isLiked, liked, userLiked 등의 필드가 있을 수 있음
+      let serverLiked = false;
+      
+      if (result.isLiked !== undefined) {
+        serverLiked = result.isLiked;
+      } else if (result.liked !== undefined) {
+        serverLiked = result.liked;
+      } else if (result.userLiked !== undefined) {
+        serverLiked = result.userLiked;
+      } else {
+        // 서버에서 좋아요 상태를 반환하지 않는 경우 별도 API로 확인
+        if (authStore.isAuthenticated) {
+          try {
+            const likeStatus = await boardAPI.checkPostLikeStatus(postId);
+            console.log('좋아요 상태 확인 결과:', likeStatus);
+            
+            if (likeStatus.isLiked !== undefined) {
+              serverLiked = likeStatus.isLiked;
+            } else if (likeStatus.liked !== undefined) {
+              serverLiked = likeStatus.liked;
+            } else if (likeStatus.userLiked !== undefined) {
+              serverLiked = likeStatus.userLiked;
+            } else {
+              serverLiked = false;
+            }
+          } catch (likeError) {
+            serverLiked = false;
+          }
+        } else {
+          // 로그인하지 않은 사용자는 기본값
+          serverLiked = false;
+        }
+      }
+      
+      // localStorage에서 저장된 좋아요 상태 확인 (백업)
+      const storageKey = `post_like_${postId}_${authStore.user?.userId || 'guest'}`;
+      const storedLiked = localStorage.getItem(storageKey);
+      
+      if (storedLiked !== null) {
+        // localStorage에 저장된 상태가 있으면 사용
+        isLiked.value = storedLiked === 'true';
+      } else {
+        // 서버 상태 사용
+        isLiked.value = serverLiked;
+        // localStorage에 저장
+        localStorage.setItem(storageKey, serverLiked.toString());
+        console.log('서버 상태를 localStorage에 저장:', serverLiked);
+      }
+      
+      
     } else {
       if (showLoading) {
         error.value = '게시글을 불러올 수 없습니다.';
@@ -303,18 +351,34 @@ const toggleLike = async () => {
   try {
     const result = await boardAPI.togglePostLike(route.params.id);
     
-    console.log('좋아요 토글 결과:', result);
     
     // 백엔드에서 PostLikeResponse 객체를 직접 반환
     if (result) {
       // 좋아요 수 업데이트
       post.value.likeCount = result.likeCount;
       
-      // 좋아요 상태 토글 (서버에서 현재 사용자의 좋아요 상태를 반환해야 함)
-      // 현재는 간단히 토글
-      isLiked.value = !isLiked.value;
+      // 서버에서 반환하는 좋아요 상태 사용
+      let newLikedState = false;
       
-      console.log('좋아요 토글 성공:', result);
+      if (result.isLiked !== undefined) {
+        newLikedState = result.isLiked;
+      } else if (result.liked !== undefined) {
+        newLikedState = result.liked;
+      } else if (result.userLiked !== undefined) {
+        newLikedState = result.userLiked;
+      } else {
+        // 서버에서 좋아요 상태를 반환하지 않는 경우 토글
+        newLikedState = !isLiked.value;
+      }
+      
+      // 상태 업데이트
+      isLiked.value = newLikedState;
+      
+      // localStorage에 저장
+      const storageKey = `post_like_${route.params.id}_${authStore.user?.userId || 'guest'}`;
+      localStorage.setItem(storageKey, newLikedState.toString());
+      
+      
     } else {
       console.error('좋아요 토글 실패: 응답이 없습니다.');
     }

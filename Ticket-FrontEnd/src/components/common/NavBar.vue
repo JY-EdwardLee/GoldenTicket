@@ -7,10 +7,10 @@
       </router-link>
     </div>
     <ul class="nav-links">
-      <li><router-link to="/application">응모</router-link></li>
-      <li><router-link to="/transfer">양도</router-link></li>
+      <li><a href="#" @click.prevent="goToApplication">응모</a></li>
+      <li><a href="#" @click.prevent="goToTransfer">양도</a></li>
       <li><router-link to="/bulletin">게시판</router-link></li>
-      <li><router-link to="/guide">FAQ</router-link></li>
+      <li><router-link to="/guide">이용가이드</router-link></li>
     </ul>
     <div class="auth-links">
       <template v-if="isLoggedIn">
@@ -44,6 +44,7 @@ const { isAuthenticated } = storeToRefs(authStore);
 // 로그인 상태 관리
 const isLoggedIn = ref(false);
 const isLoginModalVisible = ref(false);
+const pendingRedirect = ref(null); // 로그인 후 리다이렉트할 경로 저장
 
 // 컴포넌트 마운트 시 로그인 상태 확인
 onMounted(() => {
@@ -53,6 +54,13 @@ onMounted(() => {
 // isAuthenticated 상태가 변경될 때마다 isLoggedIn 업데이트
 watch(isAuthenticated, (newValue) => {
   isLoggedIn.value = newValue;
+  
+  // 로그인 성공 시 대기 중인 리다이렉트 처리
+  if (newValue && pendingRedirect.value) {
+    router.push(pendingRedirect.value);
+    pendingRedirect.value = null;
+    isLoginModalVisible.value = false;
+  }
 });
 
 // 로그인 모달 열기
@@ -63,6 +71,27 @@ const openLoginModal = () => {
 // 로그인 모달 닫기
 const closeLoginModal = () => {
   isLoginModalVisible.value = false;
+  pendingRedirect.value = null; // 모달 닫을 때 대기 중인 리다이렉트 초기화
+};
+
+// 응모 페이지로 이동
+const goToApplication = () => {
+  if (!isAuthenticated.value) {
+    pendingRedirect.value = '/application'; // 로그인 후 이동할 경로 저장
+    isLoginModalVisible.value = true;
+    return;
+  }
+  router.push('/application');
+};
+
+// 양도 페이지로 이동
+const goToTransfer = () => {
+  if (!isAuthenticated.value) {
+    pendingRedirect.value = '/transfer'; // 로그인 후 이동할 경로 저장
+    isLoginModalVisible.value = true;
+    return;
+  }
+  router.push('/transfer');
 };
 
 // In NavBar.vue
