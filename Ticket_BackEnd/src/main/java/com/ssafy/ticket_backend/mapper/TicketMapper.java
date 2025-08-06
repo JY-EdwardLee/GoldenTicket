@@ -35,10 +35,4 @@ public interface TicketMapper {
     int insertOtherPlatformTicket(OtherPlatformTicket otherPlatformTicket);
 
     Ticket selectTicketByGame(Long gameId, String seat, Long userId);
-<<<<<<< HEAD
-=======
-
-    void deleteWaitListByUserIdAndGameId(@Param("buyer") Long buyer, @Param("gameId") Long gameId);
-
->>>>>>> remotes/origin/BE/feat/chatbot
 }
