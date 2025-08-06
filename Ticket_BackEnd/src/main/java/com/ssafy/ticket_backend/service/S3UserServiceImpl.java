@@ -8,7 +8,7 @@ import com.ssafy.ticket_backend.dto.request.S3SaverRequest;
 import com.ssafy.ticket_backend.dto.response.S3DownloadResponse;
 import com.ssafy.ticket_backend.dto.response.S3SaveResponse;
 import com.ssafy.ticket_backend.dto.response.S3UploadUrlResponse;
-import com.ssafy.ticket_backend.exception.DatabaseOperationException;
+import com.ssafy.ticket_backend.exception.DatabaseException;
 import com.ssafy.ticket_backend.exception.ImageDownloadUrlGenerationException;
 import com.ssafy.ticket_backend.exception.PresignedUrlGenerationException;
 import com.ssafy.ticket_backend.exception.SaveUploadKeyException;
@@ -167,7 +167,7 @@ public class S3UserServiceImpl implements S3UserService {
             try {
                 saveUploadInfo(s3SaverRequest.getKey(), s3SaverRequest.getRefId());
             } catch (Exception e) {
-                throw new DatabaseOperationException("프로필 이미지 정보 저장에 실패하였습니다.");
+                throw new DatabaseException("프로필 이미지 정보 저장에 실패하였습니다.");
             }
 
             // 업데이트인 경우 기존 S3 객체 삭제
@@ -269,7 +269,7 @@ public class S3UserServiceImpl implements S3UserService {
 
             GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket,
                 key).withMethod(HttpMethod.GET).withExpiration(expiration);
-            
+
             return amazonS3.generatePresignedUrl(request).toString();
         } catch (Exception e) {
             throw new PresignedUrlGenerationException("Presigned URL 생성에 실패하였습니다.");

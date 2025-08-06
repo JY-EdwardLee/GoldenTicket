@@ -2,14 +2,17 @@ package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.request.SMSVerificationCheckRequest;
 import com.ssafy.ticket_backend.exception.UserSignupException;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.nurigo.sdk.message.model.Message;
 import net.nurigo.sdk.message.request.SingleMessageSendingRequest;
 import net.nurigo.sdk.message.service.DefaultMessageService;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SMSService {
@@ -19,8 +22,8 @@ public class SMSService {
 
     public void sendVerificationCode(String phoneNumber) {
         try {
-            String millisStr = String.valueOf(System.currentTimeMillis());  // 무작위 6자리 숫자 생성
-            String verificationCode = millisStr.substring(millisStr.length() - 6);  // 무작위 6자리 숫자 생성
+            String verificationCode = String.format("%06d",
+                new Random().nextInt(1000000));  // 무작위 6자리 숫자 생성
 
             redisTemplate.opsForValue().set(phoneNumber, verificationCode, 5, TimeUnit.MINUTES);
 
@@ -60,6 +63,7 @@ public class SMSService {
 
             messageService.sendOne(new SingleMessageSendingRequest(message));
         } catch (Exception e) {
+            log.error("SMS API 오류: ", e);
             throw new RuntimeException("메시지 발송 도중 오류가 발생하였습니다.");
         }
     }

@@ -3,10 +3,8 @@ package com.ssafy.ticket_backend.service;
 import com.ssafy.ticket_backend.dto.request.CommentRequest;
 import com.ssafy.ticket_backend.dto.request.CommentUpdateRequest;
 import com.ssafy.ticket_backend.dto.response.CommentLikeResponse;
-import com.ssafy.ticket_backend.exception.CommentCreateFailException;
-import com.ssafy.ticket_backend.exception.CommentDeleteFailException;
-import com.ssafy.ticket_backend.exception.CommentUpdateFailException;
-import com.ssafy.ticket_backend.exception.DatabaseOperationException;
+import com.ssafy.ticket_backend.exception.CommentException;
+import com.ssafy.ticket_backend.exception.DatabaseException;
 import com.ssafy.ticket_backend.mapper.CommentMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.User;
@@ -36,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
         User user = userMapper.selectUserByEmail(email);
 
         if (user.getIsBlock()) {
-            throw new CommentCreateFailException("차단된 사용자는 댓글을 작성할 수 없습니다.");
+            throw new CommentException("차단된 사용자는 댓글을 작성할 수 없습니다.");
         }
 
         commentRequest.setUserId(user.getUserId());
@@ -45,12 +43,12 @@ public class CommentServiceImpl implements CommentService {
             int result = commentMapper.insertComment(commentRequest);
 
             if (result != 1) {
-                throw new DatabaseOperationException("댓글 저장 중 오류가 발생했습니다.");
+                throw new DatabaseException("댓글 저장 중 오류가 발생했습니다.");
             }
         } catch (DataAccessException e) {
-            throw new DatabaseOperationException("존재하지 않는 게시글입니다.");
+            throw new DatabaseException("존재하지 않는 게시글입니다.");
         } catch (Exception e) {
-            throw new CommentCreateFailException("댓글 저장 중 오류가 발생하였습니다.");
+            throw new CommentException("댓글 저장 중 오류가 발생하였습니다.");
         }
     }
 
@@ -69,7 +67,7 @@ public class CommentServiceImpl implements CommentService {
         if (!user.getUserRole().equals(UserRole.ADMIN)) {
             Long result = commentMapper.selectUserIdByCommentId(commentId);
             if (user.getUserId() != result) {
-                throw new CommentDeleteFailException("권한이 없습니다.");
+                throw new CommentException("권한이 없습니다.");
             }
         }
 
@@ -77,7 +75,7 @@ public class CommentServiceImpl implements CommentService {
         int deleteTrue = commentMapper.CommentDeleteTrue(commentId);
 
         if (deleteTrue != 1) {
-            throw new DatabaseOperationException("댓글 삭제 중 오류가 발생하였습니다.");
+            throw new DatabaseException("댓글 삭제 중 오류가 발생하였습니다.");
         }
     }
 
@@ -96,15 +94,15 @@ public class CommentServiceImpl implements CommentService {
         Long result = commentMapper.selectUserIdByCommentId(commentId);
 
         if (result == null) {
-            throw new CommentUpdateFailException("존재하지 않는 댓글입니다.");
+            throw new CommentException("존재하지 않는 댓글입니다.");
         } else if (user.getUserId() != commentMapper.selectUserIdByCommentId(commentId)) {
-            throw new CommentUpdateFailException("권한이 없습니다.");
+            throw new CommentException("권한이 없습니다.");
         }
 
         int updateResult = commentMapper.updateComment(commentId, commentUpdateRequest);
 
         if (updateResult != 1) {
-            throw new DatabaseOperationException("댓글 수정 중 오류가 발생하였습니다.");
+            throw new DatabaseException("댓글 수정 중 오류가 발생하였습니다.");
         }
     }
 

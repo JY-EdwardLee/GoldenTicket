@@ -1,6 +1,6 @@
 package com.ssafy.ticket_backend.service;
 
-import com.ssafy.ticket_backend.exception.TicketTransferException;
+import com.ssafy.ticket_backend.exception.TicketException;
 import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.TicketMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
@@ -37,15 +37,15 @@ public class QRCodeService {
             Game game = gameMapper.selectGameByGameId(ticket.getGameId());
 
             if (!Objects.equals(ticket.getBuyerId(), user.getUserId())) {  // 구매자가 아니라면
-                throw new TicketTransferException("티켓과 사용자 정보가 일치하지 않습니다.");
+                throw new TicketException("티켓과 사용자 정보가 일치하지 않습니다.");
             }
 
             if (game.isEnded() || game.isCanceled()) {
-                throw new TicketTransferException("이미 종료된 게임입니다.");
+                throw new TicketException("이미 종료된 게임입니다.");
             }
 
             if (ticket.getTicketStatus().equals(TicketStatus.USED)) {
-                throw new TicketTransferException("이미 사용한 티켓입니다.");
+                throw new TicketException("이미 사용한 티켓입니다.");
             }
 
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
@@ -95,23 +95,23 @@ public class QRCodeService {
             Game game = gameMapper.selectGameByGameId(ticket.getGameId());
 
             if (!Objects.equals(user.getUserId(), userId)) {
-                throw new TicketTransferException("사용자 정보가 일치하지 않습니다.");
+                throw new TicketException("사용자 정보가 일치하지 않습니다.");
             }
 
             if (!Objects.equals(ticket.getBuyerId(), user.getUserId())) {  // 구매자가 아니라면
-                throw new TicketTransferException("티켓과 사용자 정보가 일치하지 않습니다.");
+                throw new TicketException("티켓과 사용자 정보가 일치하지 않습니다.");
             }
 
             if (game.isEnded() || game.isCanceled()) {
-                throw new TicketTransferException("이미 종료된 게임입니다.");
+                throw new TicketException("이미 종료된 게임입니다.");
             }
 
             if (timestamp == null) {
-                throw new TicketTransferException("QR 코드에 타임스탬프 정보가 없습니다.");
+                throw new TicketException("QR 코드에 타임스탬프 정보가 없습니다.");
             }
 
             if (System.currentTimeMillis() - timestamp.getTime() > 60000) {
-                throw new TicketTransferException("만료된 QR코드입니다.");
+                throw new TicketException("만료된 QR코드입니다.");
             }
 
             ticket.setTicketStatus(TicketStatus.USED);

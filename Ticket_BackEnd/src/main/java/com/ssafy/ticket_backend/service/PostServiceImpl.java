@@ -8,17 +8,15 @@ import com.ssafy.ticket_backend.dto.response.PostDetailResponse;
 import com.ssafy.ticket_backend.dto.response.PostLikeResponse;
 import com.ssafy.ticket_backend.dto.response.PostUserResponse;
 import com.ssafy.ticket_backend.dto.response.S3DownloadResponse;
-import com.ssafy.ticket_backend.exception.BlockedUserException;
-import com.ssafy.ticket_backend.exception.DatabaseOperationException;
+import com.ssafy.ticket_backend.exception.DatabaseException;
 import com.ssafy.ticket_backend.exception.PostCreateFailException;
-import com.ssafy.ticket_backend.exception.PostDeleteException;
 import com.ssafy.ticket_backend.exception.PostDeleteFailException;
 import com.ssafy.ticket_backend.exception.PostLikeFailException;
 import com.ssafy.ticket_backend.exception.PostNotFoundException;
 import com.ssafy.ticket_backend.exception.PostRetrievalException;
 import com.ssafy.ticket_backend.exception.PostUpdateException;
-import com.ssafy.ticket_backend.exception.PostUpdateFailException;
 import com.ssafy.ticket_backend.exception.PostUserNotFoundException;
+import com.ssafy.ticket_backend.exception.UserBlockException;
 import com.ssafy.ticket_backend.mapper.CommentMapper;
 import com.ssafy.ticket_backend.mapper.PostMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
@@ -56,7 +54,7 @@ public class PostServiceImpl implements PostService {
             postRequest.setUserId(user.getUserId());
 
             if (user.getIsBlock()) {
-                throw new BlockedUserException("차단된 사용자는 글을 작성할 수 없습니다.");
+                throw new UserBlockException("차단된 사용자는 글을 작성할 수 없습니다.");
             }
 
             // 게시글 먼저 생성하여 postId 획득
@@ -87,7 +85,7 @@ public class PostServiceImpl implements PostService {
                     // 이미지 키 변경 실패해도 게시글 작성은 성공으로 처리
                 }
             }
-        } catch (DataAccessException | BlockedUserException e) {
+        } catch (DataAccessException | UserBlockException e) {
             throw e;
         } catch (Exception e) {
             throw new PostCreateFailException("게시글 작성 중 오류가 발생하였습니다.");
@@ -116,7 +114,7 @@ public class PostServiceImpl implements PostService {
             int result = postMapper.plusView(postId);
 
             if (result == 0) {
-                throw new DatabaseOperationException("조회수 증가에 실패했습니다.");
+                throw new DatabaseException("조회수 증가에 실패했습니다.");
             }
 
             // 댓글
@@ -160,7 +158,7 @@ public class PostServiceImpl implements PostService {
 
             return postDetailResponse;
 
-        } catch (PostUserNotFoundException | PostNotFoundException | DatabaseOperationException e) {
+        } catch (PostUserNotFoundException | PostNotFoundException | DatabaseException e) {
             throw e;
         } catch (Exception e) {
             throw new PostRetrievalException("게시글 조회시 오류가 발생하였습니다.");
@@ -180,13 +178,13 @@ public class PostServiceImpl implements PostService {
             User user = userMapper.selectUserByEmail(email);
 
             if (user.getIsBlock()) {
-                throw new BlockedUserException("차단된 사용자는 글을 작성할 수 없습니다.");
+                throw new UserBlockException("차단된 사용자는 글을 작성할 수 없습니다.");
             }
 
             if (!user.getUserRole().equals(UserRole.ADMIN)) {
                 if (user.getUserId() != postMapper.selectUserIdByPostId(
                     postUpdateRequest.getPostId())) {
-                    throw new PostUpdateFailException("권한이 없습니다.");
+                    throw new PostUpdateException("권한이 없습니다.");
                 }
             }
 
@@ -196,9 +194,9 @@ public class PostServiceImpl implements PostService {
             // imageUrl이 null이면 DB에서도 null로 업데이트됨
 
             if (result != 1) {
-                throw new DatabaseOperationException("게시물 수정중 오류가 발생하였습니다.");
+                throw new DatabaseException("게시물 수정중 오류가 발생하였습니다.");
             }
-        } catch (BlockedUserException | PostUpdateFailException | DatabaseOperationException e) {
+        } catch (UserBlockException | PostUpdateException | DatabaseException e) {
             throw e;
         } catch (Exception e) {
             throw new PostUpdateException("게시글 수정시 오류가 발생하였습니다.");
@@ -227,12 +225,12 @@ public class PostServiceImpl implements PostService {
             int deleteTrue = postMapper.deleteTrue(PostId);
 
             if (deleteTrue != 1) {
-                throw new DatabaseOperationException("게시물 삭제 중 오류가 발생하였습니다.");
+                throw new DatabaseException("게시물 삭제 중 오류가 발생하였습니다.");
             }
         } catch (PostDeleteFailException e) {
             throw e;
         } catch (Exception e) {
-            throw new PostDeleteException("게시글 삭제시 오류가 발생하였습니다.");
+            throw new PostDeleteFailException("게시글 삭제시 오류가 발생하였습니다.");
         }
     }
 
