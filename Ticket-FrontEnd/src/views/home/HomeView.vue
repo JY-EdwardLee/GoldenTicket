@@ -65,69 +65,36 @@
             subtitle="실제 사용자들의 생생한 후기를 확인해보세요" 
           />
           
-          <!-- 캐러셀 컨테이너 -->
-          <div class="review-carousel-wrapper">
-            <!-- 왼쪽 화살표 -->
-            <v-btn
-              icon
-              class="carousel-arrow carousel-arrow-left"
-              @click="previousReviews"
-              :disabled="currentReviewIndex === 0"
-              size="large"
-              color="white"
-              variant="elevated"
-              elevation="3"
-            >
-              <v-icon color="primary">mdi-chevron-left</v-icon>
-            </v-btn>
-            
-            <!-- 후기 카드들 -->
-            <div class="review-carousel-container">
-              <div class="review-carousel-content">
-                <v-row class="review-row" :style="{ transform: `translateX(-${currentReviewIndex * (100 / reviewsPerView)}%)` }">
-                  <v-col 
-                    cols="12" 
-                    md="4" 
-                    class="pa-4 review-slide" 
-                    v-for="(review, index) in reviews" 
-                    :key="index"
-                  >
-                    <ReviewCard
-                      :name="review.name"
-                      :team="review.team"
-                      :content="review.content"
-                      :date="review.date"
-                    />
-                  </v-col>
-                </v-row>
+          <!-- 자동 스크롤 캐러셀 컨테이너 -->
+          <div class="auto-review-carousel-wrapper">
+            <div class="auto-review-carousel-container">
+              <div 
+                class="auto-review-carousel-track"
+                :style="{
+                  transform: `translateX(${translateX}px)`,
+                  transition: isTransitioning ? 'transform 0.5s ease-in-out' : 'none'
+                }"
+              >
+                <!-- 원본 후기들 -->
+                <div 
+                  v-for="(review, index) in extendedReviews" 
+                  :key="`review-${index}`"
+                  class="auto-review-slide"
+                >
+                  <ReviewCard
+                    :name="review.name"
+                    :team="review.team"
+                    :content="review.content"
+                    :date="review.date"
+                  />
+                </div>
               </div>
             </div>
             
-            <!-- 오른쪽 화살표 -->
-            <v-btn
-              icon
-              class="carousel-arrow carousel-arrow-right"
-              @click="nextReviews"
-              :disabled="currentReviewIndex >= maxReviewIndex"
-              size="large"
-              color="white"
-              variant="elevated"
-              elevation="3"
-            >
-              <v-icon color="primary">mdi-chevron-right</v-icon>
-            </v-btn>
+
           </div>
           
-          <!-- 현대적인 인디케이터 -->
-          <div class="review-indicators-modern">
-            <div 
-              v-for="(dot, index) in totalPages"
-              :key="index"
-              class="indicator-dot"
-              :class="{ 'active': index === currentPage }"
-              @click="goToPage(index)"
-            ></div>
-          </div>
+
         </v-container>
       </v-container>
 
@@ -155,16 +122,53 @@
     
     <!-- Login Modal -->
     <LoginModal :isVisible="showLoginModal" @close="closeLoginModal" />
+    
+    <!-- Tutorial Modal -->
+    <v-dialog v-model="showTutorialModal" max-width="500" persistent>
+      <v-card class="tutorial-modal">
+        <v-card-title class="text-h5 text-center pa-6">
+          <v-icon color="primary" size="48" class="mb-4">mdi-help-circle</v-icon>
+          <div class="tutorial-modal-main-title">서비스 사용을 도와드릴까요?</div>
+        </v-card-title>
+        
+        <v-card-text class="text-center pa-6">
+          <p class="tutorial-modal-sub-title">
+            쉽고 편리한 튜토리얼 기능을 이용해보세요!
+          </p>
+        </v-card-text>
+        
+        <v-card-actions class="justify-center pa-6">
+          <v-btn 
+            style="font-size: 15px;"
+            color="primary" 
+            variant="flat" 
+            @click="startTutorial"
+          >
+            네, 도와주세요!
+          </v-btn>
+          <v-btn 
+            style="font-size: 15px;"
+            color="grey" 
+            variant="outlined" 
+            @click="closeTutorialModal"
+          >
+            아뇨, 괜찮아요~
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
 <script setup>
-import { ref, watch, onMounted, computed } from 'vue';
+import { ref, watch, onMounted, onUnmounted, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import http from '@/utils/http';
 import axios from 'axios';
 import { API_CONFIG } from '@/config/api.config';
+import { driver } from 'driver.js';
+import 'driver.js/dist/driver.css';
 
 // 공통 컴포넌트 import
 import HeroCard from '../../components/ui/HeroCard.vue';
@@ -180,46 +184,310 @@ const router = useRouter();
 // Auth store
 const authStore = useAuthStore();
 const showLoginModal = ref(false);
-const pendingRedirect = ref(null); // 로그인 후 리다이렉트할 경로 저장
+
+// 로그인 후 리다이렉트할 경로 저장 (localStorage 사용)
+const pendingRedirect = ref(localStorage.getItem('pendingRedirect') || null);
+
+// 튜토리얼 모달 관리 (누락된 부분 추가)
+const showTutorialModal = ref(false);
+
+// 로그인 성공 후 처리를 위한 플래그
+const isProcessingLogin = ref(false);
 
 // 로그인 상태 변화 감지하여 리다이렉트 처리
-watch(() => authStore.isAuthenticated, (newValue) => {
-  if (newValue && pendingRedirect.value) {
-    // 로그인 성공 시 저장된 경로로 리다이렉트
-    router.push(pendingRedirect.value);
-    pendingRedirect.value = null;
-    showLoginModal.value = false;
+watch(() => authStore.isAuthenticated, async (newValue, oldValue) => {
+  console.log('인증 상태 변경 감지:', { 
+    from: oldValue, 
+    to: newValue, 
+    hasPendingRedirect: !!pendingRedirect.value,
+    pendingRedirect: pendingRedirect.value,
+    isProcessingLogin: isProcessingLogin.value
+  });
+  
+  // 로그인 성공 시에만 처리
+  if (newValue && !oldValue && pendingRedirect.value && !isProcessingLogin.value) {
+    isProcessingLogin.value = true;
+    
+    try {
+      // DOM 업데이트 완료까지 대기
+      await nextTick();
+      
+      // 로그인 모달이 열려있다면 닫기
+      if (showLoginModal.value) {
+        console.log('로그인 모달 닫기');
+        showLoginModal.value = false;
+        // 모달 닫힘 애니메이션 대기
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+      
+      // 리다이렉트 경로 저장 후 초기화
+      const redirectPath = pendingRedirect.value;
+      pendingRedirect.value = null;
+      localStorage.removeItem('pendingRedirect');
+      
+      console.log('리다이렉트 시도:', redirectPath);
+      
+      // 리다이렉트 실행
+      await router.push(redirectPath);
+      console.log('리다이렉트 성공');
+      
+    } catch (error) {
+      console.error('리다이렉트 실패:', error);
+      // 실패 시 메인 페이지로 이동
+      await router.push('/');
+      console.log('메인 페이지로 이동');
+    } finally {
+      isProcessingLogin.value = false;
+    }
   }
 });
 
+
 // 로그인 모달 닫기
 function closeLoginModal() {
+  console.log('로그인 모달 닫기 요청');
   showLoginModal.value = false;
-  pendingRedirect.value = null; // 모달 닫을 때 대기 중인 리다이렉트 초기화
+  
+  // 모달이 수동으로 닫힌 경우 대기 중인 리다이렉트 초기화
+  if (!authStore.isAuthenticated) {
+    pendingRedirect.value = null;
+    localStorage.removeItem('pendingRedirect');
+    isProcessingLogin.value = false;
+  }
 }
 
-// 메인 페이지 로직
-const goToApply = () => {
-  console.log(authStore.isAuthenticated)
-  // 로그인 상태 확인
-  if (!authStore.isAuthenticated) {
-    pendingRedirect.value = '/application'; // 로그인 후 이동할 경로 저장
-    showLoginModal.value = true;
-    return;
+// 로그인 성공 후 처리를 위한 메서드
+const handleLoginSuccess = async () => {
+  console.log('로그인 성공 처리 시작');
+  
+  if (pendingRedirect.value) {
+    console.log('대기 중인 리다이렉트 있음:', pendingRedirect.value);
+    
+    // 잠시 대기 후 리다이렉트 처리는 watch에서 자동으로 처리됨
+    // 여기서는 추가 로직이 필요한 경우에만 사용
   }
-  // 응모 페이지로 이동
-  router.push('/application');
 };
 
-const goToTransfer = () => {
+// 응모 페이지로 이동
+const goToApply = async () => {
+  console.log('응모하기 클릭 - 현재 인증 상태:', authStore.isAuthenticated);
+  const isInTutorial = !!document.querySelector('.driver-popover');
+  console.log('튜토리얼 상태:', isInTutorial);
+  
+  // 응모 튜토리얼 플래그 확인
+  const showApplyTutorial = localStorage.getItem('showApplyTutorial') === 'true';
+  
   // 로그인 상태 확인
   if (!authStore.isAuthenticated) {
-    pendingRedirect.value = '/transfer'; // 로그인 후 이동할 경로 저장
+    // 로그인 후 이동할 경로 저장 (튜토리얼 플래그 유지)
+    const redirectPath = isInTutorial || showApplyTutorial ? '/application?tutorial=true' : '/application';
+    console.log('로그인 필요, 리다이렉트 경로 저장:', redirectPath);
+    
+    // 튜토리얼이 활성화된 상태면 닫기
+    if (isInTutorial) {
+      console.log('튜토리얼 오버레이 닫기');
+      try {
+        const driverObj = driver();
+        driverObj.destroy();
+      } catch (e) {
+        console.warn('튜토리얼 닫기 실패:', e);
+      }
+    }
+    
+    // 대기 중인 리다이렉트 설정 및 로그인 모달 표시
+    pendingRedirect.value = redirectPath;
+    localStorage.setItem('pendingRedirect', redirectPath);
+    await nextTick(); // DOM 업데이트 대기
     showLoginModal.value = true;
+    console.log('로그인 모달 표시');
     return;
   }
-  // 양도 페이지로 이동
-  router.push('/transfer');
+  
+  // 이미 로그인된 상태면 바로 이동
+  try {
+    const path = isInTutorial || showApplyTutorial ? '/application?tutorial=true' : '/application';
+    console.log('바로 이동:', path);
+    
+    // 응모 튜토리얼 플래그가 있으면 제거 (한 번만 보여주기 위함)
+    if (showApplyTutorial) {
+      localStorage.removeItem('showApplyTutorial');
+    }
+    
+    await router.push(path);
+    console.log('이동 완료');
+  } catch (err) {
+    console.error('이동 실패:', err);
+  }
+};
+
+// 양도 페이지로 이동 (개선된 버전)
+const goToTransfer = async () => {
+  console.log('양도하기 클릭 - 현재 인증 상태:', authStore.isAuthenticated);
+  const isInTutorial = !!document.querySelector('.driver-popover');
+  console.log('튜토리얼 상태:', isInTutorial);
+  
+  // 양도 튜토리얼 플래그 확인
+  const showTransferTutorial = localStorage.getItem('showTransferTutorial') === 'true';
+  
+  // 로그인 상태 확인
+  if (!authStore.isAuthenticated) {
+    // 로그인 후 이동할 경로 저장 (튜토리얼 플래그 유지)
+    const redirectPath = isInTutorial || showTransferTutorial ? '/transfer?tutorial=true' : '/transfer';
+    console.log('로그인 필요, 리다이렉트 경로 저장:', redirectPath);
+    
+    // 튜토리얼이 활성화된 상태면 닫기
+    if (isInTutorial) {
+      console.log('튜토리얼 오버레이 닫기');
+      try {
+        const driverObj = driver();
+        driverObj.destroy();
+      } catch (e) {
+        console.warn('튜토리얼 닫기 실패:', e);
+      }
+    }
+    
+    // 대기 중인 리다이렉트 설정 및 로그인 모달 표시
+    pendingRedirect.value = redirectPath;
+    localStorage.setItem('pendingRedirect', redirectPath);
+    await nextTick(); // DOM 업데이트 대기
+    showLoginModal.value = true;
+    console.log('로그인 모달 표시');
+    return;
+  }
+  
+  // 이미 로그인된 상태면 바로 이동
+  try {
+    const path = isInTutorial || showTransferTutorial ? '/transfer?tutorial=true' : '/transfer';
+    console.log('바로 이동:', path);
+    
+    // 양도 튜토리얼 플래그가 있으면 제거 (한 번만 보여주기 위함)
+    if (showTransferTutorial) {
+      localStorage.removeItem('showTransferTutorial');
+    }
+    
+    await router.push(path);
+    console.log('이동 완료');
+  } catch (err) {
+    console.error('이동 실패:', err);
+  }
+};
+
+// 튜토리얼 모달 관련 함수들
+const closeTutorialModal = () => {
+  showTutorialModal.value = false;
+};
+
+// 아이콘 클래스 적용 함수 (컴포넌트 스코프로 이동)
+const applyStepIcon = (step) => {
+  const popover = document.querySelector('.driver-popover');
+  if (popover) {
+    popover.classList.remove('step-welcome', 'step-apply', 'step-transfer');
+    if (step.popover.title === '환영합니다!') {
+      popover.classList.add('step-welcome');
+    } else if (step.popover.title === '티켓 응모') {
+      popover.classList.add('step-apply');
+    } else if (step.popover.title === '티켓 양도') {
+      popover.classList.add('step-transfer');
+    }
+  }
+};
+
+const startTutorial = () => {
+  // 모달 닫기
+  showTutorialModal.value = false;
+  
+  // 약간의 지연 후 튜토리얼 시작 (모달이 완전히 닫히는 시간 확보)
+  setTimeout(() => {
+    // 간단한 설정으로 드라이버 초기화
+    const driverObj = driver({
+      showProgress: false,
+      overlayColor: 'rgba(0, 0, 0, 0.7)',
+      animate: 300,
+      allowClose: true,
+      doneBtnText: '완료',
+      nextBtnText: '다음',
+      prevBtnText: '이전',
+      
+      // 각 단계가 활성화될 때 아이콘 업데이트
+      onHighlighted: (element, step) => {
+        // 다음 애니메이션 프레임에서 아이콘 업데이트 (렌더링 완료 보장)
+        requestAnimationFrame(() => {
+          applyStepIcon(step);
+        });
+      },
+      
+      // 팝오버가 렌더링될 때 아이콘 업데이트 (이중 보장)
+      onPopoverRender: (popover, { config, state }) => {
+        const currentStep = state.activeStep;
+        if (currentStep) {
+          requestAnimationFrame(() => {
+            applyStepIcon(currentStep);
+          });
+        }
+      },
+      
+      // 튜토리얼 완료 시 실행
+      onDestroyed: () => {
+        // 튜토리얼 완료 시 로컬 스토리지에 기록
+        localStorage.setItem('tutorialCompleted', 'true');
+        // 모든 기능의 튜토리얼 플래그 설정 (완료 후 각 기능 사용 시 튜토리얼 표시)
+        localStorage.setItem('showApplyTutorial', 'true');
+        localStorage.setItem('showTransferTutorial', 'true');
+        console.log('메인 튜토리얼 완료 및 모든 기능 튜토리얼 플래그 설정됨');
+      },
+      
+      steps: [
+        {
+          popover: {
+            title: '환영합니다!',
+            description: '야구 티켓 양도 플랫폼에 오신 것을 환영합니다. 안전하고 편리한 티켓 거래를 시작해보세요!',
+            side: 'center',
+            align: 'center'
+          }
+        },
+        {
+          element: '.enter-card',
+          popover: {
+            title: '티켓 응모',
+            description: '여기를 클릭하여 원하는 야구 경기 티켓에 응모해보세요. 공정한 추첨을 통해 티켓을 받을 수 있습니다!',
+            side: 'top',
+            align: 'center',
+            onNext: () => {
+              // 응모하기 버튼 클릭 시 응모 튜토리얼 플래그 설정
+              localStorage.setItem('showApplyTutorial', 'true');
+              console.log('응모 튜토리얼 플래그 설정됨');
+              return true; // 다음 단계로 진행 허용
+            }
+          }
+        },
+        {
+          element: '.transfer-card',
+          popover: {
+            title: '티켓 양도',
+            description: '보유하고 있는 티켓을 다른 사람에게 양도하고 싶다면 여기를 클릭하세요. 안전한 거래를 보장합니다!',
+            side: 'top',
+            align: 'center',
+            onNext: () => {
+              // 양도하기 버튼 클릭 시 양도 튜토리얼 플래그 설정
+              localStorage.setItem('showTransferTutorial', 'true');
+              console.log('양도 튜토리얼 플래그 설정됨');
+              return true; // 다음 단계로 진행 허용
+            }
+          }
+        }
+      ]
+    });
+    
+    // 튜토리얼 시작
+    driverObj.drive();
+  }, 100);
+};
+
+// 튜토리얼 모달 표시 (항상 표시)
+const showTutorialOnEntry = () => {
+  console.log('튜토리얼 모달 표시');
+  // 즉시 모달 표시 (지연 없이)
+  showTutorialModal.value = true;
 };
 
 // 사용자 랭킹 데이터
@@ -239,9 +507,11 @@ const fetchUserRanking = async () => {
     }));
   } catch (error) {
     console.error('사용자 랭킹 데이터 가져오기 실패:', error);
-    // 기본값 설정
+    // 기본값 설정 - RankingCard 컴포넌트 형식에 맞게 수정
     userRankingData.value = [
-      { name: '데이터 없음', subtitle: '0건', avatar: '/default-avatar.png' }
+      { name: '서버 연결 중...', subtitle: '1위', score: 0, avatar: '/default-avatar.png' },
+      { name: '데이터 로딩 중...', subtitle: '2위', score: 0, avatar: '/default-avatar.png' },
+      { name: '잠시만 기다려주세요', subtitle: '3위', score: 0, avatar: '/default-avatar.png' }
     ];
   }
 };
@@ -281,9 +551,11 @@ const fetchTeamRanking = async () => {
     }));
   } catch (error) {
     console.error('팀 랭킹 데이터 가져오기 실패:', error);
-    // 기본값 설정
+    // 기본값 설정 - RankingCard 컴포넌트 형식에 맞게 수정
     teamRankingData.value = [
-      { name: '데이터 없음', subtitle: '0건', avatar: '/default-team.png' }
+      { name: '서버 연결 중...', subtitle: '1위', score: 0, change: '+0%', avatar: '/default-team.png' },
+      { name: '데이터 로딩 중...', subtitle: '2위', score: 0, change: '+0%', avatar: '/default-team.png' },
+      { name: '잠시만 기다려주세요', subtitle: '3위', score: 0, change: '+0%', avatar: '/default-team.png' }
     ];
   }
 };
@@ -352,52 +624,59 @@ const reviews = ref([
   }
 ]);
 
-// 후기 캐러셀 관련 데이터
-const reviewsPerView = 3;
-const currentReviewIndex = ref(0);
-const maxReviewIndex = reviews.value.length - reviewsPerView;
-const totalPages = Math.ceil(reviews.value.length / reviewsPerView);
-
-// 현재 페이지 계산 (computed)
-const currentPage = computed(() => {
-  // 마지막 페이지 처리를 위한 올바른 계산
-  if (currentReviewIndex.value >= maxReviewIndex) {
-    return totalPages - 1; // 마지막 페이지 (인덱스 3)
-  }
-  return Math.floor(currentReviewIndex.value / reviewsPerView);
+// 자동 스크롤 캐러셀 관련 변수
+const originalReviews = computed(() => reviews.value);
+const extendedReviews = computed(() => {
+  // 무한 루프를 위해 앞뒤로 복사본 추가
+  return [...originalReviews.value, ...originalReviews.value, ...originalReviews.value];
 });
 
-// 이전 후기 보기
-function previousReviews() {
-  const currentPageNum = currentPage.value;
-  if (currentPageNum > 0) {
-    const newPage = currentPageNum - 1;
-    currentReviewIndex.value = newPage * reviewsPerView;
-  }
-}
+const translateX = ref(0);
+const isTransitioning = ref(false);
+const autoScrollTimer = ref(null);
+const isPaused = ref(false);
+const currentActiveIndex = ref(0);
 
-// 다음 후기 보기
-function nextReviews() {
-  const currentPageNum = currentPage.value;
-  if (currentPageNum < totalPages - 1) {
-    const newPage = currentPageNum + 1;
-    currentReviewIndex.value = newPage * reviewsPerView;
-    // 마지막 페이지 처리
-    if (currentReviewIndex.value > maxReviewIndex) {
-      currentReviewIndex.value = maxReviewIndex;
+// 슬라이드 설정 - 더 부드럽게 조정
+const slideWidth = 364; // 각 슬라이드 너비 (340px 카드 + 24px 간격)
+const autoScrollSpeed = 4000; // 4초마다 이동 (더 여유롭게)
+const scrollPixelsPerMove = 0.2; // 한 번에 이동할 픽셀 (더 부드럽게)
+const smoothScrollInterval = 5; // 부드러운 스크롤 간격 (더 빠른 주기로 부드럽게)
+
+// 자동 스크롤 시작
+const startAutoScroll = () => {
+  if (autoScrollTimer.value) clearInterval(autoScrollTimer.value);
+  
+  autoScrollTimer.value = setInterval(() => {
+    if (!isPaused.value) {
+      translateX.value -= scrollPixelsPerMove;
+      
+      // 한 슬라이드만큼 이동했는지 확인
+      const currentSlideIndex = Math.abs(translateX.value) / slideWidth;
+      
+      if (currentSlideIndex >= originalReviews.value.length) {
+        // 첫 번째 복사본 세트를 다 지나면 원본 위치로 리셋
+        translateX.value = 0;
+        currentActiveIndex.value = 0;
+      } else {
+        // 현재 활성 인덱스 업데이트
+        currentActiveIndex.value = Math.floor(currentSlideIndex) % originalReviews.value.length;
+      }
     }
-  }
-}
+  }, smoothScrollInterval);
+};
 
-// 특정 페이지로 이동
-function goToPage(page) {
-  currentReviewIndex.value = page * reviewsPerView;
-  if (currentReviewIndex.value > maxReviewIndex) {
-    currentReviewIndex.value = maxReviewIndex;
-  }
-}
+// 자동 스크롤 일시정지
+const pauseAutoScroll = () => {
+  isPaused.value = true;
+};
 
-// 서비스 데이터
+// 자동 스크롤 재개
+const resumeAutoScroll = () => {
+  isPaused.value = false;
+};
+
+
 const services = ref([
   {
     title: '모바일 최적화',
@@ -419,11 +698,55 @@ const services = ref([
   }
 ]);
 
-// 컴포넌트 마운트 시 랭킹 데이터 가져오기
-onMounted(() => {
+// 컴포넌트 마운트 시 초기화
+onMounted(async () => {
+  console.log('HomeView 마운트됨');
+  
+  // 로그인 후 리다이렉트 처리 (watch가 동작하지 않을 경우 대비)
+  if (authStore.isAuthenticated && pendingRedirect.value) {
+    console.log('마운트 시 로그인된 상태에서 대기 중인 리다이렉트 발견:', pendingRedirect.value);
+    const redirectPath = pendingRedirect.value;
+    pendingRedirect.value = null;
+    localStorage.removeItem('pendingRedirect');
+    
+    try {
+      console.log('마운트 시 리다이렉트 실행:', redirectPath);
+      await router.push(redirectPath);
+      console.log('마운트 시 리다이렉트 성공');
+      return; // 리다이렉트 성공 시 나머지 초기화 건너뛰기
+    } catch (error) {
+      console.error('마운트 시 리다이렉트 실패:', error);
+    }
+  }
+  
   fetchUserRanking();
   fetchTeamRanking();
-  // authStore.verifyToken()
+  startAutoScroll();
+  
+  // 페이지 새로고침 시에도 튜토리얼 모달 표시
+  const isPageReload = performance.navigation.type === 1;
+  if (isPageReload) {
+    console.log('페이지 새로고침 감지 - 튜토리얼 모달 표시');
+    showTutorialOnEntry();
+  } else {
+    // 일반적인 페이지 진입 시에도 튜토리얼 모달 표시
+    console.log('일반 페이지 진입 - 튜토리얼 모달 표시');
+    showTutorialOnEntry();
+  }
+  
+  // URL에 tutorial 파라미터가 있으면 무조건 튜토리얼 모달 표시
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has('tutorial')) {
+    console.log('URL에 tutorial 파라미터 있음 - 튜토리얼 모달 표시');
+    showTutorialOnEntry();
+  }
+});
+
+// 컴포넌트 언마운트 시 타이머 정리
+onUnmounted(() => {
+  if (autoScrollTimer.value) {
+    clearInterval(autoScrollTimer.value);
+  }
 });
 
 </script>
@@ -480,11 +803,11 @@ onMounted(() => {
   }
   
   .text-h3 {
-    font-size: 1.75rem !important;
+    font-size: 2rem !important;
   }
   
   .text-h5 {
-    font-size: 1.25rem !important;
+    font-size: 2rem !important;
   }
   
   .text-h6 {
@@ -492,116 +815,115 @@ onMounted(() => {
   }
 }
 
-/* 후기 캐러셀 스타일 */
-.review-carousel-container {
+/* 튜토리얼 모달 스타일 - 금색 테마 */
+.tutorial-modal {
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(255, 178, 44, 0.2) !important;
+  border: 2px solid #FFB22C;
+}
+
+.tutorial-modal .v-card-title {
+  background: linear-gradient(135deg, #FFB22C 0%, #FF9A1A 100%);
+  color: white;
+  border-radius: 16px 16px 0 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.tutorial-modal .v-icon {
+  color: white !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.tutorial-modal .v-btn {
+  font-weight: 600;
+}
+
+.tutorial-modal .v-btn--variant-flat {
+  background: linear-gradient(135deg, #FFB22C 0%, #FF9A1A 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(255, 178, 44, 0.3) !important;
+}
+
+.tutorial-modal .v-btn--variant-flat:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 178, 44, 0.4) !important;
+}
+
+.tutorial-modal .v-btn--variant-outlined {
+  border-color: #FFB22C !important;
+  color: #FF9A1A !important;
+}
+
+.tutorial-modal .v-btn--variant-outlined:hover {
+  background-color: rgba(255, 178, 44, 0.1) !important;
+}
+
+/* 자동 스크롤 캐러셀 스타일 */
+.auto-review-carousel-wrapper {
   position: relative;
-  overflow: hidden;
-}
-
-/* 캐러셀 래퍼 - 화살표와 컨텐츠를 포함하는 컨테이너 */
-.review-carousel-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 0 60px; /* 화살표 공간 확보 */
-}
-
-/* 실제 캐러셀 컨테이너 - 카드들만 포함 */
-.review-carousel-container {
-  flex: 1;
-  overflow: hidden;
-}
-
-.review-carousel-content {
-  transition: transform 0.5s ease;
-}
-
-.review-row {
-  display: flex;
-  flex-wrap: nowrap;
-}
-
-.review-slide {
-  flex-shrink: 0;
   width: 100%;
+  overflow: hidden;
+  min-height: 400px;
+  background: #f8f9fa;
+  border-radius: 16px;
+  padding: 24px 0;
 }
 
-/* 개선된 화살표 스타일 */
-.carousel-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-  transition: all 0.3s ease;
+.auto-review-carousel-container {
+  width: 100%;
+  overflow: hidden;
+  height: 300px;
 }
 
-.carousel-arrow:hover {
-  transform: translateY(-50%) scale(1.05);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
+.auto-review-carousel-track {
+  display: flex;
+  width: fit-content;
+  gap: 24px; /* 간격 약간 증가 */
+  transition: transform 0.1s linear; /* 부드러운 전환 효과 */
+  will-change: transform; /* GPU 가속 최적화 */
 }
 
-.carousel-arrow:disabled {
-  opacity: 0.3;
-  transform: translateY(-50%);
+.auto-review-slide {
+  width: 340px; /* 너비 약간 증가 */
+  flex-shrink: 0;
+  height: 100%;
 }
 
-.carousel-arrow-left {
-  left: 0;
-}
 
-.carousel-arrow-right {
-  right: 0;
-}
 
-/* 현대적인 인디케이터 스타일 */
-.review-indicators-modern {
+/* 진행 상태 인디케이터 */
+.auto-carousel-indicators {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
-  margin-top: 32px;
+  gap: 8px;
+  margin-top: 24px;
 }
 
-.indicator-dot {
-  width: 12px;
-  height: 12px;
+.auto-carousel-indicators .indicator-dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background-color: #e0e0e0;
+  transition: all 0.3s ease;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
 }
 
-.indicator-dot:hover {
+.auto-carousel-indicators .indicator-dot.active {
+  background-color: #1976d2;
+  transform: scale(1.5);
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+}
+
+.auto-carousel-indicators .indicator-dot:hover:not(.active) {
   background-color: #bdbdbd;
   transform: scale(1.2);
 }
 
-.indicator-dot.active {
-  background-color: #1976d2;
-  transform: scale(1.3);
-  box-shadow: 0 0 0 4px rgba(25, 118, 210, 0.2);
-}
-
-.indicator-dot.active::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 6px;
-  height: 6px;
-  background-color: white;
-  border-radius: 50%;
-  opacity: 0.8;
-}
-
-/* 모바일 반응형 */
+/* 반응형 디자인 */
 @media (max-width: 768px) {
-  .review-carousel-wrapper {
-    gap: 16px;
+  .auto-review-slide {
+    width: 280px;
     margin: 0 -16px;
   }
   
@@ -644,4 +966,20 @@ onMounted(() => {
 .ranking-section .v-list {
   flex: 1;
 }
+
+/**
+ * 튜토리얼 모달의 제목 폰트 크기
+ */
+.tutorial-modal-main-title {
+  font-size: 30px;
+}
+
+.tutorial-modal-sub-title {
+  font-size: 17px;
+}
+
+.text-center.pa-6{
+  padding-bottom: 0px !important;
+}
+
 </style>
