@@ -120,7 +120,7 @@
               <div class="team-logo-placeholder">⚾</div>
             </div>
             <div class="team-details">
-              <span class="team-name">{{ themeStore.selectedTeam.value || currentTeam }}</span>
+              <span class="team-name">{{ enumToTeamName[themeStore.selectedTeam.value] || enumToTeamName[user.value.myTeam] }}</span>
               <span class="team-label">나의 관심팀</span>
             </div>
           </div>
@@ -160,6 +160,7 @@ import { ref, computed, onMounted, reactive } from 'vue'
 import { useTeamThemeStore } from '../../stores/teamTheme.js'
 import { useAuthStore } from '../../stores/auth.js'
 import { API_CONFIG } from '../../config/api.config.js'
+import { enumToTeamName } from '../../utils/teamNameMap.js'
 import http from '../../utils/http.js'
 
 // 테마 스토어 사용
@@ -210,7 +211,7 @@ const teams = {
     color: '#002E6D'
   },
   doosan: {
-    name: 'DOOSAN_BEAR',
+    name: 'DOOSAN_BEARS',
     logo: 'https://upload.wikimedia.org/wikipedia/ko/thumb/8/8f/Doosan_Bears_logo.svg/1200px-Doosan_Bears_logo.svg.png',
     color: '#131230'
   },
@@ -233,7 +234,7 @@ const formData = reactive({
 })
 
 // 관심 팀 변경 함수
-const changeFavoriteTeam = () => {
+const changeFavoriteTeam = async () => {
   if (selectedTeam.value) {
     const teamName = currentTeam.value.name
     console.log('관심 팀이 변경되었습니다:', teamName)
@@ -243,10 +244,11 @@ const changeFavoriteTeam = () => {
       "myTeam": teamName,
       "gender": user.value.gender
     }
-    const ans = http.patch(API_CONFIG.USER.PROFILE, requestForm)
-    console.log(ans)
+    await http.patch(API_CONFIG.USER.PROFILE, requestForm)
     // 테마 색상 변경
     themeStore.setSelectedTeam(teamName)
+    authStore.getUserInfo()
+    localStorage.setItem('selectedTeam', teamName)
     
     // 여기에 API 호출 로직을 추가할 수 있습니다
   }
@@ -301,6 +303,7 @@ onMounted(async () => {
     if (teamKey) {
       selectedTeam.value = teamKey
     }
+    localStorage.setItem('selectedTeam', teamKey)
   }
   themeStore.initializeTheme()
 }})

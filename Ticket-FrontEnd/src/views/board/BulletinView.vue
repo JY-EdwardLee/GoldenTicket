@@ -22,6 +22,19 @@ import NoticeBoard from '@/components/board/NoticeBoard.vue';
 import FreeBoard from '@/components/board/FreeBoard.vue';
 import GroupBoard from '@/components/board/GroupBoard.vue';
 import { boardAPI } from '@/api/board.js';
+import { useTeamThemeStore } from '@/stores/teamTheme.js'
+
+// 1. 로컬 스토리지에서 사용자 정보를 가져옵니다.
+const user = JSON.parse(localStorage.getItem('user'))
+
+// 2. 팀 테마 스토어를 가져옵니다.
+const themeStore = useTeamThemeStore
+
+// 3. 사용자 정보에 myTeam 값이 있으면 해당 팀으로 테마를 설정합니다.
+// 이 코드는 컴포넌트가 생성될 때마다 실행되어 현재 사용자의 팀 테마를 적용합니다.
+if (user?.myTeam) {
+  themeStore.setSelectedTeam(user.myTeam)
+}
 
 const route = useRoute();
 const selectedTab = ref('notice');
@@ -66,7 +79,7 @@ onMounted(() => {
 }
 
 .tab.active {
-  background: #e11d48;
+  background: var(--theme-primary, #ff6b35);
   color: #fff;
 }
 

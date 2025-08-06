@@ -10,26 +10,30 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref(JSON.parse(localStorage.getItem('user') || 'null'));
   const redirectPath = ref(localStorage.getItem('redirectPath') || null);
 
-  const isTokenExpired = (token) => {
+  const isTokenExpired = (tokenString) => {
+    if (!tokenString) return true;
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payload = JSON.parse(atob(tokenString.split('.')[1]));
       const now = Math.floor(Date.now() / 1000);
       return payload.exp < now;
     } catch (e) {
       console.error('Token decoding failed:', e);
-      console.error('Token:', token);
-      token.value = null;
-      user.value = null;
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('user');
-      return true; // 디코딩 실패 시 무조건 만료된 것으로 간주
+      // Malformed token is considered expired/invalid
+      return true;
     }
   };
-  
+
   const isAuthenticated = computed(() => {
     const t = token.value;
     return !!t && !isTokenExpired(t);
   });
+
+  const checkTokenValidity = () => {
+    if (token.value && isTokenExpired(token.value)) {
+      console.log('Session expired, logging out.');
+      logout();
+    }
+  };
 
   function setToken(newToken) {
     token.value = newToken;
@@ -38,6 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function setUser(userData) {
     user.value = userData;
+    localStorage.removeItem('user')
     localStorage.setItem('user', JSON.stringify(userData));
   }
 
@@ -79,24 +84,25 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('Failed to fetch user info:', error);
     }
   }
-// In auth.js
-async function logout() {
-  try {
-    // First make the API call to invalidate the session
-    await http.post(API_CONFIG.AUTH.LOGOUT, { withCredentials: true });
-  } catch (error) {
-    console.error('Logout error:', error);
-    // Even if the API call fails, we still want to clear the local state
-  } finally {
-    // First, clear the local state
-    token.value = null;
-    user.value = null;
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
-    // Always redirect to home after logout
-    router.push('/');
+
+  async function logout() {
+    try {
+      // First make the API call to invalidate the session
+      await http.post(API_CONFIG.AUTH.LOGOUT, { withCredentials: true });
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if the API call fails, we still want to clear the local state
+    } finally {
+      // First, clear the local state
+      token.value = null;
+      user.value = null;
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('user');
+      // Always redirect to home after logout
+      router.push('/');
+    }
   }
-}
+
   // 토큰 검증 함수 (필요한 경우 API 호출로 검증 가능)
   async function verifyToken() {
     if (!token.value) return false;
@@ -129,5 +135,6 @@ async function logout() {
     logout,
     verifyToken,
     getUserInfo,
+    checkTokenValidity,
   };
 });

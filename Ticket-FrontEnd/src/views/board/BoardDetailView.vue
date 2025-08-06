@@ -145,6 +145,19 @@ import CommentSection from '@/components/board/CommentSection.vue';
 import DeleteConfirmModal from '@/components/board/DeleteConfirmModal.vue';
 import { boardAPI, BOARD_TYPES, BOARD_TYPE_NAMES } from '@/api/board.js';
 import { useAuthStore } from '@/stores/auth.js';
+import { useTeamThemeStore } from '@/stores/teamTheme.js'
+
+// 1. 로컬 스토리지에서 사용자 정보를 가져옵니다.
+const user = JSON.parse(localStorage.getItem('user'))
+
+// 2. 팀 테마 스토어를 가져옵니다.
+const themeStore = useTeamThemeStore
+
+// 3. 사용자 정보에 myTeam 값이 있으면 해당 팀으로 테마를 설정합니다.
+// 이 코드는 컴포넌트가 생성될 때마다 실행되어 현재 사용자의 팀 테마를 적용합니다.
+if (user?.myTeam) {
+  themeStore.setSelectedTeam(user.myTeam)
+}
 
 const route = useRoute();
 const router = useRouter();
@@ -527,7 +540,7 @@ const handleCommentDelete = async (deleteData) => {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f4f6;
-  border-top: 4px solid #e11d48;
+  border-top: 4px solid var(--theme-primary, #ff6b35);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
@@ -545,7 +558,7 @@ const handleCommentDelete = async (deleteData) => {
   align-items: center;
   justify-content: center;
   padding: 100px 20px;
-  color: #dc2626;
+  color: var(--theme-primary, #ff6b35);
 }
 
 .error-message {
@@ -554,7 +567,7 @@ const handleCommentDelete = async (deleteData) => {
 }
 
 .retry-btn {
-  background: #e11d48;
+  background: var(--theme-primary, #ff6b35);
   color: white;
   border: none;
   border-radius: 6px;
@@ -564,7 +577,7 @@ const handleCommentDelete = async (deleteData) => {
 }
 
 .retry-btn:hover {
-  background: #be123c;
+  filter: brightness(90%);
 }
 
 .board-detail-root {
@@ -610,9 +623,9 @@ const handleCommentDelete = async (deleteData) => {
 }
 
 .list-btn {
-  background: #e11d48;
+  background: var(--theme-primary, #ff6b35);
   color: white;
-  border-color: #e11d48;
+  border-color: var(--theme-primary, #ff6b35);
 }
 
 .list-btn:hover {

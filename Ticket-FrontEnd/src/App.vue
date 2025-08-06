@@ -1,6 +1,7 @@
 <script setup>
 import DefaultLayout from "./layouts/DefaultLayout.vue";
 import DeleteUserModal from "./components/common/DeleteUserModal.vue";
+import Chatbot from "./components/common/Chatbot.vue";
 import { useDeleteUserModal } from "./composables/useDeleteUserModal.js";
 
 import { connectWebSocket, disconnectWebSocket } from "./utils/socket.js";
@@ -10,6 +11,10 @@ import { useAuthStore } from "@/stores/auth"; // Pinia authStore 임포트
 const authStore = useAuthStore();
 // 토큰을 reactive하게 추적 (Pinia store의 토큰)
 const token = ref(authStore.token);
+
+onMounted(() => {
+  authStore.checkTokenValidity();
+});
 
 // Pinia authStore의 토큰 변화를 감지해서 웹소켓 연결/해제 처리
 watch(
@@ -37,9 +42,7 @@ const { isDeleteUserModalVisible, closeDeleteUserModal, handleDeleteUser } =
 
 <template>
   <DefaultLayout>
-    <!-- 얍얍얍! -->
-    <!-- 2025-08-04 중요한건 꺽이지 않는 마음음 -->
-    <!-- Deployed via GitLab CI/CD at 2025-07-31 -->
+
 
     <router-view />
 
@@ -49,5 +52,8 @@ const { isDeleteUserModalVisible, closeDeleteUserModal, handleDeleteUser } =
       @close="closeDeleteUserModal"
       @withdraw="handleDeleteUser"
     />
+    
+    <!-- 전역 챗봇 -->
+    <Chatbot />
   </DefaultLayout>
 </template>

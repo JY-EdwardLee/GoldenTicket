@@ -1251,9 +1251,9 @@ watch(selectedTeam, watchFilterAndSort);
 }
 
 .retry-btn {
-  background: #e11d48;
+  background: var(--theme-primary, #ff6b35);
   color: white;
-  border: none;
+  border: 1px solid var(--theme-primary, #ff6b35);
   border-radius: 6px;
   padding: 8px 16px;
   cursor: pointer;
@@ -1261,7 +1261,7 @@ watch(selectedTeam, watchFilterAndSort);
 }
 
 .retry-btn:hover {
-  background: #be123c;
+  filter: brightness(90%);
 }
 
 /* 반응형 디자인 */

@@ -5,34 +5,34 @@ const createTeamThemeStore = () => {
   // KBO 팀별 색상 및 로고 정의
   const teamColors = {
     'SAMSUNG_LIONS': {
-      primary: '#1f4788',
-      secondary: '#ffffff',
-      accent: '#1f4788',
-      gradient: 'linear-gradient(135deg, #1f4788 0%, #2856a3 100%)',
+      primary: '#074CA1',
+      secondary: '#C0C0C0',
+      accent: '#C0C0C0',
+      gradient: 'linear-gradient(135deg, #074CA1 0%, #C0C0C0 100%)',
       logo: new URL('@/assets/logo/samsung.svg', import.meta.url).href,
       stadium: '대구 삼성 라이온즈 파크'
     },
     'KIWOOM_HEROES': {
-      primary: '#820024',
-      secondary: '#ffd700',
-      accent: '#820024',
-      gradient: 'linear-gradient(135deg, #820024 0%, #a0002d 100%)',
+      primary: '#570514',
+      secondary: '#B07F4A',
+      accent: '#B07F4A',
+      gradient: 'linear-gradient(135deg, #570514 0%, #B07F4A 100%)',
       logo: new URL('@/assets/logo/KIWOOM.svg', import.meta.url).href,
       stadium: '고척 스카이돔'
     },
     'LG_TWINS': {
-      primary: '#c70025',
+      primary: '#C30452',
       secondary: '#000000',
-      accent: '#c70025',
-      gradient: 'linear-gradient(135deg, #c70025 0%, #e6002d 100%)',
+      accent: '#000000',
+      gradient: 'linear-gradient(135deg, #C30452 0%, #000000 100%)',
       logo: new URL('@/assets/logo/LG.svg', import.meta.url).href,
       stadium: '서울종합운동장 야구장'
     },
-    'DOOSAN_BEAR': {
-      primary: '#131230',
-      secondary: '#d4af37',
-      accent: '#131230',
-      gradient: 'linear-gradient(135deg, #131230 0%, #1a1a4a 100%)',
+    'DOOSAN_BEARS': {
+      primary: '#1A1748',
+      secondary: '#EB1D25',
+      accent: '#EB1D25',
+      gradient: 'linear-gradient(135deg, #1A1748 0%, #EB1D25 100%)',
       logo: new URL('@/assets/logo/DOOSAN.svg', import.meta.url).href,
       stadium: '서울종합운동장 야구장'
     },
@@ -45,52 +45,44 @@ const createTeamThemeStore = () => {
       stadium: '수원 케이티 위즈 파크'
     },
     'SSG_LANDERS': {
-      primary: '#ce0e2d',
-      secondary: '#ffffff',
-      accent: '#ce0e2d',
-      gradient: 'linear-gradient(135deg, #ce0e2d 0%, #e51c3a 100%)',
+      primary: '#CE0E2D',
+      secondary: '#FFB81C',
+      accent: '#FFB81C',
+      gradient: 'linear-gradient(135deg, #CE0E2D 0%, #FFB81C 100%)',
       logo: new URL('@/assets/logo/SSG.svg', import.meta.url).href,
       stadium: '인천 SSG 랜더스필드'
     },
     'NC_DINOS': {
       primary: '#315288',
-      secondary: '#d4af37',
-      accent: '#315288',
-      gradient: 'linear-gradient(135deg, #315288 0%, #3d639c 100%)',
+      secondary: '#AF917B',
+      accent: '#AF917B',
+      gradient: 'linear-gradient(135deg, #315288 0%, #AF917B 100%)',
       logo: new URL('@/assets/logo/NC.svg', import.meta.url).href,
       stadium: '창원NC파크'
     },
     'KIA_TIGERS': {
-      primary: '#000000',
-      secondary: '#ff0000',
-      accent: '#ea1538',
-      gradient: 'linear-gradient(135deg, #000000 0%, #ea1538 100%)',
+      primary: '#EA0029',
+      secondary: '#06141F',
+      accent: '#06141F',
+      gradient: 'linear-gradient(135deg, #EA0029 0%, #06141F 100%)',
       logo: new URL('@/assets/logo/kia.svg', import.meta.url).href,
       stadium: '광주 기아 챔피언스 필드'
     },
     'LOTTE_GIANTS': {
-      primary: '#041e42',
-      secondary: '#c5002b',
-      accent: '#041e42',
-      gradient: 'linear-gradient(135deg, #041e42 0%, #0b2d5a 100%)',
+      primary: '#041E42',
+      secondary: '#D00F31',
+      accent: '#D00F31',
+      gradient: 'linear-gradient(135deg, #041E42 0%, #D00F31 100%)',
       logo: new URL('@/assets/logo/LOTTE.svg', import.meta.url).href,
       stadium: '사직 야구장'
     },
     'HANHWA_EAGLES': {
-      primary: '#ff6600',
-      secondary: '#000000',
-      accent: '#ff6600',
-      gradient: 'linear-gradient(135deg, #ff6600 0%, #ff7a1a 100%)',
+      primary: '#FC4E00',
+      secondary: '#07111F',
+      accent: '#07111F',
+      gradient: 'linear-gradient(135deg, #FC4E00 0%, #07111F 100%)',
       logo: new URL('@/assets/logo/HanWha.svg', import.meta.url).href,
       stadium: '대전 한화생명 볼파크'
-    },
-    'KIA_TIGERS': {
-      primary: '#ea1538',
-      secondary: '#000000',
-      accent: '#ea1538',
-      gradient: 'linear-gradient(135deg, #ea1538 0%, #ff1c3f 100%)',
-      logo: new URL('@/assets/logo/kia.svg', import.meta.url).href,
-      stadium: '고척 스카이돔'
     }
   }
 
