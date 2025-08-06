@@ -6,6 +6,7 @@ import com.ssafy.ticket_backend.mapper.TicketMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.Game;
 import com.ssafy.ticket_backend.model.Ticket;
+import com.ssafy.ticket_backend.model.TicketStatus;
 import com.ssafy.ticket_backend.model.User;
 import com.ssafy.ticket_backend.util.AesEncryptor;
 import com.ssafy.ticket_backend.util.QRCodeUtil;
@@ -13,7 +14,9 @@ import java.sql.Timestamp;
 import java.util.Base64;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,8 +26,8 @@ public class QRCodeService {
     private final TicketMapper ticketMapper;
     private final GameMapper gameMapper;
     private final AesEncryptor aesEncryptor;
-
-    private static final String FRONTEND_BASE_URL = "http://i13a109.p.ssafy.io/qrcode/check/";
+    @Value("${FE_BASE_URL}")
+    private String FE_BASE_URL;
 
     public String createQRCode(String userEmail, Long ticketId) {
         try {
@@ -41,12 +44,16 @@ public class QRCodeService {
                 throw new TicketTransferException("이미 종료된 게임입니다.");
             }
 
+            if (ticket.getTicketStatus().equals(TicketStatus.USED)) {
+                throw new TicketTransferException("이미 사용한 티켓입니다.");
+            }
+
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
             String qrText = "userId:" + user.getUserId() + ",ticketId:" + ticketId + ",timestamp:"
                 + timestamp.getTime();
 
             byte[] qrImage = QRCodeUtil.generateQRCodeImage(
-                FRONTEND_BASE_URL + aesEncryptor.encrypt(qrText), 300, 300);
+                FE_BASE_URL + "/qrcode/check/" + aesEncryptor.encrypt(qrText), 300, 300);
 
             return Base64.getEncoder().encodeToString(qrImage);
         } catch (Exception e) {
@@ -54,6 +61,7 @@ public class QRCodeService {
         }
     }
 
+    @Transactional
     public void checkValidQRCode(String userEmail, String qrcode) {
         try {
             String decrypt = aesEncryptor.decrypt(qrcode);
@@ -105,9 +113,11 @@ public class QRCodeService {
             if (System.currentTimeMillis() - timestamp.getTime() > 60000) {
                 throw new TicketTransferException("만료된 QR코드입니다.");
             }
+
+            ticket.setTicketStatus(TicketStatus.USED);
+            ticketMapper.updateTicket(ticket);
         } catch (Exception e) {
             throw new RuntimeException("QR 코드 검증 중 오류가 발생했습니다.", e);
         }
-
     }
 }

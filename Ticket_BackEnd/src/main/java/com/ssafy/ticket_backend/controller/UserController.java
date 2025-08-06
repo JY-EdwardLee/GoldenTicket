@@ -12,7 +12,6 @@ import com.ssafy.ticket_backend.dto.response.TicketResponse;
 import com.ssafy.ticket_backend.dto.response.TransactionResponse;
 import com.ssafy.ticket_backend.service.CustomUserDetails;
 import com.ssafy.ticket_backend.service.UserService;
-import com.ssafy.ticket_backend.util.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,7 +41,6 @@ import org.springframework.web.servlet.view.RedirectView;
 public class UserController {
 
     private final UserService userService;
-    private final JwtUtil jwtUtil;
 
     @Value("${kakao.rest.api.key}")
     private String KakaoRestApiKey;
