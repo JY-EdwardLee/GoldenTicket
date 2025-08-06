@@ -1,0 +1,162 @@
+/* Driver.js 커스텀 스타일 - 전역 적용 */
+
+/* 팝오버 박스 크기 및 기본 스타일 */
+.driver-popover {
+  min-width: 600px !important;
+  max-width: 700px !important;
+  min-height: 280px !important;
+  padding: 40px 50px !important;
+  border-radius: 20px !important;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25) !important;
+  background: white !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+/* 팝오버 헤더 영역 */
+.driver-popover-header {
+  width: 100% !important;
+  text-align: center !important;
+  margin-bottom: 25px !important;
+}
+
+/* 제목 스타일 */
+.driver-popover-title {
+  font-size: 32px !important;
+  font-weight: 800 !important;
+  margin-bottom: 15px !important;
+  color: #2c3e50 !important;
+  text-align: center !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.5px !important;
+  position: relative !important;
+  padding-top: 60px !important;
+}
+
+/* 제목 위에 아이콘 추가 - 기본 (환영합니다!) */
+.driver-popover-title::before {
+  content: '🎫' !important;
+  font-size: 48px !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: block !important;
+  margin-bottom: 15px !important;
+}
+
+/* 티켓 응모 단계 아이콘 */
+.driver-popover.step-apply .driver-popover-title::before {
+  content: '🎟️' !important;
+}
+
+/* 티켓 양도 단계 아이콘 */
+.driver-popover.step-transfer .driver-popover-title::before {
+  content: '🔄' !important;
+}
+
+/* 환영 단계 아이콘 (기본값 유지) */
+.driver-popover.step-welcome .driver-popover-title::before {
+  content: '🎫' !important;
+}
+
+/* 설명 텍스트 스타일 */
+.driver-popover-description {
+  font-size: 18px !important;
+  line-height: 1.7 !important;
+  color: #5a6c7d !important;
+  text-align: center !important;
+  margin: 0 !important;
+  padding: 0 20px !important;
+  word-break: keep-all !important;
+}
+
+/* 네비게이션 버튼 컨테이너 */
+.driver-popover-navigation-btns {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 20px !important;
+  margin-top: 5px !important;
+  width: 100% !important;
+}
+
+/* 모든 버튼 공통 스타일 */
+.driver-popover-next-btn,
+.driver-popover-prev-btn,
+.driver-popover-close-btn {
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  padding: 14px 28px !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: none !important;
+  min-width: 30px !important;
+  text-transform: none !important;
+  letter-spacing: -0.2px !important;
+}
+
+/* 다음 버튼 (금색 테마) */
+.driver-popover-next-btn {
+  background: linear-gradient(135deg, #FFB22C 0%, #FF9A1A 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(255, 178, 44, 0.3) !important;
+}
+
+.driver-popover-next-btn:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 25px rgba(255, 178, 44, 0.5) !important;
+  background: linear-gradient(135deg, #FF9A1A 0%, #FFB22C 100%) !important;
+}
+
+/* 이전 버튼 */
+.driver-popover-prev-btn {
+  background: #ffffff !important;
+  color: #6b7280 !important;
+  border: 2px solid #e5e7eb !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.driver-popover-prev-btn:hover {
+  background: #f9fafb !important;
+  border-color: #d1d5db !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 완료 버튼 (금색 테마) */
+.driver-popover-close-btn {
+  background: linear-gradient(135deg, #FFB22C 0%, #FF9A1A 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(255, 178, 44, 0.3) !important;
+}
+
+.driver-popover-close-btn:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 25px rgba(255, 178, 44, 0.5) !important;
+  background: linear-gradient(135deg, #FF9A1A 0%, #FFB22C 100%) !important;
+}
+
+/* 진행률 표시 숨김 */
+.driver-popover-progress-text {
+  display: none !important;
+}
+
+/* 닫기 버튼 (X) */
+.driver-popover-close-btn-icon {
+  position: absolute !important;
+  top: 15px !important;
+  right: 15px !important;
+  background: none !important;
+  border: none !important;
+  font-size: 20px !important;
+  color: #999 !important;
+  cursor: pointer !important;
+}
+
+.driver-popover-close-btn-icon:hover {
+  color: #666 !important;
+}

@@ -17,10 +17,7 @@
           <label>이름</label>
           <div class="input-wrapper">
             <div class="input-icon">👤</div>
-            <input type="text" :value="user?.userName || ''">
-            <button class="edit-btn">
-              <span class="edit-icon">✏️</span>
-            </button>
+            <input type="text" :value="user?.userName || ''" readonly>
           </div>
         </div>
 
@@ -29,9 +26,6 @@
           <div class="input-wrapper">
             <div class="input-icon">📧</div>
             <input type="email" :value="user?.email || ''" readonly>
-            <button class="edit-btn">
-              <span class="edit-icon">✏️</span>
-            </button>
           </div>
         </div>
 
@@ -39,8 +33,8 @@
           <label>닉네임</label>
           <div class="input-wrapper">
             <div class="input-icon">🏷️</div>
-            <input type="text" :value="user?.nickName || ''">
-            <button class="edit-btn">
+            <input type="text" v-model="formData.nickName">
+            <button class="edit-btn" @click="changeUserInfo">
               <span class="edit-icon">✏️</span>
             </button>
           </div>
@@ -51,9 +45,6 @@
           <div class="input-wrapper">
             <div class="input-icon">📱</div>
             <input type="tel" :value="user?.phoneNumber || ''">
-            <button class="edit-btn">
-              <span class="edit-icon">✏️</span>
-            </button>
           </div>
         </div>
 
@@ -62,9 +53,6 @@
           <div class="input-wrapper">
             <div class="input-icon">🎂</div>
             <input type="date" :value="user?.birthDate || ''" readonly>
-            <button class="edit-btn">
-              <span class="edit-icon">✏️</span>
-            </button>
           </div>
         </div>
       </div>
@@ -132,7 +120,7 @@
               <div class="team-logo-placeholder">⚾</div>
             </div>
             <div class="team-details">
-              <span class="team-name">{{ themeStore.selectedTeam.value || currentTeam.name }}</span>
+              <span class="team-name">{{ themeStore.selectedTeam.value || currentTeam }}</span>
               <span class="team-label">나의 관심팀</span>
             </div>
           </div>
@@ -168,7 +156,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import { useTeamThemeStore } from '../../stores/teamTheme.js'
 import { useAuthStore } from '../../stores/auth.js'
 import { API_CONFIG } from '../../config/api.config.js'
@@ -237,7 +225,12 @@ const teams = {
 const selectedTeam = ref(null)
 
 // 현재 팀 정보
-const currentTeam = computed(() => teams[selectedTeam.value] || teams[user?.myTeam])
+const currentTeam = computed(() => teams[selectedTeam.value] || teams[user.value?.myTeam])
+
+// 폼 데이터
+const formData = reactive({
+  nickName: '',
+})
 
 // 관심 팀 변경 함수
 const changeFavoriteTeam = () => {
@@ -258,6 +251,19 @@ const changeFavoriteTeam = () => {
     // 여기에 API 호출 로직을 추가할 수 있습니다
   }
 }
+
+// 유저 정보 변경 함수
+const changeUserInfo = () => {
+  const requestForm = {
+    "nickName": formData.nickName || user.value.nickName,
+    "profilePhotoUrl": user.value.profilePhotoUrl,
+    "myTeam": user.value.myTeam,
+    "gender": user.value.gender
+  }
+  const ans = http.patch(API_CONFIG.USER.PROFILE, requestForm)
+  console.log(ans)
+}
+
 
 // 이미지 로드 성공 핸들러
 const handleImageLoad = (event) => {
@@ -288,6 +294,7 @@ onMounted(async () => {
   const savedTeam = authStore.user.value?.myTeam
   if (userInfo) {
     user.value = JSON.parse(userInfo)
+    formData.nickName = user.value.nickName
   if (savedTeam) {
     // 저장된 팀명으로 select 값 찾기, 지금 팀 key.name으로 되어 있음 바꿔야 함함
     const teamKey = Object.keys(teams).find(key => teams[key].name === savedTeam)

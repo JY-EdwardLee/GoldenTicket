@@ -142,4 +142,103 @@ const handleRowClick = (post) => {
 .like-icon {
   font-size: 14px;
 }
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .board-table {
+    font-size: 14px;
+  }
+  
+  .board-table th, 
+  .board-table td {
+    padding: 10px 4px;
+    font-size: 13px;
+  }
+  
+  .board-table th:nth-child(4),
+  .board-table th:nth-child(5),
+  .board-table th:nth-child(6),
+  .board-table td:nth-child(4),
+  .board-table td:nth-child(5),
+  .board-table td:nth-child(6) {
+    display: none;
+  }
+  
+  .title-cell {
+    padding-left: 8px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .author-cell {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .like-cell {
+    gap: 2px;
+  }
+  
+  .like-icon {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .board-table {
+    font-size: 12px;
+  }
+  
+  .board-table th, 
+  .board-table td {
+    padding: 8px 2px;
+    font-size: 12px;
+  }
+  
+  .board-table th:nth-child(3),
+  .board-table td:nth-child(3) {
+    display: none;
+  }
+  
+  .title-cell {
+    padding-left: 4px;
+    max-width: 150px;
+  }
+  
+  .author-cell {
+    max-width: 60px;
+  }
+  
+  .like-cell {
+    gap: 1px;
+  }
+  
+  .like-icon {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 360px) {
+  .board-table {
+    font-size: 11px;
+  }
+  
+  .board-table th, 
+  .board-table td {
+    padding: 6px 1px;
+    font-size: 11px;
+  }
+  
+  .title-cell {
+    max-width: 120px;
+  }
+  
+  .author-cell {
+    max-width: 50px;
+  }
+}
 </style> 
