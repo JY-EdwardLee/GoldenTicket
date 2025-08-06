@@ -1,8 +1,9 @@
 package com.ssafy.ticket_backend.service;
 
-import org.springframework.stereotype.Service;
 
-@Service
+import com.ssafy.ticket_backend.dto.request.ChatbotRequest;
+import com.ssafy.ticket_backend.dto.response.ChatbotResponse;
+
 public interface ChatbotService {
-    String askPythonChatbot(String question);
+    ChatbotResponse askPythonChatbot(ChatbotRequest request, String userEmail, String accessToken);
 }

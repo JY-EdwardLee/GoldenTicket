@@ -8,5 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ChatbotRequest {
+
+    private Long userId;
     private String question;
+    private boolean isLogined;
 }

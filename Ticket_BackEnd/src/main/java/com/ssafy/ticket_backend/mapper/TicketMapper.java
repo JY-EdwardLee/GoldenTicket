@@ -40,4 +40,5 @@ public interface TicketMapper {
     Ticket selectTicketByGame(Long gameId, String seat, Long userId);
 
     void deleteWaitListByUserIdAndGameId(@Param("buyer") Long buyer, @Param("gameId") Long gameId);
+
 }
