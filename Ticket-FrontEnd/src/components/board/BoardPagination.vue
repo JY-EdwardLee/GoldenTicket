@@ -98,4 +98,46 @@ const goToNextPage = () => {
 .page-arrow:hover {
   background-color: #e5e7eb;
 }
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .pagination {
+    gap: 6px;
+    margin-top: 16px;
+  }
+  
+  .page, 
+  .page-arrow {
+    width: 24px;
+    height: 24px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination {
+    gap: 4px;
+    margin-top: 12px;
+  }
+  
+  .page, 
+  .page-arrow {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 360px) {
+  .pagination {
+    gap: 3px;
+  }
+  
+  .page, 
+  .page-arrow {
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+  }
+}
 </style> 

@@ -19,10 +19,10 @@
           type="text" 
           :placeholder="`${searchTypeName}을 입력하세요`"
           :value="searchValue"
-          @input="$emit('update:searchValue', $event.target.value)"
-          @keyup.enter="$emit('search', searchType)"
+          @input="handleSearchInput"
+          @keyup.enter="handleSearch"
         />
-        <span class="search-icon" @click="$emit('search', searchType)">🔍</span>
+        <span class="search-icon" @click="handleSearch">🔍</span>
       </div>
     </div>
   </div>
@@ -43,7 +43,7 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['update:searchValue', 'search']);
+const emit = defineEmits(['update:searchValue', 'search', 'searchTypeChange']);
 
 const searchType = ref('title');
 
@@ -51,6 +51,20 @@ const searchType = ref('title');
 const searchTypeName = computed(() => {
   return SEARCH_TYPE_NAMES[searchType.value] || '검색어';
 });
+
+// 검색 입력 처리
+const handleSearchInput = (event) => {
+  emit('update:searchValue', event.target.value);
+};
+
+// 검색 실행
+const handleSearch = () => {
+  if (!props.searchValue.trim()) {
+    alert('검색어를 입력해주세요.');
+    return;
+  }
+  emit('search', searchType.value, props.searchValue.trim());
+};
 
 // 검색 타입 변경 시 이벤트 발생
 const handleSearchTypeChange = () => {

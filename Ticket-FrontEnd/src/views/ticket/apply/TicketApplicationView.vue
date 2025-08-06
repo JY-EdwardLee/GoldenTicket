@@ -895,4 +895,423 @@ function formatGameDateTime(dateTimeStr) {
   font-size: 22px;
   color: #555;
 }
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .apply-wrapper {
+    padding: 0 16px;
+  }
+  
+  .stepper {
+    margin: 20px 0 16px;
+    gap: 0 8px;
+  }
+  
+  .step {
+    font-size: 12px;
+  }
+  
+  .step span {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+  }
+  
+  .bar {
+    width: 40px;
+    height: 3px;
+  }
+  
+  .title {
+    font-size: 24px;
+    margin: 0 0 20px 0;
+    padding: 0 16px;
+  }
+  
+  .team-bg-container {
+    width: 100%;
+    max-width: 400px;
+    height: 80px;
+    margin: 0 auto 20px auto;
+  }
+  
+  .team-bg-image {
+    width: 100%;
+    height: 100px;
+  }
+  
+  .team-list.team-list-row {
+    gap: 12px;
+    margin-bottom: 16px;
+    width: 100%;
+    padding: 0 16px;
+  }
+  
+  .team-row {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .team-card {
+    width: 100%;
+    height: 80px;
+    font-size: 18px;
+  }
+  
+  .next-btn {
+    padding: 12px 32px;
+    font-size: 16px;
+  }
+  
+  /* Game selection responsive */
+  .game-select-main {
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 24px;
+    padding: 0 16px;
+  }
+  
+  .calendar-area {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    min-height: 450px;
+    padding: 20px 16px;
+  }
+  
+  .calendar-header-section {
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .calendar-title {
+    font-size: 24px;
+    min-width: 160px;
+  }
+  
+  .month-nav-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    font-size: 18px;
+    flex-basis: 36px !important;
+  }
+  
+  .calendar-grid {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .calendar-header {
+    font-size: 18px;
+  }
+  
+  .calendar-cell {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+  
+  .calendar-logo {
+    padding-bottom: 8px;
+    padding-left: 16px;
+  }
+  
+  .calendar-logo img {
+    height: 32px;
+  }
+  
+  .info-area {
+    width: 100%;
+    max-width: 400px;
+    gap: 20px;
+  }
+  
+  .selected-date-box {
+    width: 100%;
+    height: auto;
+    min-height: 160px;
+    padding: 16px;
+  }
+  
+  .selected-date-box b {
+    font-size: 24px;
+  }
+  
+  .selected-team {
+    font-size: 14px;
+  }
+  
+  .game-list-box {
+    width: 100%;
+    height: auto;
+    min-height: 200px;
+    padding: 16px;
+  }
+  
+  .game-list-box b {
+    font-size: 20px;
+  }
+  
+  .game-card {
+    margin: 12px 0;
+    padding: 12px 16px;
+    gap: 4px;
+  }
+  
+  .game-title {
+    font-size: 16px;
+  }
+  
+  .game-desc {
+    font-size: 16px;
+    margin-top: 8px;
+  }
+  
+  .apply-btn {
+    margin-top: 20px;
+    padding: 8px 16px;
+    font-size: 16px;
+  }
+  
+  .no-game {
+    font-size: 18px;
+    margin-top: 40px;
+  }
+  
+  .no-game-centered {
+    min-height: 100px;
+    font-size: 18px;
+  }
+  
+  /* Apply complete overlay responsive */
+  .apply-complete-card {
+    width: 90%;
+    max-width: 400px;
+    padding: 24px 20px 20px 20px;
+    margin: 0 16px;
+  }
+  
+  .apply-complete-stepper {
+    gap: 0 8px;
+    margin-bottom: 16px;
+  }
+  
+  .apply-complete-stepper .step {
+    font-size: 11px;
+  }
+  
+  .apply-complete-stepper .step span {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
+  
+  .apply-complete-stepper .bar {
+    width: 28px;
+    height: 2px;
+  }
+  
+  .apply-icon-circle {
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+  }
+  
+  .apply-title {
+    font-size: 20px;
+    margin: 18px 0 4px 0;
+  }
+  
+  .apply-desc {
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  
+  .apply-info-card {
+    padding: 16px;
+    margin-bottom: 16px;
+    width: 100%;
+    height: auto;
+    min-height: 160px;
+  }
+  
+  .apply-info-title {
+    font-size: 24px;
+    margin-bottom: 6px;
+  }
+  
+  .apply-info-row {
+    font-size: 16px;
+    margin-bottom: 3px;
+  }
+  
+  .apply-confirm-btn {
+    width: 100%;
+    padding: 12px 0;
+    font-size: 16px;
+    margin-top: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .apply-wrapper {
+    padding: 0 12px;
+  }
+  
+  .title {
+    font-size: 22px;
+    padding: 0 8px;
+  }
+  
+  .team-bg-container {
+    max-width: 320px;
+    height: 70px;
+  }
+  
+  .team-bg-image {
+    height: 80px;
+  }
+  
+  .team-list.team-list-row {
+    padding: 0 8px;
+  }
+  
+  .team-card {
+    height: 70px;
+    font-size: 16px;
+  }
+  
+  .game-select-main {
+    padding: 0 8px;
+  }
+  
+  .calendar-area {
+    max-width: 320px;
+    padding: 16px 12px;
+  }
+  
+  .calendar-title {
+    font-size: 20px;
+    min-width: 140px;
+  }
+  
+  .month-nav-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    font-size: 16px;
+    flex-basis: 32px !important;
+  }
+  
+  .calendar-grid {
+    gap: 8px;
+  }
+  
+  .calendar-header {
+    font-size: 16px;
+  }
+  
+  .calendar-cell {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+  }
+  
+  .info-area {
+    max-width: 320px;
+  }
+  
+  .selected-date-box {
+    padding: 12px;
+  }
+  
+  .selected-date-box b {
+    font-size: 20px;
+  }
+  
+  .game-list-box {
+    padding: 12px;
+  }
+  
+  .game-list-box b {
+    font-size: 18px;
+  }
+  
+  .game-card {
+    padding: 10px 12px;
+  }
+  
+  .game-title {
+    font-size: 15px;
+  }
+  
+  .game-desc {
+    font-size: 14px;
+  }
+  
+  .apply-btn {
+    font-size: 15px;
+  }
+  
+  .apply-complete-card {
+    width: 95%;
+    padding: 20px 16px 16px 16px;
+    margin: 0 8px;
+  }
+  
+  .apply-info-title {
+    font-size: 20px;
+  }
+  
+  .apply-info-row {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .team-list.team-list-row {
+    gap: 16px;
+  }
+  
+  .team-row {
+    gap: 20px;
+  }
+  
+  .team-card {
+    width: 160px;
+    height: 90px;
+    font-size: 18px;
+  }
+  
+  .game-select-main {
+    gap: 32px;
+  }
+  
+  .calendar-area {
+    width: 400px;
+    height: 500px;
+  }
+  
+  .info-area {
+    width: 300px;
+  }
+  
+  .selected-date-box {
+    width: 320px;
+    height: 180px;
+  }
+  
+  .game-list-box {
+    width: 320px;
+    height: 240px;
+  }
+}
 </style>

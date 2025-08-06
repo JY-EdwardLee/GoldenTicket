@@ -89,7 +89,7 @@ button:focus-visible {
   
   /* 다크모드에서의 입력 필드 스타일 */
   input, textarea, select {
-    color: rgba(255, 255, 255, 0.87);
+    /* color: rgba(255, 255, 255, 0.87); */
     background-color: #1a1a1a;
   }
 }
