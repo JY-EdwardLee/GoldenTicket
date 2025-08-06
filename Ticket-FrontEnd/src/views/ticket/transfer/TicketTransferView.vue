@@ -1924,4 +1924,632 @@ function closeWarningModal() {
   left: 0 !important;
   top: 0 !important;
 }
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .transfer-root {
+    padding: 0 16px;
+  }
+  
+  .transfer-main {
+    padding: 0 16px;
+  }
+  
+  .main-center-card {
+    width: 100%;
+    max-width: 100%;
+    margin: 24px 0 32px 0;
+    min-height: 300px;
+  }
+  
+  .card-inner {
+    width: 100%;
+    height: auto;
+    min-height: 400px;
+    padding: 32px 20px;
+  }
+  
+  .card-title {
+    font-size: 28px;
+    margin-bottom: 6px;
+  }
+  
+  .card-desc {
+    font-size: 16px;
+    margin-top: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .provider-row {
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+    margin-top: 8px;
+  }
+  
+  .provider-col {
+    width: 100%;
+  }
+  
+  .provider-img {
+    margin-bottom: 12px;
+  }
+  
+  .nol-img,
+  .ticketlink-img {
+    width: 100%;
+    max-width: 280px;
+    height: 120px;
+  }
+  
+  .provider-btn {
+    width: 100%;
+    max-width: 250px;
+    height: 48px;
+    font-size: 18px;
+    gap: 6px;
+  }
+  
+  .btn-icon {
+    font-size: 14px;
+  }
+  
+  /* Ticket list responsive */
+  .ticket-tab-row {
+    gap: 12px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .ticket-tab {
+    padding: 6px 24px;
+    font-size: 14px;
+  }
+  
+  .ticket-list {
+    padding: 0 16px !important;
+    max-height: 500px !important;
+  }
+  
+  .ticket-card {
+    width: 100%;
+    max-width: 100%;
+    padding: 20px 24px 16px 24px;
+    height: auto;
+    min-height: 120px;
+    max-height: 350px;
+  }
+  
+  .ticket-card .ticket-title {
+    font-size: 20px;
+  }
+  
+  .ticket-card .ticket-info-row {
+    font-size: 16px;
+    margin-top: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .ticket-card .ticket-people {
+    font-size: 16px;
+  }
+  
+  .ticket-card .ticket-detail {
+    padding: 20px 24px 16px 24px;
+    font-size: 16px;
+  }
+  
+  .ticket-detail-title {
+    font-size: 24px;
+    margin-bottom: 8px;
+    margin-top: 2px;
+  }
+  
+  .ticket-detail-info-row {
+    gap: 12px;
+    font-size: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  
+  .ticket-detail-horizontal-row-centered {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .ticket-detail-block.block-horizontal {
+    padding: 12px 10px 10px 12px;
+    min-width: 120px;
+  }
+  
+  .ticket-detail-block.block-horizontal .block-title {
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+  
+  .ticket-detail-block.block-horizontal .block-content {
+    font-size: 14px;
+  }
+  
+  .ticket-detail-block.block-horizontal .block-icon {
+    font-size: 16px;
+  }
+  
+  .ticket-detail-transfer-btn {
+    width: 100%;
+    max-width: 180px;
+    height: 60px;
+    font-size: 18px;
+  }
+  
+  /* Detail page responsive */
+  .detail-page-wrap {
+    padding: 20px 0 32px 0;
+  }
+  
+  .detail-card {
+    width: 100%;
+    max-width: 400px;
+    margin-top: 8px;
+    margin-bottom: 24px;
+  }
+  
+  .detail-header {
+    padding: 24px 20px 40px 20px;
+    min-height: 280px;
+  }
+  
+  .detail-header-logo {
+    font-size: 22px;
+    left: 20px;
+    top: 16px;
+  }
+  
+  .detail-header-ticketid {
+    right: 20px;
+    top: 16px;
+    font-size: 12px;
+  }
+  
+  .ticketid-value {
+    font-size: 13px;
+  }
+  
+  .detail-match-title {
+    margin-top: 32px;
+  }
+  
+  .main-title {
+    font-size: 26px;
+  }
+  
+  .detail-header-info-row {
+    left: 20px;
+    bottom: 20px;
+    font-size: 16px;
+  }
+  
+  .detail-header-info-line {
+    gap: 60px;
+    width: 100%;
+    max-width: 360px;
+  }
+  
+  .detail-header-info-col {
+    font-size: 14px;
+    min-width: 150px;
+    margin-left: 0;
+  }
+  
+  .info-icon {
+    font-size: 16px;
+  }
+  
+  .detail-price-row {
+    padding: 0 20px;
+  }
+  
+  .detail-price {
+    font-size: 20px;
+  }
+  
+  .detail-seat-row {
+    padding: 0 20px;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  
+  .detail-seat-block {
+    padding: 12px 8px 8px 8px;
+    max-width: 100px;
+  }
+  
+  .seat-title {
+    font-size: 12px;
+    margin-bottom: 3px;
+  }
+  
+  .seat-value {
+    font-size: 14px;
+  }
+  
+  .detail-apply-box {
+    margin: 0 20px 16px 20px;
+    padding: 18px 0 16px 0;
+  }
+  
+  .apply-title {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .apply-btns {
+    gap: 12px;
+  }
+  
+  .apply-yes,
+  .apply-no {
+    padding: 8px 24px;
+    font-size: 15px;
+  }
+  
+  .detail-notice-box {
+    margin: 0 20px 20px 20px;
+    padding: 16px;
+  }
+  
+  .notice-title {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+  
+  .notice-content {
+    font-size: 13px;
+  }
+  
+  /* Complete page responsive */
+  .complete-root {
+    padding: 24px 0;
+    height: auto;
+    min-height: 600px;
+  }
+  
+  .complete-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 24px 20px 20px 20px;
+    margin-bottom: 16px;
+  }
+  
+  .match-info {
+    padding: 16px 0 10px 0;
+    margin-bottom: 24px;
+  }
+  
+  .match-title {
+    font-size: 22px;
+  }
+  
+  .match-detail {
+    font-size: 14px;
+    margin-top: 4px;
+    gap: 12px;
+  }
+  
+  .complete-message {
+    margin: 28px 0 12px 0;
+  }
+  
+  .main-message {
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+  }
+  
+  .sub-message {
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+  }
+  
+  .confirm-btn {
+    padding: 8px 24px;
+    font-size: 1rem;
+    margin-top: 8px;
+  }
+  
+  /* Warning modal responsive */
+  .warning-modal-container {
+    max-width: 320px;
+    width: 95%;
+  }
+  
+  .warning-modal-content {
+    padding: 32px 24px 24px 24px;
+  }
+  
+  .warning-modal-icon {
+    font-size: 40px;
+    margin-bottom: 16px;
+  }
+  
+  .warning-modal-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  
+  .warning-modal-message {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  
+  .warning-modal-confirm-btn {
+    padding: 10px 32px;
+    font-size: 15px;
+  }
+  
+  /* Applying status responsive */
+  .applying-message {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .transfer-root {
+    padding: 0 12px;
+  }
+  
+  .transfer-main {
+    padding: 0 12px;
+  }
+  
+  .card-inner {
+    padding: 24px 16px;
+    min-height: 350px;
+  }
+  
+  .card-title {
+    font-size: 24px;
+  }
+  
+  .card-desc {
+    font-size: 15px;
+    margin-top: 12px;
+    margin-bottom: 20px;
+  }
+  
+  .provider-row {
+    gap: 20px;
+  }
+  
+  .nol-img,
+  .ticketlink-img {
+    height: 100px;
+  }
+  
+  .provider-btn {
+    height: 44px;
+    font-size: 16px;
+  }
+  
+  .ticket-tab {
+    padding: 5px 20px;
+    font-size: 13px;
+  }
+  
+  .ticket-list {
+    padding: 0 12px !important;
+  }
+  
+  .ticket-card {
+    padding: 16px 20px 14px 20px;
+    min-height: 110px;
+  }
+  
+  .ticket-card .ticket-title {
+    font-size: 18px;
+  }
+  
+  .ticket-card .ticket-info-row {
+    font-size: 14px;
+    margin-top: 12px;
+    gap: 8px;
+  }
+  
+  .ticket-card .ticket-people {
+    font-size: 14px;
+  }
+  
+  .ticket-card .ticket-detail {
+    padding: 16px 20px 14px 20px;
+    font-size: 14px;
+  }
+  
+  .ticket-detail-title {
+    font-size: 20px;
+  }
+  
+  .ticket-detail-info-row {
+    font-size: 14px;
+    gap: 8px;
+  }
+  
+  .ticket-detail-block.block-horizontal {
+    padding: 10px 8px 8px 10px;
+    min-width: 100px;
+  }
+  
+  .ticket-detail-block.block-horizontal .block-title {
+    font-size: 13px;
+  }
+  
+  .ticket-detail-block.block-horizontal .block-content {
+    font-size: 12px;
+  }
+  
+  .ticket-detail-transfer-btn {
+    max-width: 160px;
+    height: 50px;
+    font-size: 16px;
+  }
+  
+  .detail-card {
+    max-width: 320px;
+  }
+  
+  .detail-header {
+    padding: 20px 16px 32px 16px;
+    min-height: 240px;
+  }
+  
+  .detail-header-logo {
+    font-size: 20px;
+    left: 16px;
+    top: 12px;
+  }
+  
+  .detail-header-ticketid {
+    right: 16px;
+    top: 12px;
+    font-size: 11px;
+  }
+  
+  .main-title {
+    font-size: 22px;
+  }
+  
+  .detail-header-info-line {
+    gap: 40px;
+    max-width: 280px;
+  }
+  
+  .detail-header-info-col {
+    font-size: 13px;
+    min-width: 120px;
+  }
+  
+  .detail-seat-block {
+    padding: 10px 6px 6px 6px;
+    max-width: 80px;
+  }
+  
+  .seat-title {
+    font-size: 11px;
+  }
+  
+  .seat-value {
+    font-size: 12px;
+  }
+  
+  .detail-apply-box {
+    margin: 0 16px 12px 16px;
+    padding: 16px 0 14px 0;
+  }
+  
+  .apply-title {
+    font-size: 15px;
+  }
+  
+  .apply-yes,
+  .apply-no {
+    padding: 6px 20px;
+    font-size: 14px;
+  }
+  
+  .detail-notice-box {
+    margin: 0 16px 16px 16px;
+    padding: 12px;
+  }
+  
+  .notice-title {
+    font-size: 13px;
+  }
+  
+  .notice-content {
+    font-size: 12px;
+  }
+  
+  .complete-card {
+    max-width: 320px;
+    padding: 20px 16px 16px 16px;
+  }
+  
+  .match-title {
+    font-size: 20px;
+  }
+  
+  .match-detail {
+    font-size: 13px;
+  }
+  
+  .main-message {
+    font-size: 1.4rem;
+  }
+  
+  .sub-message {
+    font-size: 0.85rem;
+  }
+  
+  .warning-modal-container {
+    max-width: 280px;
+  }
+  
+  .warning-modal-content {
+    padding: 24px 20px 20px 20px;
+  }
+  
+  .warning-modal-icon {
+    font-size: 36px;
+  }
+  
+  .warning-modal-title {
+    font-size: 16px;
+  }
+  
+  .warning-modal-message {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .main-center-card {
+    width: 90%;
+    max-width: 700px;
+  }
+  
+  .card-inner {
+    width: 100%;
+    height: auto;
+    min-height: 450px;
+    padding: 40px 28px;
+  }
+  
+  .provider-row {
+    gap: 36px;
+  }
+  
+  .nol-img,
+  .ticketlink-img {
+    width: 240px;
+    height: 130px;
+  }
+  
+  .provider-btn {
+    width: 220px;
+    height: 50px;
+    font-size: 22px;
+  }
+  
+  .ticket-card {
+    width: 580px;
+    padding: 20px 28px 16px 28px;
+  }
+  
+  .detail-card {
+    width: 500px;
+  }
+  
+  .complete-card {
+    width: 500px;
+  }
+}
 </style>

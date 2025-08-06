@@ -4,6 +4,7 @@
       title="공지사항"
       v-model:searchValue="searchValue"
       @search="handleSearch"
+      @searchTypeChange="handleSearchTypeChange"
     />
     
     <!-- 로딩 상태 -->
@@ -28,6 +29,11 @@
       @postClick="handlePostClick"
     />
     
+    <!-- 검색 결과 메시지 -->
+    <div v-if="searchResultMessage" class="search-result-message">
+      {{ searchResultMessage }}
+    </div>
+    
     <BoardPagination 
       :currentPage="currentPage"
       :totalPages="totalPages"
@@ -45,6 +51,8 @@ import BoardPagination from './BoardPagination.vue';
 import { boardAPI, BOARD_TYPES } from '@/api/board.js';
 
 const searchValue = ref('');
+const searchType = ref('title');
+const searchResultMessage = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 10; // 페이지당 게시글 수
 const isLoading = ref(false);
@@ -57,6 +65,7 @@ const allPosts = ref([]); // 전체 게시글 저장
 const loadPosts = async () => {
   isLoading.value = true;
   error.value = '';
+  searchResultMessage.value = '';
   
   try {
     const result = await boardAPI.getPostsByCategory(BOARD_TYPES.NOTICE);
@@ -72,6 +81,46 @@ const loadPosts = async () => {
   } catch (err) {
     error.value = '공지사항 목록을 불러오는 중 오류가 발생했습니다.';
     console.error('공지사항 목록 로드 중 오류:', err);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// 검색 타입 변경
+const handleSearchTypeChange = (type) => {
+  searchType.value = type;
+  console.log('검색 타입 변경:', type);
+};
+
+// 검색 실행
+const handleSearch = async (searchTypeParam, searchValueParam) => {
+  if (!searchValueParam || !searchValueParam.trim()) {
+    alert('검색어를 입력해주세요.');
+    return;
+  }
+
+  isLoading.value = true;
+  error.value = '';
+  
+  try {
+    const result = await boardAPI.searchPosts(BOARD_TYPES.NOTICE, searchTypeParam, searchValueParam.trim());
+    
+    // 서버가 배열을 직접 반환하므로 result 자체가 배열
+    if (Array.isArray(result)) {
+      allPosts.value = result;
+      currentPage.value = 1; // 검색 시 첫 페이지로 이동
+      updateDisplayedPosts();
+      searchResultMessage.value = `검색 결과: ${result.length}건`;
+      console.log('검색 성공:', result);
+    } else {
+      error.value = '데이터 형식이 올바르지 않습니다.';
+      searchResultMessage.value = '';
+      console.error('검색 실패: 잘못된 데이터 형식');
+    }
+  } catch (err) {
+    error.value = '검색 중 오류가 발생했습니다.';
+    searchResultMessage.value = '';
+    console.error('검색 중 오류:', err);
   } finally {
     isLoading.value = false;
   }
@@ -100,11 +149,6 @@ const updateDisplayedPosts = () => {
 onMounted(() => {
   loadPosts();
 });
-
-const handleSearch = () => {
-  console.log('검색:', searchValue.value);
-  // TODO: 실제 검색 로직 구현
-};
 
 const handlePostClick = (post) => {
   console.log('게시글 클릭:', post);
@@ -171,5 +215,84 @@ const handlePageChange = (page) => {
 
 .retry-btn:hover {
   background: #be123c;
+}
+
+/* 검색 결과 메시지 */
+.search-result-message {
+  text-align: center;
+  padding: 12px;
+  margin: 16px 32px;
+  background: #f0f9ff;
+  border: 1px solid #0ea5e9;
+  border-radius: 6px;
+  color: #0369a1;
+  font-size: 14px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .loading-container {
+    padding: 40px 16px;
+  }
+  
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
+    margin-bottom: 12px;
+  }
+  
+  .error-container {
+    padding: 40px 16px;
+  }
+  
+  .error-message {
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  
+  .retry-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .search-result-message {
+    margin: 12px 16px;
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .loading-container {
+    padding: 32px 12px;
+  }
+  
+  .loading-spinner {
+    width: 28px;
+    height: 28px;
+    border-width: 2px;
+    margin-bottom: 10px;
+  }
+  
+  .error-container {
+    padding: 32px 12px;
+  }
+  
+  .error-message {
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+  
+  .retry-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  
+  .search-result-message {
+    margin: 10px 12px;
+    padding: 8px;
+    font-size: 12px;
+  }
 }
 </style> 

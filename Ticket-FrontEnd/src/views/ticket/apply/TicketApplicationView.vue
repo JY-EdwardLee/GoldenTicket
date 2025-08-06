@@ -38,7 +38,7 @@
           </div>
         </div>
       </div>
-      <button class="next-btn" :disabled="!selectedTeam" @click="step = 2">{{ pageText.nextBtn }}</button>
+      <button class="next-btn" :disabled="!selectedTeam" @click="goToNextStep">{{ pageText.nextBtn }}</button>
     </div>
     <div v-else-if="step === 2" class="game-select-main">
       <div class="calendar-area">
@@ -132,21 +132,28 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
 import axios from 'axios';
 import API_CONFIG from '@/config/api.config';
 import { stadiumNameToEnum } from '@/utils/teamStadium';
 import { teamNameToEnum, getEnumTeamName } from '@/utils/teamNameMap';
 import http from '@/utils/http'
 import { useRouter } from 'vue-router';
+import { driver } from 'driver.js';
+import 'driver.js/dist/driver.css';
 
 const router = useRouter();
+
+// 튜토리얼 관련 변수
+const showTutorial = ref(false);
 
 const teamRows = [
   ['SSG랜더스', '키움히어로즈', 'LG트윈스', 'KT위즈', 'NC다이노스'],
   ['두산베어스', 'KIA타이거즈', '롯데자이언츠', '한화이글스', '삼성라이온즈']
 ];
-const selectedTeam = ref('');
+// 기본 팀을 SSG랜더스로 설정
+const selectedTeam = ref('SSG랜더스');
+const driverObj = ref(null); // 드라이버 인스턴스를 저장할 ref 추가
 // 서버에서 받아올 경기 데이터 배열
 const bgHover = ref(false);
 const step = ref(1);
@@ -160,7 +167,6 @@ const selectedGame = ref(null);
 const currentYear = 2025;
 const currentMonth = ref(8); // 8월부터 시작
 const today = new Date(2025, 7, 4); // 2025-08-04 (월은 0부터 시작)
-import { computed, onMounted } from 'vue';
 
 // 달력 computed 속성들
 const daysInCurrentMonth = computed(() => {
@@ -193,14 +199,60 @@ const pageText = {
   selectDateGuide: '날짜를 선택하세요',
   selectedTeam: '선택된 팀:',
   gameListTitle: '경기 목록',
-  gameTitle: 'SSG 랜더스 vs 키움 히어로즈',
-  gameDesc: '인천 SSG 랜더스필드',
   applyBtn: '응모하기',
   noGame: '날짜를 선택해주세요',
 };
 
 function selectTeam(team) {
   selectedTeam.value = team;
+  
+  // 로컬 스토리지에 선택된 팀 저장
+  localStorage.setItem('selectedTeam', team);
+  
+  // 선택된 팀 강조 표시 업데이트
+  document.querySelectorAll('.team-card').forEach(card => {
+    if (card.textContent === team) {
+      card.classList.add('selected');
+    } else {
+      card.classList.remove('selected');
+    }
+  });
+  
+  // 팀 배경 이미지 업데이트 - SSG 팀일 때만 active 클래스 추가
+  const teamBg = document.querySelector('.team-bg-image');
+  if (teamBg) {
+    if (team === 'SSG랜더스') {
+      teamBg.classList.add('active');
+    } else {
+      teamBg.classList.remove('active');
+    }
+  }
+  
+  // 다음 버튼 활성화
+  const nextButton = document.querySelector('.next-btn');
+  if (nextButton) {
+    nextButton.disabled = false;
+  }
+  
+  // 팀 선택 팝오버의 설명문 업데이트
+  updateTeamSelectionPopup();
+  
+  console.log('팀 선택됨:', team); // 디버깅용 로그
+}
+
+// 팀 선택 팝오버의 설명문을 업데이트하는 함수
+function updateTeamSelectionPopup() {
+  if (!driverObj.value) return;
+  
+  // 현재 활성화된 팝오버 요소 찾기
+  const activePopup = document.querySelector('.driver-popover.driver-active-popup');
+  if (!activePopup) return;
+  
+  // 설명문 요소 찾기
+  const descriptionEl = activePopup.querySelector('.driver-popover-description');
+  if (descriptionEl) {
+    descriptionEl.textContent = `원하는 팀을 선택해주세요. (현재 선택: ${selectedTeam.value})`;
+  }
 }
 
 // 달력 관련 함수들
@@ -233,8 +285,317 @@ function nextMonth() {
   }
 }
 
+// 캘린더 튜토리얼 시작
+const startCalendarTutorial = () => {
+  if (driverObj.value) {
+    driverObj.value.destroy();
+  }
+  
+  // 캘린더가 완전히 로드될 때까지 대기
+  setTimeout(() => {
+    driverObj.value = driver({
+      showProgress: false,
+      overlayColor: 'rgba(0, 0, 0, 0.7)',
+      animate: 300,
+      allowClose: true,
+      doneBtnText: '완료',
+      nextBtnText: '확인',
+      prevBtnText: '이전',
+      
+      onPopoverRender: (popover, { config, state }) => {
+        if (popover && typeof popover.querySelector === 'function') {
+          const popoverElement = popover.querySelector('.driver-popover');
+          if (popoverElement) {
+            popoverElement.classList.add('tutorial-popover');
+          }
+        }
+      },
+      
+      steps: [
+        {
+          element: '.calendar-area',
+          popover: {
+            title: '날짜 선택',
+            description: '캘린더에서 원하는 경기 날짜를 선택해주세요. 날짜를 클릭하면 해당 날짜의 경기 목록이 표시됩니다.',
+            side: 'right',
+            align: 'start'
+          }
+        }
+      ]
+    });
+    
+    driverObj.value.drive();
+  }, 300);
+};
+
+// 경기 목록 튜토리얼 시작
+const startGameListTutorial = () => {
+  if (driverObj.value) {
+    driverObj.value.destroy();
+  }
+  
+  setTimeout(() => {
+    driverObj.value = driver({
+      showProgress: true,
+      overlayColor: 'rgba(0, 0, 0, 0.7)',
+      animate: 300,
+      allowClose: true,
+      doneBtnText: '완료',
+      nextBtnText: '응모하기',
+      prevBtnText: '이전',
+      
+      onPopoverRender: (popover, { config, state }) => {
+        if (popover && typeof popover.querySelector === 'function') {
+          const popoverElement = popover.querySelector('.driver-popover');
+          if (popoverElement) {
+            popoverElement.classList.add('tutorial-popover');
+          }
+        }
+      },
+      
+      onNextClick: () => {
+        // 응모하기 버튼 클릭
+        const applyButton = document.querySelector('.game-card .apply-btn');
+        if (applyButton) {
+          applyButton.click();
+        }
+        return false; // 기본 next 동작 방지
+      },
+      
+      steps: [
+        {
+          element: '.game-list',
+          popover: {
+            title: '경기 선택',
+            description: '선택한 날짜의 경기 목록입니다. 응모하고 싶은 경기의 응모하기 버튼을 클릭해주세요.',
+            side: 'left',
+            align: 'start',
+            showButtons: ['next'], // 이전 버튼 숨김
+            onNextClick: () => {
+              const applyButton = document.querySelector('.game-card .apply-btn');
+              if (applyButton) {
+                applyButton.click();
+              }
+              return false;
+            }
+          }
+        }
+      ]
+    });
+    
+    driverObj.value.drive();
+  }, 300);
+};
+
+// 초기 팀 선택 튜토리얼 시작
+const startTutorial = () => {
+  if (driverObj.value) {
+    driverObj.value.destroy();
+  }
+
+  // 다음 버튼 클릭 핸들러
+  const handleNextClick = (fromTutorial = false) => {
+    console.log('핸들러 호출:', { fromTutorial, currentStep: step.value });
+    
+    // 팀이 선택되어 있는지 확인
+    if (!selectedTeam.value) {
+      selectedTeam.value = 'SSG랜더스'; // 기본값 설정
+    }
+    
+    const currentStep = step.value;
+    
+    // 튜토리얼에서 호출된 경우
+    if (fromTutorial) {
+      // 튜토리얼 먼저 종료
+      if (driverObj.value) {
+        driverObj.value.destroy();
+        driverObj.value = null;
+      }
+      
+      // 직접 step 변경
+      if (currentStep === 1) {
+        step.value = 2;
+        // DOM 업데이트 후 캘린더 튜토리얼 시작
+        setTimeout(() => {
+          startCalendarTutorial();
+        }, 300);
+      }
+      return true;
+    }
+    
+    // 일반 버튼 클릭에서 호출된 경우
+    const nextButton = document.querySelector('.next-btn');
+    if (nextButton && !nextButton.disabled) {
+      // 현재 튜토리얼 종료
+      if (driverObj.value) {
+        driverObj.value.destroy();
+        driverObj.value = null;
+      }
+      
+      // 다음 버튼 클릭
+      nextButton.click();
+      
+      // 단계가 1에서 2로 변경되었을 때 캘린더 튜토리얼 시작
+      if (currentStep === 1) {
+        setTimeout(() => {
+          if (step.value === 2) {
+            startCalendarTutorial();
+          }
+        }, 500);
+      }
+      
+      return true;
+    }
+    return false;
+  };
+
+  driverObj.value = driver({
+    showProgress: false,
+    overlayColor: 'rgba(0, 0, 0, 0.7)',
+    animate: 300,
+    allowClose: true,
+    doneBtnText: '완료',
+    nextBtnText: '다음',
+    prevBtnText: '이전',
+    
+    // 단계별 커스텀 이벤트 처리
+    onNextClick: (element, step, { state }) => {
+      console.log('글로벌 onNextClick 호출, activeStep:', state.activeStep);
+      
+      if (state.activeStep === 0) {
+        // 팀 선택 단계: 다음 단계로 이동
+        return true; // 기본 동작 허용
+      } else if (state.activeStep === 1) {
+        // 다음 버튼 단계: goToNextStep 호출
+        return goToNextStep();
+      }
+      return true;
+    },
+    
+    onPopoverRender: (popover, { config, state }) => {
+      // 팝오버가 DOM 요소인지 확인
+      if (popover && typeof popover.querySelector === 'function') {
+        // 팝오버가 렌더링될 때마다 클래스 추가
+        const popoverElement = popover.nodeType === 1 ? popover : popover.querySelector('.driver-popover');
+        if (popoverElement && popoverElement.classList) {
+          popoverElement.classList.add('tutorial-popover');
+          
+          // 팀 선택 팝오버의 설명문을 실시간으로 업데이트
+          if (state.activeStep === 0) { // 팀 선택 단계일 때만
+            const descriptionEl = popoverElement.querySelector('.driver-popover-description');
+            if (descriptionEl) {
+              descriptionEl.textContent = `원하는 팀을 선택해주세요. (현재 선택: ${selectedTeam.value})`;
+            }
+          }
+        }
+        
+        // 모든 버튼 찾기 (여러 가지 셀렉터 시도)
+        const possibleSelectors = [
+          '.driver-next-btn',
+          '.driver-popover-next-btn', 
+          '[data-driver-popover-next-btn]',
+          'button:contains("다음")',
+          '.driver-popover button:last-child'
+        ];
+        
+        let nextButton = null;
+        for (const selector of possibleSelectors) {
+          nextButton = popover.querySelector(selector);
+          if (nextButton) break;
+        }
+        
+        if (nextButton) {
+          nextButton.disabled = false;
+          console.log('다음 버튼 찾음:', nextButton.className);
+        } else {
+          console.warn('다음 버튼을 찾을 수 없음');
+        }
+      }
+    },
+    
+    steps: [
+      {
+        element: '.team-list',
+        popover: {
+          title: '팀 선택',
+          description: '원하는 팀을 선택해주세요.',
+          side: 'right',
+          align: 'start'
+        }
+      },
+      {
+        element: '.next-btn',
+        popover: {
+          title: '다음 단계',
+          description: '다음 버튼을 눌러주세요.',
+          side: 'left',
+          align: 'start'
+        }
+      }
+    ]
+  });
+  
+  // 튜토리얼 시작
+  driverObj.value.drive();
+};
+
+// 다음 단계로 이동하는 함수
+const goToNextStep = () => {
+  console.log('goToNextStep called', { currentStep: step.value, hasSelectedTeam: !!selectedTeam.value });
+  
+  if (step.value === 1 && selectedTeam.value) {
+    // 현재 튜토리얼이 있다면 종료
+    if (driverObj.value) {
+      driverObj.value.destroy();
+      driverObj.value = null;
+    }
+    
+    // 단계 변경
+    step.value = 2;
+    
+    // DOM 업데이트 후 캘린더 튜토리얼 시작
+    nextTick(() => {
+      // URL에 튜토리얼 파라미터가 있으면 캘린더 튜토리얼 시작
+      const urlParams = new URLSearchParams(window.location.search);
+      const tutorialParam = urlParams.get('tutorial');
+      
+      if (tutorialParam === 'true') {
+        startCalendarTutorial();
+      }
+    });
+    
+    return true;
+  }
+  return false;
+};
+
 // 컴포넌트 마운트 시 현재 날짜 자동 선택 및 경기 로드
 onMounted(async () => {
+  // 이전에 선택한 팀이 있으면 복원
+  const savedTeam = localStorage.getItem('selectedTeam');
+  if (savedTeam) {
+    selectedTeam.value = savedTeam;
+    // UI 업데이트
+    document.querySelectorAll('.team-card').forEach(card => {
+      if (card.textContent === savedTeam) {
+        card.classList.add('selected');
+      } else {
+        card.classList.remove('selected');
+      }
+    });
+  }
+
+  // URL에서 튜토리얼 파라미터 확인
+  const urlParams = new URLSearchParams(window.location.search);
+  const tutorialParam = urlParams.get('tutorial');
+  
+  if (tutorialParam === 'true') {
+    // 약간의 지연 후 튜토리얼 시작 (컴포넌트 렌더링 완료 대기)
+    setTimeout(() => {
+      startTutorial();
+    }, 800); // 로딩 시간을 좀 더 여유롭게 조정
+  }
+  
   // 현재 날짜 가져오기
   const today = new Date();
   const currentDay = today.getDate();
@@ -280,6 +641,17 @@ async function selectDate(date) {
       team: teamEnum
     });
     gamesOnDate.value = data;
+    
+    // 날짜 선택 후 캘린더 튜토리얼이 활성화되어 있다면 종료하고 경기 목록 튜토리얼 시작
+    if (driverObj.value) {
+      driverObj.value.destroy();
+      // 경기 데이터가 로드된 후 튜토리얼 시작
+      setTimeout(() => {
+        if (data && data.length > 0) {
+          startGameListTutorial();
+        }
+      }, 500);
+    }
   } catch (error) {
     console.error('응모/경기조회 에러:', error);
     gamesOnDate.value = [];
@@ -320,6 +692,59 @@ function formatGameDateTime(dateTimeStr) {
   return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
 }
 </script>
+
+<style>
+/* Global tutorial styles */
+:global(.driver-popover.tutorial-popover) {
+  border-radius: 10px;
+  max-width: 320px;
+}
+
+:global(.driver-popover.tutorial-popover .driver-popover-title) {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+:global(.driver-popover.tutorial-popover .driver-popover-description) {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+:global(.driver-popover.tutorial-popover .driver-popover-arrow) {
+  display: none;
+}
+
+:global(.driver-popover.tutorial-popover .driver-popover-footer) {
+  margin-top: 15px;
+  text-align: right;
+}
+
+:global(.driver-popover.tutorial-popover .driver-popover-footer button) {
+  background: #d32f2f;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+:global(.driver-popover.tutorial-popover .driver-popover-footer button:hover) {
+  background: #b71c1c;
+}
+
+:global(.driver-highlighted-element) {
+  border: 3px solid #d32f2f !important;
+  border-radius: 8px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+}
+
+:global(.driver-active-element) {
+  position: relative;
+  z-index: 10000;
+}
+</style>
 
 <style scoped>
 *{
@@ -894,5 +1319,424 @@ function formatGameDateTime(dateTimeStr) {
   min-height: 120px;
   font-size: 22px;
   color: #555;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .apply-wrapper {
+    padding: 0 16px;
+  }
+  
+  .stepper {
+    margin: 20px 0 16px;
+    gap: 0 8px;
+  }
+  
+  .step {
+    font-size: 12px;
+  }
+  
+  .step span {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+  }
+  
+  .bar {
+    width: 40px;
+    height: 3px;
+  }
+  
+  .title {
+    font-size: 24px;
+    margin: 0 0 20px 0;
+    padding: 0 16px;
+  }
+  
+  .team-bg-container {
+    width: 100%;
+    max-width: 400px;
+    height: 80px;
+    margin: 0 auto 20px auto;
+  }
+  
+  .team-bg-image {
+    width: 100%;
+    height: 100px;
+  }
+  
+  .team-list.team-list-row {
+    gap: 12px;
+    margin-bottom: 16px;
+    width: 100%;
+    padding: 0 16px;
+  }
+  
+  .team-row {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  
+  .team-card {
+    width: 100%;
+    height: 80px;
+    font-size: 18px;
+  }
+  
+  .next-btn {
+    padding: 12px 32px;
+    font-size: 16px;
+  }
+  
+  /* Game selection responsive */
+  .game-select-main {
+    flex-direction: column;
+    gap: 24px;
+    margin-bottom: 24px;
+    padding: 0 16px;
+  }
+  
+  .calendar-area {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    min-height: 450px;
+    padding: 20px 16px;
+  }
+  
+  .calendar-header-section {
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  
+  .calendar-title {
+    font-size: 24px;
+    min-width: 160px;
+  }
+  
+  .month-nav-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    max-width: 36px !important;
+    max-height: 36px !important;
+    font-size: 18px;
+    flex-basis: 36px !important;
+  }
+  
+  .calendar-grid {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  
+  .calendar-header {
+    font-size: 18px;
+  }
+  
+  .calendar-cell {
+    width: 32px;
+    height: 32px;
+    font-size: 18px;
+  }
+  
+  .calendar-logo {
+    padding-bottom: 8px;
+    padding-left: 16px;
+  }
+  
+  .calendar-logo img {
+    height: 32px;
+  }
+  
+  .info-area {
+    width: 100%;
+    max-width: 400px;
+    gap: 20px;
+  }
+  
+  .selected-date-box {
+    width: 100%;
+    height: auto;
+    min-height: 160px;
+    padding: 16px;
+  }
+  
+  .selected-date-box b {
+    font-size: 24px;
+  }
+  
+  .selected-team {
+    font-size: 14px;
+  }
+  
+  .game-list-box {
+    width: 100%;
+    height: auto;
+    min-height: 200px;
+    padding: 16px;
+  }
+  
+  .game-list-box b {
+    font-size: 20px;
+  }
+  
+  .game-card {
+    margin: 12px 0;
+    padding: 12px 16px;
+    gap: 4px;
+  }
+  
+  .game-title {
+    font-size: 16px;
+  }
+  
+  .game-desc {
+    font-size: 16px;
+    margin-top: 8px;
+  }
+  
+  .apply-btn {
+    margin-top: 20px;
+    padding: 8px 16px;
+    font-size: 16px;
+  }
+  
+  .no-game {
+    font-size: 18px;
+    margin-top: 40px;
+  }
+  
+  .no-game-centered {
+    min-height: 100px;
+    font-size: 18px;
+  }
+  
+  /* Apply complete overlay responsive */
+  .apply-complete-card {
+    width: 90%;
+    max-width: 400px;
+    padding: 24px 20px 20px 20px;
+    margin: 0 16px;
+  }
+  
+  .apply-complete-stepper {
+    gap: 0 8px;
+    margin-bottom: 16px;
+  }
+  
+  .apply-complete-stepper .step {
+    font-size: 11px;
+  }
+  
+  .apply-complete-stepper .step span {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
+  
+  .apply-complete-stepper .bar {
+    width: 28px;
+    height: 2px;
+  }
+  
+  .apply-icon-circle {
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+  }
+  
+  .apply-title {
+    font-size: 20px;
+    margin: 18px 0 4px 0;
+  }
+  
+  .apply-desc {
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  
+  .apply-info-card {
+    padding: 16px;
+    margin-bottom: 16px;
+    width: 100%;
+    height: auto;
+    min-height: 160px;
+  }
+  
+  .apply-info-title {
+    font-size: 24px;
+    margin-bottom: 6px;
+  }
+  
+  .apply-info-row {
+    font-size: 16px;
+    margin-bottom: 3px;
+  }
+  
+  .apply-confirm-btn {
+    width: 100%;
+    padding: 12px 0;
+    font-size: 16px;
+    margin-top: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .apply-wrapper {
+    padding: 0 12px;
+  }
+  
+  .title {
+    font-size: 22px;
+    padding: 0 8px;
+  }
+  
+  .team-bg-container {
+    max-width: 320px;
+    height: 70px;
+  }
+  
+  .team-bg-image {
+    height: 80px;
+  }
+  
+  .team-list.team-list-row {
+    padding: 0 8px;
+  }
+  
+  .team-card {
+    height: 70px;
+    font-size: 16px;
+  }
+  
+  .game-select-main {
+    padding: 0 8px;
+  }
+  
+  .calendar-area {
+    max-width: 320px;
+    padding: 16px 12px;
+  }
+  
+  .calendar-title {
+    font-size: 20px;
+    min-width: 140px;
+  }
+  
+  .month-nav-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    font-size: 16px;
+    flex-basis: 32px !important;
+  }
+  
+  .calendar-grid {
+    gap: 8px;
+  }
+  
+  .calendar-header {
+    font-size: 16px;
+  }
+  
+  .calendar-cell {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+  }
+  
+  .info-area {
+    max-width: 320px;
+  }
+  
+  .selected-date-box {
+    padding: 12px;
+  }
+  
+  .selected-date-box b {
+    font-size: 20px;
+  }
+  
+  .game-list-box {
+    padding: 12px;
+  }
+  
+  .game-list-box b {
+    font-size: 18px;
+  }
+  
+  .game-card {
+    padding: 10px 12px;
+  }
+  
+  .game-title {
+    font-size: 15px;
+  }
+  
+  .game-desc {
+    font-size: 14px;
+  }
+  
+  .apply-btn {
+    font-size: 15px;
+  }
+  
+  .apply-complete-card {
+    width: 95%;
+    padding: 20px 16px 16px 16px;
+    margin: 0 8px;
+  }
+  
+  .apply-info-title {
+    font-size: 20px;
+  }
+  
+  .apply-info-row {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .team-list.team-list-row {
+    gap: 16px;
+  }
+  
+  .team-row {
+    gap: 20px;
+  }
+  
+  .team-card {
+    width: 160px;
+    height: 90px;
+    font-size: 18px;
+  }
+  
+  .game-select-main {
+    gap: 32px;
+  }
+  
+  .calendar-area {
+    width: 400px;
+    height: 500px;
+  }
+  
+  .info-area {
+    width: 300px;
+  }
+  
+  .selected-date-box {
+    width: 320px;
+    height: 180px;
+  }
+  
+  .game-list-box {
+    width: 320px;
+    height: 240px;
+  }
 }
 </style>

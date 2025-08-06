@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import './style.css';
+import './assets/driver-custom.css'; // Driver.js 커스텀 스타일
 import App from './App.vue';
 import router from './router';
 

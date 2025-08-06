@@ -25,17 +25,10 @@ export const boardAPI = {
   // 게시글 상세 조회
   getPostDetail: async (postId) => {
     try {
-      // 인증된 사용자의 경우 좋아요 상태도 함께 받아오기 위해 authApiClient 사용
-      const response = await authApiClient.get(`/posts/${postId}`);
+      const response = await publicApiClient.get(`/posts/${postId}`);
       return response.data;
     } catch (error) {
-      // 인증되지 않은 사용자의 경우 publicApiClient로 재시도
-      try {
-        const publicResponse = await publicApiClient.get(`/posts/${postId}`);
-        return publicResponse.data;
-      } catch (publicError) {
-        throw apiErrorHandler(error);
-      }
+      throw apiErrorHandler(error);
     }
   },
 
@@ -43,16 +36,6 @@ export const boardAPI = {
   togglePostLike: async (postId) => {
     try {
       const response = await authApiClient.post(`/posts/${postId}/like`);
-      return response.data;
-    } catch (error) {
-      throw apiErrorHandler(error);
-    }
-  },
-
-  // 게시글 좋아요 상태 확인 (인증 필요)
-  checkPostLikeStatus: async (postId) => {
-    try {
-      const response = await authApiClient.get(`/posts/${postId}/like`);
       return response.data;
     } catch (error) {
       throw apiErrorHandler(error);
