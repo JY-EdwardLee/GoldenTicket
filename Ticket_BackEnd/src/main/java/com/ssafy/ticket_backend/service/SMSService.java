@@ -29,10 +29,7 @@ public class SMSService {
             message.setTo(phoneNumber);
             message.setText("""
                 안녕하세요. 골든티켓입니다.
-                인증번호는
-                """ + verificationCode + """
-                입니다.
-                """);
+                인증번호 : """ + verificationCode);
 
             messageService.sendOne(new SingleMessageSendingRequest(message));
         } catch (Exception e) {

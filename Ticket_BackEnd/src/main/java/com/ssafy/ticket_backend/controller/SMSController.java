@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/sms")
+@RequestMapping("/users/signup")
 public class SMSController {
 
     private final SMSService smsService;
