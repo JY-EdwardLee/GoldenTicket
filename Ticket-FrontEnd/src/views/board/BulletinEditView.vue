@@ -169,6 +169,19 @@ import { useRouter, useRoute } from 'vue-router';
 import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import { boardAPI, validatePostData, BOARD_TYPE_NAMES, uploadImageToS3, uploadToS3 } from '@/api/board.js';
+import { useTeamThemeStore } from '@/stores/teamTheme.js'
+
+// 1. 로컬 스토리지에서 사용자 정보를 가져옵니다.
+const user = JSON.parse(localStorage.getItem('user'))
+
+// 2. 팀 테마 스토어를 가져옵니다.
+const themeStore = useTeamThemeStore
+
+// 3. 사용자 정보에 myTeam 값이 있으면 해당 팀으로 테마를 설정합니다.
+// 이 코드는 컴포넌트가 생성될 때마다 실행되어 현재 사용자의 팀 테마를 적용합니다.
+if (user?.myTeam) {
+  themeStore.setSelectedTeam(user.myTeam)
+}
 
 const router = useRouter();
 const route = useRoute();
@@ -572,7 +585,7 @@ const handleCancel = () => {
 }
 
 .header-section {
-  background: linear-gradient(135deg, #e11d48 0%, #f97316 100%);
+  background: var(--theme-gradient);
   color: white;
   padding: 40px;
   text-align: center;
@@ -638,7 +651,7 @@ const handleCancel = () => {
   align-items: center;
   justify-content: center;
   padding: 100px 20px;
-  color: #dc2626;
+  color: var(--theme-primary, #ff6b35);
 }
 
 .error-message {
@@ -647,7 +660,7 @@ const handleCancel = () => {
 }
 
 .retry-btn {
-  background: #e11d48;
+  background: var(--theme-primary, #ff6b35);
   color: white;
   border: none;
   border-radius: 6px;
@@ -657,7 +670,7 @@ const handleCancel = () => {
 }
 
 .retry-btn:hover {
-  background: #be123c;
+  filter: brightness(90%);
 }
 
 .edit-form {

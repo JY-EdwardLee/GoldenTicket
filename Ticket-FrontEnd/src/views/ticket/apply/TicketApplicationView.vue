@@ -13,10 +13,11 @@
       <h2 class="title">{{ pageText.selectTeamTitle }}</h2>
       <div class="team-bg-container">
         <div class="team-bg-image"
-          :class="{ 'active': selectedTeam === 'SSG랜더스' || bgHover }"
+          :class="{ 'active': selectedTeam === enumToTeamName[user.myTeam] || bgHover }"
+          :style="{ background: `url('/catchphrase/${user.myTeam}_CP.svg') center no-repeat`, backgroundSize: 'cover' }"
           @mouseenter="bgHover = true"
           @mouseleave="bgHover = false"
-          @click="selectTeam('SSG랜더스')"
+          @click="selectTeam(enumToTeamName[user.myTeam])"
           style="cursor:pointer;"
         ></div>
       </div>
@@ -72,7 +73,7 @@
           </div>
         </div>
         <div class="calendar-logo">
-          <img src="/landers_logo.png" alt="landers logo" />
+          <img :src="`/${selectedTeam}.png`" alt="landers logo" />
         </div>
       </div>
       <div class="info-area">
@@ -136,9 +137,21 @@ import { ref } from 'vue';
 import axios from 'axios';
 import API_CONFIG from '@/config/api.config';
 import { stadiumNameToEnum } from '@/utils/teamStadium';
-import { teamNameToEnum, getEnumTeamName } from '@/utils/teamNameMap';
+import { teamNameToEnum, enumToTeamName } from '@/utils/teamNameMap';
 import http from '@/utils/http'
 import { useRouter } from 'vue-router';
+import { useTeamThemeStore } from '@/stores/teamTheme.js'
+
+const user = JSON.parse(localStorage.getItem('user'))
+
+// 팀 테마 스토어를 가져옵니다.
+const themeStore = useTeamThemeStore
+
+// 사용자 정보에 myTeam 값이 있으면 해당 팀으로 테마를 설정합니다.
+// 이 코드는 컴포넌트가 생성될 때마다 실행되어 현재 사용자의 팀 테마를 적용합니다.
+if (user?.myTeam) {
+  themeStore.setSelectedTeam(user.myTeam)
+}
 
 const router = useRouter();
 
@@ -347,7 +360,7 @@ function formatGameDateTime(dateTimeStr) {
   font-weight: 500;
 }
 .step.active {
-  color: #e57373;
+  color: var(--theme-primary, #ff6b35);
 }
 .step span {
   display: inline-flex;
@@ -356,19 +369,21 @@ function formatGameDateTime(dateTimeStr) {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #f8bbd0;
+  background: var(--theme-primary, #ff6b35);
+  opacity: 0.25;
   color: #fff;
   font-weight: bold;
   margin-bottom: 6px;
   font-size: 18px;
 }
 .step.active span {
-  background: #e57373;
+  background: var(--theme-primary, #ff6b35);
+  opacity: 1;
 }
 .bar {
   width: 60px;
   height: 4px;
-  background: #f8bbd0;
+  background: var(--theme-primary, #ff6b35);
   border-radius: 2px;
 }
 .main-area {
@@ -389,7 +404,7 @@ function formatGameDateTime(dateTimeStr) {
 }
 .team-bg-container {
   width: 600px;
-  height: 100px;
+  height: 180px;
   margin: 0 auto 30px auto;
   display: flex;
   align-items: center;
@@ -397,13 +412,13 @@ function formatGameDateTime(dateTimeStr) {
 }
 .team-bg-image {
   width: 600px;
-  height: 130px;
+  height: 200px !important;
   border-radius: 16px;
-  background: url('/org_logo/image 3.svg') center no-repeat;
-  background-size: cover;
   opacity: 0.25;
   transition: opacity 0.3s;
+
 }
+
 .team-bg-image.active {
   opacity: 1;
 }
@@ -514,12 +529,12 @@ function formatGameDateTime(dateTimeStr) {
 .calendar-title {
   font-size: 30px;
   font-weight: 700;
-  color: #e57373;
+  color: var(--theme-primary, #ff6b35);
   text-align: center;
   min-width: 200px;
 }
 .month-nav-btn {
-  background: #e57373;
+  background: var(--theme-primary, #ff6b35);
   color: white;
   border: none;
   border-radius: 50%;
@@ -547,7 +562,7 @@ function formatGameDateTime(dateTimeStr) {
   text-align: center;
 }
 .month-nav-btn:hover {
-  background: #d32f2f;
+  background: var(--theme-gradient, #ff6b35);
 }
 .month-nav-btn:disabled {
   background: #ccc;
@@ -584,7 +599,7 @@ function formatGameDateTime(dateTimeStr) {
   box-sizing: border-box;
 }
 .calendar-cell.selected {
-  background: #d32f2f !important;
+  background: var(--theme-gradient, #ff6b35) !important;
   color: #fff !important;
   border: none;
   box-sizing: border-box;
@@ -620,7 +635,7 @@ function formatGameDateTime(dateTimeStr) {
   justify-content: center;
 }
 .calendar-cell.today.selected {
-  background: #d32f2f !important;
+  background: var(--theme-gradient, #ff6b35) !important;
   color: #fff !important;
   border: none;
   box-sizing: border-box;
@@ -662,7 +677,7 @@ function formatGameDateTime(dateTimeStr) {
   gap: 28px;
 }
 .selected-date-box {
-  background: #fff;
+  background: var(--theme-background, #fff);
   border-radius: 14px;
   width: 400px;
   height: 200px;
@@ -683,7 +698,7 @@ function formatGameDateTime(dateTimeStr) {
   font-weight: bold;
 }
 .game-list-box {
-  background: #fff;
+  background: var(--theme-background, #fff);
   border-radius: 14px;
   box-shadow: 0 2px 16px 0 #f8bbd04d;
   padding: 20px 20px 20px 20px;
@@ -697,7 +712,7 @@ function formatGameDateTime(dateTimeStr) {
 .game-card {
   margin: 16px 0;
   padding: 14px 18px;
-  background: #fff3e0;
+  background: var(--theme-background, #fff3e0);
   border-radius: 10px;
   box-shadow: 0 2px 8px 0 #f8bbd04d;
   display: flex;
@@ -745,7 +760,7 @@ function formatGameDateTime(dateTimeStr) {
   justify-content: center;
 }
 .apply-complete-card {
-  background: #fff;
+  background: var(--theme-background, #fff);
   border-radius: 18px;
   box-shadow: 0 6px 32px 0 #e5737340;
   padding: 36px 32px 32px 32px;

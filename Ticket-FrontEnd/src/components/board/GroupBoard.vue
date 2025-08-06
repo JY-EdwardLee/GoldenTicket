@@ -216,7 +216,7 @@ const handleWriteClick = () => {
   align-items: center;
   justify-content: center;
   padding: 60px 20px;
-  color: #dc2626;
+  color: var(--theme-primary, #ff6b35);
 }
 
 .error-message {
@@ -225,9 +225,9 @@ const handleWriteClick = () => {
 }
 
 .retry-btn {
-  background: #e11d48;
+  background: var(--theme-primary, #ff6b35);
   color: white;
-  border: none;
+  border: 1px solid var(--theme-primary, #ff6b35);
   border-radius: 6px;
   padding: 8px 16px;
   cursor: pointer;
@@ -235,7 +235,7 @@ const handleWriteClick = () => {
 }
 
 .retry-btn:hover {
-  background: #be123c;
+  filter: brightness(90%);
 }
 
 /* 검색 결과 메시지 */
