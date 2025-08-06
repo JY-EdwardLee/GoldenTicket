@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ssafy.ticket_backend.mapper.GroupMapper">
+
+  <!-- 그룹 생성기 -->
+  <select id="getGames" resultType="com.ssafy.ticket_backend.model.Game">
+    SELECT *
+    FROM games
+    WHERE game_datetime > NOW();
+  </select>
+
+  <!-- 그룹 생성기 -->
+  <insert id="insertGroup" parameterType="Long">
+    INSERT INTO groups (game_id, is_active, is_ended, applicants_count)
+    VALUES (#{gameId}, true, false, 0)
+  </insert>
+
+
+  <resultMap id="GroupResponseMap" type="com.ssafy.ticket_backend.dto.response.GroupDetailResponse">
+    <id property="groupId" column="group_id"/>
+    <result property="gameId" column="game_id"/>
+    <result property="applicantsCount" column="applicants_count"/>
+    <association property="gameResponse"
+      javaType="GameResponse">
+      <id property="id" column="game_id"/>
+      <result property="date" column="game_datetime"/>
+      <result property="home" column="home_team"
+        typeHandler="com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler"/>
+      <result property="away" column="away_team"
+        typeHandler="com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler"/>
+      <result property="stadium" column="stadium"
+        typeHandler="com.ssafy.ticket_backend.handler.StadiumTypeHandler"/>
+    </association>
+  </resultMap>
+
+  <!-- 팀별 그룹조회 - is_active = true && is_ended = false인 경우만 조회 -->
+  <select id="getGroupList" parameterType="com.ssafy.ticket_backend.model.BaseballTeams"
+    resultMap="GroupResponseMap">
+    SELECT
+    g.group_id,
+    g.game_id,
+    g.applicants_count,
+    gm.game_datetime,
+    gm.home_team,
+    gm.away_team,
+    gm.stadium
+    FROM groups g
+    JOIN games gm ON g.game_id = gm.game_id
+    WHERE g.is_active = true
+    AND g.is_ended = false
+    AND (gm.home_team =
+    #{baseballTeams, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler}
+    OR gm.away_team =
+    #{baseballTeams, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler})
+    ORDER BY gm.game_datetime ASC
+  </select>
+
+
+  <select id="selectOneGroup" parameterType="int">
+    SELECT * FROM groups
+    WHERE group_id = #{groupId}
+  </select>
+
+  <insert id="insertApplication" parameterType="com.ssafy.ticket_backend.model.Application">
+    INSERT INTO group_applications (group_id, user_id)
+    VALUES (#{gameId}, #{userId})
+  </insert>
+
+  <update id="updateGroupCount" parameterType="long">
+    UPDATE groups
+    SET 
+      applicants_count = applicants_count + 1,
+      is_active = CASE 
+        WHEN applicants_count + 1 >= 20 THEN false 
+        ELSE is_active 
+      END
+    WHERE group_id = #{groupId}
+  </update>
+
+</mapper>

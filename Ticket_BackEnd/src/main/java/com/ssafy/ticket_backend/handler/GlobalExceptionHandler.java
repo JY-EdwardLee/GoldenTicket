@@ -4,7 +4,11 @@ import com.ssafy.ticket_backend.dto.response.ErrorResponse;
 import com.ssafy.ticket_backend.exception.BoardException;
 import com.ssafy.ticket_backend.exception.CommentException;
 import com.ssafy.ticket_backend.exception.DatabaseException;
+import com.ssafy.ticket_backend.exception.GameAlreadyEndedException;
 import com.ssafy.ticket_backend.exception.GameApplyException;
+import com.ssafy.ticket_backend.exception.GroupCapacityExceededException;
+import com.ssafy.ticket_backend.exception.GroupJoinCountException;
+import com.ssafy.ticket_backend.exception.GroupParticipationException;
 import com.ssafy.ticket_backend.exception.ImageDownloadUrlGenerationException;
 import com.ssafy.ticket_backend.exception.PostCreateFailException;
 import com.ssafy.ticket_backend.exception.PostDeleteFailException;
@@ -121,8 +125,7 @@ public class GlobalExceptionHandler {
 
     // Comment
     @ExceptionHandler(CommentException.class)
-    public ResponseEntity<ErrorResponse> handleCommentCreateFailException(
-        CommentException e) {
+    public ResponseEntity<ErrorResponse> handleCommentCreateFailException(CommentException e) {
         ErrorResponse response = new ErrorResponse("Comment_Create_Fail", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
@@ -153,7 +156,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
-
     @ExceptionHandler(ImageDownloadUrlGenerationException.class)
     public ResponseEntity<ErrorResponse> handleImageDownloadUrlGenerationException(
         ImageDownloadUrlGenerationException e) {
@@ -163,7 +165,6 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
-
 
     @ExceptionHandler(GameApplyException.class)
     public ResponseEntity<ErrorResponse> handleGameApplyException(GameApplyException e) {
@@ -177,6 +178,32 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleTicketTransferException(TicketException e) {
         ErrorResponse response = new ErrorResponse("TICKET_TRANSFER_ERROR", e.getMessage());
 
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    // Group
+    @ExceptionHandler(GameAlreadyEndedException.class)
+    public ResponseEntity<ErrorResponse> handleGameAlreadyEnded(GameAlreadyEndedException e) {
+        ErrorResponse response = new ErrorResponse("GAME_ALREADY_ENDED", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(GroupCapacityExceededException.class)
+    public ResponseEntity<ErrorResponse> handleGroupCapacityExceeded(
+        GroupCapacityExceededException e) {
+        ErrorResponse response = new ErrorResponse("GROUP_CAPACITY_EXCEEDED", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(GroupJoinCountException.class)
+    public ResponseEntity<ErrorResponse> handleGroupJoinCount(GroupJoinCountException e) {
+        ErrorResponse response = new ErrorResponse("GROUP_JOIN_COUNT_ERROR", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(GroupParticipationException.class)
+    public ResponseEntity<ErrorResponse> handleGroupParticipation(GroupParticipationException e) {
+        ErrorResponse response = new ErrorResponse("GROUP_PARTICIPATION_ERROR", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }
