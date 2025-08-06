@@ -54,6 +54,11 @@ public class TicketServiceImpl implements TicketService {
             if (game.isEnded()) {  // 이미 끝난 경기라면
                 throw new TicketException("이미 종료된 경기입니다.");
             }
+
+            if (game.getGameDateTime().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new TicketException("게임 시작 2시간 이내에는 양도 할 수 없습니다.");
+            }
+
             List<Waitlist> waitlists = ticketMapper.selectWaitingWaitListByGameId(game.getGameId());
             // 대기열이 있다면
             if (!waitlists.isEmpty()) {
@@ -97,10 +102,9 @@ public class TicketServiceImpl implements TicketService {
 
                 User buyUser = userMapper.selectUserByUserId(buyer);
 
-                String text =
-                    "[골든티켓]" + "\n" + waitlist.getCreatedAt().getMonthValue() + "월 "
-                        + waitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다." + "\n"
-                        + "30분 이내 결제해주시기 바랍니다." + "\n";
+                String text = "[골든티켓]" + "\n" + waitlist.getCreatedAt().getMonthValue() + "월 "
+                    + waitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다." + "\n"
+                    + "30분 이내 결제해주시기 바랍니다." + "\n";
                 smsService.sendSMS(buyUser.getPhoneNumber(), text);
             } else {  // 대기열이 없다면
                 throw new TicketException("응모자가 없습니다.");

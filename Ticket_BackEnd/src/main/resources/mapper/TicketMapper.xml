@@ -52,7 +52,8 @@
     FROM other_platform
     WHERE user_email = #{userEmail}
     AND platform = #{platform}
-    AND game_datetime > now()
+    AND game_datetime >= NOW()
+    AND game_datetime &lt;= DATE_ADD(NOW(), INTERVAL 7 DAY)
   </select>
 
   <select id="selectTicketByGame" resultType="com.ssafy.ticket_backend.model.Ticket"
