@@ -131,6 +131,19 @@ import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import { boardAPI, validatePostData, BOARD_TYPES, uploadImageToS3 } from '@/api/board.js';
 import { useAuthStore } from '@/stores/auth.js';
+import { useTeamThemeStore } from '@/stores/teamTheme.js'
+
+// 1. 로컬 스토리지에서 사용자 정보를 가져옵니다.
+const user = JSON.parse(localStorage.getItem('user'))
+
+// 2. 팀 테마 스토어를 가져옵니다.
+const themeStore = useTeamThemeStore
+
+// 3. 사용자 정보에 myTeam 값이 있으면 해당 팀으로 테마를 설정합니다.
+// 이 코드는 컴포넌트가 생성될 때마다 실행되어 현재 사용자의 팀 테마를 적용합니다.
+if (user?.myTeam) {
+  themeStore.setSelectedTeam(user.myTeam)
+}
 
 const router = useRouter();
 const route = useRoute();
@@ -441,7 +454,7 @@ const handleCancel = () => {
 }
 
 .header-section {
-  background: linear-gradient(135deg, #e11d48 0%, #f97316 100%);
+  background: var(--theme-gradient);
   color: white;
   padding: 40px;
   text-align: center;
@@ -821,7 +834,7 @@ const handleCancel = () => {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #e11d48 0%, #f97316 100%);
+  background: var(--theme-gradient);
   color: white;
   box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
 }

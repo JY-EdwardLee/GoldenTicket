@@ -176,6 +176,7 @@ const user = ref(null)
 // 티켓 정보
 const ticket = ref(null)
 
+
 // 폼 데이터
 const formData = reactive({
   userName: '',

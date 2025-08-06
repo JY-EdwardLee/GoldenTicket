@@ -1245,15 +1245,28 @@ watch(selectedTeam, watchFilterAndSort);
   100% { transform: rotate(360deg); }
 }
 
+<<<<<<< HEAD
+=======
+/* 에러 스타일 */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--theme-primary, #ff6b35);
+}
+
+>>>>>>> FE/전체페이지테마
 .error-message {
   color: #dc2626;
   margin-bottom: 16px;
 }
 
 .retry-btn {
-  background: #e11d48;
+  background: var(--theme-primary, #ff6b35);
   color: white;
-  border: none;
+  border: 1px solid var(--theme-primary, #ff6b35);
   border-radius: 6px;
   padding: 8px 16px;
   cursor: pointer;
@@ -1261,7 +1274,7 @@ watch(selectedTeam, watchFilterAndSort);
 }
 
 .retry-btn:hover {
-  background: #be123c;
+  filter: brightness(90%);
 }
 
 /* 반응형 디자인 */
