@@ -52,9 +52,6 @@ public class KakaoPayService {
         headers.add("Authorization", "KakaoAK " + apiKey);
         headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
 
-        String successUrl =
-            BE_BASE_URL + "/payment/kakao/success?partner_order_id=" + partnerOrderId;
-
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("cid", cid);
         params.add("partner_order_id", partnerOrderId);
@@ -64,7 +61,8 @@ public class KakaoPayService {
         params.add("quantity", String.valueOf(kakaoPayRequest.getQuantity()));
         params.add("total_amount", String.valueOf(kakaoPayRequest.getTotalAmount()));
         params.add("tax_free_amount", "0");
-        params.add("approval_url", successUrl);
+        params.add("approval_url",
+            BE_BASE_URL + "/payment/kakao/success?partner_order_id=" + partnerOrderId);
         params.add("cancel_url", BE_BASE_URL + "/payment/kakao/cancel");
         params.add("fail_url", BE_BASE_URL + "/payment/kakao/fail");
 
@@ -128,13 +126,12 @@ public class KakaoPayService {
     public void insertKakaoTransaction(KakaoPayApproveResponse approveResponse) {
         Ticket ticket = transactionMapper.selectTicketByTicketId(
             Long.parseLong(approveResponse.getItem_code()));
-
+        
         // 거래 기록 갱신
         Transaction transaction = transactionMapper.selectTransactionByTicketId(
             ticket.getTicketId());
         transaction.setTransactionStatus(String.valueOf(TicketStatus.TRANSACTION_COMPLETE));
         transactionMapper.updateTransaction(transaction);
-
         transactionMapper.transactionComplete(ticket.getTicketId());  // 티켓의 거래 상태 변경
     }
 }
