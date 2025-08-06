@@ -99,10 +99,11 @@
   <update id="updateUser" parameterType="com.ssafy.ticket_backend.dto.request.UserPatchRequest">
     UPDATE users
     SET
-    nick_name = #{nickName},
-    profile_photo_url = #{profileImageUrl},
-    my_team = #{myTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler},
-    gender = #{gender}
+    nick_name = #{userPatchRequest.nickName},
+    profile_photo_url = #{userPatchRequest.profileImageUrl},
+    my_team =
+    #{userPatchRequest.myTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler},
+    gender = #{userPatchRequest.gender}
     WHERE email = #{email}
   </update>
 
