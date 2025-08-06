@@ -67,11 +67,11 @@
             <div class="payment-details" v-if="showSimplePayment">
                 <div class="simple-payment">
                 <div class="payment-buttons">
-                    <button class="payment-button" id="naver">
-                    <img src="@/assets/logo/btn_npaygr_pay.svg" alt="네이버페이">
-                    </button>
-                    <button class="payment-button" id="kakao">
+                                        <button type="button" class="payment-button" id="kakao" @click="selectedMethod = 'kakao'" :class="{ 'selected': selectedMethod === 'kakao' }">
                     <img src="@/assets/logo/btn_kakaoye_pay.png" alt="카카오페이">
+                    </button>
+                                        <button type="button" class="payment-button" id="naver" @click="selectedMethod = 'naver'" :class="{ 'selected': selectedMethod === 'naver' }">
+                    <img src="@/assets/logo/btn_npaygr_pay.svg" alt="네이버페이">
                     </button>
                 </div>
                 </div>
@@ -222,6 +222,7 @@ const handleAgreeAllChange = () => {
 
 // 결제 요청 핸들러
 const handlePayment = async () => {
+  if (selectedMethod.value === 'kakao') {
   try {
     const paymentData = {
       ticketId: route.params.id,
@@ -241,7 +242,10 @@ const handlePayment = async () => {
     console.error('결제 요청 실패:', error);
     alert('결제 요청에 실패했습니다.');
   }
-};
+} else if (selectedMethod.value === 'naver') {
+  alert('네이버페이 결제 준비 중입니다.');
+  }
+}
 
 // 개별 체크박스 변경 시 전체 동의 상태 업데이트
 const updateAgreeAll = () => {
@@ -252,6 +256,8 @@ const togglePaymentSection = (type) => {
   showSimplePayment.value = type === 'simple';
   showBankTransfer.value = type === 'bank';
 }
+
+const selectedMethod = ref(null)
 
 </script>
 
@@ -504,6 +510,10 @@ const togglePaymentSection = (type) => {
 
 .payment-button:hover {
   border-color: #1a73e8;
+}
+
+.payment-button.selected {
+    border: 2px solid #007bff;
 }
 
 .payment-button img {
