@@ -218,6 +218,9 @@ const handleAgreeAllChange = () => {
   if (agreeAll.value) {
     agreeTerms.value = true
     agreePayment.value = true
+  } else {
+    agreeTerms.value = false
+    agreePayment.value = false
   }
 }
 
@@ -245,6 +248,10 @@ const handlePayment = async () => {
   }
 } else if (selectedMethod.value === 'naver') {
   alert('네이버페이 결제 준비 중입니다.');
+  } else if (showBankTransfer.value === true) {
+    alert('무통장입금 결제 준비 중입니다.');
+  } else {
+    alert('결제 수단을 선택해주세요.');
   }
 }
 
