@@ -179,6 +179,13 @@ public class TicketServiceImpl implements TicketService {
         return ticketResponses;
     }
 
+    /**
+     * 결제 완료에 따른 상태 변환
+     *
+     * @param ticketId
+     * @param userEmail
+     */
+    @Transactional
     @Override
     public void completeTransfer(String ticketId, String userEmail) {
         User user = userMapper.selectUserByEmail(userEmail);
@@ -192,6 +199,13 @@ public class TicketServiceImpl implements TicketService {
         transactionMapper.updateWaitlist(waitlist);
     }
 
+    /**
+     * 티켓의 상세 정보
+     *
+     * @param userEmail 사용자 이메일
+     * @param ticketId  티켓 id
+     * @return 티켓 상세 정보
+     */
     @Override
     public TicketResponse getTicketDetail(String userEmail, Long ticketId) {
         Ticket ticket = ticketMapper.selectTicketByTicketId(ticketId);

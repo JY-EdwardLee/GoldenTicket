@@ -34,6 +34,10 @@ public class PaymentController {
 
     /**
      * 결제 준비 요청
+     *
+     * @param userDetails     사용자 정보
+     * @param kakaoPayRequest 결제 요청
+     * @return
      */
     @PostMapping("/kakao/ready")
     public ResponseEntity<KakaoPayReadyResponse> kakaoReadyToPay(
@@ -50,6 +54,10 @@ public class PaymentController {
 
     /**
      * 결제 성공 카카오페이에서 리다이렉트되어 호출되는 엔드포인트
+     *
+     * @param pgToken
+     * @param partnerOrderId
+     * @return
      */
     @GetMapping("/kakao/success")
     public ResponseEntity<Void> kakaoAfterPayRequest(@RequestParam("pg_token") String pgToken,
@@ -77,6 +85,8 @@ public class PaymentController {
 
     /**
      * 결제 취소
+     *
+     * @return
      */
     @GetMapping("/kakao/cancel")
     public ResponseEntity<Void> kakaoCancel() {
@@ -88,6 +98,8 @@ public class PaymentController {
 
     /**
      * 결제 실패
+     *
+     * @return
      */
     @GetMapping("/kakao/fail")
     public ResponseEntity<Void> kakaoFail() {
