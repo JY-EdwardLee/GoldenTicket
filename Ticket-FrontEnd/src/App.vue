@@ -12,6 +12,10 @@ const authStore = useAuthStore();
 // 토큰을 reactive하게 추적 (Pinia store의 토큰)
 const token = ref(authStore.token);
 
+onMounted(() => {
+  authStore.checkTokenValidity();
+});
+
 // Pinia authStore의 토큰 변화를 감지해서 웹소켓 연결/해제 처리
 watch(
   () => authStore.token,
