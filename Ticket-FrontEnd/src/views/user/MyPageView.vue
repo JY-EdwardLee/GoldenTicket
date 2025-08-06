@@ -18,7 +18,7 @@
           <div class="avatar-icon">👤</div>
         </div>
         <div class="user-info">
-          <h3 class="username">{{ user?.userName || '' }}</h3>
+          <h3 class="username">{{ user?.nickName || '' }}</h3>
           <div class="team-section">
             <div class="team-logo-container" v-if="themeStore.selectedTeam.value">
               <img

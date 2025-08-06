@@ -38,6 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function setUser(userData) {
     user.value = userData;
+    localStorage.removeItem('user')
     localStorage.setItem('user', JSON.stringify(userData));
   }
 

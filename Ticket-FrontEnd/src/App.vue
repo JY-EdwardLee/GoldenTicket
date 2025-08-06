@@ -1,6 +1,7 @@
 <script setup>
 import DefaultLayout from "./layouts/DefaultLayout.vue";
 import DeleteUserModal from "./components/common/DeleteUserModal.vue";
+import Chatbot from "./components/common/Chatbot.vue";
 import { useDeleteUserModal } from "./composables/useDeleteUserModal.js";
 
 import { connectWebSocket, disconnectWebSocket } from "./utils/socket.js";
@@ -37,9 +38,7 @@ const { isDeleteUserModalVisible, closeDeleteUserModal, handleDeleteUser } =
 
 <template>
   <DefaultLayout>
-    <!-- 얍얍얍! -->
-    <!-- 2025-08-04 중요한건 꺽이지 않는 마음음 -->
-    <!-- Deployed via GitLab CI/CD at 2025-07-31 -->
+
 
     <router-view />
 
@@ -49,5 +48,8 @@ const { isDeleteUserModalVisible, closeDeleteUserModal, handleDeleteUser } =
       @close="closeDeleteUserModal"
       @withdraw="handleDeleteUser"
     />
+    
+    <!-- 전역 챗봇 -->
+    <Chatbot />
   </DefaultLayout>
 </template>
