@@ -98,7 +98,7 @@ public class TicketServiceImpl implements TicketService {
                 User buyUser = userMapper.selectUserByUserId(buyer);
 
                 String text =
-                    "[골든티켓] 티켓 결제 안내" + "\n" + waitlist.getCreatedAt().getMonthValue() + "월 "
+                    "[골든티켓]" + "\n" + waitlist.getCreatedAt().getMonthValue() + "월 "
                         + waitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다." + "\n"
                         + "30분 이내 결제해주시기 바랍니다." + "\n";
                 smsService.sendSMS(buyUser.getPhoneNumber(), text);
