@@ -77,6 +77,7 @@ public class PostServiceImpl implements PostService {
                     if (updatedImageUrl != null) {
                         int updateResult = postMapper.updatePostImage(actualPostId,
                             updatedImageUrl);
+
                         if (updateResult != 1) {
                             System.err.println("이미지 URL 업데이트 실패");
                         }
@@ -103,9 +104,9 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostDetailResponse getPostDetail(Long postId) {
         try {
-
             // 게시물 정보
             PostDetailResponse postDetailResponse = postMapper.selectPostById(postId);
+
             if (postDetailResponse == null) {
                 throw new PostNotFoundException("해당 게시글이 존재하지 않습니다.");
             }
@@ -113,12 +114,14 @@ public class PostServiceImpl implements PostService {
             // 조회수
             postDetailResponse.setViewCount(postDetailResponse.getViewCount() + 1);
             int result = postMapper.plusView(postId);
+
             if (result == 0) {
                 throw new DatabaseOperationException("조회수 증가에 실패했습니다.");
             }
 
             // 댓글
             List<CommentDetailResponse> comments = commentMapper.getComments(postId);
+
             for (CommentDetailResponse cd : comments) {
                 String nickName = userMapper.getNickNameByUserId(cd.getUserId());
                 cd.setNickName(nickName);
@@ -130,13 +133,13 @@ public class PostServiceImpl implements PostService {
             Long userId = postMapper.selectUserIdByPostId(postId);
 
             // 게시글 작성자 프로필 이미지 URL 추가
-            Long writerId = userId;
             S3DownloadResponse userProfileUrl = s3UserService.getImageUrlsByTypeAndRefId(
                 new S3DownloadRequest(S3Type.UserProfile, userId));
             postDetailResponse.setImageUrl(userProfileUrl.getDownloadUrl());
 
             // 게시글 이미지 URL 추가
             String postImageKey = postMapper.getPostImageKey(postId); // DB에서 게시글 이미지 키 조회
+
             if (postImageKey != null && !postImageKey.isEmpty()) {
                 S3DownloadResponse postImageUrl = s3PostService.getImageUrlsByTypeAndRefId(
                     new S3DownloadRequest(S3Type.PostImage, postId));
@@ -146,12 +149,15 @@ public class PostServiceImpl implements PostService {
             if (userId == null) {
                 throw new PostUserNotFoundException("게시글 작성자 정보가 존재하지 않습니다.");
             }
+
             PostUserResponse postUserResponse = userMapper.selectUserByPostId(userId);
+
             if (postUserResponse == null) {
                 throw new PostUserNotFoundException("게시글 작성자 정보가 존재하지 않습니다.");
             }
 
             postDetailResponse.setPostUser(postUserResponse);
+
             return postDetailResponse;
 
         } catch (PostUserNotFoundException | PostNotFoundException | DatabaseOperationException e) {
@@ -170,7 +176,6 @@ public class PostServiceImpl implements PostService {
     @Transactional
     @Override
     public void updatePost(String email, PostUpdateRequest postUpdateRequest) {
-
         try {
             User user = userMapper.selectUserByEmail(email);
 
@@ -210,7 +215,6 @@ public class PostServiceImpl implements PostService {
     @Transactional
     @Override
     public void deletePost(String email, Long PostId) {
-
         try {
             User user = userMapper.selectUserByEmail(email);
 
@@ -225,7 +229,6 @@ public class PostServiceImpl implements PostService {
             if (deleteTrue != 1) {
                 throw new DatabaseOperationException("게시물 삭제 중 오류가 발생하였습니다.");
             }
-
         } catch (PostDeleteFailException e) {
             throw e;
         } catch (Exception e) {
@@ -242,7 +245,6 @@ public class PostServiceImpl implements PostService {
     @Transactional
     @Override
     public PostLikeResponse likePost(String email, Long postId) {
-
         try {
             User user = userMapper.selectUserByEmail(email);
 

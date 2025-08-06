@@ -10,27 +10,26 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface CommentMapper {
 
-  int insertComment(CommentRequest commentRequest);
+    int insertComment(CommentRequest commentRequest);
 
-  int CommentDeleteTrue(Long commentId);
+    int CommentDeleteTrue(Long commentId);
 
-  int updateComment(@Param("commentId") Long commentId,
-      CommentUpdateRequest commentUpdateRequest);
+    int updateComment(@Param("commentId") Long commentId,
+        CommentUpdateRequest commentUpdateRequest);
 
-  List<CommentDetailResponse> getComments(Long postId);
+    List<CommentDetailResponse> getComments(Long postId);
 
-  Long selectUserIdByCommentId(Long commentId);
+    Long selectUserIdByCommentId(Long commentId);
 
-  boolean selectLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
+    boolean selectLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
 
-  void plusLike(@Param("commentId") Long commentId);
+    void plusLike(@Param("commentId") Long commentId);
 
-  void insertCommentLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
+    void insertCommentLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
 
-  void minusLike(@Param("commentId") Long commentId);
+    void minusLike(@Param("commentId") Long commentId);
 
-  void deletePostLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
+    void deletePostLike(@Param("userId") Long userId, @Param("commentId") Long commentId);
 
-  Long selectCommentLike(Long commentId);
-
+    Long selectCommentLike(Long commentId);
 }

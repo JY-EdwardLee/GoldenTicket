@@ -38,6 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtUtil.isBlacklisted(jwt)) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Access token is blacklisted.");
+                
                 return;
             }
 

@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class S3DownloadResponse {
 
-  String downloadUrl;
-  String message;
+    String downloadUrl;
+    String message;
 }

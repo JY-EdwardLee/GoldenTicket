@@ -8,9 +8,9 @@ import lombok.Setter;
 @Setter
 public class PostUpdateRequest {
 
-  Long postId;
-  String title;
-  String content;
-  BoardType boardType;
-  String imageUrl;
+    Long postId;
+    String title;
+    String content;
+    BoardType boardType;
+    String imageUrl;
 }

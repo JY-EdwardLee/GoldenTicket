@@ -10,7 +10,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-// 유저 회원가입 요청 DTO
 public class UserSignupRequest {
 
     private long userId;

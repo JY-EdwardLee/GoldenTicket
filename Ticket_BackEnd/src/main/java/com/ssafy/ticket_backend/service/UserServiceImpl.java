@@ -180,6 +180,7 @@ public class UserServiceImpl implements UserService {
             oauthUserResponse = OAuthUserResponse.builder().isRegistered(false).email(email)
                 .userName("시니어 이름").nickName(nickname).birthDay("05-22").birthYear("1960")
                 .gender("M").socialProvider("KAKAO").profilePhotoUrl(profilePhotoUrl).build();
+
             return oauthUserResponse;
         }
 
@@ -257,6 +258,7 @@ public class UserServiceImpl implements UserService {
             oauthUserResponse = OAuthUserResponse.builder().isRegistered(false).email(email)
                 .nickName(nickname).socialProvider("NAVER").gender(gender).birthDay(birthday)
                 .birthYear(birthyear).profilePhotoUrl(profilePhotoUrl).userName(name).build();
+
             return oauthUserResponse;
         }
 
@@ -340,7 +342,6 @@ public class UserServiceImpl implements UserService {
         return loginUserResponse;
     }
 
-
     /**
      * 로그아웃 처리 (액세스 토큰 블랙리스트 등록 및 리프레시 토큰 제거)
      *
@@ -380,6 +381,7 @@ public class UserServiceImpl implements UserService {
         }
 
         String newAccessToken = jwtUtil.generateAccessToken(email);
+
         return new JwtTokenResponse(newAccessToken, refreshToken);
     }
 

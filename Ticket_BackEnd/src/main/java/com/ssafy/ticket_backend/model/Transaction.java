@@ -5,9 +5,9 @@ import lombok.Data;
 @Data
 public class Transaction {
 
-    Long transactionId;
-    Long ticketId;
-    Long sellerId;
-    Long buyerId;
-    String transactionStatus;
+    private Long transactionId;
+    private Long ticketId;
+    private Long sellerId;
+    private Long buyerId;
+    private String transactionStatus;
 }

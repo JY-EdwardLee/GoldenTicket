@@ -6,11 +6,11 @@ import com.ssafy.ticket_backend.dto.response.CommentLikeResponse;
 
 public interface CommentService {
 
-  void createComment(String email, CommentRequest commentRequest);
+    void createComment(String email, CommentRequest commentRequest);
 
-  void deleteComment(String email, Long commentId);
+    void deleteComment(String email, Long commentId);
 
-  void updateComment(String email, Long commentId, CommentUpdateRequest commentUpdateRequest);
+    void updateComment(String email, Long commentId, CommentUpdateRequest commentUpdateRequest);
 
-  CommentLikeResponse likeComment(String email, Long commentId);
+    CommentLikeResponse likeComment(String email, Long commentId);
 }

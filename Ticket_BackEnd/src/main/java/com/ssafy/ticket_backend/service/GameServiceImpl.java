@@ -141,6 +141,7 @@ public class GameServiceImpl implements GameService {
             if (!waitlists.isEmpty()) {
                 // 무작위 추첨
                 List<Long> randomPicks = new ArrayList<>();
+                
                 for (Waitlist w : waitlists) {
                     User u = userMapper.selectUserByUserId(w.getUserId());
 
