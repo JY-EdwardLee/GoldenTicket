@@ -32,6 +32,8 @@ public class TicketServiceImpl implements TicketService {
     private final GameMapper gameMapper;
     private final TransactionMapper transactionMapper;
 
+    private final SMSService smsService;
+
     @Transactional
     @Override
     public TicketResponse transferTicket(String userEmail, Long ticketId) {
@@ -92,11 +94,16 @@ public class TicketServiceImpl implements TicketService {
                 waitlist.setStatus(WaitlistStatus.WAITING_PAYING);
                 waitlist.setTransactionId(transactionId);
                 transactionMapper.updateWaitlist(waitlist);
+
+                User buyUser = userMapper.selectUserByUserId(buyer);
+
+                String text =
+                    "[골든티켓] 티켓 결제 안내" + "\n" + waitlist.getCreatedAt().getMonthValue() + "월 "
+                        + waitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다." + "\n"
+                        + "30분 이내 결제해주시기 바랍니다." + "\n";
+                smsService.sendSMS(buyUser.getPhoneNumber(), text);
             } else {  // 대기열이 없다면
                 throw new TicketTransferException("응모자가 없습니다.");
-//                ticket.setTicketStatus(TicketStatus.BEING_ASSIGNMENT);
-//
-//                ticketMapper.updateTicket(ticket);
             }
 
             TicketResponse ticketResponse = new TicketResponse(ticket);

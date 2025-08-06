@@ -7,13 +7,13 @@ import lombok.Data;
 @Data
 public class Game {
 
-    Long gameId;
-    LocalDateTime gameDateTime;
-    BaseballTeams homeTeam;
-    BaseballTeams awayTeam;
-    Stadium stadium;
-    boolean isCanceled;
-    boolean isEnded;
+    private Long gameId;
+    private LocalDateTime gameDateTime;
+    private BaseballTeams homeTeam;
+    private BaseballTeams awayTeam;
+    private Stadium stadium;
+    private boolean isCanceled;
+    private boolean isEnded;
 
     public GameResponse toGameResponse() {
         GameResponse gameResponse = new GameResponse();
