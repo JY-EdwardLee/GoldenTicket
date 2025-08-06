@@ -72,7 +72,7 @@ public class TicketServiceImpl implements TicketService {
 
                 Waitlist waitlist = transactionMapper.selectWaitlistByUserIdAndGameId(buyer,
                     game.getGameId());
-                
+
                 ticket.setBuyerId(buyer);
                 ticket.setTicketStatus(TicketStatus.BEING_PAYING);
                 ticket.setMatchedDate(LocalDateTime.now());
@@ -179,11 +179,33 @@ public class TicketServiceImpl implements TicketService {
         return ticketResponses;
     }
 
+    /**
+     * 결제 완료에 따른 상태 변환
+     *
+     * @param ticketId
+     * @param userEmail
+     */
+    @Transactional
     @Override
-    public void transferTicketToBuyer(String ticketId, String userId) {
-        ticketMapper.transferTicket(ticketId, userId);
+    public void completeTransfer(String ticketId, String userEmail) {
+        User user = userMapper.selectUserByEmail(userEmail);
+        Ticket ticket = ticketMapper.selectTicketByTicketId(Long.valueOf(ticketId));
+
+        ticketMapper.transferTicket(Long.valueOf(ticketId), user.getUserId());
+        Waitlist waitlist = transactionMapper.selectWaitlistByUserIdAndGameId(user.getUserId(),
+            ticket.getGameId());
+
+        waitlist.setStatus(WaitlistStatus.TRANSACTION_COMPLETE);
+        transactionMapper.updateWaitlist(waitlist);
     }
 
+    /**
+     * 티켓의 상세 정보
+     *
+     * @param userEmail 사용자 이메일
+     * @param ticketId  티켓 id
+     * @return 티켓 상세 정보
+     */
     @Override
     public TicketResponse getTicketDetail(String userEmail, Long ticketId) {
         Ticket ticket = ticketMapper.selectTicketByTicketId(ticketId);

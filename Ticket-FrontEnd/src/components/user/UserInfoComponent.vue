@@ -132,7 +132,7 @@
               <div class="team-logo-placeholder">⚾</div>
             </div>
             <div class="team-details">
-              <span class="team-name">{{ themeStore.selectedTeam.value || currentTeam.name }}</span>
+              <span class="team-name">{{ themeStore.selectedTeam.value || currentTeam }}</span>
               <span class="team-label">나의 관심팀</span>
             </div>
           </div>
@@ -237,7 +237,7 @@ const teams = {
 const selectedTeam = ref(null)
 
 // 현재 팀 정보
-const currentTeam = computed(() => teams[selectedTeam.value] || teams[user?.myTeam])
+const currentTeam = computed(() => teams[selectedTeam.value] || teams[user.value?.myTeam])
 
 // 관심 팀 변경 함수
 const changeFavoriteTeam = () => {

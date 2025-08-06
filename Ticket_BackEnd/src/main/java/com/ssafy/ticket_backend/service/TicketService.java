@@ -9,7 +9,7 @@ public interface TicketService {
 
     List<TicketResponse> getTicketsFromOtherPlatform(String userEmail, String platform);
 
-    void transferTicketToBuyer(String ticketId, String userId);
+    void completeTransfer(String ticketId, String userId);
 
     TicketResponse getTicketDetail(String userEmail, Long ticketId);
 }

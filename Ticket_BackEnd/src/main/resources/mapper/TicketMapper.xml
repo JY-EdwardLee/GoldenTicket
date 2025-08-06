@@ -114,14 +114,6 @@
     WHERE buyer_id = #{userId} and ticket_status = 'TRANSACTION_COMPLETE'
   </select>
 
-  <select id="selectWaitListByGameId" resultType="com.ssafy.ticket_backend.model.Waitlist"
-    parameterType="long">
-    SELECT
-    *
-    FROM waitlists
-    WHERE game_id = #{gameId}
-  </select>
-
   <select id="selectWaitingWaitListByGameId" resultType="com.ssafy.ticket_backend.model.Waitlist"
     parameterType="long">
     SELECT
@@ -153,7 +145,7 @@
   <update id="transferTicket">
     UPDATE tickets
     SET buyer_id = #{userId},
-    matched_date = NOW()
+    transaction_date = NOW()
     WHERE ticket_id = #{ticketId}
   </update>
 
