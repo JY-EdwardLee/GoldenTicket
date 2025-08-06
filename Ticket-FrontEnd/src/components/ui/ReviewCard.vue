@@ -2,8 +2,12 @@
   <v-card elevation="2" rounded="lg" class="h-100 review-card">
     <v-card-text class="pa-6">
       <div class="d-flex align-center mb-4">
-        <v-avatar :color="avatarColor" class="mr-4">
-          <v-icon color="white">{{ avatarIcon }}</v-icon>
+        <v-avatar class="mr-4" :style="{ backgroundColor: 'white', border: '2px solid #e0e0e0' }">
+          <img 
+            :src="getTeamLogo(team)" 
+            :alt="team + ' 로고'"
+            style="width: 100%; height: 100%; object-fit: contain; padding: 4px;"
+          />
         </v-avatar>
         <div>
           <div class="font-weight-bold">{{ name }}</div>
@@ -47,6 +51,24 @@ const props = defineProps({
     default: 'mdi-account'
   }
 });
+
+// 팀명에 맞는 로고 파일 경로 반환
+const getTeamLogo = (teamName) => {
+  const teamLogoMap = {
+    'KIA 타이거즈': '/src/assets/logo/kia.svg',
+    'LG 트윈스': '/src/assets/logo/LG.svg',
+    '두산 베어스': '/src/assets/logo/DOOSAN.svg',
+    'SSG 랜더스': '/src/assets/logo/SSG_LANDERS.svg',
+    '삼성 라이온즈': '/src/assets/logo/samsung.svg',
+    '롯데 자이언츠': '/src/assets/logo/LOTTE.svg',
+    'NC 다이노스': '/src/assets/logo/NC.svg',
+    '키움 히어로즈': '/src/assets/logo/KIWOOM.svg',
+    'KT 위즈': '/src/assets/logo/KT.svg',
+    '한화 이글스': '/src/assets/logo/HanWha.svg'
+  };
+  
+  return teamLogoMap[teamName] || '/src/assets/logo/SSG_LANDERS.svg'; // 기본 로고
+};
 </script>
 
 <style scoped>
