@@ -32,8 +32,9 @@ public class SMSController {
      * @return OK
      */
     @PostMapping("/verification")
-    public ResponseEntity<?> sendSMS(@RequestBody SMSVerificationRequest smsVerificationRequest) {
-        smsService.sendSMS(smsVerificationRequest.getPhoneNumber());
+    public ResponseEntity<?> sendVerificationCode(
+        @RequestBody SMSVerificationRequest smsVerificationRequest) {
+        smsService.sendVerificationCode(smsVerificationRequest.getPhoneNumber());
 
         return ResponseEntity.ok("발송 완료");
     }
@@ -43,9 +44,9 @@ public class SMSController {
      * @return OK
      */
     @PostMapping("/verification/check")
-    public ResponseEntity<?> checkPhone(
+    public ResponseEntity<?> checkVerificationCode(
         @RequestBody SMSVerificationCheckRequest smsVerificationCheckRequest) {
-        smsService.checkVerification(smsVerificationCheckRequest);
+        smsService.checkVerificationCode(smsVerificationCheckRequest);
 
         return ResponseEntity.ok("인증 완료");
     }
