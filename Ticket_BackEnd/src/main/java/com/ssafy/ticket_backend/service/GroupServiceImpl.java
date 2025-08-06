@@ -1,7 +1,7 @@
 package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.response.GroupDetailResponse;
-import com.ssafy.ticket_backend.exception.DatabaseOperationException;
+import com.ssafy.ticket_backend.exception.DatabaseException;
 import com.ssafy.ticket_backend.exception.GameAlreadyEndedException;
 import com.ssafy.ticket_backend.exception.GroupCapacityExceededException;
 import com.ssafy.ticket_backend.exception.GroupJoinCountException;
@@ -70,7 +70,7 @@ public class GroupServiceImpl implements GroupService {
 
             int result = groupMapper.insertApplication(new Application(groupId, user.getUserId()));
             if (result != 1) {
-                throw new DatabaseOperationException("회원 정보를 확인해 주세요.");
+                throw new DatabaseException("회원 정보를 확인해 주세요.");
             }
 
             int result2 = groupMapper.updateGroupCount(groupId);
@@ -79,7 +79,7 @@ public class GroupServiceImpl implements GroupService {
             }
 
         } catch (GroupCapacityExceededException | GameAlreadyEndedException |
-                 GroupJoinCountException | DatabaseOperationException e) {
+                 GroupJoinCountException | DatabaseException e) {
             throw e;
         } catch (Exception e) {
             throw new GroupParticipationException("그룹 참여 중 오류가 발생하였습니다.");
