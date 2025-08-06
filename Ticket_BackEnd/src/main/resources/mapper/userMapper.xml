@@ -96,14 +96,13 @@
   </select>
 
   <!-- 유저 정보 수정 -->
-  <update id="updateUser" parameterType="map">
+  <update id="updateUser" parameterType="com.ssafy.ticket_backend.dto.request.UserPatchRequest">
     UPDATE users
     SET
-    nickname = #{userPatchRequest.nickName},
-    profile_photo_url = #{userPatchRequest.profileImageUrl},
-    my_team =
-    #{userPatchRequest.myTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler},
-    gender = #{userPatchRequest.gender}
+    nick_name = #{nickName},
+    profile_photo_url = #{profileImageUrl},
+    my_team = #{myTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler},
+    gender = #{gender}
     WHERE email = #{email}
   </update>
 
