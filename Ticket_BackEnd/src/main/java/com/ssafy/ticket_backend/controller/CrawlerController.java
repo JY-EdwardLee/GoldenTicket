@@ -27,7 +27,12 @@ public class CrawlerController {
 
     private final CrawlMapper crawlMapper;
 
-    // 팀 이름을 BaseballTeams enum으로 매핑하는 메서드
+    /**
+     * 팀 이름을 BaseballTeams enum으로 매핑하는 메서드
+     *
+     * @param teamName
+     * @return
+     */
     private BaseballTeams mapTeamName(String teamName) {
         if (teamName == null || teamName.isEmpty()) {
             return null;
@@ -61,7 +66,12 @@ public class CrawlerController {
         }
     }
 
-    // 경기장 이름을 Stadium enum으로 매핑하는 메서드
+    /**
+     * // 경기장 이름을 Stadium enum으로 매핑하는 메서드
+     *
+     * @param stadiumName
+     * @return
+     */
     private Stadium mapStadiumName(String stadiumName) {
         if (stadiumName == null || stadiumName.isEmpty()) {
             return null;
@@ -89,16 +99,20 @@ public class CrawlerController {
             case "수원":
                 return Stadium.SUWON;
             default:
-                System.out.println("알 수 없는 경기장: '" + trimmedStadiumName + "'");
+                // 알 수 없는 경기장
                 return null;
         }
     }
 
-    // 날짜와 시간을 LocalDateTime으로 변환하는 메서드
+    /**
+     * 날짜와 시간을 LocalDateTime으로 변환하는 메서드
+     *
+     * @param dateInfo
+     * @param timeInfo
+     * @return
+     */
     private LocalDateTime parseDateTime(String dateInfo, String timeInfo) {
         try {
-            System.out.println("파싱 시도 - 날짜: " + dateInfo + ", 시간: " + timeInfo);
-
             // 날짜 형식: "7월 1일 (화)" -> "2025-07-01"
             String dateStr = dateInfo.replaceAll("([0-9]+)월 ([0-9]+)일.*", "2025-$1-$2");
 
@@ -110,16 +124,17 @@ public class CrawlerController {
             String timeStr = timeInfo + ":00";
 
             String dateTimeStr = dateStr + "T" + timeStr;
-            System.out.println("파싱된 날짜시간: " + dateTimeStr);
 
             return LocalDateTime.parse(dateTimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         } catch (Exception e) {
-            System.out.println(
-                "날짜/시간 파싱 실패: " + dateInfo + " " + timeInfo + " - 오류: " + e.getMessage());
+            // 날짜 시간 파싱 실패
             return null;
         }
     }
 
+    /**
+     * @return
+     */
     @GetMapping("/kbo-schedule")
     public String crawlKboSchedule() {
         StringBuilder result = new StringBuilder();
@@ -131,44 +146,40 @@ public class CrawlerController {
 
         try {
             String url = "https://m.sports.naver.com/kbaseball/schedule/index?category=kbo&date=2025-08-01";
-            System.out.println("크롤링 시작: " + url);
             driver.get(url);
 
             // 페이지 전체 로딩 대기 (필요시 Thread.sleep 추가)
             Thread.sleep(2000);
-            System.out.println("페이지 로딩 완료");
 
             // 페이지 소스 확인 (디버깅용)
             String pageSource = driver.getPageSource();
-            System.out.println("페이지 제목: " + driver.getTitle());
 
             // 새로운 네이버 스포츠 구조에 맞는 선택자 사용
             // 날짜별 경기 그룹 찾기
             List<WebElement> matchGroups = driver.findElements(
                 By.cssSelector("div[class*='ScheduleLeagueType_match_list_group']"));
-            System.out.println("찾은 경기 그룹 수: " + matchGroups.size());
 
             for (WebElement matchGroup : matchGroups) {
                 // 각 그룹에서 날짜 정보 찾기
                 String dateInfo = "";
+
                 try {
                     WebElement dateElement = matchGroup.findElement(
                         By.cssSelector("em[class*='ScheduleLeagueType_title']"));
                     dateInfo = dateElement.getText().trim();
                 } catch (Exception e) {
-                    System.out.println("날짜 정보 찾기 실패: " + e.getMessage());
                     dateInfo = "날짜 정보 없음";
                 }
 
                 // 각 그룹에서 경기 목록 찾기
                 List<WebElement> matchItems = matchGroup.findElements(
                     By.cssSelector("li[class*='MatchBox_match_item']"));
-                System.out.println("찾은 경기 아이템 수: " + matchItems.size());
 
                 for (WebElement matchItem : matchItems) {
                     try {
                         // 경기 시간 추출
                         String time = "";
+
                         try {
                             WebElement timeElement = matchItem.findElement(
                                 By.cssSelector("div[class*='MatchBox_time']"));
@@ -195,18 +206,14 @@ public class CrawlerController {
                         String awayScore = "";
                         String homeScore = "";
 
-                        System.out.println("팀 아이템 수: " + teamItems.size());
-
                         if (teamItems.size() >= 2) {
                             // 첫 번째 팀 (원정팀)
                             try {
                                 WebElement awayTeamElement = teamItems.get(0).findElement(
                                     By.cssSelector("strong[class*='MatchBoxHeadToHeadArea_team']"));
                                 awayTeam = awayTeamElement.getText().trim();
-                                System.out.println("원정팀 파싱: " + awayTeam);
                             } catch (Exception e) {
                                 awayTeam = "원정팀 정보 없음";
-                                System.out.println("원정팀 파싱 실패: " + e.getMessage());
                             }
 
                             // 두 번째 팀 (홈팀)
@@ -214,10 +221,8 @@ public class CrawlerController {
                                 WebElement homeTeamElement = teamItems.get(1).findElement(
                                     By.cssSelector("strong[class*='MatchBoxHeadToHeadArea_team']"));
                                 homeTeam = homeTeamElement.getText().trim();
-                                System.out.println("홈팀 파싱: " + homeTeam);
                             } catch (Exception e) {
                                 homeTeam = "홈팀 정보 없음";
-                                System.out.println("홈팀 파싱 실패: " + e.getMessage());
                             }
 
                             // 스코어 추출
@@ -259,26 +264,17 @@ public class CrawlerController {
                             && game.getStadium() != null && game.getGameDateTime() != null) {
 
                             crawlMapper.insertGame(game);
-                            System.out.println("경기 정보 저장 성공: " + game);
                         } else {
-                            System.out.println(
-                                "⚠️ 경기 정보 누락으로 저장 건너뜀: " + "홈팀=" + game.getHomeTeam() + ", 원정팀="
-                                    + game.getAwayTeam() + ", 경기장=" + game.getStadium() + ", 날짜="
-                                    + game.getGameDateTime());
+                            // 경기 정보 누락
                         }
-                        System.out.println(game);
 
                     } catch (Exception e) {
-                        String errorMsg = "⚠️ 경기 정보 파싱 실패: " + e.getMessage() + "\n";
-                        result.append(errorMsg);
-                        System.out.print(errorMsg);
+                        result.append("⚠️ 경기 정보 파싱 실패 : ").append(e.getMessage()).append("\n");
                     }
                 }
             }
         } catch (Exception e) {
-            String errorMsg = "실행 중 오류: " + e.getMessage() + "\n";
-            result.append(errorMsg);
-            System.out.print(errorMsg);
+            result.append("실행 중 오류 : ").append(e.getMessage()).append("\n");
         } finally {
             driver.quit();  // 브라우저 종료
         }

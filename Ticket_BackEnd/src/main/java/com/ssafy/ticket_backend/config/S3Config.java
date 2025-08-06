@@ -11,24 +11,21 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class S3Config {
 
-  @Value("${cloud.aws.credentials.access-key}")
-  private String accessKey;
+    @Value("${cloud.aws.credentials.access-key}")
+    private String accessKey;
 
-  @Value("${cloud.aws.credentials.secret-key}")
-  private String secretKey;
+    @Value("${cloud.aws.credentials.secret-key}")
+    private String secretKey;
 
-  @Value("${cloud.aws.region.static}")
-  private String region;
+    @Value("${cloud.aws.region.static}")
+    private String region;
 
-  @Bean
-  public AmazonS3 amazonS3() {
-    BasicAWSCredentials credentials = new BasicAWSCredentials("AKIAVWABJXVPSPQQNQ2U",
-        "df1/j5LgdZuOKF3MJXe8pwgAm+HFIloK8JTld77o");
-    return AmazonS3ClientBuilder.standard()
-        .withRegion("ap-northeast-2")
-        .withCredentials(new AWSStaticCredentialsProvider(credentials))
-        .build();
-  }
+    @Bean
+    public AmazonS3 amazonS3() {
+        BasicAWSCredentials credentials = new BasicAWSCredentials("AKIAVWABJXVPSPQQNQ2U",
+            "df1/j5LgdZuOKF3MJXe8pwgAm+HFIloK8JTld77o");
+        
+        return AmazonS3ClientBuilder.standard().withRegion("ap-northeast-2")
+            .withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
+    }
 }
-
-// 하드코딩 Test

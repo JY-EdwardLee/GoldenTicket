@@ -22,66 +22,66 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/comments")
 public class CommentController {
 
-  private final CommentService commentService;
+    private final CommentService commentService;
 
-  /**
-   * 댓글 작성
-   *
-   * @param userDetails    작성자 정보
-   * @param commentRequest 댓글 내용
-   * @return 성공/실패 메세지
-   */
-  @PostMapping("")
-  public ResponseEntity<CommentResponse> createComment(
-      @AuthenticationPrincipal CustomUserDetails userDetails,
-      @RequestBody CommentRequest commentRequest) {
-    commentService.createComment(userDetails.getUsername(), commentRequest);
+    /**
+     * 댓글 작성
+     *
+     * @param userDetails    작성자 정보
+     * @param commentRequest 댓글 내용
+     * @return 성공/실패 메세지
+     */
+    @PostMapping("")
+    public ResponseEntity<CommentResponse> createComment(
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        @RequestBody CommentRequest commentRequest) {
+        commentService.createComment(userDetails.getUsername(), commentRequest);
 
-    return ResponseEntity.ok(new CommentResponse(true, "댓글 작성 성공"));
-  }
+        return ResponseEntity.ok(new CommentResponse(true, "댓글 작성 성공"));
+    }
 
-  /**
-   * 댓글 삭제
-   *
-   * @param userDetails 작성자 정보
-   * @param commentId   댓글 기본키
-   * @return 성공/실패 메세지
-   */
-  @DeleteMapping("/{commentId}")
-  public ResponseEntity<CommentResponse> deleteComment(
-      @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long commentId) {
-    commentService.deleteComment(userDetails.getUsername(), commentId);
+    /**
+     * 댓글 삭제
+     *
+     * @param userDetails 작성자 정보
+     * @param commentId   댓글 기본키
+     * @return 성공/실패 메세지
+     */
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<CommentResponse> deleteComment(
+        @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long commentId) {
+        commentService.deleteComment(userDetails.getUsername(), commentId);
 
-    return ResponseEntity.ok(new CommentResponse(true, "댓글 삭제 성공"));
-  }
+        return ResponseEntity.ok(new CommentResponse(true, "댓글 삭제 성공"));
+    }
 
-  /**
-   * 댓글 수정
-   *
-   * @param userDetails          작성자 정보
-   * @param commentUpdateRequest 수정 내용
-   * @return 성공/실패 메세지
-   */
-  @PatchMapping("/{commentId}")
-  public ResponseEntity<CommentResponse> editComments(
-      @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long commentId,
-      @RequestBody CommentUpdateRequest commentUpdateRequest) {
-    commentService.updateComment(userDetails.getUsername(), commentId, commentUpdateRequest);
+    /**
+     * 댓글 수정
+     *
+     * @param userDetails          작성자 정보
+     * @param commentUpdateRequest 수정 내용
+     * @return 성공/실패 메세지
+     */
+    @PatchMapping("/{commentId}")
+    public ResponseEntity<CommentResponse> editComments(
+        @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long commentId,
+        @RequestBody CommentUpdateRequest commentUpdateRequest) {
+        commentService.updateComment(userDetails.getUsername(), commentId, commentUpdateRequest);
 
-    return ResponseEntity.ok(new CommentResponse(true, "댓글 수정 성공"));
-  }
+        return ResponseEntity.ok(new CommentResponse(true, "댓글 수정 성공"));
+    }
 
-  /**
-   * 댓글 좋아요
-   *
-   * @param commentId 댓글 기본키
-   * @return CommentLikeResponse
-   */
-  @PostMapping("/{commentId}/like")
-  public ResponseEntity<CommentLikeResponse> addLike(
-      @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long commentId) {
-    CommentLikeResponse commentLikeResponse = commentService.likeComment(userDetails.getUsername(),
-        commentId);
-    return ResponseEntity.ok(commentLikeResponse);
-  }
+    /**
+     * 댓글 좋아요
+     *
+     * @param commentId 댓글 기본키
+     * @return CommentLikeResponse
+     */
+    @PostMapping("/{commentId}/like")
+    public ResponseEntity<CommentLikeResponse> addLike(
+        @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long commentId) {
+        CommentLikeResponse commentLikeResponse = commentService.likeComment(
+            userDetails.getUsername(), commentId);
+        return ResponseEntity.ok(commentLikeResponse);
+    }
 }

@@ -22,8 +22,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // 웹소켓 연결 엔드포인트 (SockJS 포함)
-        registry.addEndpoint("/ws-notify")
-            .setHandshakeHandler(new CustomHandshakeHandler()) //
+        registry.addEndpoint("/ws-notify").setHandshakeHandler(new CustomHandshakeHandler()) //
             .setAllowedOriginPatterns("*") // CORS 허용, 배포 환경에 맞게 조정 필요
             .addInterceptors(new JwtHandshakeInterceptor(jwtUtil))  // 여기서 JWT 인증 처리 가능
             .withSockJS();

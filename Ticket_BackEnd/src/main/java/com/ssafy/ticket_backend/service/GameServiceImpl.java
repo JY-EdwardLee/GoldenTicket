@@ -163,8 +163,6 @@ public class GameServiceImpl implements GameService {
 
                 ticketMapper.updateTicket(ticket);
             }
-
-            // TODO Transaction states 새로 추가???
         } catch (GameApplyException e) {
             throw e;
         } catch (Exception e) {

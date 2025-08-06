@@ -97,7 +97,7 @@ public class PostController {
     public ResponseEntity<PostLikeResponse> post(
         @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long postId) {
         PostLikeResponse postLikeResponse = postService.likePost(userDetails.getUsername(), postId);
-        
+
         return ResponseEntity.ok(postLikeResponse);
     }
 }

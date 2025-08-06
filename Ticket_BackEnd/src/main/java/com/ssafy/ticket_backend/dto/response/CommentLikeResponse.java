@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CommentLikeResponse {
 
-  private Long commentId;
-  private Long likeCount;
-
+    private Long commentId;
+    private Long likeCount;
 }

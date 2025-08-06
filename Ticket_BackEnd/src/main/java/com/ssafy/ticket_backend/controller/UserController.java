@@ -78,7 +78,6 @@ public class UserController {
         String state = "random_state_string"; // CSRF 방지용 (랜덤 문자열 생성 권장)
 
         String naverAuthUrl =
-
             "https://nid.naver.com/oauth2.0/authorize" + "?response_type=code" + "&client_id="
                 + NaverClientId + "&redirect_uri=" + BE_BASE_URL + "/users/auth/naver/callback"
                 + "&state=" + state;
@@ -180,6 +179,7 @@ public class UserController {
         // 1. 쿠키에서 accessToken 추출
         String accessToken = null;
         Cookie[] cookies = request.getCookies();
+
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("access_token".equals(cookie.getName())) {
@@ -204,6 +204,7 @@ public class UserController {
     @GetMapping("/auth/temp-user")
     public ResponseEntity<OAuthUserResponse> getTempUserInfo(@RequestParam String tempUserId) {
         OAuthUserResponse oAuthUserResponse = userService.getTempUserInfo(tempUserId);
+
         return ResponseEntity.ok(oAuthUserResponse);
     }
 
@@ -216,6 +217,7 @@ public class UserController {
     @PostMapping("/auth/refresh")
     public ResponseEntity<?> refreshToken(HttpServletRequest request) {
         String refreshToken = null;
+
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("refresh_token".equals(cookie.getName())) {
@@ -224,7 +226,9 @@ public class UserController {
                 }
             }
         }
+
         JwtTokenResponse jwtTokenResponse = userService.refreshToken(refreshToken);
+
         return ResponseEntity.ok(jwtTokenResponse);
     }
 
@@ -296,7 +300,6 @@ public class UserController {
      */
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String authHeader) {
-
         String accessToken = authHeader.substring(7);
 
         userService.deleteUserByEmail(accessToken);
@@ -373,15 +376,13 @@ public class UserController {
         @AuthenticationPrincipal CustomUserDetails userDetails) {
         List<PostAllResponse> postAllResponses = userService.selectPostsByUser(
             userDetails.getUsername());
+        
         return ResponseEntity.ok(postAllResponses);
     }
 
     /**
-     * TODO
-     * <p>
-     * 테스트용 로그인
-     * <p>
-     * 실제 서비스에서 삭제할 것
+     * 테스트용 로그인 실제 서비스에서 삭제할 것
+     * TODO 삭제하기
      *
      * @return 5번 사용자
      */

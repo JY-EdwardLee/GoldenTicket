@@ -61,8 +61,6 @@ public class JwtUtil {
         redisTemplate.opsForValue()
             .set("refresh:" + email, refreshToken, REFRESH_TIME, TimeUnit.MILLISECONDS);
 
-//        System.out.println("[리프레시 토큰 저장됨] 이메일: " + email + ", 토큰: " + refreshToken);
-
         return refreshToken;
     }
 
@@ -73,14 +71,12 @@ public class JwtUtil {
      */
     public void deleteRefreshToken(String email) {
         Boolean deleted = redisTemplate.delete("refresh:" + email);
-//        System.out.println("[리프레시 토큰 삭제] 이메일: " + email + ", 삭제 성공: " + deleted);
-
     }
 
     /**
      * 엑세스 토큰을 블랙리스트에 등록 (로그아웃, 회원탈퇴 시 호출)
      *
-     * @param 토큰 로그아웃 처리핳 엑세스 토큰 문자열
+     * @param token 로그아웃 처리핳 엑세스 토큰 문자열
      */
     public void addToBlackList(String token) {
         // 토큰 만료까지 남은 시간 계산
@@ -88,9 +84,6 @@ public class JwtUtil {
 
         // Redis 블랙리스트에 저장 (key: blacklist:{token}, TTL: 남은 만료시간)
         redisTemplate.opsForValue().set("blacklist:" + token, "logout", ttl, TimeUnit.MILLISECONDS);
-
-//        System.out.println("[블랙리스트 등록] 엑세스 토큰: " + token + ", TTL(ms): " + ttl);
-
     }
 
     /**
@@ -100,9 +93,7 @@ public class JwtUtil {
      * @return 블랙 리스트에 있으면 true, 없으면 false
      */
     public boolean isBlacklisted(String token) {
-        boolean isBlack = Boolean.TRUE.equals(redisTemplate.hasKey("blacklist:" + token));
-//        System.out.println("[블랙리스트 조회] 토큰: " + token + ", 블랙리스트 여부: " + isBlack);
-        return isBlack;
+        return redisTemplate.hasKey("blacklist:" + token);
     }
 
 
@@ -132,16 +123,16 @@ public class JwtUtil {
 
             return true;
         } catch (ExpiredJwtException e) {
-            System.out.println("토큰이 만료됨: " + e.getMessage());
+            // 토큰 만료
             throw e;
         } catch (UnsupportedJwtException e) {
-            System.out.println("지원하지 않는 토큰: " + e.getMessage());
+            // 지원하지 않는 토큰
         } catch (MalformedJwtException e) {
-            System.out.println("토큰 형식이 잘못됨: " + e.getMessage());
+            // 토큰 형식이 잘못됨
         } catch (SignatureException e) {
-            System.out.println("서명 오류: " + e.getMessage());
+            // 서명 오류
         } catch (IllegalArgumentException e) {
-            System.out.println("잘못된 인자: " + e.getMessage());
+            // 잘못된 인자
         }
 
         return false;

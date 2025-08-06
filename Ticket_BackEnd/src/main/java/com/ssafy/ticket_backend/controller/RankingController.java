@@ -22,20 +22,17 @@ public class RankingController {
      * @return UserRankingResponse가 담긴 List
      */
     @GetMapping("/user")
-    public List<UserRankingResponse> getUserRanking(){
+    public List<UserRankingResponse> getUserRanking() {
         return rankingService.getUserRanking();
     }
-
 
     /**
      * 팀별 양도 랭킹 순위 (상위 3명)
      *
      * @return TeamRankingResponse가 담긴 List
-     *
-     * */
+     */
     @GetMapping("/team")
     public List<TeamRankingResponse> getTeamRanking() {
         return rankingService.getTeamRanking();
     }
-
 }
