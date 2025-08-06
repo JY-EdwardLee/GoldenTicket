@@ -8,7 +8,11 @@ import com.ssafy.ticket_backend.exception.CommentDeleteFailException;
 import com.ssafy.ticket_backend.exception.CommentLikeFailException;
 import com.ssafy.ticket_backend.exception.CommentUpdateFailException;
 import com.ssafy.ticket_backend.exception.DatabaseOperationException;
+import com.ssafy.ticket_backend.exception.GameAlreadyEndedException;
 import com.ssafy.ticket_backend.exception.GameApplyException;
+import com.ssafy.ticket_backend.exception.GroupCapacityExceededException;
+import com.ssafy.ticket_backend.exception.GroupJoinCountException;
+import com.ssafy.ticket_backend.exception.GroupParticipationException;
 import com.ssafy.ticket_backend.exception.ImageDownloadUrlGenerationException;
 import com.ssafy.ticket_backend.exception.PostCreateFailException;
 import com.ssafy.ticket_backend.exception.PostDeleteException;
@@ -222,4 +226,32 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+
+    // Group
+    @ExceptionHandler(GameAlreadyEndedException.class)
+    public ResponseEntity<ErrorResponse> handleGameAlreadyEnded(GameAlreadyEndedException e) {
+        ErrorResponse response = new ErrorResponse("GAME_ALREADY_ENDED", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(GroupCapacityExceededException.class)
+    public ResponseEntity<ErrorResponse> handleGroupCapacityExceeded(
+        GroupCapacityExceededException e) {
+        ErrorResponse response = new ErrorResponse("GROUP_CAPACITY_EXCEEDED", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(GroupJoinCountException.class)
+    public ResponseEntity<ErrorResponse> handleGroupJoinCount(GroupJoinCountException e) {
+        ErrorResponse response = new ErrorResponse("GROUP_JOIN_COUNT_ERROR", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(GroupParticipationException.class)
+    public ResponseEntity<ErrorResponse> handleGroupParticipation(GroupParticipationException e) {
+        ErrorResponse response = new ErrorResponse("GROUP_PARTICIPATION_ERROR", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+
 }
