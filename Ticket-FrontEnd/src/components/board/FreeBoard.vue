@@ -133,8 +133,8 @@ const handleSearchTypeChange = (type) => {
 };
 
 // 검색 실행
-const handleSearch = async (searchTypeParam = null) => {
-  if (!searchValue.value.trim()) {
+const handleSearch = async (searchTypeParam, searchValueParam) => {
+  if (!searchValueParam || !searchValueParam.trim()) {
     alert('검색어를 입력해주세요.');
     return;
   }
@@ -143,8 +143,7 @@ const handleSearch = async (searchTypeParam = null) => {
   error.value = '';
   
   try {
-    const type = searchTypeParam || searchType.value;
-    const result = await boardAPI.searchPosts(BOARD_TYPES.FREE, type, searchValue.value.trim());
+    const result = await boardAPI.searchPosts(BOARD_TYPES.FREE, searchTypeParam, searchValueParam.trim());
     
     // 서버가 배열을 직접 반환하므로 result 자체가 배열
     if (Array.isArray(result)) {
@@ -277,5 +276,96 @@ const handleWriteClick = () => {
 
 .write-btn:hover {
   background: #e11d48;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .loading-container {
+    padding: 40px 16px;
+  }
+  
+  .loading-spinner {
+    width: 32px;
+    height: 32px;
+    border-width: 3px;
+    margin-bottom: 12px;
+  }
+  
+  .error-container {
+    padding: 40px 16px;
+  }
+  
+  .error-message {
+    margin-bottom: 12px;
+    font-size: 14px;
+  }
+  
+  .retry-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .search-result-message {
+    margin: 12px 16px;
+    padding: 10px;
+    font-size: 13px;
+  }
+  
+  .write-btn {
+    float: none;
+    display: block;
+    width: 100%;
+    max-width: 200px;
+    margin: 16px auto 0 auto;
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .loading-container {
+    padding: 32px 12px;
+  }
+  
+  .loading-spinner {
+    width: 28px;
+    height: 28px;
+    border-width: 2px;
+    margin-bottom: 10px;
+  }
+  
+  .error-container {
+    padding: 32px 12px;
+  }
+  
+  .error-message {
+    margin-bottom: 10px;
+    font-size: 13px;
+  }
+  
+  .retry-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+  
+  .search-result-message {
+    margin: 10px 12px;
+    padding: 8px;
+    font-size: 12px;
+  }
+  
+  .write-btn {
+    max-width: 180px;
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .write-btn {
+    max-width: 160px;
+    font-size: 12px;
+    padding: 7px 12px;
+  }
 }
 </style> 
