@@ -107,11 +107,10 @@ const ticketId = ref(null)
 const homeTeamLogoPath = computed(() => {
   if (ticketDetail.value?.game?.home && teamNameToLogo[ticketDetail.value.game.home]) {
     const logoFileName = teamNameToLogo[ticketDetail.value.game.home]
-    return `/src/assets/logo/${logoFileName}.svg`
+    return `@/assets/logo/${logoFileName}.svg`
   }
   return ''
 })
-
 // 티켓 상세 정보 - 라우트 state에서 가져오거나 API로 조회
 
 // 뒤로 가기
