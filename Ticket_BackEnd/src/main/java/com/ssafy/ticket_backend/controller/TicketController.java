@@ -53,6 +53,13 @@ public class TicketController {
         return ResponseEntity.ok(TicketResponse);
     }
 
+    /**
+     * 티켓의 정보 반환
+     *
+     * @param userDetails 사용자 정보
+     * @param ticketId    티켓의 id
+     * @return 티켓의 정보
+     */
     @GetMapping("/details/{ticketId}")
     public ResponseEntity<TicketResponse> getTicketDetail(
         @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long ticketId) {

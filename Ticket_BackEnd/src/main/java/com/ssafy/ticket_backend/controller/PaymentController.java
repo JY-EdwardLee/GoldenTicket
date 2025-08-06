@@ -34,6 +34,10 @@ public class PaymentController {
 
     /**
      * 결제 준비 요청
+     *
+     * @param userDetails     사용자 정보
+     * @param kakaoPayRequest 결제 요청
+     * @return
      */
     @PostMapping("/kakao/ready")
     public ResponseEntity<KakaoPayReadyResponse> kakaoReadyToPay(
@@ -50,34 +54,39 @@ public class PaymentController {
 
     /**
      * 결제 성공 카카오페이에서 리다이렉트되어 호출되는 엔드포인트
+     *
+     * @param pgToken
+     * @param partnerOrderId
+     * @return
      */
     @GetMapping("/kakao/success")
-    public ResponseEntity<Void> kakaoAfterPayRequest(
-        @RequestParam("pg_token") String pgToken,
+    public ResponseEntity<Void> kakaoAfterPayRequest(@RequestParam("pg_token") String pgToken,
         @RequestParam("partner_order_id") String partnerOrderId) {
-
         try {
             KakaoPayApproveResponse approveResponse = kakaoPayService.approve(pgToken,
                 partnerOrderId);
             kakaoPayService.insertKakaoTransaction(approveResponse);
-            ticketService.transferTicketToBuyer(approveResponse.getItem_code(),
+            ticketService.completeTransfer(approveResponse.getItem_code(),
                 approveResponse.getPartner_user_id());
 
             HttpHeaders headers = new HttpHeaders();
-            headers.setLocation(URI.create(
-                FE_BASE_URL + "/mypage/tickets/" + approveResponse.getItem_code()));
+            headers.setLocation(
+                URI.create(FE_BASE_URL + "/mypage/tickets/" + approveResponse.getItem_code()));
 
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
         } catch (IllegalStateException e) {
             // Redis에서 데이터를 찾지 못한 경우 (만료 또는 잘못된 요청)
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(URI.create(FE_BASE_URL + "/payment/fail?reason=expired"));
+
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
         }
     }
 
     /**
      * 결제 취소
+     *
+     * @return
      */
     @GetMapping("/kakao/cancel")
     public ResponseEntity<Void> kakaoCancel() {
@@ -89,6 +98,8 @@ public class PaymentController {
 
     /**
      * 결제 실패
+     *
+     * @return
      */
     @GetMapping("/kakao/fail")
     public ResponseEntity<Void> kakaoFail() {

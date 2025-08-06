@@ -281,7 +281,7 @@ public class UserController {
     /**
      * 마이페이지의 정보를 반환
      *
-     * @return
+     * @return 마이페이지
      */
     @GetMapping("/me")
     public ResponseEntity<MyPageResponse> getMyPage(
@@ -294,7 +294,7 @@ public class UserController {
     /**
      * 회원 탈퇴
      *
-     * @return
+     * @return 완료 여부
      */
     @DeleteMapping("/delete")
     public ResponseEntity<?> deleteUser(@RequestHeader("Authorization") String authHeader) {
@@ -311,7 +311,7 @@ public class UserController {
      *
      * @param userDetails      JWT를 받아와서 사용
      * @param userPatchRequest 변경하려는 정보
-     * @return 성공여부
+     * @return 성공 여부
      */
     @PatchMapping("/me")
     public ResponseEntity<Void> updateMyPage(@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -324,8 +324,8 @@ public class UserController {
     /**
      * 나의 응모 목록
      *
-     * @param userDetails
-     * @return
+     * @param userDetails 사용자 정보
+     * @return 응모 목록
      */
     @GetMapping("/me/applications")
     public ResponseEntity<List<MyApplicationResponse>> getMyApplications(
@@ -337,10 +337,10 @@ public class UserController {
     }
 
     /**
-     * 나의 결제
+     * 나의 결제 목록
      *
-     * @param userDetails
-     * @return
+     * @param userDetails 사용자 정보
+     * @return 결제 목록
      */
     @GetMapping("/me/payments")
     public ResponseEntity<List<TransactionResponse>> getMyPayments(
@@ -354,7 +354,7 @@ public class UserController {
     /**
      * 나의 티켓 목록
      *
-     * @return
+     * @return 티켓 구매 내역 반환
      */
     @GetMapping("/me/tickets")
     public ResponseEntity<List<TicketResponse>> getMyTickets(
@@ -368,7 +368,7 @@ public class UserController {
     /**
      * 나의 게시글 목록
      *
-     * @return
+     * @return 게시글 목록
      */
     @GetMapping("/me/posts")
     public ResponseEntity<List<PostAllResponse>> getMyPosts(
@@ -378,8 +378,15 @@ public class UserController {
         return ResponseEntity.ok(postAllResponses);
     }
 
-    // 로그인 - 테스트 용 로그인이므로 실제 서비스에서는 사용 금지
-
+    /**
+     * TODO
+     * <p>
+     * 테스트용 로그인
+     * <p>
+     * 실제 서비스에서 삭제할 것
+     *
+     * @return 5번 사용자
+     */
     @PostMapping("/testlogin")
     public ResponseEntity<JwtTokenResponse> testLogin() {
         JwtTokenResponse tokens = userService.testUser();
