@@ -73,21 +73,7 @@ deploy:
       docker-compose logs --tail=10 fastapi-chatbot &&
       echo '✅ FastAPI chatbot deployed successfully with Docker!'
       "
-    
-    # ✅ 파이썬 서버 실행 (추가됨)
-    - echo "🚀 Starting FastAPI chatbot server..."
-    - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "
-      cd /home/ubuntu/Ticket-Chatbot &&
-      source ../chatbot-venv/bin/activate &&
-      export OPENAI_API_KEY='$OPENAI_API_KEY' &&
-      export PINECONE_API_KEY='$PINECONE_API_KEY' &&
-      export PINECONE_ENVIRONMENT='$PINECONE_ENVIRONMENT' &&
-      export UPSTAGE_API_KEY='$UPSTAGE_API_KEY' &&
-      nohup uvicorn app:app --host 0.0.0.0 --port 8000 --reload > chatbot.log 2>&1 &
-      sleep 3 &&
-      echo 'FastAPI server started with all environment variables'
-      "
-
+  
     # 프론트엔드 배포
     - scp -r -i ~/.ssh/id_rsa Ticket-FrontEnd/dist/* $EC2_USER@$EC2_HOST:/var/www/html/ # 👈 추가
     # SSH 키 경로를 명시적으로 ~/.ssh/id_rsa로 사용
