@@ -106,9 +106,6 @@ deploy:
       echo 'FastAPI server started with all environment variables'
       "
 
-    # FastAPI 실행 후 확인
-    - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "curl -s http://localhost:8000/health || lsof -i :8000"
-
     # 프론트엔드 배포
     - scp -r -i ~/.ssh/id_rsa Ticket-FrontEnd/dist/* $EC2_USER@$EC2_HOST:/var/www/html/ # 👈 추가
     # SSH 키 경로를 명시적으로 ~/.ssh/id_rsa로 사용
