@@ -115,4 +115,5 @@ deploy:
       bash $DEPLOY_PATH/deploy.sh $JAR_NAME"
 
   only:
-    - master # master 브랜치에 푸시될 때만 배포 실행
+    - BE/Python # master 브랜치에 푸시될 때만 배포 실행
+
