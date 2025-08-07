@@ -45,34 +45,14 @@ build:
       - Ticket_BackEnd/build/libs/$JAR_NAME
     expire_in: 1 hour
 
-#  파이썬 챗봇 빌드 Job (추가됨)
-# ✅ 파이썬 챗봇 Docker 빌드 단계 추가
-python_chatbot_docker_build:
-  stage: build
-  script:
-    - echo "🐳 Building Python chatbot Docker image..."
-    - cd Ticket-Chatbot
-    # Dockerfile과 docker-compose.yml이 있는지 확인
-    - ls -la Dockerfile docker-compose.yml
-    # Docker 이미지 빌드 (빌드만, 실행은 배포에서)
-    - docker build -t fastapi-chatbot:latest .
-    - echo "✅ Docker image built successfully"
-  artifacts:
-    paths:
-      - Ticket-Chatbot/
-    expire_in: 1 hour
-  only:
-    - BUILDE/chatbot
-    - master
-
 deploy:
   stage: deploy
   dependencies: # 👈 여기에만 추가
     - frontend_build # 👈 여기에만 추가
     - build # 👈 여기에만 추가
-    - python_chatbot_docker_build # ✅ 파이썬 챗봇 빌드 결과 사용 (추가됨)
   script:
     - echo "🚀 Deploying to EC2..."
+    
     # ✅ 파이썬 챗봇 업로드
     - echo "📤 Uploading Python chatbot to EC2..."
     - scp -r -i ~/.ssh/id_rsa Ticket-Chatbot $EC2_USER@$EC2_HOST:/home/ubuntu/
@@ -81,23 +61,24 @@ deploy:
     - echo "🐳 Deploying FastAPI chatbot with Docker..."
     - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "
       cd /home/ubuntu/Ticket-Chatbot &&
+      # 기존 컨테이너 중지 및 제거
       docker-compose down || true &&
+      # 기존 이미지 정리 (선택적)
       docker image prune -f || true &&
+      # 환경변수 파일 생성
       echo 'OPENAI_API_KEY='$OPENAI_API_KEY'' > .env &&
       echo 'PINECONE_API_KEY='$PINECONE_API_KEY'' >> .env &&
       echo 'PINECONE_ENVIRONMENT='$PINECONE_ENVIRONMENT'' >> .env &&
       echo 'UPSTAGE_API_KEY='$UPSTAGE_API_KEY'' >> .env &&
+      # EC2에서 Docker 이미지 빌드 및 컨테이너 실행
       docker-compose up --build -d &&
+      # 컨테이너 상태 확인
       sleep 5 &&
       docker-compose ps &&
       docker-compose logs --tail=10 fastapi-chatbot &&
       echo '✅ FastAPI chatbot deployed successfully with Docker!'
       "
     
-
-    # FastAPI 실행 전 중복 종료
-    - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "sudo lsof -t -i :8000 | xargs --no-run-if-empty kill -9 || true"
-
     # ✅ 파이썬 서버 실행 (추가됨)
     - echo "🚀 Starting FastAPI chatbot server..."
     - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "
@@ -138,5 +119,4 @@ deploy:
       bash $DEPLOY_PATH/deploy.sh $JAR_NAME"
 
   only:
-    - BUILDE/chatbot # master 브랜치에 푸시될 때만 배포 실행
     - master
