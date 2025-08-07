@@ -113,19 +113,13 @@ const handleSearch = async (searchTypeParam, searchValueParam) => {
       currentPage.value = 1; // 검색 시 첫 페이지로 이동
       updateDisplayedPosts();
       
-      // 검색 결과가 없으면 "등록된 게시글이 없습니다" 메시지 표시
-      if (result.length === 0) {
-        searchResultMessage.value = '등록된 게시글이 없습니다';
-      } else {
-        searchResultMessage.value = `검색 결과: ${result.length}건`;
-      }
     } else {
       error.value = '데이터 형식이 올바르지 않습니다.';
       searchResultMessage.value = '';
       console.error('검색 실패: 잘못된 데이터 형식');
     }
   } catch (err) {
-    error.value = '검색 중 오류가 발생했습니다.';
+    error.value = '등록된 게시글이 없습니다. 다시 검색해 주세요.';
     searchResultMessage.value = '';
     console.error('검색 중 오류:', err);
   } finally {
