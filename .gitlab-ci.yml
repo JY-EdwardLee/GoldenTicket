@@ -97,6 +97,7 @@ deploy:
       export OPENAI_API_KEY='$OPENAI_API_KEY' &&
       export PINECONE_API_KEY='$PINECONE_API_KEY' &&
       export PINECONE_ENVIRONMENT='$PINECONE_ENVIRONMENT' &&
+      export UPSTAGE_API_KEY='$UPSTAGE_API_KEY' &&
       nohup uvicorn app:app --host 0.0.0.0 --port 8000 --reload > chatbot.log 2>&1 &
       sleep 3 &&
       echo 'FastAPI server started with all environment variables'
