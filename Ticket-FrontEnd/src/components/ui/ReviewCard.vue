@@ -55,19 +55,19 @@ const props = defineProps({
 // 팀명에 맞는 로고 파일 경로 반환
 const getTeamLogo = (teamName) => {
   const teamLogoMap = {
-    'KIA 타이거즈': '@/assets/logo/kia.svg',
-    'LG 트윈스': '@/assets/logo/LG.svg',
-    '두산 베어스': '@/assets/logo/DOOSAN.svg',
-    'SSG 랜더스': '@/assets/logo/SSG_LANDERS.svg',
-    '삼성 라이온즈': '@/assets/logo/samsung.svg',
-    '롯데 자이언츠': '@/assets/logo/LOTTE.svg',
-    'NC 다이노스': '@/assets/logo/NC.svg',
-    '키움 히어로즈': '@/assets/logo/KIWOOM.svg',
-    'KT 위즈': '@/assets/logo/KT.svg',
-    '한화 이글스': '@/assets/logo/HanWha.svg'
+    'KIA 타이거즈': '/logo/kia.svg',
+    'LG 트윈스': '/logo/LG.svg',
+    '두산 베어스': '/logo/DOOSAN.svg',
+    'SSG 랜더스': '/logo/SSG_LANDERS.svg',
+    '삼성 라이온즈': '/logo/samsung.svg',
+    '롯데 자이언츠': '/logo/LOTTE.svg',
+    'NC 다이노스': '/logo/NC.svg',
+    '키움 히어로즈': '/logo/KIWOOM.svg',
+    'KT 위즈': '/logo/KT.svg',
+    '한화 이글스': '/logo/HanWha.svg'
   };
   
-  return teamLogoMap[teamName] || '@/assets/logo/SSG_LANDERS.svg'; // 기본 로고
+  return teamLogoMap[teamName] || '/logo/SSG_LANDERS.svg'; // 기본 로고
 };
 </script>
 
