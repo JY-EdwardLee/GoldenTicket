@@ -157,7 +157,7 @@ const getLogoUrl = (teamName) => {
     if (teamName) {
         const logoFileName = teamNameToLogo[teamName];
         // Correctly resolves path from assets
-        return `/assets/logo/${logoFileName}.svg`;
+        return `/src/assets/logo/${logoFileName}.svg`;
     }
     return '';
 };

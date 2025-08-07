@@ -157,6 +157,7 @@
   </div>
 </template>
 
+
 <script setup>
 import NavBar from '@/components/common/NavBar.vue';
 import FooterBar from '@/components/common/FooterBar.vue';
@@ -488,6 +489,7 @@ const selectedMethod = ref(null)
   background-color: #f8f9fa;
   height: 188px;
 }
+
 
 .payment-buttons {
   display: flex;
