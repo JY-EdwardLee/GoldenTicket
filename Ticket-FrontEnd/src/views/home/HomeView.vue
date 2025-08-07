@@ -169,7 +169,6 @@ import axios from 'axios';
 import { API_CONFIG } from '@/config/api.config';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
-
 // 공통 컴포넌트 import
 import HeroCard from '../../components/ui/HeroCard.vue';
 import RankingCard from '../../components/ui/RankingCard.vue';
@@ -177,6 +176,8 @@ import ReviewCard from '../../components/ui/ReviewCard.vue';
 import ServiceCard from '../../components/ui/ServiceCard.vue';
 import SectionHeader from '../../components/ui/SectionHeader.vue';
 import LoginModal from '../../components/common/LoginModal.vue';
+import { useTeamThemeStore } from '@/stores/teamTheme.js'
+
 
 // 라우터 설정
 const router = useRouter();
@@ -698,10 +699,12 @@ const services = ref([
   }
 ]);
 
+
+
 // 컴포넌트 마운트 시 초기화
 onMounted(async () => {
   console.log('HomeView 마운트됨');
-  
+
   // 로그인 후 리다이렉트 처리 (watch가 동작하지 않을 경우 대비)
   if (authStore.isAuthenticated && pendingRedirect.value) {
     console.log('마운트 시 로그인된 상태에서 대기 중인 리다이렉트 발견:', pendingRedirect.value);

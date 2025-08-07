@@ -31,6 +31,7 @@
 <script setup>
 import { computed } from 'vue';
 
+
 const props = defineProps({
   title: {
     type: String,
@@ -91,16 +92,22 @@ const handleClick = () => {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+.hero-card.primary {
+  background-color: var(--theme-primary, #ff6b35);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
 .hero-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
 }
 
 .enter-card {
-  background: linear-gradient(135deg, #FFB22C 0%, #FF9A1A 100%) !important;
+  background-color: var(--theme-primary, #ff6b35) !important;
 }
 
 .transfer-card {
-  background: linear-gradient(135deg, #854836 0%, #6B3A2E 100%) !important;
+  background-color: var(--theme-secondary, #ff6b35) !important;
 }
 </style>
