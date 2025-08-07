@@ -23,6 +23,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
+
   const isAuthenticated = computed(() => {
     const t = token.value;
     return !!t && !isTokenExpired(t);

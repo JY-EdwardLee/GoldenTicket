@@ -30,7 +30,7 @@
             
             <!-- 주의사항 섹션을 complete-card 내부로 이동 -->
             <div class="detail-notice-box" style="margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
-              <div class="notice-title" style="font-size: 18px; font-weight: 700; color: #ce0e2d; margin-bottom: 15px;">양도 신청 주의사항</div>
+              <div class="notice-title" style="font-size: 18px; font-weight: 700; color: var(--theme-primary); margin-bottom: 15px;">양도 신청 주의사항</div>
               <div class="notice-content" style="font-size: 14px; color: #333; line-height: 1.8;">
                 <div style="margin-bottom: 8px;">• 양도 신청 후 취소는 불가능합니다.</div>
                 <div style="margin-bottom: 8px;">• 매칭 완료 시 알림이 전송됩니다.</div>
@@ -109,7 +109,7 @@
             </div>
           </div>
           <div class="detail-notice-box" style="position: relative; z-index: 3; margin-top: 20px; padding: 20px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
-            <div class="notice-title" style="font-size: 18px; font-weight: 700; color: #ce0e2d; margin-bottom: 15px;">양도 신청 주의사항</div>
+            <div class="notice-title" style="font-size: 18px; font-weight: 700; color: var(--theme-primary); margin-bottom: 15px;">양도 신청 주의사항</div>
             <div class="notice-content" style="font-size: 14px; color: #333; line-height: 1.8;">
               <div style="margin-bottom: 8px;">• 양도 신청 후 취소는 불가능합니다.</div>
               <div style="margin-bottom: 8px;">• 매칭 완료 시 알림이 전송됩니다.</div>
@@ -235,7 +235,7 @@
                     <button 
                       class="ticket-detail-transfer-btn" 
                       :style="{ 
-                        backgroundColor: getTeamColor(ticket.homeKor || ticket.game?.home),
+                                                backgroundColor: lightenHexColor(getTeamColor(ticket.homeKor || ticket.game?.home), 40),
                         border: `2px solid ${getTeamColor(ticket.homeKor || ticket.game?.home)}` 
                       }"
                       @click="handleApply(ticket)"
@@ -317,6 +317,18 @@ const { TICKET } = API_CONFIG;
 import { getEnumTeamName, teamNameToEnum } from '@/utils/teamNameMap.js';
 import { stadiumNameToEnum } from '@/utils/teamStadium.js';
 import http from '@/utils/http'
+import { useTeamThemeStore } from '@/stores/teamTheme.js'
+
+const user = JSON.parse(localStorage.getItem('user'))
+
+// 팀 테마 스토어를 가져옵니다.
+const themeStore = useTeamThemeStore
+
+// 사용자 정보에 myTeam 값이 있으면 해당 팀으로 테마를 설정합니다.
+// 이 코드는 컴포넌트가 생성될 때마다 실행되어 현재 사용자의 팀 테마를 적용합니다.
+if (user?.myTeam) {
+  themeStore.setSelectedTeam(user.myTeam)
+}
 
 const tickets = ref([]);
 const ticketLoading = ref(false);
@@ -484,6 +496,21 @@ const getTeamClass = (ticket) => {
   const homeTeam = normalizeTeamName(ticket.homeKor || ticket.game?.home || '')
   // teamColortoEnum의 키와 일치하는 팀명 사용
   return homeTeam ? `team-${homeTeam}` : 'team-default'
+}
+
+// 팀별 색상 매핑
+const lightenHexColor = (hex, amount) => {
+  hex = hex.replace('#', '');
+  let r = parseInt(hex.substring(0, 2), 16);
+  let g = parseInt(hex.substring(2, 4), 16);
+  let b = parseInt(hex.substring(4, 6), 16);
+
+  r = Math.min(255, r + amount);
+  g = Math.min(255, g + amount);
+  b = Math.min(255, b + amount);
+
+  const toHex = c => ('0' + c.toString(16)).slice(-2);
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
 // 팀별 색상 매핑
@@ -833,7 +860,7 @@ function closeWarningModal() {
   font-size: 25px;
   font-weight: 700;
   color: #fff;
-  background: #ce0e2d;
+  background: var(--theme-gradient);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -845,10 +872,10 @@ function closeWarningModal() {
   text-overflow: ellipsis;
 }
 .nol-btn {
-  background: #ce0e2d;
+  background: var(--theme-gradient);
 }
 .ticketlink-btn {
-  background: linear-gradient(90deg, #ce0e2d 70%, #ffb22c 100%);
+  background: var(--theme-gradient);
 }
 .btn-icon {
   font-size: 15px;
@@ -915,7 +942,7 @@ function closeWarningModal() {
   transition: background 0.2s, color 0.2s;
 }
 .ticket-tab.active {
-  background: #ce0e2d;
+  background: var(--theme-primary);
   color: #fff;
   box-shadow: 0 2px 8px 0 #ce0e2d22;
 }
@@ -1453,7 +1480,7 @@ function closeWarningModal() {
   margin-bottom: 10px;
   font-size: 22px;
   font-weight: 800;
-  color: #ce0e2d;
+  color: var(--theme-primary);
 }
 .detail-gate {
   font-size: 14px;
@@ -1508,7 +1535,7 @@ function closeWarningModal() {
 .seat-title {
   font-size: 13px;
   font-weight: 700;
-  color: #b1002b;
+  color: var(--theme-primary);
   margin-bottom: 4px;
 }
 .seat-value {
@@ -1535,7 +1562,7 @@ function closeWarningModal() {
   gap: 18px;
 }
 .apply-yes {
-  background: #ce0e2d;
+  background: var(--theme-primary);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -1547,8 +1574,8 @@ function closeWarningModal() {
 }
 .apply-no {
   background: #fff;
-  color: #ce0e2d;
-  border: 1.5px solid #ce0e2d;
+  color: var(--theme-primary);
+  border: 1.5px solid var(--theme-primary);
   border-radius: 8px;
   padding: 10px 32px;
   font-size: 17px;
@@ -1557,10 +1584,10 @@ function closeWarningModal() {
   transition: background 0.18s, color 0.18s;
 }
 .apply-yes:hover {
-  background: #b1002b;
+  background: var(--theme-primary);
 }
 .apply-no:hover {
-  background: #ce0e2d;
+  background: var(--theme-primary);
   color: #fff;
 }
 .detail-notice-box {
@@ -1573,7 +1600,7 @@ function closeWarningModal() {
 .notice-title {
   font-size: 15px;
   font-weight: 700;
-  color: #ce0e2d;
+  color: var(--theme-primary);
   margin-bottom: 10px;
 }
 .notice-list {
@@ -1605,7 +1632,7 @@ function closeWarningModal() {
   text-align: center;
 }
 .match-info {
-  background: #ce0e2d;
+  background: var(--theme-primary);
   color: #fff;
   border-radius: 12px;
   padding: 18px 0 12px 0;
@@ -1639,7 +1666,7 @@ function closeWarningModal() {
   margin-bottom: 18px;
 }
 .confirm-btn {
-  background: #ce0e2d;
+  background: var(--theme-gradient);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -1687,8 +1714,8 @@ function closeWarningModal() {
 }
 .back-btn {
   background: #fff;
-  color: #ce0e2d;
-  border: 1.5px solid #ce0e2d;
+  color: var(--theme-gradient);
+  border: 1.5px solid var(--theme-gradient);
   border-radius: 8px;
   padding: 10px 34px;
   font-size: 1.1rem;
@@ -1814,7 +1841,7 @@ function closeWarningModal() {
 
 .ticket-detail-transfer-btn {
   color: white;
-  border: none;
+  border: 2px solid #ce0e2d;
   border-radius: 8px;
   font-size: 20px;
   font-weight: 600;
@@ -1828,7 +1855,6 @@ function closeWarningModal() {
   flex-shrink: 0;
   z-index: 200; /* 매우 높은 z-index로 설정하여 클릭 가능하도록 */
   position: relative;
-  background-color: inherit; /* Add this line to remove fallback background-color */
 }
 .ticket-detail-transfer-btn:hover {
   filter: brightness(0.9);

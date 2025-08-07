@@ -179,7 +179,7 @@ const selectedGame = ref(null);
 // 달력 관련 변수들
 const currentYear = 2025;
 const currentMonth = ref(8); // 8월부터 시작
-const today = new Date(2025, 7, 4); // 2025-08-04 (월은 0부터 시작)
+const today = new Date(); // 2025-08-04 (월은 0부터 시작)
 
 // 달력 computed 속성들
 const daysInCurrentMonth = computed(() => {

@@ -12,7 +12,7 @@ export const stadiumNameToEnum = {
 };
 
 export const stadiumOfTeam = {
-  'JAMSIL': '대구 삼성 라이온즈 파크',
+  'DAEGU': '대구 삼성 라이온즈 파크',
   'GOCHUK': '고척 스카이돔',
   'JAMSIL': '서울종합운동장 야구장',
   'JAMSIL': '서울종합운동장 야구장',
