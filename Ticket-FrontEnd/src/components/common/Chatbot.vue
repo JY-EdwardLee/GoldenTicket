@@ -139,7 +139,7 @@ const sendMessage = async () => {
     let headers = {
       'Content-Type': 'application/json',
     };
-    if (authStore.token.value) {
+    if (authStore.token?.value) {
       const jwToken = authStore.token.value;
       headers = {
         'Content-Type': 'application/json',
@@ -147,7 +147,7 @@ const sendMessage = async () => {
       };
     }
     const response = await axios.post(API_CONFIG.MAIN_PAGE.CHAT, {
-      userId: user.userId,
+      userId: user?.userId || null,
       question: newMessage.value,
       isLogin: authStore.isAuthenticated.value,
     }, {

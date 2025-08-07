@@ -1,0 +1,24 @@
+# Ticket-Chatbot/docker-compose.yml
+version: '3.8'
+
+services:
+  fastapi-chatbot:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PINECONE_API_KEY=${PINECONE_API_KEY}
+      - PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}
+      - UPSTAGE_API_KEY=${UPSTAGE_API_KEY}
+    volumes:
+      - .:/app  # 개발 시에만 사용 (코드 변경 실시간 반영)
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

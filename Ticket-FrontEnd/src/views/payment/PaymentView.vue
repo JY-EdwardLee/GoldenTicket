@@ -67,11 +67,11 @@
             <div class="payment-details" v-if="showSimplePayment">
                 <div class="simple-payment">
                 <div class="payment-buttons">
-                                        <button type="button" class="payment-button" id="kakao" @click="selectedMethod = 'kakao'" :class="{ 'selected': selectedMethod === 'kakao' }">
-                    <img src="@/assets/logo/btn_kakaoye_pay.png" alt="카카오페이">
+                    <button type="button" class="payment-button" id="kakao" @click="selectedMethod = 'kakao'" :class="{ 'selected': selectedMethod === 'kakao' }">
+                        <img src="@/assets/logo/btn_kakaoye_pay.png" alt="카카오페이">
                     </button>
-                                        <button type="button" class="payment-button" id="naver" @click="selectedMethod = 'naver'" :class="{ 'selected': selectedMethod === 'naver' }">
-                    <img src="@/assets/logo/btn_npaygr_pay.svg" alt="네이버페이">
+                    <button type="button" class="payment-button" id="naver" @click="selectedMethod = 'naver'" :class="{ 'selected': selectedMethod === 'naver' }">
+                        <img src="@/assets/logo/btn_npaygr_pay.svg" alt="네이버페이">
                     </button>
                 </div>
                 </div>
@@ -156,6 +156,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup>
 import NavBar from '@/components/common/NavBar.vue';
@@ -502,9 +503,11 @@ const selectedMethod = ref(null)
   padding: 0.5rem;
   cursor: pointer;
   transition: all 0.2s;
-  text-align : center;
-  height : 55px;
-  width:200px;
+  height: 55px;
+  width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #naver {
@@ -513,7 +516,7 @@ const selectedMethod = ref(null)
 
 #kakao {
   background-color: #FFEB00;
-  width:200px;
+  width: 200px;
 }
 
 .payment-button:hover {
@@ -521,7 +524,7 @@ const selectedMethod = ref(null)
 }
 
 .payment-button.selected {
-    border: 2px solid #007bff;
+  border: 2px solid #007bff;
 }
 
 .payment-button img {

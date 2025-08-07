@@ -45,58 +45,35 @@ build:
       - Ticket_BackEnd/build/libs/$JAR_NAME
     expire_in: 1 hour
 
-#  파이썬 챗봇 빌드 Job (추가됨)
-python_chatbot_build:
-  image: python:3.10
-  stage: build
-  script:
-    - echo "🐍 Building Python chatbot..."
-    - cd Ticket-Chatbot/
-    - pip install --upgrade pip
-    - pip install -r requirements.txt # 너가 준 requirements.txt 기준
-  artifacts:
-    paths:
-      - Ticket-Chatbot/
-    expire_in: 1 hour
-  only:
-    - master
-
 deploy:
   stage: deploy
   dependencies: # 👈 여기에만 추가
     - frontend_build # 👈 여기에만 추가
     - build # 👈 여기에만 추가
-    - python_chatbot_build # ✅ 파이썬 챗봇 빌드 결과 사용 (추가됨)
   script:
     - echo "🚀 Deploying to EC2..."
-    # ✅ 파이썬 챗봇 업로드 (추가됨)
+    
+    # ✅ 파이썬 챗봇 업로드
     - echo "📤 Uploading Python chatbot to EC2..."
     - scp -r -i ~/.ssh/id_rsa Ticket-Chatbot $EC2_USER@$EC2_HOST:/home/ubuntu/
-
-    # ✅ 파이썬 챗봇 .env 업로드 (추가됨)
-    # - echo "📄 Uploading .env file to EC2..."
-    # - scp -i ~/.ssh/id_rsa Ticket-Chatbot/.env $EC2_USER@$EC2_HOST:/home/ubuntu/Ticket-Chatbot/.env
-
-    # ✅ 파이썬 챗봇 설치 및 가상환경 구성 (추가됨)
-    - echo "⚙️ Setting up Python chatbot on EC2..."
-    - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "
-      cd /home/ubuntu &&
-      sudo apt update &&
-      sudo apt install -y python3-venv &&
-      python3 -m venv chatbot-venv &&
-      source chatbot-venv/bin/activate &&
-      pip install --upgrade pip &&
-      pip install -r Ticket-Chatbot/requirements.txt
-      "
-
-    # ✅ 파이썬 서버 실행 (추가됨)
-    - echo "🚀 Starting FastAPI chatbot server..."
+    
+    # ✅ Docker로 챗봇 배포 (EC2에서 빌드 + 실행)
+    - echo "🐳 Deploying FastAPI chatbot with Docker..."
     - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "
       cd /home/ubuntu/Ticket-Chatbot &&
-      source ../chatbot-venv/bin/activate &&
-      nohup uvicorn app:app --host 0.0.0.0 --port 8000 --reload > chatbot.log 2>&1 &
+      docker-compose down || true &&
+      docker image prune -f || true &&
+      echo 'OPENAI_API_KEY='$OPENAI_API_KEY'' > .env &&
+      echo 'PINECONE_API_KEY='$PINECONE_API_KEY'' >> .env &&
+      echo 'PINECONE_ENVIRONMENT='$PINECONE_ENVIRONMENT'' >> .env &&
+      echo 'UPSTAGE_API_KEY='$UPSTAGE_API_KEY'' >> .env &&
+      docker-compose up --build -d &&
+      sleep 5 &&
+      docker-compose ps &&
+      docker-compose logs --tail=10 fastapi-chatbot &&
+      echo '✅ FastAPI chatbot deployed successfully with Docker!'
       "
-
+  
     # 프론트엔드 배포
     - scp -r -i ~/.ssh/id_rsa Ticket-FrontEnd/dist/* $EC2_USER@$EC2_HOST:/var/www/html/ # 👈 추가
     # SSH 키 경로를 명시적으로 ~/.ssh/id_rsa로 사용
@@ -123,4 +100,4 @@ deploy:
       bash $DEPLOY_PATH/deploy.sh $JAR_NAME"
 
   only:
-    - master # master 브랜치에 푸시될 때만 배포 실행
+    - master
