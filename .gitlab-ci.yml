@@ -11,7 +11,7 @@ stages:
 variables:
   JAR_NAME: goldenticketBE.jar
   EC2_USER: ubuntu
-  EC2_HOST: $SPRING_EC2_URL
+  EC2_HOST: i13a109.p.ssafy.io
   DEPLOY_PATH: /home/ubuntu/app
   # SSH_KEY_PATH는 before_script에서 동적으로 설정되므로, 여기서는 제거하거나 주석 처리해도 무방합니다.
 
@@ -73,9 +73,9 @@ deploy:
     - echo "📤 Uploading Python chatbot to EC2..."
     - scp -r -i ~/.ssh/id_rsa Ticket-Chatbot $EC2_USER@$EC2_HOST:/home/ubuntu/
 
-    #   # ✅ 파이썬 챗봇 .env 업로드 (추가됨)
-    # - echo "📄 Uploading .env file to EC2..."
-    # - scp -i ~/.ssh/id_rsa Ticket-Chatbot/.env $EC2_USER@$EC2_HOST:/home/ubuntu/Ticket-Chatbot/.env
+    # ✅ 파이썬 챗봇 .env 업로드 (추가됨)
+    - echo "📄 Uploading .env file to EC2..."
+    - scp -i ~/.ssh/id_rsa Ticket-Chatbot/.env $EC2_USER@$EC2_HOST:/home/ubuntu/Ticket-Chatbot/.env
 
     # ✅ 파이썬 챗봇 설치 및 가상환경 구성 (추가됨)
     - echo "⚙️ Setting up Python chatbot on EC2..."
