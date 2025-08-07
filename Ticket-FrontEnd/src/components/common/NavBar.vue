@@ -3,7 +3,7 @@
     <div class="logo">
       <router-link to="/">
         <span>골든 티켓</span>
-        <!-- <img src="@/assets/images/logo1.png" alt="logo" /> -->
+        <!-- <img src="@@/assets/images/logo1.png" alt="logo" /> -->
       </router-link>
     </div>
     
