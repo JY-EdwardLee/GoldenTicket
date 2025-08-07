@@ -46,19 +46,23 @@ build:
     expire_in: 1 hour
 
 #  파이썬 챗봇 빌드 Job (추가됨)
-python_chatbot_build:
-  image: python:3.10
+# ✅ 파이썬 챗봇 Docker 빌드 단계 추가
+python_chatbot_docker_build:
   stage: build
   script:
-    - echo "🐍 Building Python chatbot..."
-    - cd Ticket-Chatbot/
-    - pip install --upgrade pip
-    - pip install -r requirements.txt # 너가 준 requirements.txt 기준
+    - echo "🐳 Building Python chatbot Docker image..."
+    - cd Ticket-Chatbot
+    # Dockerfile과 docker-compose.yml이 있는지 확인
+    - ls -la Dockerfile docker-compose.yml
+    # Docker 이미지 빌드 (빌드만, 실행은 배포에서)
+    - docker build -t fastapi-chatbot:latest .
+    - echo "✅ Docker image built successfully"
   artifacts:
     paths:
       - Ticket-Chatbot/
     expire_in: 1 hour
   only:
+    - BUILDE/chatbot
     - master
 
 deploy:
@@ -66,28 +70,30 @@ deploy:
   dependencies: # 👈 여기에만 추가
     - frontend_build # 👈 여기에만 추가
     - build # 👈 여기에만 추가
-    - python_chatbot_build # ✅ 파이썬 챗봇 빌드 결과 사용 (추가됨)
+    - python_chatbot_docker_build # ✅ 파이썬 챗봇 빌드 결과 사용 (추가됨)
   script:
     - echo "🚀 Deploying to EC2..."
-    # ✅ 파이썬 챗봇 업로드 (추가됨)
+    # ✅ 파이썬 챗봇 업로드
     - echo "📤 Uploading Python chatbot to EC2..."
     - scp -r -i ~/.ssh/id_rsa Ticket-Chatbot $EC2_USER@$EC2_HOST:/home/ubuntu/
-
-    # ✅ 파이썬 챗봇 .env 업로드 (추가됨)
-    # - echo "📄 Uploading .env file to EC2..."
-    # - scp -i ~/.ssh/id_rsa Ticket-Chatbot/.env $EC2_USER@$EC2_HOST:/home/ubuntu/Ticket-Chatbot/.env
-
-    # ✅ 파이썬 챗봇 설치 및 가상환경 구성 (추가됨)
-    - echo "⚙️ Setting up Python chatbot on EC2..."
+    
+    # ✅ Docker로 챗봇 배포 (EC2에서 빌드 + 실행)
+    - echo "🐳 Deploying FastAPI chatbot with Docker..."
     - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "
-      cd /home/ubuntu &&
-      sudo apt update &&
-      sudo apt install -y python3-venv &&
-      python3 -m venv chatbot-venv &&
-      source chatbot-venv/bin/activate &&
-      pip install --upgrade pip &&
-      pip install -r Ticket-Chatbot/requirements.txt
+      cd /home/ubuntu/Ticket-Chatbot &&
+      docker-compose down || true &&
+      docker image prune -f || true &&
+      echo 'OPENAI_API_KEY='$OPENAI_API_KEY'' > .env &&
+      echo 'PINECONE_API_KEY='$PINECONE_API_KEY'' >> .env &&
+      echo 'PINECONE_ENVIRONMENT='$PINECONE_ENVIRONMENT'' >> .env &&
+      echo 'UPSTAGE_API_KEY='$UPSTAGE_API_KEY'' >> .env &&
+      docker-compose up --build -d &&
+      sleep 5 &&
+      docker-compose ps &&
+      docker-compose logs --tail=10 fastapi-chatbot &&
+      echo '✅ FastAPI chatbot deployed successfully with Docker!'
       "
+    
 
     # FastAPI 실행 전 중복 종료
     - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "sudo lsof -t -i :8000 | xargs --no-run-if-empty kill -9 || true"
@@ -132,4 +138,5 @@ deploy:
       bash $DEPLOY_PATH/deploy.sh $JAR_NAME"
 
   only:
-    - master # master 브랜치에 푸시될 때만 배포 실행
+    - BUILDE/chatbot # master 브랜치에 푸시될 때만 배포 실행
+    - master
