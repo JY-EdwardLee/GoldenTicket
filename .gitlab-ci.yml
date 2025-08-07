@@ -94,7 +94,12 @@ deploy:
     - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "
       cd /home/ubuntu/Ticket-Chatbot &&
       source ../chatbot-venv/bin/activate &&
+      export OPENAI_API_KEY='$OPENAI_API_KEY' &&
+      export PINECONE_API_KEY='$PINECONE_API_KEY' &&
+      export PINECONE_ENVIRONMENT='$PINECONE_ENVIRONMENT' &&
       nohup uvicorn app:app --host 0.0.0.0 --port 8000 --reload > chatbot.log 2>&1 &
+      sleep 3 &&
+      echo 'FastAPI server started with all environment variables'
       "
 
     # 프론트엔드 배포
