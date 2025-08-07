@@ -158,6 +158,8 @@ const sendMessage = async () => {
       text: response.data.answer,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     });
+    await nextTick();
+    await nextTick();
     scrollToBottom();
   } catch (error) {
     messages.value.push({
@@ -166,15 +168,23 @@ const sendMessage = async () => {
       text: '죄송합니다. 다시 시도해주세요.',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     });
+    await nextTick();
+    await nextTick();
     scrollToBottom();
     console.error('Error sending message:', error);
   }
   isTyping.value = false;
 };
 
-const scrollToBottom = () => {
+const scrollToBottom = async () => {
+  await nextTick(); // DOM 업데이트 대기
+  await new Promise(resolve => setTimeout(resolve, 50)); // 추가 대기
+  
   if (messagesContainer.value) {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+    messagesContainer.value.scrollTo({
+      top: messagesContainer.value.scrollHeight,
+      behavior: 'smooth' // 부드러운 스크롤
+    });
   }
 };
 </script>
@@ -218,6 +228,7 @@ const scrollToBottom = () => {
   flex-grow: 1;
   overflow-y: auto;
   padding: 8px 16px;
+  height: 400px;
 }
 
 .date-divider {
