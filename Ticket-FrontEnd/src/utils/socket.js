@@ -30,8 +30,8 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
   }
 
   // 로컬 테스트 시
-  const socket = new SockJS("http://localhost:8080/ws-notify");
-  // const socket = new SockJS("http://i13a109.p.ssafy.io:8080/ws-notify");
+  // const socket = new SockJS("http://localhost:8080/ws-notify");
+  const socket = new SockJS("http://i13a109.p.ssafy.io:8080/ws-notify");
 
   stompClient = Stomp.over(socket);
   // console.log("[WebSocket] Stomp 클라이언트 생성 완료");
@@ -45,7 +45,7 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
       stompClient.subscribe("/user/queue/notify", (message) => {
         let payload;
         try {
-          payload = JSON.parse(message.body)
+          payload = JSON.parse(message.body);
         } catch (e) {
           // JSON 파싱 실패 시, 문자열을 message 필드에 넣어서 넘김
           payload = { message: message.body };

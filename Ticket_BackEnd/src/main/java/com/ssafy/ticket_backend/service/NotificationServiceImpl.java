@@ -11,23 +11,13 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final SimpMessagingTemplate messagingTemplate;
 
+
+    // 당첨 된 사람에게 알림
     @Override
     public void sendNotificationToUser(String userEmail, String message) {
+
+        // userEmail을 기준으로 /user/{userEmail}/queue/notify 경로로 알림 전송
         messagingTemplate.convertAndSendToUser(userEmail, "/queue/notify", message);
     }
 
-    // 비동기 알림 (5초 지연 후 전송)
-    @Async
-    public void sendDelayedNotification(String userEmail, String message, long delayMillis) {
-        message = "실시간 알림 테스트!";
-
-        try {
-            Thread.sleep(delayMillis);
-
-            sendNotificationToUser(userEmail, message);
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
 }

@@ -33,6 +33,7 @@ public class TicketServiceImpl implements TicketService {
     private final TransactionMapper transactionMapper;
 
     private final SMSService smsService;
+    private final NotificationService notificationService;
 
     @Transactional
     @Override
@@ -106,6 +107,14 @@ public class TicketServiceImpl implements TicketService {
                     + waitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다." + "\n"
                     + "30분 이내 결제해주시기 바랍니다." + "\n";
                 smsService.sendSMS(buyUser.getPhoneNumber(), text);
+
+                // **실시간 알림 전송**
+                String realTimeMessage = "당첨된 티켓: " + game.getHomeTeam() + " vs " + game.getAwayTeam()
+                    + "\n응모하신 티켓이 당첨되었습니다. 30분 이내 결제해주시기 바랍니다.";
+
+                // WebSocket을 통해 실시간 알림 전송
+                notificationService.sendNotificationToUser(buyUser.getEmail(), realTimeMessage);
+
             } else {  // 대기열이 없다면
                 throw new TicketException("응모자가 없습니다.");
             }
