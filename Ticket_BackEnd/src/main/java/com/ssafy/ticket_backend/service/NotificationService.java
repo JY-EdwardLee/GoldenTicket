@@ -1,8 +1,5 @@
 package com.ssafy.ticket_backend.service;
 
-import org.springframework.stereotype.Service;
-
-
 public interface NotificationService {
 
     void sendNotificationToUser(String userEmail, String message);

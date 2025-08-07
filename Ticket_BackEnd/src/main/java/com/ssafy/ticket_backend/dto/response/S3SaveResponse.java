@@ -7,7 +7,6 @@ import lombok.Setter;
 @Setter
 public class S3SaveResponse {
 
-  boolean success;  // 성공 여부
-  String message;   // 결과 메시지
-
+    boolean success;  // 성공 여부
+    String message;   // 결과 메시지
 }

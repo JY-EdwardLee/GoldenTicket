@@ -14,5 +14,4 @@ public enum BaseballTeams {
     HANHWA_EAGLES,  // 한화 이글스
     NC_DINOS,  // 엔씨 다이노스
     KIWOOM_HEROES,  // 키움 히어로즈
-
 }

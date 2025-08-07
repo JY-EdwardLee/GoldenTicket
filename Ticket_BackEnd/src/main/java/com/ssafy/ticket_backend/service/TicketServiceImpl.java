@@ -2,7 +2,7 @@ package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.response.GameResponse;
 import com.ssafy.ticket_backend.dto.response.TicketResponse;
-import com.ssafy.ticket_backend.exception.TicketTransferException;
+import com.ssafy.ticket_backend.exception.TicketException;
 import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.TicketMapper;
 import com.ssafy.ticket_backend.mapper.TransactionMapper;
@@ -32,6 +32,8 @@ public class TicketServiceImpl implements TicketService {
     private final GameMapper gameMapper;
     private final TransactionMapper transactionMapper;
 
+    private final SMSService smsService;
+
     @Transactional
     @Override
     public TicketResponse transferTicket(String userEmail, Long ticketId) {
@@ -41,17 +43,22 @@ public class TicketServiceImpl implements TicketService {
             Game game = gameMapper.selectGameByGameId(ticket.getGameId());
 
             if (!seller.getUserId().equals(ticket.getSellerId())) {  // 판매자의 티켓이 아니라면
-                throw new TicketTransferException("잘못된 티켓입니다.");
+                throw new TicketException("잘못된 티켓입니다.");
             }
 
             if (!ticket.getTicketStatus()
                 .equals(TicketStatus.BEFORE_ASSIGNMENT)) {  // 양도 전 티켓이 아니라면
-                throw new TicketTransferException("양도 전 티켓이 아닙니다.");
+                throw new TicketException("양도 전 티켓이 아닙니다.");
             }
 
             if (game.isEnded()) {  // 이미 끝난 경기라면
-                throw new TicketTransferException("이미 종료된 경기입니다.");
+                throw new TicketException("이미 종료된 경기입니다.");
             }
+
+            if (game.getGameDateTime().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new TicketException("게임 시작 2시간 이내에는 양도 할 수 없습니다.");
+            }
+
             List<Waitlist> waitlists = ticketMapper.selectWaitingWaitListByGameId(game.getGameId());
             // 대기열이 있다면
             if (!waitlists.isEmpty()) {
@@ -92,11 +99,15 @@ public class TicketServiceImpl implements TicketService {
                 waitlist.setStatus(WaitlistStatus.WAITING_PAYING);
                 waitlist.setTransactionId(transactionId);
                 transactionMapper.updateWaitlist(waitlist);
+
+                User buyUser = userMapper.selectUserByUserId(buyer);
+
+                String text = "[골든티켓]" + "\n" + waitlist.getCreatedAt().getMonthValue() + "월 "
+                    + waitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다." + "\n"
+                    + "30분 이내 결제해주시기 바랍니다." + "\n";
+                smsService.sendSMS(buyUser.getPhoneNumber(), text);
             } else {  // 대기열이 없다면
-                throw new TicketTransferException("응모자가 없습니다.");
-//                ticket.setTicketStatus(TicketStatus.BEING_ASSIGNMENT);
-//
-//                ticketMapper.updateTicket(ticket);
+                throw new TicketException("응모자가 없습니다.");
             }
 
             TicketResponse ticketResponse = new TicketResponse(ticket);
@@ -105,11 +116,11 @@ public class TicketServiceImpl implements TicketService {
                     game.getAwayTeam(), game.getStadium()));
 
             return ticketResponse;
-        } catch (TicketTransferException e) {
+        } catch (TicketException e) {
             throw e;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new TicketTransferException("티켓 양도 중 오류가 발생했습니다.");
+            throw new TicketException("티켓 양도 중 오류가 발생했습니다.");
         }
     }
 

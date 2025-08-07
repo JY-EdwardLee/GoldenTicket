@@ -126,7 +126,7 @@ public class KakaoPayService {
     public void insertKakaoTransaction(KakaoPayApproveResponse approveResponse) {
         Ticket ticket = transactionMapper.selectTicketByTicketId(
             Long.parseLong(approveResponse.getItem_code()));
-        
+
         // 거래 기록 갱신
         Transaction transaction = transactionMapper.selectTransactionByTicketId(
             ticket.getTicketId());

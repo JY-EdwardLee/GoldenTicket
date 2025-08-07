@@ -7,7 +7,7 @@ import lombok.Data;
 public class UserPatchRequest {
 
     String nickName;
+    String gender;
     String profileImageUrl;
     BaseballTeams myTeam;
-    String gender;
 }

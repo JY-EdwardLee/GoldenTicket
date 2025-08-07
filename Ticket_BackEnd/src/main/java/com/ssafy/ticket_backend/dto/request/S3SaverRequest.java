@@ -10,8 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class S3SaverRequest {
 
-  String key;
-  S3Type type;
-  Long refId;
-
+    String key;
+    S3Type type;
+    Long refId;
 }

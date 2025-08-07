@@ -67,6 +67,11 @@ public class GameController {
         return ResponseEntity.ok(new ApplicationGameResponse(true, "취소 완료"));
     }
 
+    /**
+     * @param userDetails
+     * @param gameId
+     * @return
+     */
     @PatchMapping("/{gameId}/applications")
     public ResponseEntity<ApplicationGameResponse> cancelPaying(
         @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long gameId) {

@@ -9,7 +9,6 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,7 +27,6 @@ public class RankingServiceImpl implements RankingService {
     private static final String TEAM_RANKING_YESTERDAY_KEY = "ranking:team_yesterday";
     private static final Duration TTL = Duration.ofDays(1); // 1일 캐시
 
-
     // 유저 양도 랭킹 조회
     @Override
     public List<UserRankingResponse> getUserRanking() {
@@ -45,6 +43,7 @@ public class RankingServiceImpl implements RankingService {
             List<UserRankingResponse> userRankingList = rankingMapper.selectUserRanking();
 
             int rank = 1;
+
             for (UserRankingResponse userRankingResponse : userRankingList) {
                 userRankingResponse.setRank(rank++);
             }
@@ -55,7 +54,6 @@ public class RankingServiceImpl implements RankingService {
                 TTL);
 
             return userRankingList;
-
         } catch (Exception e) {
             throw new RuntimeException("팀 랭킹 캐시 처리 실패", e);
         }
@@ -121,7 +119,6 @@ public class RankingServiceImpl implements RankingService {
             }
 
             return todayList;
-
         } catch (Exception e) {
             throw new RuntimeException("팀 랭킹 캐시 또는 증가율 처리 중 오류", e);
         }
@@ -131,6 +128,7 @@ public class RankingServiceImpl implements RankingService {
     @Scheduled(cron = "0 0 0 * * *") // 매일 자정
     public void backupTeamRankingForYesterday() {
         String todayData = redisTemplate.opsForValue().get(TEAM_RANKING_TODAY_KEY);
+        
         if (todayData != null) {
             redisTemplate.opsForValue().set(TEAM_RANKING_YESTERDAY_KEY, todayData);
         }

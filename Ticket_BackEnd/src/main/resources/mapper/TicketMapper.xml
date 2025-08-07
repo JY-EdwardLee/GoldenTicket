@@ -52,7 +52,7 @@
     FROM other_platform
     WHERE user_email = #{userEmail}
     AND platform = #{platform}
-    AND game_datetime > now()
+    AND game_datetime >= NOW()
   </select>
 
   <select id="selectTicketByGame" resultType="com.ssafy.ticket_backend.model.Ticket"
@@ -158,6 +158,5 @@
     (#{platform}, #{price}, #{seat}, #{gameDatetime}, #{homeTeam}, #{awayTeam}, #{stadium}
     ,#{userEmail})
   </insert>
-
 
 </mapper>

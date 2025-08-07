@@ -1,8 +1,8 @@
 package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.request.GameCheckRequest;
-import com.ssafy.ticket_backend.exception.BlockedUserException;
 import com.ssafy.ticket_backend.exception.GameApplyException;
+import com.ssafy.ticket_backend.exception.UserBlockException;
 import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.TicketMapper;
 import com.ssafy.ticket_backend.mapper.TransactionMapper;
@@ -58,7 +58,7 @@ public class GameServiceImpl implements GameService {
 
             // 정지된 사용자라면
             if (user.getIsBlock()) {
-                throw new BlockedUserException("정지된 사용자입니다.");
+                throw new UserBlockException("정지된 사용자입니다.");
             }
 
             // 게임이 있는지 확인
@@ -141,6 +141,7 @@ public class GameServiceImpl implements GameService {
             if (!waitlists.isEmpty()) {
                 // 무작위 추첨
                 List<Long> randomPicks = new ArrayList<>();
+
                 for (Waitlist w : waitlists) {
                     User u = userMapper.selectUserByUserId(w.getUserId());
 
@@ -163,8 +164,6 @@ public class GameServiceImpl implements GameService {
 
                 ticketMapper.updateTicket(ticket);
             }
-
-            // TODO Transaction states 새로 추가???
         } catch (GameApplyException e) {
             throw e;
         } catch (Exception e) {

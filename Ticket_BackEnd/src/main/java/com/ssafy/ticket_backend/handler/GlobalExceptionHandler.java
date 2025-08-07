@@ -1,26 +1,25 @@
 package com.ssafy.ticket_backend.handler;
 
 import com.ssafy.ticket_backend.dto.response.ErrorResponse;
-import com.ssafy.ticket_backend.exception.BlockedUserException;
 import com.ssafy.ticket_backend.exception.BoardException;
-import com.ssafy.ticket_backend.exception.CommentCreateFailException;
-import com.ssafy.ticket_backend.exception.CommentDeleteFailException;
-import com.ssafy.ticket_backend.exception.CommentLikeFailException;
-import com.ssafy.ticket_backend.exception.CommentUpdateFailException;
-import com.ssafy.ticket_backend.exception.DatabaseOperationException;
+import com.ssafy.ticket_backend.exception.CommentException;
+import com.ssafy.ticket_backend.exception.DatabaseException;
+import com.ssafy.ticket_backend.exception.GameAlreadyEndedException;
 import com.ssafy.ticket_backend.exception.GameApplyException;
+import com.ssafy.ticket_backend.exception.GroupCapacityExceededException;
+import com.ssafy.ticket_backend.exception.GroupJoinCountException;
+import com.ssafy.ticket_backend.exception.GroupParticipationException;
 import com.ssafy.ticket_backend.exception.ImageDownloadUrlGenerationException;
 import com.ssafy.ticket_backend.exception.PostCreateFailException;
-import com.ssafy.ticket_backend.exception.PostDeleteException;
 import com.ssafy.ticket_backend.exception.PostDeleteFailException;
 import com.ssafy.ticket_backend.exception.PostNotFoundException;
 import com.ssafy.ticket_backend.exception.PostRetrievalException;
 import com.ssafy.ticket_backend.exception.PostUpdateException;
-import com.ssafy.ticket_backend.exception.PostUpdateFailException;
 import com.ssafy.ticket_backend.exception.PostUserNotFoundException;
 import com.ssafy.ticket_backend.exception.PresignedUrlGenerationException;
 import com.ssafy.ticket_backend.exception.SaveUploadKeyException;
-import com.ssafy.ticket_backend.exception.TicketTransferException;
+import com.ssafy.ticket_backend.exception.TicketException;
+import com.ssafy.ticket_backend.exception.UserBlockException;
 import com.ssafy.ticket_backend.exception.UserProfileKeyQueryException;
 import com.ssafy.ticket_backend.exception.UserSignupException;
 import com.ssafy.ticket_backend.model.BoardType;
@@ -34,8 +33,8 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 public class GlobalExceptionHandler {
 
     // DB
-    @ExceptionHandler(DatabaseOperationException.class)
-    public ResponseEntity<ErrorResponse> handleDb(DatabaseOperationException e) {
+    @ExceptionHandler(DatabaseException.class)
+    public ResponseEntity<ErrorResponse> handleDb(DatabaseException e) {
         ErrorResponse response = new ErrorResponse("DB_ERROR", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
@@ -48,8 +47,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(BlockedUserException.class)
-    public ResponseEntity<ErrorResponse> handleBlockedUserException(BlockedUserException e) {
+    @ExceptionHandler(UserBlockException.class)
+    public ResponseEntity<ErrorResponse> handleBlockedUserException(UserBlockException e) {
         ErrorResponse response = new ErrorResponse("BLOCKED_USER", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
@@ -96,20 +95,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
-    @ExceptionHandler(PostUpdateFailException.class)
-    public ResponseEntity<ErrorResponse> handlePostUpdateFailException(PostUpdateFailException e) {
-        ErrorResponse response = new ErrorResponse("Post_Update_Fail", e.getMessage());
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    }
-
-    @ExceptionHandler(PostDeleteFailException.class)
-    public ResponseEntity<ErrorResponse> handlePostDeleteFailException(PostDeleteFailException e) {
-        ErrorResponse response = new ErrorResponse("Post_Delete_Fail", e.getMessage());
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    }
-
     @ExceptionHandler(PostCreateFailException.class)
     public ResponseEntity<ErrorResponse> handlePostCreateFailException(PostCreateFailException e) {
         ErrorResponse response = new ErrorResponse("POST_Create_Fail", e.getMessage());
@@ -131,42 +116,17 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
-    @ExceptionHandler(PostDeleteException.class)
-    public ResponseEntity<ErrorResponse> handlePostDeleteException(PostDeleteException e) {
+    @ExceptionHandler(PostDeleteFailException.class)
+    public ResponseEntity<ErrorResponse> handlePostDeleteException(PostDeleteFailException e) {
         ErrorResponse response = new ErrorResponse("POST_DELETE_FAIL", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
     // Comment
-    @ExceptionHandler(CommentCreateFailException.class)
-    public ResponseEntity<ErrorResponse> handleCommentCreateFailException(
-        CommentCreateFailException e) {
+    @ExceptionHandler(CommentException.class)
+    public ResponseEntity<ErrorResponse> handleCommentCreateFailException(CommentException e) {
         ErrorResponse response = new ErrorResponse("Comment_Create_Fail", e.getMessage());
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    }
-
-    @ExceptionHandler(CommentDeleteFailException.class)
-    public ResponseEntity<ErrorResponse> handleCommentDeleteFailException(
-        CommentDeleteFailException e) {
-        ErrorResponse response = new ErrorResponse("Comment_Delete_Fail", e.getMessage());
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    }
-
-    @ExceptionHandler(CommentUpdateFailException.class)
-    public ResponseEntity<ErrorResponse> handleCommentUpdateFailException(
-        CommentUpdateFailException e) {
-        ErrorResponse response = new ErrorResponse("Comment_Update_Fail", e.getMessage());
-
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-    }
-
-    @ExceptionHandler(CommentLikeFailException.class)
-    public ResponseEntity<ErrorResponse> handleCommentLikeFailException(
-        CommentLikeFailException e) {
-        ErrorResponse response = new ErrorResponse("Comment_Like_Fail", e.getMessage());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
@@ -196,7 +156,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
-
     @ExceptionHandler(ImageDownloadUrlGenerationException.class)
     public ResponseEntity<ErrorResponse> handleImageDownloadUrlGenerationException(
         ImageDownloadUrlGenerationException e) {
@@ -207,7 +166,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
-
     @ExceptionHandler(GameApplyException.class)
     public ResponseEntity<ErrorResponse> handleGameApplyException(GameApplyException e) {
         ErrorResponse response = new ErrorResponse("GAME_APPLY_ERROR", e.getMessage());
@@ -216,10 +174,36 @@ public class GlobalExceptionHandler {
     }
 
     // Ticket
-    @ExceptionHandler(TicketTransferException.class)
-    public ResponseEntity<ErrorResponse> handleTicketTransferException(TicketTransferException e) {
+    @ExceptionHandler(TicketException.class)
+    public ResponseEntity<ErrorResponse> handleTicketTransferException(TicketException e) {
         ErrorResponse response = new ErrorResponse("TICKET_TRANSFER_ERROR", e.getMessage());
 
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    // Group
+    @ExceptionHandler(GameAlreadyEndedException.class)
+    public ResponseEntity<ErrorResponse> handleGameAlreadyEnded(GameAlreadyEndedException e) {
+        ErrorResponse response = new ErrorResponse("GAME_ALREADY_ENDED", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(GroupCapacityExceededException.class)
+    public ResponseEntity<ErrorResponse> handleGroupCapacityExceeded(
+        GroupCapacityExceededException e) {
+        ErrorResponse response = new ErrorResponse("GROUP_CAPACITY_EXCEEDED", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(GroupJoinCountException.class)
+    public ResponseEntity<ErrorResponse> handleGroupJoinCount(GroupJoinCountException e) {
+        ErrorResponse response = new ErrorResponse("GROUP_JOIN_COUNT_ERROR", e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(GroupParticipationException.class)
+    public ResponseEntity<ErrorResponse> handleGroupParticipation(GroupParticipationException e) {
+        ErrorResponse response = new ErrorResponse("GROUP_PARTICIPATION_ERROR", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }

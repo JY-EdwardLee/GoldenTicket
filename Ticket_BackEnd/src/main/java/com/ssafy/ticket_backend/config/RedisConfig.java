@@ -32,21 +32,9 @@ public class RedisConfig {
         return new LettuceConnectionFactory(redisStandaloneConfiguration);
     }
 
-//    @Primary
-//    @Bean(name = "redisTemplateString")
-//    public RedisTemplate<String, String> redisTemplate() {
-//        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
-//        redisTemplate.setConnectionFactory(redisConnectionFactory());
-//        redisTemplate.setKeySerializer(new StringRedisSerializer());
-//        redisTemplate.setValueSerializer(new StringRedisSerializer());
-//
-//        return redisTemplate;
-//    }
-
     /**
      * KakaoPayService에서 사용
      */
-//    @Bean(name = "redisTemplateObject")
     @Bean
     public RedisTemplate<String, Object> redisTemplateObject() {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();

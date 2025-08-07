@@ -8,5 +8,6 @@ public enum TicketStatus {
     BEING_ASSIGNMENT,  // 양도 중
     BEING_PAYING,  // 결제 중
     TRANSACTION_COMPLETE,  // 거래 완료
-    CANCEL_WAITING  // 응모 취소
+    CANCEL_WAITING,  // 응모 취소
+    USED  // 사용 완료
 }

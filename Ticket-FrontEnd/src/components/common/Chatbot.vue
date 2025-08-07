@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Chat Button -->
+    <!-- 채팅 버튼 -->
     <v-btn
       dark
       fixed
@@ -16,9 +16,9 @@
       <v-icon class="white--text" size="32" v-else>mdi-close</v-icon>
     </v-btn>
 
-    <!-- Chat Window -->
+    <!-- 채팅창 -->
     <v-card v-if="isChatOpen" class="chat-window" width="350" height="600">
-      <!-- Header -->
+      <!-- 헤더 -->
       <v-toolbar color="white" light flat class="chat-header">
         <v-btn icon @click="toggleChat">
           <v-icon>mdi-arrow-left</v-icon>
@@ -33,7 +33,7 @@
         </v-btn>
       </v-toolbar>
 
-      <!-- Messages Area -->
+      <!-- 메시지 영역 -->
       <v-card-text class="messages-container" ref="messagesContainer">
          <div class="text-center my-2">
           <span class="date-divider">{{ new Date().toLocaleDateString() }}</span>
@@ -61,7 +61,7 @@
         </div>
       </v-card-text>
 
-      <!-- Input Area -->
+      <!-- 입력 영역 -->
       <v-card-actions class="input-area">
         <v-text-field
           v-model="newMessage"
@@ -91,7 +91,7 @@ import { ref, nextTick, computed } from 'vue';
 import {API_CONFIG} from '@/config/api.config.js'
 import { useTeamThemeStore } from '@/stores/teamTheme';
 import { useAuthStore } from '@/stores/auth';
-
+import axios from 'axios';
 
 const authStore = useAuthStore();
 const themeStore = useTeamThemeStore;
@@ -118,7 +118,7 @@ const toggleChat = () => {
 const sendMessage = async () => {
   if (!newMessage.value.trim()) return;
 
-  // Add user message
+  // 사용자 메시지 추가
   messages.value.push({
     id: Date.now(),
     sender: 'user',
@@ -130,12 +130,28 @@ const sendMessage = async () => {
   await nextTick();
   scrollToBottom();
 
-  // 백엔드에 메시지 전달달
+  // 유저 정보 세팅
+  const user = JSON.parse(localStorage.getItem('user'))
+
+  // 백엔드에 메시지 전달
   isTyping.value = true;
   try {
-    const response = await axios.post(API_CONFIG.CHAT, {
-      isLogin: authStore.isLogin.value,
+    let headers = {
+      'Content-Type': 'application/json',
+    };
+    if (authStore.token.value) {
+      const jwToken = authStore.token.value;
+      headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jwToken}`,
+      };
+    }
+    const response = await axios.post(API_CONFIG.MAIN_PAGE.CHAT, {
+      userId: user.userId,
       question: newMessage.value,
+      isLogin: authStore.isAuthenticated.value,
+    }, {
+      headers: headers,
     });
     console.log(response.data);
     // 봇 응답 추가
@@ -239,13 +255,14 @@ const scrollToBottom = () => {
 }
 
 .message.user {
-  background-color: var(--v-theme-primary);
-  color: white;
+  background-color: var(--theme-primary);
+  color: #ffffff;
   border-bottom-right-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .message.bot {
-  background-color: #FFFFFF;
+  background-color: #f2f2f2;
   color: #333;
   border-bottom-left-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);

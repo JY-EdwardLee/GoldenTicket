@@ -11,5 +11,4 @@ public interface RankingService {
 
     // 팀별 양도 랭킹 조회
     List<TeamRankingResponse> getTeamRanking();
-
 }

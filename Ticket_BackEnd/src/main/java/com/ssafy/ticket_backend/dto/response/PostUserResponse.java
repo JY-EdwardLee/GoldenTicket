@@ -9,5 +9,4 @@ public class PostUserResponse {
 
     private Long userId;
     private String nickname;
-
 }
