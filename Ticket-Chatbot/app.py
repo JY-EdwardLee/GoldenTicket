@@ -80,7 +80,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5713",
+        "http://localhost:5173",
         "http://i13a109.p.ssafy.io"
     ],
     allow_credentials=True,
