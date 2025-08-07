@@ -22,6 +22,19 @@ export const boardAPI = {
     }
   },
 
+  // 게시판별 게시글 검색
+  searchPosts: async (boardType, searchType, searchValue) => {
+    try {
+      const params = {};
+      params[searchType] = searchValue;
+      
+      const response = await publicApiClient.get(`/boards/${boardType}`, { params });
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
+  },
+
   // 게시글 상세 조회
   getPostDetail: async (postId) => {
     try {
