@@ -130,23 +130,26 @@ const sendMessage = async () => {
   await nextTick();
   scrollToBottom();
 
+  // 유저 정보 세팅
+  const user = JSON.parse(localStorage.getItem('user'))
+
   // 백엔드에 메시지 전달
   isTyping.value = true;
   try {
     let headers = {
       'Content-Type': 'application/json',
     };
-    if (authStore.accessToken.value) {
-      const jwToken = authStore.accessToken.value;
+    if (authStore.token.value) {
+      const jwToken = authStore.token.value;
       headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${jwToken}`,
       };
     }
-    const response = await axios.post(API_CONFIG.CHAT, {
-      userId: authStore.userId.value,
+    const response = await axios.post(API_CONFIG.MAIN_PAGE.CHAT, {
+      userId: user.userId,
       question: newMessage.value,
-      isLogin: authStore.isLogin.value,
+      isLogin: authStore.isAuthenticated.value,
     }, {
       headers: headers,
     });
