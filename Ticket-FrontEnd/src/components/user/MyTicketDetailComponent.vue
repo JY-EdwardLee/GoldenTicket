@@ -23,22 +23,21 @@
             <div class="info-item">
               <span class="icon">&#x1F4C5;</span>
               <div class="info-text">
-                <p>{{ formatDate(ticketDetail.gameDate).split(' ')[0] }} ({{ formatDate(ticketDetail.gameDate).split(' ')[2] }})</p>
-                <p>{{ formatDate(ticketDetail.gameDate).split(' ')[1] }} 경기 시작</p>
+                <p>{{ formatDate(ticketDetail.game.date).split(' ')[0] }}</p>
+                <p>{{ formatDate(ticketDetail.game.date).split(' ')[1] }} {{ formatDate(ticketDetail.game.date).split(' ')[2] }} 경기 시작</p>
               </div>
             </div>
             <div class="info-item">
               <span class="icon">&#x1F4CD;</span>
               <div class="info-text">
                 <p>{{ stadiumOfTeam[ticketDetail.game.stadium] }}</p>
-                <p>{{ ticketDetail.game.stadiumAddress }}</p> <!-- Assuming address is available -->
               </div>
             </div>
             <div class="info-item">
               <span class="icon">&#x1F4BA;</span>
               <div class="info-text">
-                <p>{{ ticketDetail.seatInfo?.split(' ')[0] }} {{ ticketDetail.seatInfo?.split(' ')[1] }}</p>
-                <p>{{ ticketDetail.seatInfo?.split(' ').slice(2).join(' ') }}</p>
+                <p>{{ ticketDetail.seat?.split(' ')[0] }} {{ ticketDetail.seat?.split(' ')[1] }}</p>
+                <p>{{ ticketDetail.seat?.split(' ').slice(2).join(' ') }}</p>
               </div>
             </div>
             <div class="info-item">
@@ -181,6 +180,21 @@ const hideQrModal = () => {
 </script>
 
 <style scoped>
+.ticket-header {
+  height: 200px; /* 원하는 높이로 조절하세요 */
+  overflow: hidden;
+  position: relative;
+}
+
+.ticket-header .team-logo {
+  border-radius: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  object-fit: cover;
+  object-position: center;
+}
+
 .ticket-wrapper {
   display: flex;
   justify-content: center;
@@ -192,14 +206,13 @@ const hideQrModal = () => {
   width: 400px;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  background-color: #CE0E2D; /* Main theme color */
+  background-color: var(--theme-primary, #ff6b35); /* Main theme color */
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .ticket-header {
   height: 250px;
-  background-image: url('https://i.imgur.com/7y3jxZ3.png'); /* Placeholder player image */
   background-size: cover;
   background-position: center;
   position: relative;
