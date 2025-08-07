@@ -68,10 +68,10 @@
                 <div class="simple-payment">
                 <div class="payment-buttons">
                     <button type="button" class="payment-button" id="kakao" @click="selectedMethod = 'kakao'" :class="{ 'selected': selectedMethod === 'kakao' }">
-                        <img src="@@/assets/logo/btn_kakaoye_pay.png" alt="카카오페이">
+                        <img src="@/assets/logo/btn_kakaoye_pay.png" alt="카카오페이">
                     </button>
                     <button type="button" class="payment-button" id="naver" @click="selectedMethod = 'naver'" :class="{ 'selected': selectedMethod === 'naver' }">
-                        <img src="@@/assets/logo/btn_npaygr_pay.svg" alt="네이버페이">
+                        <img src="@/assets/logo/btn_npaygr_pay.svg" alt="네이버페이">
                     </button>
                 </div>
                 </div>

@@ -9,7 +9,7 @@ const createTeamThemeStore = () => {
       secondary: '#C0C0C0',
       accent: '#C0C0C0',
       gradient: 'linear-gradient(135deg, #074CA1 0%, #C0C0C0 100%)',
-      logo: new URL('@@/assets/logo/samsung.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/samsung.svg', import.meta.url).href,
       stadium: '대구 삼성 라이온즈 파크'
     },
     'KIWOOM_HEROES': {
@@ -17,7 +17,7 @@ const createTeamThemeStore = () => {
       secondary: '#B07F4A',
       accent: '#B07F4A',
       gradient: 'linear-gradient(135deg, #570514 0%, #B07F4A 100%)',
-      logo: new URL('@@/assets/logo/KIWOOM.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/KIWOOM.svg', import.meta.url).href,
       stadium: '고척 스카이돔'
     },
     'LG_TWINS': {
@@ -25,7 +25,7 @@ const createTeamThemeStore = () => {
       secondary: '#000000',
       accent: '#000000',
       gradient: 'linear-gradient(135deg, #C30452 0%, #000000 100%)',
-      logo: new URL('@@/assets/logo/LG.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/LG.svg', import.meta.url).href,
       stadium: '서울종합운동장 야구장'
     },
     'DOOSAN_BEARS': {
@@ -33,7 +33,7 @@ const createTeamThemeStore = () => {
       secondary: '#EB1D25',
       accent: '#EB1D25',
       gradient: 'linear-gradient(135deg, #1A1748 0%, #EB1D25 100%)',
-      logo: new URL('@@/assets/logo/DOOSAN.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/DOOSAN.svg', import.meta.url).href,
       stadium: '서울종합운동장 야구장'
     },
     'KT_WIZ': {
@@ -41,7 +41,7 @@ const createTeamThemeStore = () => {
       secondary: '#ff0000',
       accent: '#ff0000',
       gradient: 'linear-gradient(135deg, #000000 0%, #333333 100%)',
-      logo: new URL('@@/assets/logo/KT.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/KT.svg', import.meta.url).href,
       stadium: '수원 케이티 위즈 파크'
     },
     'SSG_LANDERS': {
@@ -49,7 +49,7 @@ const createTeamThemeStore = () => {
       secondary: '#FFB81C',
       accent: '#FFB81C',
       gradient: 'linear-gradient(135deg, #CE0E2D 0%, #FFB81C 100%)',
-      logo: new URL('@@/assets/logo/SSG.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/SSG.svg', import.meta.url).href,
       stadium: '인천 SSG 랜더스필드'
     },
     'NC_DINOS': {
@@ -57,7 +57,7 @@ const createTeamThemeStore = () => {
       secondary: '#AF917B',
       accent: '#AF917B',
       gradient: 'linear-gradient(135deg, #315288 0%, #AF917B 100%)',
-      logo: new URL('@@/assets/logo/NC.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/NC.svg', import.meta.url).href,
       stadium: '창원NC파크'
     },
     'KIA_TIGERS': {
@@ -65,7 +65,7 @@ const createTeamThemeStore = () => {
       secondary: '#06141F',
       accent: '#06141F',
       gradient: 'linear-gradient(135deg, #EA0029 0%, #06141F 100%)',
-      logo: new URL('@@/assets/logo/kia.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/kia.svg', import.meta.url).href,
       stadium: '광주 기아 챔피언스 필드'
     },
     'LOTTE_GIANTS': {
@@ -73,7 +73,7 @@ const createTeamThemeStore = () => {
       secondary: '#D00F31',
       accent: '#D00F31',
       gradient: 'linear-gradient(135deg, #041E42 0%, #D00F31 100%)',
-      logo: new URL('@@/assets/logo/LOTTE.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/LOTTE.svg', import.meta.url).href,
       stadium: '사직 야구장'
     },
     'HANHWA_EAGLES': {
@@ -81,7 +81,7 @@ const createTeamThemeStore = () => {
       secondary: '#07111F',
       accent: '#07111F',
       gradient: 'linear-gradient(135deg, #FC4E00 0%, #07111F 100%)',
-      logo: new URL('@@/assets/logo/HanWha.svg', import.meta.url).href,
+      logo: new URL('@/assets/logo/HanWha.svg', import.meta.url).href,
       stadium: '대전 한화생명 볼파크'
     }
   }

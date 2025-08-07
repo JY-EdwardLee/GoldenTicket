@@ -107,7 +107,7 @@ const ticketId = ref(null)
 const homeTeamLogoPath = computed(() => {
   if (ticketDetail.value?.game?.home && teamNameToLogo[ticketDetail.value.game.home]) {
     const logoFileName = teamNameToLogo[ticketDetail.value.game.home]
-    return `@@/assets/logo/${logoFileName}.svg`
+    return `@/assets/logo/${logoFileName}.svg`
   }
   return ''
 })
