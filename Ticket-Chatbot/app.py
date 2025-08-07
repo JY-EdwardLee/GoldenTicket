@@ -80,8 +80,11 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",
-        "http://i13a109.p.ssafy.io"
+        
+        "http://localhost:5713",
+        "http://i13a109.p.ssafy.io",
+        "http://localhost:8080",          # 자바 백엔드 개발환경 주소
+        "http://i13a109.p.ssafy.io:8080"  # 자바 백엔드 배포주소
     ],
     allow_credentials=True,
     allow_methods=["*"],
