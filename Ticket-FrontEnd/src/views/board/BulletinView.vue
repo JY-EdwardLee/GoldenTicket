@@ -101,20 +101,69 @@ onMounted(() => {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .board-tabs {
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
+    padding: 24px 16px 0 16px;
+    gap: 6px;
   }
   
   .tab {
-    width: 200px;
-    text-align: center;
+    padding: 10px 20px;
+    font-size: 14px;
   }
   
   .main-content {
+    width: 98%;
+    padding: 24px 0 32px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .board-tabs {
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    padding: 20px 12px 0 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .tab {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+    padding: 10px 8px;
+    font-size: 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  
+  .main-content {
+    width: 100%;
     padding: 16px 0 24px 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .board-tabs {
+    padding: 16px 8px 0 8px;
+    gap: 3px;
+    flex-wrap: nowrap;
+  }
+  
+  .tab {
+    flex: 1;
+    min-width: 80px;
+    padding: 8px 4px;
+    font-size: 11px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  
+  .main-content {
+    padding: 12px 0 20px 0;
   }
 }
 </style>

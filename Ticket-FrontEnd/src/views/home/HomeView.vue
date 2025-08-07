@@ -7,24 +7,26 @@
           <v-row justify="center" align="center" class="fill-height">
             <!-- 응모 카드 -->
             <v-col cols="12" md="6" class="pa-4">
-              <HeroCard
-                title="응모"
-                :description="['다양한 티켓 응모에 참여하고', '원하는 공연을 만나보세요']"
-                button-text="응모하기"
-                type="primary"
-                @click="goToApply"
-              />
+                <HeroCard
+                class="enter-card"
+                  title="응모"
+                  :description="['다양한 티켓 응모에 참여하고', '원하는 공연을 만나보세요']"
+                  button-text="응모하기"
+                  type="primary"
+                  @click="goToApply"
+                />
             </v-col>
             
             <!-- 양도 카드 -->
             <v-col cols="12" md="6" class="pa-4">
-              <HeroCard
-                title="양도"
-                :description="['티켓을 안전하게 양도하고', '필요한 사람에게 전달하세요']"
-                button-text="양도하기"
-                type="secondary"
-                @click="goToTransfer"
-              />
+                <HeroCard
+                  class="transfer-card"
+                  title="양도"
+                  :description="['티켓을 안전하게 양도하고', '필요한 사람에게 전달하세요']"
+                  button-text="양도하기"
+                  type="secondary"
+                  @click="goToTransfer"
+                />
             </v-col>
           </v-row>
         </v-container>
@@ -127,7 +129,6 @@
     <v-dialog v-model="showTutorialModal" max-width="500" persistent>
       <v-card class="tutorial-modal">
         <v-card-title class="text-h5 text-center pa-6">
-          <v-icon color="primary" size="48" class="mb-4">mdi-help-circle</v-icon>
           <div class="tutorial-modal-main-title">서비스 사용을 도와드릴까요?</div>
         </v-card-title>
         
@@ -142,7 +143,7 @@
             style="font-size: 15px;"
             color="primary" 
             variant="flat" 
-            @click="startTutorial"
+            @click="() => startTutorial(authStore, { value: showLoginModal })"
           >
             네, 도와주세요!
           </v-btn>
@@ -152,7 +153,7 @@
             variant="outlined" 
             @click="closeTutorialModal"
           >
-            아뇨, 괜찮아요~
+            아뇨, 괜찮아요
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -164,10 +165,10 @@
 import { ref, watch, onMounted, onUnmounted, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import http from '@/utils/http';
+import { useTutorial } from '@/views/tutorial/useTutorial';
+import { driver } from 'driver.js';
 import axios from 'axios';
 import { API_CONFIG } from '@/config/api.config';
-import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 // 공통 컴포넌트 import
 import HeroCard from '../../components/ui/HeroCard.vue';
@@ -189,8 +190,8 @@ const showLoginModal = ref(false);
 // 로그인 후 리다이렉트할 경로 저장 (localStorage 사용)
 const pendingRedirect = ref(localStorage.getItem('pendingRedirect') || null);
 
-// 튜토리얼 모달 관리 (누락된 부분 추가)
-const showTutorialModal = ref(false);
+// 튜토리얼 composable 사용
+const { showTutorialModal, openTutorialModal, closeTutorialModal, startTutorial } = useTutorial();
 
 // 로그인 성공 후 처리를 위한 플래그
 const isProcessingLogin = ref(false);
@@ -269,6 +270,23 @@ const handleLoginSuccess = async () => {
   }
 };
 
+// 팝오버가 완전히 닫혔는지 확인하는 함수
+const waitForPopoverClose = () => {
+  return new Promise((resolve) => {
+    const checkPopover = () => {
+      const popover = document.querySelector('.driver-popover');
+      if (!popover) {
+        console.log('팝오버가 완전히 닫혔습니다');
+        resolve();
+      } else {
+        console.log('팝오버가 아직 존재합니다, 다시 확인...');
+        setTimeout(checkPopover, 10); // 10ms 후 다시 확인 (응답성 향상)
+      }
+    };
+    checkPopover();
+  });
+};
+
 // 응모 페이지로 이동
 const goToApply = async () => {
   console.log('응모하기 클릭 - 현재 인증 상태:', authStore.isAuthenticated);
@@ -278,22 +296,24 @@ const goToApply = async () => {
   // 응모 튜토리얼 플래그 확인
   const showApplyTutorial = localStorage.getItem('showApplyTutorial') === 'true';
   
+  // 튜토리얼이 활성화된 상태면 먼저 닫기
+  if (isInTutorial) {
+    console.log('튜토리얼 오버레이 닫기');
+    try {
+      const driverObj = driver();
+      driverObj.destroy();
+      // 팝오버가 완전히 닫힐 때까지 대기
+      await waitForPopoverClose();
+    } catch (e) {
+      console.warn('튜토리얼 닫기 실패:', e);
+    }
+  }
+  
   // 로그인 상태 확인
   if (!authStore.isAuthenticated) {
     // 로그인 후 이동할 경로 저장 (튜토리얼 플래그 유지)
     const redirectPath = isInTutorial || showApplyTutorial ? '/application?tutorial=true' : '/application';
     console.log('로그인 필요, 리다이렉트 경로 저장:', redirectPath);
-    
-    // 튜토리얼이 활성화된 상태면 닫기
-    if (isInTutorial) {
-      console.log('튜토리얼 오버레이 닫기');
-      try {
-        const driverObj = driver();
-        driverObj.destroy();
-      } catch (e) {
-        console.warn('튜토리얼 닫기 실패:', e);
-      }
-    }
     
     // 대기 중인 리다이렉트 설정 및 로그인 모달 표시
     pendingRedirect.value = redirectPath;
@@ -330,22 +350,24 @@ const goToTransfer = async () => {
   // 양도 튜토리얼 플래그 확인
   const showTransferTutorial = localStorage.getItem('showTransferTutorial') === 'true';
   
+  // 튜토리얼이 활성화된 상태면 먼저 닫기
+  if (isInTutorial) {
+    console.log('튜토리얼 오버레이 닫기');
+    try {
+      const driverObj = driver();
+      driverObj.destroy();
+      // 팝오버가 완전히 닫힐 때까지 대기
+      await waitForPopoverClose();
+    } catch (e) {
+      console.warn('튜토리얼 닫기 실패:', e);
+    }
+  }
+  
   // 로그인 상태 확인
   if (!authStore.isAuthenticated) {
     // 로그인 후 이동할 경로 저장 (튜토리얼 플래그 유지)
     const redirectPath = isInTutorial || showTransferTutorial ? '/transfer?tutorial=true' : '/transfer';
     console.log('로그인 필요, 리다이렉트 경로 저장:', redirectPath);
-    
-    // 튜토리얼이 활성화된 상태면 닫기
-    if (isInTutorial) {
-      console.log('튜토리얼 오버레이 닫기');
-      try {
-        const driverObj = driver();
-        driverObj.destroy();
-      } catch (e) {
-        console.warn('튜토리얼 닫기 실패:', e);
-      }
-    }
     
     // 대기 중인 리다이렉트 설정 및 로그인 모달 표시
     pendingRedirect.value = redirectPath;
@@ -371,124 +393,6 @@ const goToTransfer = async () => {
   } catch (err) {
     console.error('이동 실패:', err);
   }
-};
-
-// 튜토리얼 모달 관련 함수들
-const closeTutorialModal = () => {
-  showTutorialModal.value = false;
-};
-
-// 아이콘 클래스 적용 함수 (컴포넌트 스코프로 이동)
-const applyStepIcon = (step) => {
-  const popover = document.querySelector('.driver-popover');
-  if (popover) {
-    popover.classList.remove('step-welcome', 'step-apply', 'step-transfer');
-    if (step.popover.title === '환영합니다!') {
-      popover.classList.add('step-welcome');
-    } else if (step.popover.title === '티켓 응모') {
-      popover.classList.add('step-apply');
-    } else if (step.popover.title === '티켓 양도') {
-      popover.classList.add('step-transfer');
-    }
-  }
-};
-
-const startTutorial = () => {
-  // 모달 닫기
-  showTutorialModal.value = false;
-  
-  // 약간의 지연 후 튜토리얼 시작 (모달이 완전히 닫히는 시간 확보)
-  setTimeout(() => {
-    // 간단한 설정으로 드라이버 초기화
-    const driverObj = driver({
-      showProgress: false,
-      overlayColor: 'rgba(0, 0, 0, 0.7)',
-      animate: 300,
-      allowClose: true,
-      doneBtnText: '완료',
-      nextBtnText: '다음',
-      prevBtnText: '이전',
-      
-      // 각 단계가 활성화될 때 아이콘 업데이트
-      onHighlighted: (element, step) => {
-        // 다음 애니메이션 프레임에서 아이콘 업데이트 (렌더링 완료 보장)
-        requestAnimationFrame(() => {
-          applyStepIcon(step);
-        });
-      },
-      
-      // 팝오버가 렌더링될 때 아이콘 업데이트 (이중 보장)
-      onPopoverRender: (popover, { config, state }) => {
-        const currentStep = state.activeStep;
-        if (currentStep) {
-          requestAnimationFrame(() => {
-            applyStepIcon(currentStep);
-          });
-        }
-      },
-      
-      // 튜토리얼 완료 시 실행
-      onDestroyed: () => {
-        // 튜토리얼 완료 시 로컬 스토리지에 기록
-        localStorage.setItem('tutorialCompleted', 'true');
-        // 모든 기능의 튜토리얼 플래그 설정 (완료 후 각 기능 사용 시 튜토리얼 표시)
-        localStorage.setItem('showApplyTutorial', 'true');
-        localStorage.setItem('showTransferTutorial', 'true');
-        console.log('메인 튜토리얼 완료 및 모든 기능 튜토리얼 플래그 설정됨');
-      },
-      
-      steps: [
-        {
-          popover: {
-            title: '환영합니다!',
-            description: '야구 티켓 양도 플랫폼에 오신 것을 환영합니다. 안전하고 편리한 티켓 거래를 시작해보세요!',
-            side: 'center',
-            align: 'center'
-          }
-        },
-        {
-          element: '.enter-card',
-          popover: {
-            title: '티켓 응모',
-            description: '여기를 클릭하여 원하는 야구 경기 티켓에 응모해보세요. 공정한 추첨을 통해 티켓을 받을 수 있습니다!',
-            side: 'top',
-            align: 'center',
-            onNext: () => {
-              // 응모하기 버튼 클릭 시 응모 튜토리얼 플래그 설정
-              localStorage.setItem('showApplyTutorial', 'true');
-              console.log('응모 튜토리얼 플래그 설정됨');
-              return true; // 다음 단계로 진행 허용
-            }
-          }
-        },
-        {
-          element: '.transfer-card',
-          popover: {
-            title: '티켓 양도',
-            description: '보유하고 있는 티켓을 다른 사람에게 양도하고 싶다면 여기를 클릭하세요. 안전한 거래를 보장합니다!',
-            side: 'top',
-            align: 'center',
-            onNext: () => {
-              // 양도하기 버튼 클릭 시 양도 튜토리얼 플래그 설정
-              localStorage.setItem('showTransferTutorial', 'true');
-              console.log('양도 튜토리얼 플래그 설정됨');
-              return true; // 다음 단계로 진행 허용
-            }
-          }
-        }
-      ]
-    });
-    
-    // 튜토리얼 시작
-    driverObj.drive();
-  }, 100);
-};
-
-// 튜토리얼 모달 표시 (항상 표시)
-const showTutorialOnEntry = () => {
-  console.log('튜토리얼 모달 표시');
-  // 즉시 모달 표시 (지연 없이)
-  showTutorialModal.value = true;
 };
 
 // 사용자 랭킹 데이터
@@ -726,23 +630,7 @@ onMounted(async () => {
   fetchTeamRanking();
   startAutoScroll();
   
-  // 페이지 새로고침 시에도 튜토리얼 모달 표시
-  const isPageReload = performance.navigation.type === 1;
-  if (isPageReload) {
-    console.log('페이지 새로고침 감지 - 튜토리얼 모달 표시');
-    showTutorialOnEntry();
-  } else {
-    // 일반적인 페이지 진입 시에도 튜토리얼 모달 표시
-    console.log('일반 페이지 진입 - 튜토리얼 모달 표시');
-    showTutorialOnEntry();
-  }
-  
-  // URL에 tutorial 파라미터가 있으면 무조건 튜토리얼 모달 표시
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.has('tutorial')) {
-    console.log('URL에 tutorial 파라미터 있음 - 튜토리얼 모달 표시');
-    showTutorialOnEntry();
-  }
+  // 튜토리얼은 이제 navbar의 '튜토리얼' 버튼을 통해서만 실행됩니다.
 });
 
 // 컴포넌트 언마운트 시 타이머 정리
@@ -826,6 +714,7 @@ onUnmounted(() => {
 }
 
 .tutorial-modal .v-card-title {
+  height: 100px !important;
   background: linear-gradient(135deg, #FFB22C 0%, #FF9A1A 100%);
   color: white;
   border-radius: 16px 16px 0 0;

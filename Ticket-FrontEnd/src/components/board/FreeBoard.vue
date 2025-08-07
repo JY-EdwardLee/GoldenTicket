@@ -158,7 +158,7 @@ const handleSearch = async (searchTypeParam, searchValueParam) => {
       console.error('검색 실패: 잘못된 데이터 형식');
     }
   } catch (err) {
-    error.value = '등록된 게시글이 없습니다.';
+    error.value = '등록된 게시글이 없습니다. 다시 검색해 주세요.';
     searchResultMessage.value = '';
     console.error('검색 중 오류:', err);
   } finally {

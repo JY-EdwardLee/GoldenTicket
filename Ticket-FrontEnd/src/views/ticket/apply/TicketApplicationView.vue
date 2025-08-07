@@ -133,7 +133,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onBeforeUnmount } from 'vue';
+import { ref, onMounted, computed, onBeforeUnmount, nextTick } from 'vue';
 import axios from 'axios';
 import API_CONFIG from '@/config/api.config';
 import { stadiumNameToEnum } from '@/utils/teamStadium';
@@ -177,9 +177,9 @@ const gamesOnDate = ref([]);
 const selectedGame = ref(null);
 
 // 달력 관련 변수들
-const currentYear = 2025;
-const currentMonth = ref(8); // 8월부터 시작
-const today = new Date(); // 2025-08-04 (월은 0부터 시작)
+const currentYear = new Date().getFullYear();
+const currentMonth = ref(new Date().getMonth() + 1); // 현재 월
+const today = new Date(); // 실제 현재 날짜 사용
 
 // 달력 computed 속성들
 const daysInCurrentMonth = computed(() => {
@@ -214,6 +214,7 @@ const pageText = {
   gameListTitle: '경기 목록',
   applyBtn: '응모하기',
   noGame: '날짜를 선택해주세요',
+  prevBtn: '이전'
 };
 
 function selectTeam(team) {
@@ -298,13 +299,281 @@ function nextMonth() {
   }
 }
 
-// 캘린더 튜토리얼 시작
+// 팝오버 스타일 적용 함수
+const applyPopoverStyles = () => {
+  console.log('팝오버 스타일 적용 시도...');
+  
+  // 여러 번 시도하여 팝오버 요소 찾기
+  const findAndStylePopover = () => {
+    const popoverElement = document.querySelector('.driver-popover');
+    if (popoverElement) {
+      console.log('팝오버 요소 찾음:', popoverElement);
+      
+      const calendarArea = document.querySelector('.calendar-area');
+      if (calendarArea) {
+        const rect = calendarArea.getBoundingClientRect();
+        const rightPosition = rect.right + 20;
+        
+        // 화면 경계를 고려한 위치 계산
+        const minTopPosition = 100; // 최소 상단 여백
+        const maxTopPosition = window.innerHeight - 200; // 최대 하단 여백
+        let topPosition = rect.top + (rect.height / 2) - 100; // 캘린더 중앙 기준
+        
+        // 경계 값 보정
+        if (topPosition < minTopPosition) {
+          topPosition = minTopPosition;
+        } else if (topPosition > maxTopPosition) {
+          topPosition = maxTopPosition;
+        }
+        
+        console.log('위치 계산:', { 
+          originalTop: rect.top, 
+          calculatedTop: topPosition, 
+          rightPosition,
+          windowHeight: window.innerHeight 
+        });
+        
+        // 모든 스타일을 강제로 설정
+        const styles = {
+          'width': '400px',           // 팝오버 너비 (기존 500px에서 400px로 조정)
+          'max-width': '500px',       // 최대 너비 (기존 600px에서 500px로 조정)
+          'min-width': '300px',       // 최소 너비 유지
+          'max-height': '250px',      // 최대 높이 (기존 300px에서 250px로 조정)
+          'position': 'fixed',
+          'left': `${rightPosition}px`,
+          'top': `${topPosition}px`,
+          'transform': 'none',
+          'right': 'auto',
+          'z-index': '10001',
+          'margin': '10px',           // 여백 추가
+          'box-shadow': '0 4px 12px rgba(0,0,0,0.15)' // 그림자 효과 추가
+        };
+        
+        Object.entries(styles).forEach(([prop, value]) => {
+          popoverElement.style.setProperty(prop, value, 'important');
+        });
+        
+        console.log('스타일 적용 완료:', { rightPosition, topPosition, width: '400px' });
+        return true;
+      }
+    }
+    return false;
+  };
+  
+  // 여러 타이밍에서 시도
+  if (!findAndStylePopover()) {
+    setTimeout(() => findAndStylePopover(), 10);
+    setTimeout(() => findAndStylePopover(), 50);
+    setTimeout(() => findAndStylePopover(), 100);
+    setTimeout(() => findAndStylePopover(), 200);
+    
+    // 지속적인 감시
+    const interval = setInterval(() => {
+      if (findAndStylePopover()) {
+        clearInterval(interval);
+      }
+    }, 100);
+    
+    setTimeout(() => clearInterval(interval), 3000);
+  }
+};
+
+// 날짜 선택 튜토리얼 시작
 const startCalendarTutorial = () => {
+  console.log('startCalendarTutorial 함수 실행 시작!');
+  
+  // 기존 driver 인스턴스 완전히 정리
   if (driverObj.value) {
-    driverObj.value.destroy();
+    console.log('기존 driverObj 종료');
+    try {
+      driverObj.value.destroy();
+    } catch (e) {
+      console.warn('driver 종료 오류:', e);
+    }
+    driverObj.value = null;
   }
   
-  // 캘린더가 완전히 로드될 때까지 대기
+  // 팝오버 위치 미리 계산
+  const calculatePopoverPosition = () => {
+    const calendarArea = document.querySelector('.calendar-area');
+    if (!calendarArea) return null;
+    
+    const rect = calendarArea.getBoundingClientRect();
+    const rightPosition = rect.right + 20;
+    const minTopPosition = 100;
+    const maxTopPosition = window.innerHeight - 200;
+    let topPosition = rect.top + (rect.height / 2) - 100;
+    
+    if (topPosition < minTopPosition) {
+      topPosition = minTopPosition;
+    } else if (topPosition > maxTopPosition) {
+      topPosition = maxTopPosition;
+    }
+    
+    return { rightPosition, topPosition };
+  };
+  
+  // 팝오버 위치 고정 CSS 추가
+  const addPopoverPositionCSS = (position) => {
+    const existingStyle = document.getElementById('calendar-tutorial-style');
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+    
+    const style = document.createElement('style');
+    style.id = 'calendar-tutorial-style';
+    style.textContent = `
+      .tutorial-calendar-modal {
+        position: fixed !important;
+        left: ${position.rightPosition}px !important;
+        top: ${position.topPosition}px !important;
+        transform: none !important;
+        width: 400px !important;
+        max-width: 500px !important;
+        min-width: 300px !important;
+        max-height: 250px !important;
+        margin: 10px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        z-index: 10001 !important;
+        transition: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+  };
+  
+  setTimeout(() => {
+    // 타겟 요소 존재 여부 확인
+    const calendarArea = document.querySelector('.calendar-area');
+    console.log('캘린더 영역 찾기:', calendarArea);
+    
+    if (!calendarArea) {
+      console.error('.calendar-area 요소를 찾을 수 없습니다!');
+      return;
+    }
+    
+    // 팝오버 위치 미리 계산 및 CSS 적용
+    const position = calculatePopoverPosition();
+    if (position) {
+      addPopoverPositionCSS(position);
+      console.log('팝오버 위치 미리 설정:', position);
+    }
+    
+    console.log('driver.js 초기화 시작...');
+    
+    try {
+      driverObj.value = driver({
+        showProgress: true,
+        overlayColor: 'rgba(0, 0, 0, 0.7)',
+        animate: false, // 애니메이션 비활성화로 위치 이동 방지
+        allowClose: true,
+        doneBtnText: '완료',
+        nextBtnText: '다음',
+        prevBtnText: '이전',
+        showButtons: ['close'],
+        popoverClass: 'tutorial-calendar-modal',
+        
+        steps: [
+          {
+            element: '.calendar-area',
+            popover: {
+              title: '날짜 선택',
+              description: '원하는 경기 날짜를 선택해주세요. 선택한 날짜의 경기 목록이 아래에 표시됩니다.',
+              side: 'right',
+              align: 'start',
+              onNext: () => {
+                setupDateClickListener();
+                return true;
+              }
+            }
+          }
+        ],
+        
+        // 콜백 이벤트
+        onHighlighted: (element, step, options) => {
+          console.log('onHighlighted 호출됨 - 위치 고정됨:', element);
+        },
+        
+        onDeselected: (element, step, options) => {
+          console.log('onDeselected 호출됨:', element);
+        },
+        
+        onDestroyed: () => {
+          console.log('onDestroyed 호출됨');
+          // 튜토리얼 종료 시 추가된 스타일 제거
+          const style = document.getElementById('calendar-tutorial-style');
+          if (style) {
+            style.remove();
+          }
+        }
+      });
+      
+      console.log('driver.js 초기화 완료, drive() 호출 시작...');
+      driverObj.value.drive();
+      console.log('drive() 호출 완료');
+      
+    } catch (error) {
+      console.error('driver.js 초기화 오류:', error);
+    }
+  }, 500);
+};
+
+// 날짜 클릭 리스너 설정
+const setupDateClickListener = () => {
+  console.log('날짜 클릭 리스너 설정 중...');
+  
+  // 기존 튜토리얼 종료
+  if (driverObj.value) {
+    driverObj.value.destroy();
+    driverObj.value = null;
+  }
+  
+  // 날짜 클릭 이벤트 리스너 추가
+  const handleDateClick = (event) => {
+    console.log('날짜 클릭 감지:', event.target);
+    
+    // 클릭된 요소가 날짜 셀인지 확인
+    const dateCell = event.target.closest('.calendar-date');
+    if (dateCell && !dateCell.classList.contains('disabled')) {
+      console.log('유효한 날짜 클릭됨');
+      
+      // 이벤트 리스너 제거
+      document.removeEventListener('click', handleDateClick);
+      
+      // 경기 목록이 로드될 때까지 잠시 대기 후 경기 목록 튜토리얼 시작
+      setTimeout(() => {
+        const gameList = document.querySelector('.game-list');
+        if (gameList && gameList.children.length > 0) {
+          console.log('경기 목록 발견, 튜토리얼 시작');
+          startGameListTutorial();
+        } else {
+          console.log('경기 목록이 없음, 튜토리얼 종료');
+          // 경기가 없는 경우 안내 메시지
+          showNoGameMessage();
+        }
+      }, 500);
+    }
+  };
+  
+  // 전역 클릭 이벤트 리스너 추가
+  document.addEventListener('click', handleDateClick);
+  
+  // 30초 후 자동으로 리스너 제거 (타임아웃 방지)
+  setTimeout(() => {
+    document.removeEventListener('click', handleDateClick);
+    console.log('날짜 클릭 리스너 타임아웃으로 제거됨');
+  }, 30000);
+};
+
+// 경기 목록 튜토리얼 시작
+const startGameListTutorial = () => {
+  console.log('경기 목록 튜토리얼 시작...');
+  
+  // 기존 driver 인스턴스 정리
+  if (driverObj.value) {
+    driverObj.value.destroy();
+    driverObj.value = null;
+  }
+  
   setTimeout(() => {
     driverObj.value = driver({
       showProgress: false,
@@ -312,85 +581,24 @@ const startCalendarTutorial = () => {
       animate: 300,
       allowClose: true,
       doneBtnText: '완료',
-      nextBtnText: '확인',
-      prevBtnText: '이전',
+      nextBtnText: '완료',
+      prevBtnText: '', // 이전 버튼 텍스트 비우기
+      showButtons: ['close', 'next'], // next 버튼을 완료 버튼으로 사용
+      popoverClass: 'tutorial-game-list-modal', // 경기 목록 모달 고유 클래스
       
-      onPopoverRender: (popover, { config, state }) => {
-        if (popover && typeof popover.querySelector === 'function') {
-          const popoverElement = popover.querySelector('.driver-popover');
-          if (popoverElement) {
-            popoverElement.classList.add('tutorial-popover');
-          }
-        }
+      // onHighlighted 이벤트 사용
+      onHighlighted: (element, step, options) => {
+        console.log('경기 목록 onHighlighted 호출됨:', element);
       },
       
       steps: [
         {
-          element: '.calendar-area',
-          popover: {
-            title: '날짜 선택',
-            description: '캘린더에서 원하는 경기 날짜를 선택해주세요. 날짜를 클릭하면 해당 날짜의 경기 목록이 표시됩니다.',
-            side: 'right',
-            align: 'start'
-          }
-        }
-      ]
-    });
-    
-    driverObj.value.drive();
-  }, 300);
-};
-
-// 경기 목록 튜토리얼 시작
-const startGameListTutorial = () => {
-  if (driverObj.value) {
-    driverObj.value.destroy();
-  }
-  
-  setTimeout(() => {
-    driverObj.value = driver({
-      showProgress: true,
-      overlayColor: 'rgba(0, 0, 0, 0.7)',
-      animate: 300,
-      allowClose: true,
-      doneBtnText: '완료',
-      nextBtnText: '응모하기',
-      prevBtnText: '이전',
-      
-      onPopoverRender: (popover, { config, state }) => {
-        if (popover && typeof popover.querySelector === 'function') {
-          const popoverElement = popover.querySelector('.driver-popover');
-          if (popoverElement) {
-            popoverElement.classList.add('tutorial-popover');
-          }
-        }
-      },
-      
-      onNextClick: () => {
-        // 응모하기 버튼 클릭
-        const applyButton = document.querySelector('.game-card .apply-btn');
-        if (applyButton) {
-          applyButton.click();
-        }
-        return false; // 기본 next 동작 방지
-      },
-      
-      steps: [
-        {
-          element: '.game-list',
+          element: '.game-list-box',
           popover: {
             title: '경기 선택',
-            description: '선택한 날짜의 경기 목록입니다. 응모하고 싶은 경기의 응모하기 버튼을 클릭해주세요.',
+            description: '선택한 날짜의 경기 목록입니다. 원하는 경기의 "응모하기" 버튼을 직접 클릭해주세요.',
             side: 'left',
-            align: 'start',
-            showButtons: ['next'], // 이전 버튼 숨김
-            onNextClick: () => {
-              const applyButton = document.querySelector('.game-card .apply-btn');
-              if (applyButton) {
-                applyButton.click();
-              }
-              return false;
-            }
+            align: 'start'
           }
         }
       ]
@@ -469,26 +677,13 @@ const startTutorial = () => {
     allowClose: true,
     doneBtnText: '완료',
     nextBtnText: '다음',
-    prevBtnText: '이전',
+    // prevBtnText: '이전',
+    showButtons: ['next', 'close'],
     
-    // 단계별 커스텀 이벤트 처리
-    onNextClick: (element, step, { state }) => {
-      console.log('글로벌 onNextClick 호출, activeStep:', state.activeStep);
-      
-      if (state.activeStep === 0) {
-        // 팀 선택 단계: 다음 단계로 이동
-        return true; // 기본 동작 허용
-      } else if (state.activeStep === 1) {
-        // 다음 버튼 단계: goToNextStep 호출
-        return goToNextStep();
-      }
-      return true;
-    },
+    // 글로벌 onNextClick 핸들러 제거 - 개별 step의 onNext 핸들러 사용
     
     onPopoverRender: (popover, { config, state }) => {
-      // 팝오버가 DOM 요소인지 확인
       if (popover && typeof popover.querySelector === 'function') {
-        // 팝오버가 렌더링될 때마다 클래스 추가
         const popoverElement = popover.nodeType === 1 ? popover : popover.querySelector('.driver-popover');
         if (popoverElement && popoverElement.classList) {
           popoverElement.classList.add('tutorial-popover');
@@ -532,8 +727,17 @@ const startTutorial = () => {
         popover: {
           title: '팀 선택',
           description: '원하는 팀을 선택해주세요.',
-          side: 'right',
-          align: 'start'
+          side: 'bottom',
+          align: 'center',
+          onNext: () => {
+            console.log('팀 선택 단계 onNext 호출');
+            // 팀이 선택되어 있는지 확인
+            if (!selectedTeam.value) {
+              selectedTeam.value = 'SSG랜더스'; // 기본값 설정
+            }
+            console.log('팀 선택 단계 완료, 다음 단계로 진행');
+            return true; // 다음 단계로 진행
+          }
         }
       },
       {
@@ -542,7 +746,14 @@ const startTutorial = () => {
           title: '다음 단계',
           description: '다음 버튼을 눌러주세요.',
           side: 'left',
-          align: 'start'
+          align: 'start',
+          onNext: () => {
+            console.log('다음 버튼 단계 onNext 호출');
+            // 튜토리얼 종료 후 다음 단계로 이동
+            const result = goToNextStep();
+            console.log('goToNextStep 결과:', result);
+            return result;
+          }
         }
       }
     ]
@@ -572,10 +783,31 @@ const goToNextStep = () => {
       const urlParams = new URLSearchParams(window.location.search);
       const tutorialParam = urlParams.get('tutorial');
       
+      console.log('nextTick 실행됨:', { tutorialParam, step: step.value });
+      
       if (tutorialParam === 'true') {
+        console.log('캘린더 튜토리얼 시작 시도...');
         startCalendarTutorial();
       }
     });
+    
+    return true;
+  }
+  return false;
+};
+
+const goToPreviousStep = () => {
+  console.log('goToPreviousStep called', { currentStep: step.value });
+  
+  if (step.value === 2) {
+    // 현재 튜토리얼이 있다면 종료
+    if (driverObj.value) {
+      driverObj.value.destroy();
+      driverObj.value = null;
+    }
+    
+    // 단계 변경
+    step.value = 1;
     
     return true;
   }
@@ -609,13 +841,13 @@ onMounted(async () => {
     }, 800); // 로딩 시간을 좀 더 여유롭게 조정
   }
   
-  // 현재 날짜 가져오기
-  const today = new Date();
-  const currentDay = today.getDate();
-  const todayMonth = today.getMonth() + 1; // 0부터 시작하므로 +1
+  // 현재 날짜 가져오기 (동적)
+  const now = new Date();
+  const currentDay = now.getDate();
+  const todayMonth = now.getMonth() + 1; // 0부터 시작하므로 +1
   
   if (currentMonth.value === todayMonth) { // 현재 월인 경우
-    selectedDate.value = currentDay; // 실제 현재 날짜 자동 선택
+    selectedDate.value = currentDay; // 현재 날짜 자동 선택
     
     // 선택된 팀이 있는 경우에만 경기 로드
     if (selectedTeam.value) {
@@ -635,6 +867,58 @@ onMounted(async () => {
     }
   }
 });
+
+// 경기 없음 안내 모달 표시 함수
+function showNoGameModal(date) {
+  if (driverObj.value) {
+    driverObj.value.destroy();
+  }
+  
+  driverObj.value = driver({
+    showProgress: false,
+    overlayColor: 'rgba(0, 0, 0, 0.7)',
+    animate: 300,
+    allowClose: true,
+    doneBtnText: '확인',
+    nextBtnText: '확인',
+    prevBtnText: '', // 이전 버튼 텍스트 비우기
+    showButtons: ['close', 'next'], // next 버튼을 확인 버튼으로 사용
+    
+    onPopoverRender: (popover, { config, state }) => {
+      if (popover && typeof popover.querySelector === 'function') {
+        const popoverElement = popover.querySelector('.driver-popover');
+        if (popoverElement) {
+          popoverElement.classList.add('tutorial-popover', 'no-game-modal');
+        }
+      }
+    },
+    
+    steps: [
+      {
+        element: '.calendar-area',
+        popover: {
+          title: '날짜 선택',
+          description: `<span style="color: red; font-weight: bold;">${date}일에는 경기가 없습니다.<br>다른 날짜를 선택해주세요.</span>`,
+          side: 'right',
+          align: 'start',
+          onNext: () => {
+            // 모달 닫기 후 날짜 선택 튜토리얼 재시작
+            if (driverObj.value) {
+              driverObj.value.destroy();
+              driverObj.value = null;
+            }
+            setTimeout(() => {
+              startCalendarTutorial();
+            }, 100);
+            return false;
+          }
+        }
+      }
+    ]
+  });
+  
+  driverObj.value.drive();
+}
 
 async function selectDate(date) {
   // 과거 날짜는 선택할 수 없음
@@ -662,6 +946,9 @@ async function selectDate(date) {
       setTimeout(() => {
         if (data && data.length > 0) {
           startGameListTutorial();
+        } else {
+          // 경기가 없는 경우 경고 모달 표시
+          showNoGameModal(date);
         }
       }, 500);
     }
@@ -673,6 +960,19 @@ async function selectDate(date) {
 async function handleApplyClick(game) {
   selectedGame.value = game;
   console.log('응모 클릭됨')
+  
+  // 모든 튜토리얼 종료 및 이벤트 리스너 제거
+  if (driverObj.value) {
+    driverObj.value.destroy();
+    driverObj.value = null;
+  }
+  
+  // 날짜 클릭 이벤트 리스너 제거 (튜토리얼 방지)
+  const existingHandlers = document.querySelectorAll('*');
+  existingHandlers.forEach(element => {
+    element.removeEventListener('click', () => {});
+  });
+  
   try {
     const { data } = await http.post(`/games/${game.gameId}/applications`);
     console.log('응모 결과:', data);
@@ -710,8 +1010,11 @@ function formatGameDateTime(dateTimeStr) {
 /* Global tutorial styles */
 :global(.driver-popover.tutorial-popover) {
   border-radius: 10px;
-  max-width: 320px;
+  max-width: 220px;
+  width: 220px;
+  z-index: 10001;
 }
+
 
 :global(.driver-popover.tutorial-popover .driver-popover-title) {
   font-size: 18px;
@@ -745,6 +1048,95 @@ function formatGameDateTime(dateTimeStr) {
 
 :global(.driver-popover.tutorial-popover .driver-popover-footer button:hover) {
   background: #b71c1c;
+}
+
+/* calendar-logo 영역을 시각적으로 제외하는 스타일 */
+:global(.driver-highlighted[data-highlighted-element=".calendar-area"] .calendar-logo) {
+  position: relative;
+  z-index: 10002 !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  pointer-events: none;
+}
+
+/* driver.js 오버레이에서 calendar-logo 영역만 어둡게 처리 */
+:global(.driver-active .calendar-logo::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 10002;
+  pointer-events: none;
+}
+
+/* 각 튜토리얼 모달별 고유 스타일 */
+
+/* 날짜 선택 모달 */
+:global(.tutorial-calendar-modal) {
+  border: 2px solid #2196F3;
+  box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3);
+}
+
+:global(.tutorial-calendar-modal .driver-popover-title) {
+  color: #2196F3;
+  font-weight: bold;
+}
+
+:global(.tutorial-calendar-modal .driver-popover-done-btn) {
+  background: #2196F3;
+  color: white;
+}
+
+:global(.tutorial-calendar-modal .driver-popover-done-btn:hover) {
+  background: #1976D2;
+}
+
+/* 경기 목록 모달 */
+:global(.tutorial-game-list-modal) {
+  border: 2px solid #4CAF50;
+  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+}
+
+:global(.tutorial-game-list-modal .driver-popover-title) {
+  color: #4CAF50;
+  font-weight: bold;
+}
+
+:global(.tutorial-game-list-modal .driver-popover-done-btn),
+:global(.tutorial-game-list-modal .driver-popover-prev-btn) {
+  background: #4CAF50;
+  color: white;
+}
+
+:global(.tutorial-game-list-modal .driver-popover-done-btn:hover),
+:global(.tutorial-game-list-modal .driver-popover-prev-btn:hover) {
+  background: #388E3C;
+}
+
+/* 경기 없음 모달 */
+:global(.tutorial-no-game-modal) {
+  border: 2px solid #f44336;
+  box-shadow: 0 4px 20px rgba(244, 67, 54, 0.3);
+}
+
+:global(.tutorial-no-game-modal .driver-popover-title) {
+  color: #f44336;
+  font-weight: bold;
+}
+
+:global(.tutorial-no-game-modal .driver-popover-description) {
+  color: #d32f2f;
+}
+
+:global(.tutorial-no-game-modal .driver-popover-done-btn) {
+  background: #f44336;
+  color: white;
+}
+
+:global(.tutorial-no-game-modal .driver-popover-done-btn:hover) {
+  background: #d32f2f;
 }
 
 :global(.driver-highlighted-element) {
@@ -846,7 +1238,9 @@ function formatGameDateTime(dateTimeStr) {
   border-radius: 16px;
   opacity: 0.25;
   transition: opacity 0.3s;
-
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
 }
 
 .team-bg-image.active {
@@ -1101,7 +1495,7 @@ function formatGameDateTime(dateTimeStr) {
   display: block;
 }
 .info-area {
-  width: 340px;
+  width: 420px;
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -1154,13 +1548,17 @@ function formatGameDateTime(dateTimeStr) {
   font-weight: 700;
   color: var(--theme-primary, #e57373);
 }
-.game-desc {
+.game-datetime {
   font-size: 18px;
   margin-top: 10px;
   color: #888;
 }
+.game-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
 .apply-btn {
-  margin-top: 30px;
   padding: 7px 20px;
   background: var(--theme-gradient, #e57373);
   color: #fff;
@@ -1385,6 +1783,9 @@ function formatGameDateTime(dateTimeStr) {
   .team-bg-image {
     width: 100%;
     height: 100px;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
   }
   
   .team-list.team-list-row {
@@ -1622,6 +2023,9 @@ function formatGameDateTime(dateTimeStr) {
   
   .team-bg-image {
     height: 80px;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
   }
   
   .team-list.team-list-row {
