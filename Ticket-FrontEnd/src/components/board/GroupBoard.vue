@@ -76,7 +76,7 @@
         <!-- 카드 이미지 영역 -->
         <div class="card-image-section">
           <img 
-            :src="post.imageUrl || '/src/assets/images/default-group.jpg'" 
+            :src="post.imageUrl || '/assets/images/default-group.jpg'" 
             :alt="post.title"
             class="card-image"
             @error="handleImageError"
@@ -730,7 +730,7 @@ const formatDate = (dateString) => {
 
 // 이미지 에러 처리
 const handleImageError = (event) => {
-  event.target.src = '/src/assets/images/default-group.jpg';
+  event.target.src = '/assets/images/default-group.jpg';
 };
 
 // 이벤트 핸들러들
