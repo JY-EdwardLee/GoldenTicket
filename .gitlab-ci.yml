@@ -88,10 +88,9 @@ deploy:
       pip install --upgrade pip &&
       pip install -r Ticket-Chatbot/requirements.txt
       "
-      
+
     # FastAPI 실행 전 중복 종료
     - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "sudo lsof -t -i :8000 | xargs --no-run-if-empty kill -9 || true"
-
 
     # ✅ 파이썬 서버 실행 (추가됨)
     - echo "🚀 Starting FastAPI chatbot server..."
