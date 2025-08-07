@@ -73,7 +73,7 @@
           </div>
         </div>
         <div class="calendar-logo">
-          <img :src="`@/assets/logo/${user.myTeam}.png`" alt="landers logo" />
+          <img :src="`/logo/${user.myTeam}.png`" alt="landers logo" />
         </div>
       </div>
       <div class="info-area">
