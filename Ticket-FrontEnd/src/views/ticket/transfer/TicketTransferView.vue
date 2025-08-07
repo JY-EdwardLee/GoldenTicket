@@ -547,7 +547,7 @@ const getTicketStyle = (ticket) => {
   
   // 호버 상태일 때 로고 배경 추가
   if (hoveredTicket.value === ticket.ticketId && logoPath) {
-    style.backgroundImage = `url('/src/assets/logo/${logoPath}')`
+    style.backgroundImage = `url('/assets/logo/${logoPath}')`
     style.backgroundSize = 'contain'
     style.backgroundPosition = 'center'
     style.backgroundRepeat = 'no-repeat'
