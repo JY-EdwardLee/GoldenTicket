@@ -4,5 +4,4 @@ public interface NotificationService {
 
     void sendNotificationToUser(String userEmail, String message);
 
-    void sendDelayedNotification(String userEmail, String message, long delayMillis);
 }

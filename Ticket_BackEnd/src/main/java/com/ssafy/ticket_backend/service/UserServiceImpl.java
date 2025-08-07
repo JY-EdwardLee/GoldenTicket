@@ -188,10 +188,6 @@ public class UserServiceImpl implements UserService {
         String accessToken = jwtUtil.generateAccessToken(user.getEmail());
         String refreshToken = jwtUtil.generateRefreshToken(user.getEmail());
 
-        // ✅ 여기서 알림 전송
-        notificationService.sendDelayedNotification(user.getEmail(), "로그인 성공! 실시간 알림이 도착했습니다 🎉",
-            5000);
-
         oauthUserResponse = OAuthUserResponse.builder().isRegistered(true)
             .token(new JwtTokenResponse(accessToken, refreshToken)).build();
 
