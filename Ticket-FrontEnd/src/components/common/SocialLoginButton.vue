@@ -8,13 +8,13 @@
     <div class="social-icon">
       <img 
         v-if="provider === 'kakao'" 
-        src="@/assets/images/kakao_login_large_narrow.png" 
+        src="@@/assets/images/kakao_login_large_narrow.png" 
         alt="카카오 로그인"
         class="social-image"
       >
       <img 
         v-else-if="provider === 'naver'" 
-        src="@/assets/images/btnG_완성형.png" 
+        src="@@/assets/images/btnG_완성형.png" 
         alt="네이버 로그인"
         class="social-image"
       >
