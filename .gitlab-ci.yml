@@ -74,8 +74,8 @@ deploy:
     - scp -r -i ~/.ssh/id_rsa Ticket-Chatbot $EC2_USER@$EC2_HOST:/home/ubuntu/
 
     # ✅ 파이썬 챗봇 .env 업로드 (추가됨)
-    - echo "📄 Uploading .env file to EC2..."
-    - scp -i ~/.ssh/id_rsa Ticket-Chatbot/.env $EC2_USER@$EC2_HOST:/home/ubuntu/Ticket-Chatbot/.env
+    # - echo "📄 Uploading .env file to EC2..."
+    # - scp -i ~/.ssh/id_rsa Ticket-Chatbot/.env $EC2_USER@$EC2_HOST:/home/ubuntu/Ticket-Chatbot/.env
 
     # ✅ 파이썬 챗봇 설치 및 가상환경 구성 (추가됨)
     - echo "⚙️ Setting up Python chatbot on EC2..."
