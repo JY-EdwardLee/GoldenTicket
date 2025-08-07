@@ -11,6 +11,7 @@
       <li><a href="#" @click.prevent="goToTransfer">양도</a></li>
       <li><router-link to="/bulletin">게시판</router-link></li>
       <li><router-link to="/guide">이용가이드</router-link></li>
+      <li><a href="#" @click.prevent="openTutorial">튜토리얼</a></li>
     </ul>
     <div class="auth-links">
       <template v-if="isLoggedIn">
@@ -31,12 +32,16 @@ import { ref, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import LoginModal from "./LoginModal.vue";
 import { useAuthStore } from "@/stores/auth";
+import { useTutorial } from "@/views/tutorial/useTutorial";
 import axios from "axios";
 import { API_CONFIG } from "@/config/api.config";
 import { storeToRefs } from "pinia";
 // 스토어 및 라우터 초기화
 const authStore = useAuthStore();
 const router = useRouter();
+
+// 튜토리얼 composable 사용
+const { openTutorialModal } = useTutorial();
 
 // store의 isAuthenticated를 반응형 참조로 가져옴
 const { isAuthenticated } = storeToRefs(authStore);
@@ -92,6 +97,29 @@ const goToTransfer = () => {
     return;
   }
   router.push('/transfer');
+};
+
+// 튜토리얼 열기
+const openTutorial = () => {
+  // 로그인 상태 확인
+  if (!isAuthenticated.value) {
+    console.log('비로그인 상태에서 튜토리얼 시도 - 로그인 모달 표시');
+    isLoginModalVisible.value = true;
+    return;
+  }
+  
+  // 홈페이지가 아닌 경우 홈페이지로 이동 후 튜토리얼 실행
+  if (router.currentRoute.value.path !== '/') {
+    router.push('/').then(() => {
+      // 페이지 이동 후 약간의 지연을 두고 튜토리얼 모달 열기
+      setTimeout(() => {
+        openTutorialModal();
+      }, 300);
+    });
+  } else {
+    // 이미 홈페이지인 경우 바로 튜토리얼 모달 열기
+    openTutorialModal();
+  }
 };
 
 // In NavBar.vue
