@@ -88,6 +88,10 @@ deploy:
       pip install --upgrade pip &&
       pip install -r Ticket-Chatbot/requirements.txt
       "
+      
+    # FastAPI 실행 전 중복 종료
+    - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "sudo lsof -t -i :8000 | xargs --no-run-if-empty kill -9 || true"
+
 
     # ✅ 파이썬 서버 실행 (추가됨)
     - echo "🚀 Starting FastAPI chatbot server..."
@@ -102,6 +106,9 @@ deploy:
       sleep 3 &&
       echo 'FastAPI server started with all environment variables'
       "
+
+    # FastAPI 실행 후 확인
+    - ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "curl -s http://localhost:8000/health || lsof -i :8000"
 
     # 프론트엔드 배포
     - scp -r -i ~/.ssh/id_rsa Ticket-FrontEnd/dist/* $EC2_USER@$EC2_HOST:/var/www/html/ # 👈 추가
