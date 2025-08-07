@@ -77,6 +77,7 @@ public class UserServiceImpl implements UserService {
     @Value("${BE_BASE_URL}")
     private String BE_BASE_URL;
 
+
     /**
      * 이메일로 사용자 정보 조회
      *

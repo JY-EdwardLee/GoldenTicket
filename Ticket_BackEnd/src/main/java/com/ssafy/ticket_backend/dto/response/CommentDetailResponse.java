@@ -17,4 +17,6 @@ public class CommentDetailResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String nickName;
+    // 댓글 작성자 이미지 추가
+    private String commentUserUrl;
 }
