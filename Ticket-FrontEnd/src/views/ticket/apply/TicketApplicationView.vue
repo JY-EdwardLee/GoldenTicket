@@ -846,7 +846,9 @@ function formatGameDateTime(dateTimeStr) {
   border-radius: 16px;
   opacity: 0.25;
   transition: opacity 0.3s;
-
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: contain !important;
 }
 
 .team-bg-image.active {
@@ -1385,6 +1387,9 @@ function formatGameDateTime(dateTimeStr) {
   .team-bg-image {
     width: 100%;
     height: 100px;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
   }
   
   .team-list.team-list-row {
@@ -1622,6 +1627,9 @@ function formatGameDateTime(dateTimeStr) {
   
   .team-bg-image {
     height: 80px;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
   }
   
   .team-list.team-list-row {
