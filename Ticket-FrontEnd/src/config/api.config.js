@@ -8,9 +8,9 @@ import axios from "axios";
 axios.defaults.baseURL = API_BASE_URL;
 
 const MAIN_PAGE = {
-  USER: `${API_BASE_URL}/rank/user`,
-  TEAM: `${API_BASE_URL}/rank/team`,
-  CHAT: `${API_BASE_URL}/chat`,
+  USER: `/rank/user`,
+  TEAM: `/rank/team`,
+  CHAT: `/chat`,
 };
 
 // 인증 관련 엔드포인트
