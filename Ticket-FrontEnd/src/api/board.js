@@ -176,6 +176,44 @@ export const boardAPI = {
       
       throw apiErrorHandler(error);
     }
+  },
+
+  // 단체관람 목록 조회
+  getGroupList: async (team = 'all') => {
+    try {
+      if (team === 'all') {
+        const allTeamKeys = Object.values(TEAM_MAPPING);
+        const requests = allTeamKeys.map((apiName) => 
+          publicApiClient.get(`/group/${apiName}`).catch((err) => ({ data: [] }))
+        );
+        const results = await Promise.all(requests);
+
+        console.log(results);
+
+        // 각 응답에 team 표시를 붙이려면, 재매핑 필요
+        const merged = [];
+        results.forEach((res, idx) => {
+          const apiName = allTeamKeys[idx];
+          const displayName = Object.keys(TEAM_MAPPING).find(
+            (k) => TEAM_MAPPING[k] === apiName
+          );
+          const arr = Array.isArray(res.data) ? res.data : [];
+          merged.push(
+            ...arr.map((g) => ({ ...g, team: displayName }))
+          );
+        });
+        return merged;
+      } else {
+        const apiTeamName = TEAM_MAPPING[team];
+        if (!apiTeamName) throw new Error(`알 수 없는 팀: ${team}`);
+        const response = await publicApiClient.get(`/group/${apiTeamName}`);
+        const arr = Array.isArray(response.data) ? response.data : [];
+        return arr.map((g) => ({ ...g, team }));
+      }
+    } catch (error) {
+      console.error('단체관람 목록 조회 실패:', error);
+      throw apiErrorHandler(error);
+    }
   }
 };
 
@@ -205,6 +243,118 @@ export const SEARCH_TYPE_NAMES = {
   [SEARCH_TYPES.TITLE]: '제목',
   [SEARCH_TYPES.CONTENT]: '내용',
   [SEARCH_TYPES.WRITER]: '작성자'
+};
+
+// 팀 이름 매핑 (UI 코드 -> API 코드)
+export const TEAM_MAPPING = {
+  SSG: 'SSG_LANDERS',
+  KIA: 'KIA_TIGERS',
+  LG: 'LG_TWINS',
+  KT: 'KT_WIZ',
+  KIWOOM: 'KIWOOM_HEROES',
+  SAMSUNG: 'SAMSUNG_LIONS',
+  LOTTE: 'LOTTE_GIANTS',
+  DOOSAN: 'DOOSAN_BEARS',
+  HANHWA: 'HANHWA_EAGLES',
+  NC: 'NC_DINOS'
+};
+
+// 홈팀 -> 홈구장 코드 매핑
+const TEAM_HOME_STADIUM_CODE = {
+  SSG_LANDERS: 'INCHON',
+  KIA_TIGERS: 'GWANGJU',
+  LG_TWINS: 'JAMSIL',
+  KT_WIZ: 'SUWON',
+  KIWOOM_HEROES: 'GOCHUK',
+  SAMSUNG_LIONS: 'DAEGU',
+  LOTTE_GIANTS: 'SAJIK',
+  DOOSAN_BEARS: 'JAMSIL',
+  HANHWA_EAGLES: 'DAEJEON',
+  NC_DINOS: 'CHANGWON'
+};
+
+// API 응답을 카드에서 사용하는 형태로 변환
+export const transformGroupData = (apiData) => {
+  const safeArray = Array.isArray(apiData) ? apiData : [];
+  return safeArray.map((group) => {
+    const game = group.gameResponse || {};
+    const dateStr = game.date || '';
+    const [d, t] = dateStr.split('T');
+
+    // 경기장 코드: 응답 stadium 우선, 없으면 홈팀 고정 홈구장 코드 사용
+    const stadiumCode = game.stadium || TEAM_HOME_STADIUM_CODE[game.home] || null;
+    const stadiumName = getStadiumName(stadiumCode);
+
+    return {
+      postId: group.groupId,
+      title: `${game.home || '홈팀'} vs ${game.away || '원정팀'}`,
+      gameDate: d || '',
+      gameTime: (t || '').substring(0,5),
+      location: stadiumName,
+      organizer: group.organizer || '단체관람 모집자',
+      currentParticipants: group.applicantsCount || 0,
+      maxParticipants: group.maxParticipants || 20,
+      description: group.description || `${game.home || '홈팀'}와 ${game.away || '원정팀'}의 경기를 함께 관람하실 분들을 모집합니다.`,
+      meetingPlace: group.meetingPlace || `${stadiumName} 정문`,
+      meetingTime: (t || '').substring(0,5),
+      hashtags: group.hashtags || ['단체관람', '함께관람', '응원'],
+      status: getStatusByParticipants(group.applicantsCount || 0, group.maxParticipants || 20),
+      conditions: group.conditions || '매너 좋은 분들만, 끝까지 응원 가능한 분',
+      createdAt: (group.createdAt || dateStr || new Date().toISOString()).split('T')[0],
+      imageUrl: getTeamImageUrl(game.home || game.away),
+      team: group.team || inferDisplayTeamFromApiTeam(game.home || game.away),
+      groupId: group.groupId,
+      organizerId: group.organizerId,
+      isApplied: group.isApplied || false
+    };
+  });
+};
+
+// 구장 이름 매핑
+const getStadiumName = (stadiumCode) => {
+  const stadiums = {
+    SAJIK: '부산 사직 야구장',
+    JAMSIL: '잠실 야구장',
+    DAEGU: '대구 삼성 라이온즈 파크',
+    SUWON: '수원 KT 위즈 파크',
+    GOCHUK: '고척 스카이돔',
+    MUNHAK: '인천 SSG 랜더스 필드',
+    GWANGJU: '광주 기아 챔피언스 필드',
+    DAEJEON: '대전 한화생명 이글스파크',
+    CHANGWON: '창원 NC 파크'
+  };
+  return stadiums[stadiumCode] || '야구장';
+};
+
+// 팀별 이미지 URL (임시 플레이스홀더)
+const getTeamImageUrl = (teamName) => {
+  const map = {
+    SSG_LANDERS: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&h=320&fit=crop',
+    KIA_TIGERS: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=640&h=320&fit=crop',
+    LG_TWINS: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&h=320&fit=crop',
+    KT_WIZ: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=640&h=320&fit=crop',
+    KIWOOM_HEROES: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&h=320&fit=crop',
+    SAMSUNG_LIONS: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=640&h=320&fit=crop',
+    LOTTE_GIANTS: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&h=320&fit=crop',
+    DOOSAN_BEARS: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=640&h=320&fit=crop',
+    HANHWA_EAGLES: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&h=320&fit=crop',
+    NC_DINOS: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=640&h=320&fit=crop'
+  };
+  return map[teamName] || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&h=320&fit=crop';
+};
+
+// API 팀코드에서 화면 팀코드 추론
+const inferDisplayTeamFromApiTeam = (apiTeam) => {
+  const entry = Object.entries(TEAM_MAPPING).find(([, v]) => v === apiTeam);
+  return entry ? entry[0] : 'SSG';
+};
+
+// 참가자 수에 따른 상태 결정
+const getStatusByParticipants = (currentParticipants, maxParticipants) => {
+  const rate = maxParticipants ? (currentParticipants / maxParticipants) * 100 : 0;
+  if (rate >= 100) return 'completed';
+  if (rate >= 75) return 'closing';
+  return 'recruiting';
 };
 
 // 게시글 데이터 유효성 검사

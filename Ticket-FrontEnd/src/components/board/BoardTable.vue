@@ -1,5 +1,6 @@
 <template>
-  <table class="board-table">
+  <!-- Desktop Table View -->
+  <table class="board-table desktop-table">
     <thead>
       <tr>
         <th>번호</th>
@@ -24,6 +25,39 @@
       </tr>
     </tbody>
   </table>
+
+  <!-- Mobile Card View -->
+  <div class="mobile-board-list">
+    <div 
+      v-for="(post, index) in posts" 
+      :key="post.postId" 
+      class="mobile-board-card"
+      @click="handleRowClick(post)"
+    >
+      <div class="card-content">
+        <div class="card-left">
+          <div class="card-title">
+            <span v-if="post.isHot" class="hot-indicator">🔥</span>
+            <span v-if="post.category" class="category-tag">[{{ post.category }}]</span>
+            {{ post.title }}
+          </div>
+          <div class="card-meta">
+            <span class="author">{{ post.nickName || '알 수 없음' }}</span>
+            <span class="separator">•</span>
+            <span class="date">{{ formatMobileDate(post.createdAt) }}</span>
+            <span class="separator">•</span>
+            <span class="views">조회 {{ post.viewCount?.toLocaleString() || 0 }}</span>
+          </div>
+        </div>
+        <div class="card-right">
+          <div class="comment-count">
+            <span class="comment-number">{{ post.commentCount || 0 }}</span>
+            <span class="comment-text">댓글</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -63,7 +97,7 @@ const getDisplayNumber = (index) => {
   return props.totalPosts - currentPosition;
 };
 
-// 날짜 포맷팅 함수
+// 날짜 포맷팅 함수 (데스크톱용)
 const formatDate = (dateString) => {
   if (!dateString) return '';
   
@@ -73,6 +107,38 @@ const formatDate = (dateString) => {
   const day = String(date.getDate()).padStart(2, '0');
   
   return `${year}.${month}.${day}`;
+};
+
+// 날짜 포맷팅 함수 (모바일용)
+const formatMobileDate = (dateString) => {
+  if (!dateString) return '';
+  
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffTime = now - date;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  // 오늘인 경우 시간만 표시
+  if (diffDays === 0) {
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+  
+  // 어제인 경우 "어제" 표시
+  if (diffDays === 1) {
+    return '어제';
+  }
+  
+  // 7일 이내인 경우 "N일 전" 표시
+  if (diffDays < 7) {
+    return `${diffDays}일 전`;
+  }
+  
+  // 그 외에는 날짜만 표시
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${month}.${day}`;
 };
 
 const handleRowClick = (post) => {
@@ -86,11 +152,16 @@ const handleRowClick = (post) => {
 </script>
 
 <style scoped>
+/* Desktop Table Styles */
 .board-table {
   width: 100%;
   border-collapse: collapse;
   margin: 0 auto;
   background: #fff;
+}
+
+.desktop-table {
+  display: table;
 }
 
 .board-table th, 
@@ -143,102 +214,145 @@ const handleRowClick = (post) => {
   font-size: 14px;
 }
 
+/* Mobile Card Styles */
+.mobile-board-list {
+  display: none;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
-  .board-table {
-    font-size: 14px;
-  }
-  
-  .board-table th, 
-  .board-table td {
-    padding: 10px 4px;
-    font-size: 13px;
-  }
-  
-  .board-table th:nth-child(4),
-  .board-table th:nth-child(5),
-  .board-table th:nth-child(6),
-  .board-table td:nth-child(4),
-  .board-table td:nth-child(5),
-  .board-table td:nth-child(6) {
+  .desktop-table {
     display: none;
   }
   
-  .title-cell {
-    padding-left: 8px;
-    max-width: 200px;
+  .mobile-board-list {
+    display: block;
+  }
+  
+  .mobile-board-card {
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .mobile-board-card:hover {
+    background-color: #f9fafb;
+  }
+  
+  .mobile-board-card:last-child {
+    border-bottom: none;
+  }
+  
+  .card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .card-left {
+    flex: 1;
+    min-width: 0;
+  }
+  
+  .card-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #222;
+    line-height: 1.4;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
   
-  .author-cell {
-    max-width: 80px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .hot-indicator {
+    color: #e11d48;
+    margin-right: 4px;
   }
   
-  .like-cell {
-    gap: 2px;
+  .category-tag {
+    color: #666;
+    margin-right: 4px;
   }
   
-  .like-icon {
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #666;
+  }
+  
+  .author {
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .separator {
+    color: #ccc;
+  }
+  
+  .views {
+    color: #999;
+  }
+  
+  .card-right {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  
+  .comment-count {
+    background: #f0f0f0;
+    border-radius: 12px;
+    padding: 4px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+  }
+  
+  .comment-number {
     font-size: 12px;
+    font-weight: 600;
+    color: #666;
+  }
+  
+  .comment-text {
+    font-size: 10px;
+    color: #999;
   }
 }
 
 @media (max-width: 480px) {
-  .board-table {
+  .mobile-board-card {
+    padding: 12px;
+  }
+  
+  .card-title {
+    font-size: 14px;
+  }
+  
+  .card-meta {
     font-size: 12px;
   }
   
-  .board-table th, 
-  .board-table td {
-    padding: 8px 2px;
-    font-size: 12px;
-  }
-  
-  .board-table th:nth-child(3),
-  .board-table td:nth-child(3) {
-    display: none;
-  }
-  
-  .title-cell {
-    padding-left: 4px;
-    max-width: 150px;
-  }
-  
-  .author-cell {
-    max-width: 60px;
-  }
-  
-  .like-cell {
-    gap: 1px;
-  }
-  
-  .like-icon {
-    font-size: 11px;
-  }
-}
 
-@media (max-width: 360px) {
-  .board-table {
+  
+  .comment-count {
+    padding: 3px 6px;
+  }
+  
+  .comment-number {
     font-size: 11px;
   }
   
-  .board-table th, 
-  .board-table td {
-    padding: 6px 1px;
-    font-size: 11px;
-  }
-  
-  .title-cell {
-    max-width: 120px;
-  }
-  
-  .author-cell {
-    max-width: 50px;
+  .comment-text {
+    font-size: 9px;
   }
 }
 </style> 

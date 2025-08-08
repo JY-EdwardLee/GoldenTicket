@@ -202,6 +202,7 @@
 import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { boardAPI, transformGroupData } from '@/api/board';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -211,432 +212,8 @@ const isLoading = ref(false);
 const error = ref('');
 const selectedTeam = ref('all');
 
-// 더미데이터
-const dummyPosts = [
-  // SSG 랜더스 경기들
-  {
-    postId: 1,
-    title: "SSG 랜더스 vs KIA 타이거즈",
-    gameDate: "2025-08-15",
-    gameTime: "18:30",
-    location: "인천 SSG 랜더스 필드",
-    organizer: "SSG팬클럽회장",
-    currentParticipants: 12,
-    maxParticipants: 20,
-    description: "시즌 마지막 KIA전! 함께 응원하며 즐거운 시간 보내요. 응원용품과 간식 준비해드립니다.",
-    meetingPlace: "인천 SSG 랜더스 필드 정문",
-    meetingTime: "17:00",
-    hashtags: ["정기모임", "응원용품 제공", "사진촬영"],
-    status: "recruiting",
-    conditions: "매너 좋은 분들만, 끝까지 응원 가능한 분",
-    createdAt: "2025-08-10",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop",
-    team: "SSG"
-  },
-  {
-    postId: 2,
-    title: "SSG 랜더스 vs LG 트윈스",
-    gameDate: "2025-08-25",
-    gameTime: "14:00",
-    location: "인천 SSG 랜더스 필드",
-    organizer: "& NO_LIMITS_CREW",
-    currentParticipants: 18,
-    maxParticipants: 20,
-    description: "오후 경기 단체 관람! 점심도 함께 하고 응원용품도 맞춰서 준비해요.",
-    meetingPlace: "인천 SSG 랜더스 필드 메인 엔트런스",
-    meetingTime: "13:00",
-    hashtags: ["오후경기", "점심 포함", "단체 응원"],
-    status: "closing",
-    conditions: "정시 참석 필수, 단체 응원 참여 의무",
-    createdAt: "2025-08-18",
-    imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=200&fit=crop",
-    team: "SSG"
-  },
-  {
-    postId: 3,
-    title: "SSG 랜더스 vs 한화 이글스",
-    gameDate: "2025-09-01",
-    gameTime: "18:30",
-    location: "인천 SSG 랜더스 필드",
-    organizer: "랜더스가족",
-    currentParticipants: 20,
-    maxParticipants: 20,
-    description: "9월 첫 경기! 가족 단위 참가 환영합니다. 아이들을 위한 간식도 준비되어 있어요.",
-    meetingPlace: "인천 SSG 랜더스 필드 정문",
-    meetingTime: "17:30",
-    hashtags: ["가족 환영", "아이 간식", "9월 개막"],
-    status: "completed",
-    conditions: "가족 단위 우선, 매너 필수",
-    createdAt: "2025-08-22",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop",
-    team: "SSG"
-  },
-  
-  // KIA 타이거즈 경기들
-  {
-    postId: 4,
-    title: "KIA 타이거즈 vs SSG 랜더스",
-    gameDate: "2025-08-20",
-    gameTime: "18:30",
-    location: "광주 기아 챔피언스 필드",
-    organizer: "KIA 팬클럽",
-    currentParticipants: 15,
-    maxParticipants: 25,
-    description: "홈 경기 단체 관람! KIA 팬들과 함께하는 특별한 경기 관람.",
-    meetingPlace: "광주 기아 챔피언스 필드 정문",
-    meetingTime: "17:00",
-    hashtags: ["홈경기", "KIA팬", "단체관람"],
-    status: "recruiting",
-    conditions: "KIA 팬 우선, 매너 필수",
-    createdAt: "2025-08-12",
-    imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=200&fit=crop",
-    team: "KIA"
-  },
-  {
-    postId: 5,
-    title: "KIA 타이거즈 vs LG 트윈스",
-    gameDate: "2025-08-28",
-    gameTime: "14:00",
-    location: "광주 기아 챔피언스 필드",
-    organizer: "타이거즈 응원단",
-    currentParticipants: 22,
-    maxParticipants: 30,
-    description: "오후 경기 단체 관람! 응원용품과 간식이 준비되어 있습니다.",
-    meetingPlace: "광주 기아 챔피언스 필드 동쪽 게이트",
-    meetingTime: "13:00",
-    hashtags: ["오후경기", "응원용품", "간식제공"],
-    status: "closing",
-    conditions: "정시 참석 필수",
-    createdAt: "2025-08-20",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop",
-    team: "KIA"
-  },
-  
-  // LG 트윈스 경기들
-  {
-    postId: 6,
-    title: "LG 트윈스 vs SSG 랜더스",
-    gameDate: "2025-08-22",
-    gameTime: "18:30",
-    location: "잠실 야구장",
-    organizer: "LG 팬클럽",
-    currentParticipants: 18,
-    maxParticipants: 25,
-    description: "잠실 홈 경기! LG 팬들과 함께하는 즐거운 관람 시간.",
-    meetingPlace: "잠실 야구장 정문",
-    meetingTime: "17:30",
-    hashtags: ["잠실홈", "LG팬", "즐거운시간"],
-    status: "recruiting",
-    conditions: "LG 팬 우선",
-    createdAt: "2025-08-15",
-    imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=200&fit=crop",
-    team: "LG"
-  },
-  {
-    postId: 7,
-    title: "LG 트윈스 vs 두산 베어스",
-    gameDate: "2025-09-05",
-    gameTime: "14:00",
-    location: "잠실 야구장",
-    organizer: "트윈스 응원단",
-    currentParticipants: 25,
-    maxParticipants: 30,
-    description: "두산과의 라이벌전! 특별 응원 이벤트와 함께하는 경기.",
-    meetingPlace: "잠실 야구장 서쪽 게이트",
-    meetingTime: "13:00",
-    hashtags: ["라이벌전", "특별이벤트", "응원단"],
-    status: "completed",
-    conditions: "응원단 활동 참여 가능한 분",
-    createdAt: "2025-08-25",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop",
-    team: "LG"
-  },
-  
-  // KT 위즈 경기들
-  {
-    postId: 8,
-    title: "KT 위즈 vs 삼성 라이온즈",
-    gameDate: "2025-08-18",
-    gameTime: "18:30",
-    location: "수원 KT 위즈 파크",
-    organizer: "KT 팬클럽",
-    currentParticipants: 10,
-    maxParticipants: 20,
-    description: "수원 홈 경기! KT 팬들과 함께하는 단체 관람.",
-    meetingPlace: "수원 KT 위즈 파크 정문",
-    meetingTime: "17:00",
-    hashtags: ["수원홈", "KT팬", "단체관람"],
-    status: "recruiting",
-    conditions: "KT 팬 우선",
-    createdAt: "2025-08-10",
-    imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=200&fit=crop",
-    team: "KT"
-  },
-  {
-    postId: 9,
-    title: "KT 위즈 vs NC 다이노스",
-    gameDate: "2025-08-30",
-    gameTime: "14:00",
-    location: "수원 KT 위즈 파크",
-    organizer: "위즈 응원단",
-    currentParticipants: 16,
-    maxParticipants: 25,
-    description: "오후 경기 단체 관람! 응원용품과 간식이 준비되어 있습니다.",
-    meetingPlace: "수원 KT 위즈 파크 동쪽 게이트",
-    meetingTime: "13:00",
-    hashtags: ["오후경기", "응원용품", "간식제공"],
-    status: "closing",
-    conditions: "정시 참석 필수",
-    createdAt: "2025-08-22",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop",
-    team: "KT"
-  },
-  
-  // 키움 히어로즈 경기들
-  {
-    postId: 10,
-    title: "키움 히어로즈 vs 한화 이글스",
-    gameDate: "2025-08-16",
-    gameTime: "18:30",
-    location: "고척 스카이돔",
-    organizer: "히어로즈 팬클럽",
-    currentParticipants: 12,
-    maxParticipants: 20,
-    description: "고척 홈 경기! 히어로즈 팬들과 함께하는 즐거운 관람.",
-    meetingPlace: "고척 스카이돔 정문",
-    meetingTime: "17:00",
-    hashtags: ["고척홈", "히어로즈팬", "즐거운시간"],
-    status: "recruiting",
-    conditions: "히어로즈 팬 우선",
-    createdAt: "2025-08-08",
-    imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=200&fit=crop",
-    team: "KIWOOM"
-  },
-  {
-    postId: 11,
-    title: "키움 히어로즈 vs 롯데 자이언츠",
-    gameDate: "2025-08-27",
-    gameTime: "14:00",
-    location: "고척 스카이돔",
-    organizer: "히어로즈 응원단",
-    currentParticipants: 20,
-    maxParticipants: 25,
-    description: "오후 경기 단체 관람! 특별 응원 이벤트가 준비되어 있습니다.",
-    meetingPlace: "고척 스카이돔 서쪽 게이트",
-    meetingTime: "13:00",
-    hashtags: ["오후경기", "특별이벤트", "응원단"],
-    status: "completed",
-    conditions: "응원단 활동 참여 가능한 분",
-    createdAt: "2025-08-18",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop",
-    team: "KIWOOM"
-  },
-  
-  // 삼성 라이온즈 경기들
-  {
-    postId: 12,
-    title: "삼성 라이온즈 vs 두산 베어스",
-    gameDate: "2025-08-19",
-    gameTime: "18:30",
-    location: "대구 삼성 라이온즈 파크",
-    organizer: "삼성 팬클럽",
-    currentParticipants: 18,
-    maxParticipants: 25,
-    description: "대구 홈 경기! 삼성 팬들과 함께하는 단체 관람.",
-    meetingPlace: "대구 삼성 라이온즈 파크 정문",
-    meetingTime: "17:00",
-    hashtags: ["대구홈", "삼성팬", "단체관람"],
-    status: "recruiting",
-    conditions: "삼성 팬 우선",
-    createdAt: "2025-08-10",
-    imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=200&fit=crop",
-    team: "SAMSUNG"
-  },
-  {
-    postId: 13,
-    title: "삼성 라이온즈 vs NC 다이노스",
-    gameDate: "2025-08-29",
-    gameTime: "14:00",
-    location: "대구 삼성 라이온즈 파크",
-    organizer: "라이온즈 응원단",
-    currentParticipants: 22,
-    maxParticipants: 30,
-    description: "오후 경기 단체 관람! 응원용품과 간식이 준비되어 있습니다.",
-    meetingPlace: "대구 삼성 라이온즈 파크 동쪽 게이트",
-    meetingTime: "13:00",
-    hashtags: ["오후경기", "응원용품", "간식제공"],
-    status: "closing",
-    conditions: "정시 참석 필수",
-    createdAt: "2025-08-20",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop",
-    team: "SAMSUNG"
-  },
-  
-  // 롯데 자이언츠 경기들
-  {
-    postId: 14,
-    title: "롯데 자이언츠 vs 한화 이글스",
-    gameDate: "2025-08-17",
-    gameTime: "18:30",
-    location: "부산 사직 야구장",
-    organizer: "롯데 팬클럽",
-    currentParticipants: 15,
-    maxParticipants: 25,
-    description: "부산 홈 경기! 롯데 팬들과 함께하는 즐거운 관람.",
-    meetingPlace: "부산 사직 야구장 정문",
-    meetingTime: "17:00",
-    hashtags: ["부산홈", "롯데팬", "즐거운시간"],
-    status: "recruiting",
-    conditions: "롯데 팬 우선",
-    createdAt: "2025-08-09",
-    imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=200&fit=crop",
-    team: "LOTTE"
-  },
-  {
-    postId: 15,
-    title: "롯데 자이언츠 vs 두산 베어스",
-    gameDate: "2025-08-26",
-    gameTime: "14:00",
-    location: "부산 사직 야구장",
-    organizer: "자이언츠 응원단",
-    currentParticipants: 20,
-    maxParticipants: 30,
-    description: "오후 경기 단체 관람! 특별 응원 이벤트가 준비되어 있습니다.",
-    meetingPlace: "부산 사직 야구장 서쪽 게이트",
-    meetingTime: "13:00",
-    hashtags: ["오후경기", "특별이벤트", "응원단"],
-    status: "completed",
-    conditions: "응원단 활동 참여 가능한 분",
-    createdAt: "2025-08-18",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop",
-    team: "LOTTE"
-  },
-  
-  // 두산 베어스 경기들
-  {
-    postId: 16,
-    title: "두산 베어스 vs SSG 랜더스",
-    gameDate: "2025-08-21",
-    gameTime: "18:30",
-    location: "잠실 야구장",
-    organizer: "두산 팬클럽",
-    currentParticipants: 16,
-    maxParticipants: 25,
-    description: "잠실 홈 경기! 두산 팬들과 함께하는 단체 관람.",
-    meetingPlace: "잠실 야구장 정문",
-    meetingTime: "17:00",
-    hashtags: ["잠실홈", "두산팬", "단체관람"],
-    status: "recruiting",
-    conditions: "두산 팬 우선",
-    createdAt: "2025-08-12",
-    imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=200&fit=crop",
-    team: "DOOSAN"
-  },
-  {
-    postId: 17,
-    title: "두산 베어스 vs 한화 이글스",
-    gameDate: "2025-08-31",
-    gameTime: "14:00",
-    location: "잠실 야구장",
-    organizer: "베어스 응원단",
-    currentParticipants: 18,
-    maxParticipants: 25,
-    description: "오후 경기 단체 관람! 응원용품과 간식이 준비되어 있습니다.",
-    meetingPlace: "잠실 야구장 동쪽 게이트",
-    meetingTime: "13:00",
-    hashtags: ["오후경기", "응원용품", "간식제공"],
-    status: "closing",
-    conditions: "정시 참석 필수",
-    createdAt: "2025-08-22",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop",
-    team: "DOOSAN"
-  },
-  
-  // 한화 이글스 경기들
-  {
-    postId: 18,
-    title: "한화 이글스 vs KIA 타이거즈",
-    gameDate: "2025-08-23",
-    gameTime: "18:30",
-    location: "대전 한화생명 이글스파크",
-    organizer: "한화 팬클럽",
-    currentParticipants: 14,
-    maxParticipants: 20,
-    description: "대전 홈 경기! 한화 팬들과 함께하는 즐거운 관람.",
-    meetingPlace: "대전 한화생명 이글스파크 정문",
-    meetingTime: "17:00",
-    hashtags: ["대전홈", "한화팬", "즐거운시간"],
-    status: "recruiting",
-    conditions: "한화 팬 우선",
-    createdAt: "2025-08-14",
-    imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=200&fit=crop",
-    team: "HANWHA"
-  },
-  {
-    postId: 19,
-    title: "한화 이글스 vs NC 다이노스",
-    gameDate: "2025-09-02",
-    gameTime: "14:00",
-    location: "대전 한화생명 이글스파크",
-    organizer: "이글스 응원단",
-    currentParticipants: 19,
-    maxParticipants: 25,
-    description: "오후 경기 단체 관람! 특별 응원 이벤트가 준비되어 있습니다.",
-    meetingPlace: "대전 한화생명 이글스파크 서쪽 게이트",
-    meetingTime: "13:00",
-    hashtags: ["오후경기", "특별이벤트", "응원단"],
-    status: "completed",
-    conditions: "응원단 활동 참여 가능한 분",
-    createdAt: "2025-08-24",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop",
-    team: "HANWHA"
-  },
-  
-  // NC 다이노스 경기들
-  {
-    postId: 20,
-    title: "NC 다이노스 vs KT 위즈",
-    gameDate: "2025-08-24",
-    gameTime: "18:30",
-    location: "창원 NC 파크",
-    organizer: "NC 팬클럽",
-    currentParticipants: 17,
-    maxParticipants: 25,
-    description: "창원 홈 경기! NC 팬들과 함께하는 단체 관람.",
-    meetingPlace: "창원 NC 파크 정문",
-    meetingTime: "17:00",
-    hashtags: ["창원홈", "NC팬", "단체관람"],
-    status: "recruiting",
-    conditions: "NC 팬 우선",
-    createdAt: "2025-08-15",
-    imageUrl: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=200&fit=crop",
-    team: "NC"
-  },
-  {
-    postId: 21,
-    title: "NC 다이노스 vs 삼성 라이온즈",
-    gameDate: "2025-09-03",
-    gameTime: "14:00",
-    location: "창원 NC 파크",
-    organizer: "다이노스 응원단",
-    currentParticipants: 21,
-    maxParticipants: 30,
-    description: "오후 경기 단체 관람! 응원용품과 간식이 준비되어 있습니다.",
-    meetingPlace: "창원 NC 파크 동쪽 게이트",
-    meetingTime: "13:00",
-    hashtags: ["오후경기", "응원용품", "간식제공"],
-    status: "closing",
-    conditions: "정시 참석 필수",
-    createdAt: "2025-08-25",
-    imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=200&fit=crop",
-    team: "NC"
-  }
-];
-
-const allPosts = ref(dummyPosts);
+const allPosts = ref([]);
 const displayedPosts = ref([]);
-
-
 
 // 선택된 팀의 제목
 const selectedTeamTitle = computed(() => {
@@ -657,34 +234,34 @@ const selectedTeamTitle = computed(() => {
 });
 
 // 총 페이지 수
-const totalPages = computed(() => Math.ceil(filteredPosts.value.length / itemsPerPage));
-
-// 필터링된 게시글
 const filteredPosts = computed(() => {
   let filtered = [...allPosts.value];
-  
-  // 팀별 필터링
   if (selectedTeam.value !== 'all') {
     filtered = filtered.filter(post => post.team === selectedTeam.value);
   }
-  
-  // 기본 정렬 (최신순)
   filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  
   return filtered;
 });
 
-// 게시글 목록 로드 (더미데이터 사용)
-const loadPosts = () => {
+const totalPages = computed(() => Math.ceil(filteredPosts.value.length / itemsPerPage));
+
+// 게시글 목록 로드 (API 사용)
+const loadPosts = async () => {
   isLoading.value = true;
   error.value = '';
-  
-  // 더미데이터 사용
-  setTimeout(() => {
-    allPosts.value = dummyPosts;
-      updateDisplayedPosts();
+  try {
+    const raw = await boardAPI.getGroupList(selectedTeam.value);
+    const transformed = transformGroupData(raw);
+    allPosts.value = transformed;
+    updateDisplayedPosts();
+  } catch (err) {
+    console.error('단체관람 목록 로드 실패:', err);
+    error.value = '데이터를 불러오는데 실패했습니다. 다시 시도해주세요.';
+    allPosts.value = [];
+    updateDisplayedPosts();
+  } finally {
     isLoading.value = false;
-  }, 500); // 로딩 효과를 위한 지연
+  }
 };
 
 // 현재 페이지의 게시글만 표시
@@ -775,13 +352,19 @@ const watchFilterAndSort = () => {
   updateDisplayedPosts();
 };
 
+// 팀 선택 변경 감지 시 API 재호출
+const onTeamChange = async () => {
+  currentPage.value = 1;
+  await loadPosts();
+};
+
 // 컴포넌트 마운트
-onMounted(() => {
-  loadPosts();
+onMounted(async () => {
+  await loadPosts();
 });
 
 // 팀 선택 변경 감지
-watch(selectedTeam, watchFilterAndSort);
+watch(selectedTeam, onTeamChange);
 </script>
 
 <style scoped>
