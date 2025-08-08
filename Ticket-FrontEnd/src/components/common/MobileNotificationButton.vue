@@ -3,7 +3,6 @@
     <button class="mobile-notification-btn" @click="handleMobileNotification">
       <span class="notification-icon">🔔</span>
       <span v-if="notificationCount > 0" class="notification-badge">{{ notificationCount }}</span>
-      <span class="notification-text">알림</span>
     </button>
   </div>
 </template>
@@ -73,7 +72,5 @@ const handleMobileNotification = () => {
   font-weight: bold;
 }
 
-.notification-text {
-  flex: 1;
-}
+
 </style>
