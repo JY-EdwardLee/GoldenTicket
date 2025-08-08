@@ -30,14 +30,27 @@
 
       <div class="form-group">
         <label for="phone">전화번호</label>
+        <div class="phone-input-container">
         <input
           type="tel"
           id="phone"
-          v-model="formData.phone"
-          placeholder="전화번호를 입력해주세요 (예: 010-1234-5678)"
+          class="phone-input"
+          v-model="formData.phoneNumber"
+          placeholder="전화번호를 입력해주세요 (예: 01012345678)"
           required
         />
+        <button type="button" class="phone-btn submit-btn" @click="handlePhoneFormat" :disabled="isCountdownActive">
+          {{ isCountdownActive ? `재전송 (${formatCountdownTime})` : '인증번호 받기' }}
+        </button>
+        </div>
       </div>
+      <div class="phone-input-container">
+        <input type="text" class="phone-input" v-model="formData.phoneCode" placeholder="인증번호를 입력해주세요" required />
+        <button type="button" class="phone-btn submit-btn" @click="handlePhoneVerify">
+          {{ isVerified ? "인증 완료" : "인증번호 확인" }}
+        </button>
+      </div>
+
 
       <div class="form-group">
         <label for="birthdate">생년월일</label>
@@ -101,6 +114,10 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const socialProvider = ref("");
+const isVerified = ref(false);
+const isCountdownActive = ref(false);
+const countdownTime = ref(0);
+let countdownInterval = null;
 
 const formData = reactive({
   email: "",
@@ -170,6 +187,62 @@ const handleSubmit = async () => {
   }
 };
 
+const handlePhoneFormat = async () => {
+  formData.phoneNumber = formData.phoneNumber.replace(/-/g, "");
+  const response = await axios.post(`${API_CONFIG.AUTH.SMS}`, {
+    phoneNumber: formData.phoneNumber,
+  });
+  console.log(response);
+  if (response.data === "발송 완료") {
+    alert("인증번호가 발송되었습니다.");
+    startCountdown();
+  }
+};
+
+// 5분 카운트다운 시작
+const startCountdown = () => {
+  isCountdownActive.value = true;
+  countdownTime.value = 300; // 5분 = 300초
+  
+  countdownInterval = setInterval(() => {
+    countdownTime.value--;
+    
+    if (countdownTime.value <= 0) {
+      clearInterval(countdownInterval);
+      isCountdownActive.value = false;
+      countdownTime.value = 0;
+    }
+  }, 1000);
+};
+
+// 카운트다운 시간을 분:초 형식으로 포맷
+const formatCountdownTime = computed(() => {
+  const minutes = Math.floor(countdownTime.value / 60);
+  const seconds = countdownTime.value % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+});
+
+const handlePhoneVerify = async () => {
+  formData.phoneNumber = formData.phoneNumber.replace(/-/g, "");
+  formData.phoneCode = formData.phoneCode.replace(/-/g, "");
+  try {
+    const response = await axios.post(`${API_CONFIG.AUTH.SMS_VERIFY}`, {
+      phoneNumber: formData.phoneNumber,
+      verificationCode: formData.phoneCode,
+    });
+    console.log(response);
+  if (response.data === "인증 완료") {
+    isVerified.value = true;
+    alert("인증되었습니다.");
+  } else {
+    alert("인증번호가 일치하지 않습니다.");
+  }
+} catch (error) {
+  console.error("인증 오류:", error);
+  alert("인증번호가 일치하지 않습니다..");
+} 
+};
+
 // 사용자 데이터 가져오기
 const fetchUserData = async (userId) => {
   try {
@@ -203,7 +276,7 @@ onMounted(() => {
 
 <style scoped>
 .signup-container {
-  max-width: 400px;
+  max-width: 500px;
   margin: 0 auto;
   padding: 40px 20px;
   font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -283,6 +356,38 @@ select {
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s;
+}
+
+.phone-input-container {
+  display: flex;
+  align-items: center;
+}
+.phone-input {
+  width: 55%;
+  padding: 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.phone-btn {
+  width: 35%;
+  padding: 14px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.phone-btn.submit-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  background-color: #ccc;
 }
 
 .submit-btn:hover {

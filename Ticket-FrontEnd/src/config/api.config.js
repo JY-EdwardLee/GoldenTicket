@@ -19,6 +19,8 @@ const AUTH = {
   NAVER: `${API_BASE_URL}/users/auth/naver`,
   SIGNUP: `${API_BASE_URL}/users/signup`,
   REFRESH: `${API_BASE_URL}/users/auth/refresh`,
+  SMS: `${API_BASE_URL}/users/signup/verification`,
+  SMS_VERIFY: `${API_BASE_URL}/users/signup/verification/check`,
   LOGOUT: `${API_BASE_URL}/users/logout`,
   TEMP_USER: `${API_BASE_URL}/users/auth/temp-user`,
 };

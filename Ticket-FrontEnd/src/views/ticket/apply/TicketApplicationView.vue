@@ -1,11 +1,11 @@
 <template>
   <div class="apply-wrapper">
     <div class="stepper">
-  <div class="step" :class="{active: step === 1}"><span>1</span><div>{{ pageText.stepper[0] }}</div></div>
+  <div class="step" :class="{active: step === 1}" ><span>1</span><div>{{ pageText.stepper[0] }}</div></div>
   <div class="bar"></div>
-  <div class="step" :class="{active: step === 2}"><span>2</span><div>{{ pageText.stepper[1] }}</div></div>
+  <div class="step" :class="{active: step === 2}" ><span>2</span><div>{{ pageText.stepper[1] }}</div></div>
   <div class="bar"></div>
-  <div class="step"><span>3</span><div>{{ pageText.stepper[2] }}</div></div>
+  <div class="step" :class="{active: step === 3}" ><span>3</span><div>{{ pageText.stepper[2] }}</div></div>
   <div class="bar"></div>
   <div class="step"><span>4</span><div>{{ pageText.stepper[3] }}</div></div>
 </div>
@@ -13,7 +13,7 @@
       <h2 class="title">{{ pageText.selectTeamTitle }}</h2>
       <div class="team-bg-container">
         <div class="team-bg-image"
-          :class="{ 'active': selectedTeam === enumToTeamName[user.myTeam] || bgHover }"
+          :class="{ 'active': selectedTeam === enumToTeamName[user.myTeam] }"
           :style="{ background: `url('/catchphrase/${user.myTeam}_CP.svg') center no-repeat`, backgroundSize: 'cover' }"
           @mouseenter="bgHover = true"
           @mouseleave="bgHover = false"
@@ -27,7 +27,12 @@
             :class="{ selected: selectedTeam === team }"
             @click="selectTeam(team)"
           >
-            {{ team }}
+            <div class="team-card-image">
+              <img :src="`/orglogo/${getEnumTeamName(team)}.svg`" :alt="team" />
+            </div>
+            <div class="team-card-name">
+              {{ team }}
+            </div>
           </div>
         </div>
         <div class="team-row">
@@ -35,7 +40,12 @@
             :class="{ selected: selectedTeam === team }"
             @click="selectTeam(team)"
           >
-            {{ team }}
+            <div class="team-card-image">
+              <img :src="`/orglogo/${getEnumTeamName(team)}.svg`" :alt="team" />
+            </div>
+            <div class="team-card-name">
+              {{ team }}
+            </div>
           </div>
         </div>
       </div>
@@ -73,7 +83,7 @@
           </div>
         </div>
         <div class="calendar-logo">
-          <img :src="`/orglogo/${user.myTeam}.png`" alt="landers logo" />
+          <img :src="`/orglogo/${user.myTeam}.svg`" alt="landers logo" />
         </div>
       </div>
       <div class="info-area">
@@ -143,6 +153,7 @@ import { useRouter } from 'vue-router';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { useTeamThemeStore } from '@/stores/teamTheme.js'
+import { getEnumTeamName } from '@/utils/teamNameMap';
 
 const user = JSON.parse(localStorage.getItem('user'))
 
@@ -154,6 +165,7 @@ const themeStore = useTeamThemeStore
 if (user?.myTeam) {
   themeStore.setSelectedTeam(user.myTeam)
 }
+
 
 const router = useRouter();
 
@@ -179,7 +191,8 @@ const selectedGame = ref(null);
 // 달력 관련 변수들
 const currentYear = new Date().getFullYear();
 const currentMonth = ref(new Date().getMonth() + 1); // 현재 월
-const today = new Date(); // 실제 현재 날짜 사용
+const today = new Date();
+today.setDate(today.getDate() - 1); // 오늘보다 하루 전 날짜 사용
 
 // 달력 computed 속성들
 const daysInCurrentMonth = computed(() => {
@@ -217,6 +230,23 @@ const pageText = {
   prevBtn: '이전'
 };
 
+// 팀 이름을 ID로 변환하는 함수
+function getTeamId(teamName) {
+  const teamMap = {
+    'SSG랜더스': 'SSG',
+    '키움히어로즈': '키움',
+    'LG트윈스': 'LG',
+    'KT위즈': 'KT',
+    'NC다이노스': 'NC',
+    '두산베어스': '두산',
+    'KIA타이거즈': 'KIA',
+    '롯데자이언츠': '롯데',
+    '한화이글스': '한화',
+    '삼성라이온즈': '삼성'
+  };
+  return teamMap[teamName] || teamName;
+}
+
 function selectTeam(team) {
   selectedTeam.value = team;
   
@@ -241,13 +271,9 @@ function selectTeam(team) {
       teamBg.classList.remove('active');
     }
   }
-  
-  // 다음 버튼 활성화
-  const nextButton = document.querySelector('.next-btn');
-  if (nextButton) {
-    nextButton.disabled = false;
-  }
-  
+
+
+
   // 팀 선택 팝오버의 설명문 업데이트
   updateTeamSelectionPopup();
   
@@ -1264,20 +1290,43 @@ function formatGameDateTime(dateTimeStr) {
 }
 .team-card {
   width: 200px;
-  height: 100px;
+  height: 140px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   border: 2px solid #e0e0e0;
   border-radius: 12px;
-  font-size: 20px;
-  font-weight: 500;
-  color: #333;
   background: #fff;
   cursor: pointer;
   transition: border 0.2s, box-shadow 0.2s;
   position: relative;
   z-index: 1;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+.team-card-image {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.team-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.team-card-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  line-height: 1.2;
 }
 .team-card.selected,
 .team-card:hover {
@@ -1334,7 +1383,7 @@ function formatGameDateTime(dateTimeStr) {
 }
 .calendar-area {
   width: 500px;
-  height: 550px;
+  height: fit-content;
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 2px 16px 0 #f8bbd04d;
@@ -1480,13 +1529,13 @@ function formatGameDateTime(dateTimeStr) {
   background: transparent;
 }
 .calendar-logo {
-  margin-top: auto;
   display: flex;
+  margin-top: 10px;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-end;
   width: 100%;
   padding-bottom: 10px;
-  padding-left: 20px;
+  padding-right: 20px;
 }
 .calendar-logo img {
   height: 36px;
@@ -1815,6 +1864,7 @@ function formatGameDateTime(dateTimeStr) {
   /* Game selection responsive */
   .game-select-main {
     flex-direction: column;
+    height: auto;
     gap: 24px;
     margin-bottom: 24px;
     padding: 0 16px;
