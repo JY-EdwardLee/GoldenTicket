@@ -344,7 +344,7 @@ async function loadGamesForDate(date) {
       }
     ];
     
-    gamesOnDate.value = dummyGames;
+    // gamesOnDate.value = dummyGames;
   } catch (error) {
     console.error('경기 목록 로드 실패:', error);
     gamesOnDate.value = [];
@@ -1026,7 +1026,7 @@ async function selectDate(date) {
       team: teamEnum
     });
     gamesOnDate.value = data;
-    
+    console.log('gamesOnDate.value : ', gamesOnDate.value);
     // 날짜 선택 후 캘린더 튜토리얼이 활성화되어 있다면 종료하고 경기 목록 튜토리얼 시작
     if (driverObj.value) {
       driverObj.value.destroy();
@@ -1066,6 +1066,7 @@ async function handleApplyClick(game) {
   });
   
   try {
+    console.log('응모 클릭됨', game)
     const { data } = await http.post(`/games/${game.gameId}/applications`);
     console.log('응모 결과:', data);
     // 성공 시에만 3단계로 이동
