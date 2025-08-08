@@ -92,7 +92,7 @@ const closeModal = () => {
   emit("close");
 };
 
-const handleKakaoLogin = (e) => {
+const handleKakaoLogin = async (e) => {
   e.preventDefault();
   const state = encodeURIComponent(window.location.pathname);
   console.log(state);
@@ -100,15 +100,15 @@ const handleKakaoLogin = (e) => {
   const url = new URL(KAKAO_AUTH_URL.value);
   // url.searchParams.set('state', state);
   console.log(url.toString());
-  window.location.href = url.toString();
+  http.get( API_CONFIG.AUTH.KAKAO );
 };
 
-const handleNaverLogin = (e) => {
+const handleNaverLogin = async (e) => {
   e.preventDefault();
   const state = encodeURIComponent(window.location.pathname);
   const url = new URL(NAVER_AUTH_URL.value);
   // url.searchParams.set("state", state);
-  window.location.href = url.toString();
+  http.get(url.toString());
 };
 </script>
 
