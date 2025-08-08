@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/games")
+@RequestMapping("/games")
 public class GameController {
 
     private final GameService gameService;
