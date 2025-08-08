@@ -3,9 +3,15 @@ package com.ssafy.ticket_backend.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Service
@@ -55,6 +61,29 @@ public class EmailServiceImpl implements EmailService {
             
         } catch (Exception e) {
             log.error("메일 전송 중 오류 발생 - 수신자: {}, 오류: {}", to, e.getMessage(), e);
+            // 메일 전송 실패 시에도 예외를 던지지 않고 로그만 남김
+        }
+    }
+
+    @Override
+    public void sendEmailWithHtmlAttachment(String to, String subject, String htmlContent, String fileName) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+            
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText("단체 관람 신청서가 첨부되었습니다.", false); // HTML이 아닌 일반 텍스트
+            
+            // HTML 파일을 첨부
+            ByteArrayResource htmlResource = new ByteArrayResource(htmlContent.getBytes(StandardCharsets.UTF_8));
+            helper.addAttachment(fileName, htmlResource, "text/html");
+            
+            mailSender.send(message);
+            log.info("HTML 첨부 메일 전송 완료: {}", to);
+            
+        } catch (MessagingException e) {
+            log.error("HTML 첨부 메일 전송 중 오류 발생 - 수신자: {}, 오류: {}", to, e.getMessage(), e);
             // 메일 전송 실패 시에도 예외를 던지지 않고 로그만 남김
         }
     }

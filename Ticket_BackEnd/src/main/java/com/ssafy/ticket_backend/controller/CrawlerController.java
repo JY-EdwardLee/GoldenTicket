@@ -145,7 +145,7 @@ public class CrawlerController {
         WebDriver driver = new ChromeDriver();
 
         try {
-            String url = "https://m.sports.naver.com/kbaseball/schedule/index?category=kbo&date=2025-08-01";
+            String url = "https://m.sports.naver.com/kbaseball/schedule/index?category=kbo&date=2025-08-08";
             driver.get(url);
 
             // 페이지 전체 로딩 대기 (필요시 Thread.sleep 추가)

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${teamName} 단체관람 신청서 작성</title>
+  <style>
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+
+      body {
+          font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+          background-color: #f8f9fa;
+          color: #333;
+          line-height: 1.4;
+      }
+
+      .container {
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 15px;
+      }
+
+      .form-container {
+          background: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          padding: 25px;
+      }
+
+      .form-title {
+          font-size: 22px;
+          font-weight: bold;
+          text-align: center;
+          margin-bottom: 8px;
+          color: #333;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 15px;
+      }
+
+      .team-logo {
+          width: 40px;
+          height: 40px;
+          background: #f0f0f0;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          color: #666;
+          border: 2px solid #ddd;
+      }
+
+      .required-note {
+          text-align: center;
+          color: #e74c3c;
+          font-size: 13px;
+          margin-bottom: 20px;
+      }
+
+      .form-section {
+          margin-bottom: 20px;
+      }
+
+      .form-row {
+          display: flex;
+          gap: 15px;
+          margin-bottom: 15px;
+      }
+
+      .form-group {
+          flex: 1;
+      }
+
+      .form-group.full-width {
+          flex: none;
+          width: 100%;
+      }
+
+      .form-label {
+          display: block;
+          font-weight: bold;
+          margin-bottom: 5px;
+          color: #333;
+          font-size: 14px;
+      }
+
+      .required {
+          color: #e74c3c;
+      }
+
+      .form-input {
+          width: 100%;
+          padding: 8px 10px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 13px;
+          transition: border-color 0.3s;
+      }
+
+      .form-input:focus {
+          outline: none;
+          border-color: #3498db;
+      }
+
+      .phone-group {
+          display: flex;
+          gap: 6px;
+          align-items: center;
+      }
+
+      .phone-input {
+          width: 100%;
+      }
+
+      .date-input-group {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+      }
+
+      .date-input {
+          flex: 1;
+      }
+
+      .textarea {
+          resize: vertical;
+          min-height: 80px;
+      }
+
+      .consent-section {
+          margin-top: 25px;
+          padding: 15px;
+          background: #f8f9fa;
+          border-radius: 6px;
+      }
+
+      .consent-title {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: bold;
+          margin-bottom: 10px;
+          color: #e74c3c;
+          font-size: 14px;
+      }
+
+      .consent-icon {
+          width: 14px;
+          height: 14px;
+          background: #e74c3c;
+          border-radius: 2px;
+      }
+
+      .consent-content {
+          margin-bottom: 15px;
+          font-size: 12px;
+          line-height: 1.5;
+      }
+
+      .consent-content p {
+          margin-bottom: 5px;
+      }
+
+      .consent-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 10px 0;
+          font-size: 11px;
+      }
+
+      .consent-table th,
+      .consent-table td {
+          border: 1px solid #ddd;
+          padding: 6px 8px;
+          text-align: left;
+      }
+
+      .consent-table th {
+          background: #f8f9fa;
+          font-weight: bold;
+          width: 30%;
+      }
+
+      .radio-group {
+          display: flex;
+          gap: 15px;
+          margin-top: 10px;
+      }
+
+      .radio-item {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 13px;
+      }
+
+      .radio-item input[type="radio"] {
+          margin: 0;
+      }
+
+      .submit-btn {
+          width: 100%;
+          padding: 12px;
+          background: #e74c3c;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          font-size: 15px;
+          font-weight: bold;
+          cursor: pointer;
+          margin-top: 20px;
+          transition: background-color 0.3s;
+      }
+
+      .submit-btn:hover {
+          background: #c0392b;
+      }
+
+      @media (max-width: 768px) {
+          .form-row {
+              flex-direction: column;
+              gap: 12px;
+          }
+
+          .phone-group {
+              flex-direction: column;
+              align-items: stretch;
+          }
+
+          .date-input-group {
+              flex-direction: column;
+              align-items: stretch;
+          }
+      }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="form-container">
+    <h1 class="form-title">
+      <div class="team-logo">로고</div>
+      ${teamName} 단체관람 신청서 작성
+    </h1>
+    <p class="required-note">* 표시는 필수입력란 입니다.</p>
+
+    <div class="form-section">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">
+            <span class="required">*</span> 관람일자
+          </label>
+          <div class="date-input-group">
+            <input type="text" class="form-input date-input" value="${viewingDate}" readonly>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">
+            <span class="required">*</span> 인원수
+          </label>
+          <input type="text" class="form-input" value="20명" readonly>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">
+            <span class="required">*</span> 단체명
+          </label>
+          <input type="text" class="form-input" value="Golden-Ticket" readonly>
+        </div>
+        <div class="form-group">
+          <label class="form-label">
+            <span class="required">*</span> 신청자
+          </label>
+          <input type="text" class="form-input" value="${applicantName}" readonly>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">
+            <span class="required">*</span> 연락처
+          </label>
+          <input type="text" class="form-input phone-input" placeholder="000-0000-0000">
+        </div>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">요청사항</label>
+        <textarea class="form-input textarea" readonly>${emailList}</textarea>
+      </div>
+    </div>
+
+    <div class="consent-section">
+      <div class="consent-title">
+        <div class="consent-icon"></div>
+        개인정보수집이용 동의사항
+      </div>
+      <div class="consent-content">
+        <p>${teamName}는 단체관람신청을 위해 아래와 같은 개인정보를 수집하고 있습니다.</p>
+        <p><strong>수집항목</strong> 필수항목 : 단체명, 담당자, 연락처 / 선택항목 : 요청사항</p>
+        <p><strong>개인정보의 수집 및 이용목적</strong> 단체관람신청 및 광고성 정보 전송</p>
+        <p><strong>개인정보의 보유 및 이용기간</strong> 개인정보 수집 및 이용목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 단, 관계법령의 규정에
+          의하여 보존할 필요가 있는 경우 회사는 아래와 같이 관계법령에서 정한 일정한 기간 동안 회원정보를 보관합니다.</p>
+        <p>• 계약 또는 청약철회 등에 관한 기록 : 5년 (전자상거래 등에서의 소비자보호에 관한 법률)</p>
+        <p>• 대금결제 및 재화 등의 공급에 관한 기록 : 5년 (전자상거래 등에서의 소비자보호에 관한 법률)</p>
+        <p>• 소비자의 불만 또는 분쟁처리에 관한 기록 : 3년 (전자상거래 등에서의 소비자보호에 관한 법률)</p>
+        <p><strong>동의를 거부할 권리 및 동의를 거부할 경우의 불이익</strong> 귀하는 개인정보 수집, 이용에 대한 동의를 거부하실 권리가 있으며, 동의를
+          거부하실 경우 서비스 이용이 제한됩니다.</p>
+      </div>
+      <div class="radio-group">
+        <div class="radio-item">
+          <input type="radio" name="consent1" id="agree1" checked>
+          <label for="agree1">동의</label>
+        </div>
+        <div class="radio-item">
+          <input type="radio" name="consent1" id="disagree1">
+          <label for="disagree1">동의하지 않음</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="consent-section">
+      <div class="consent-title">
+        <div class="consent-icon"></div>
+        마케팅 활동을 위한 개인정보 위탁 동의(선택)
+      </div>
+      <div class="consent-content">
+        <p>귀하는 상기 내용과 같이 귀하의 개인정보를 제3자에게 제공하는 것을 동의합니다. (동의를 거부할 수 있으며, 거부에 따른 불이익은 없습니다.)</p>
+        <table class="consent-table">
+          <tr>
+            <th>제공 하는자</th>
+            <td>${teamName}</td>
+          </tr>
+          <tr>
+            <th>제공 받는 자</th>
+            <td>(주)대홍기획</td>
+          </tr>
+          <tr>
+            <th>제공 목적</th>
+            <td>신규 서비스 개발 및 마케팅, 서비스 이용 통계 및 설문</td>
+          </tr>
+          <tr>
+            <th>제공 항목</th>
+            <td>단체명, 담당자, 연락처</td>
+          </tr>
+          <tr>
+            <th>보유기간</th>
+            <td>3년</td>
+          </tr>
+        </table>
+      </div>
+      <div class="radio-group">
+        <div class="radio-item">
+          <input type="radio" name="consent2" id="agree2" checked>
+          <label for="agree2">동의</label>
+        </div>
+        <div class="radio-item">
+          <input type="radio" name="consent2" id="disagree2">
+          <label for="disagree2">동의하지 않음</label>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn">확인</button>
+  </div>
+</div>
+
+<script>
+    // 폼 제출 처리
+    document.querySelector('.submit-btn').addEventListener('click', function () {
+        const requiredFields = document.querySelectorAll('.required');
+        let isValid = true;
+
+        // 필수 필드 검증
+        requiredFields.forEach(field => {
+            const input = field.closest('.form-group').querySelector('input, textarea');
+            if (!input.value.trim()) {
+                isValid = false;
+                input.style.borderColor = '#e74c3c';
+            } else {
+                input.style.borderColor = '#ddd';
+            }
+        });
+
+        if (isValid) {
+            alert('신청서가 성공적으로 제출되었습니다.');
+        } else {
+            alert('필수 항목을 모두 입력해주세요.');
+        }
+    });
+</script>
+</body>
+</html>

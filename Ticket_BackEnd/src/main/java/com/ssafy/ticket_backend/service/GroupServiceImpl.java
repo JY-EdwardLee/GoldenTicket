@@ -12,11 +12,20 @@ import com.ssafy.ticket_backend.model.BaseballTeams;
 import com.ssafy.ticket_backend.model.Game;
 import com.ssafy.ticket_backend.model.Group;
 import com.ssafy.ticket_backend.model.User;
+import com.ssafy.ticket_backend.util.HtmlTemplateUtil;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GroupServiceImpl implements GroupService {
@@ -24,6 +33,10 @@ public class GroupServiceImpl implements GroupService {
     private final GroupMapper groupMapper;
     private final UserMapper userMapper;
     private final EmailService emailService;
+    private final HtmlTemplateUtil htmlTemplateUtil;
+
+    @Value("${spring.mail.username}")
+    private String mailUsername;
 
 
     /**
@@ -82,17 +95,64 @@ public class GroupServiceImpl implements GroupService {
         // 그룹 정원이 다 찼을 때 메일 전송
         int cnt = groupMapper.selectCountByGroupId(groupId);
 
-        // TODO 메일 전송: 비동기 처리
+        // 그룹 정원이 다 찼을 때 HTML 신청서 생성 및 메일 전송
         if (cnt == 20) {
-            // TODO 파일 생성기 작성해야함.
+            try {
+                // HTML 신청서 생성
+                String htmlContent = generateGroupApplicationHtml(groupId, user, group);
 
-            String gameInfo = "더미 게임: 삼성 라이온즈 vs KIA 타이거즈 (2024-08-15 18:30)";
-            emailService.sendGroupFullNotification(groupId, gameInfo);
+                // HTML 파일을 메일에 첨부하여 전송
+                String subject = "[Golden Ticket] 단체 관람 신청서";
+                String fileName = String.format("group_application_%d.html", groupId);
+                emailService.sendEmailWithHtmlAttachment(mailUsername, subject, htmlContent,
+                    fileName);
+
+                log.info("단체 관람 신청서 HTML 메일 전송 완료: 그룹 ID {}", groupId);
+
+            } catch (IOException e) {
+                log.error("HTML 신청서 생성 중 오류 발생: {}", e.getMessage(), e);
+            }
         }
 
         if (result2 != 1) {
             throw new GroupJoinCountException("그룹 집계 중 오류가 발생하였습니다.");
         }
+    }
+
+    /**
+     * 단체 관람 신청서 HTML을 생성합니다.
+     *
+     * @param groupId 그룹 ID
+     * @param user    신청자 정보
+     * @param group   그룹 정보
+     * @return HTML 문자열
+     * @throws IOException 템플릿 처리 중 오류 발생 시
+     */
+    private String generateGroupApplicationHtml(long groupId, User user, Group group)
+        throws IOException {
+        Map<String, String> data = new HashMap<>();
+
+        // 현재 날짜 포맷팅
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        // 기본 데이터 설정
+        data.put("applicationDate", now.format(formatter));
+        data.put("applicantName", user.getUserName());
+        data.put("applicantPhone", user.getPhoneNumber());
+        data.put("applicantEmail", user.getEmail());
+        data.put("groupName", "단체 관람 그룹 #" + groupId);
+        data.put("groupType", "일반 단체");
+        data.put("groupDescription", "단체 관람을 위한 그룹입니다.");
+        data.put("gameSchedule", "2024-08-15 18:30");
+        data.put("teamName", "삼성 라이온즈 vs KIA 타이거즈");
+        data.put("applicantCount", "20");
+        data.put("preferredSeating", "일반석");
+        data.put("specialRequests", "특별한 요청사항이 없습니다.");
+        data.put("applicationStatus", "신청 완료");
+        data.put("processedDate", now.format(formatter));
+
+        return htmlTemplateUtil.generateGroupApplicationHtml(data);
     }
 
     /**
