@@ -11,7 +11,7 @@
 </div>
     <div v-if="step === 1" class="main-area">
       <h2 class="title">{{ pageText.selectTeamTitle }}</h2>
-      <div class="team-bg-container">
+      <div class="team-bg-container" :class="{ 'active': selectedTeam === enumToTeamName[user.myTeam] || bgHover }">
         <div class="team-bg-image"
           :class="{ 'active': selectedTeam === enumToTeamName[user.myTeam] || bgHover }"
           :style="{ background: `url('/catchphrase/${user.myTeam}_CP.svg') center no-repeat`, backgroundSize: 'cover' }"
@@ -1394,18 +1394,33 @@ function formatGameDateTime(dateTimeStr) {
 }
 
 .team-bg-container.active {
-  border: 2px solid var(--theme-gradient, #e57373) !important;
+  border: 1px solid #d6623c !important;
+  border-radius: 16px !important;
+  box-shadow: 
+    0 5px 10px rgba(0, 0, 0, 0.2), /* 깊이감 있는 그림자 */
+    inset 0 1px 1px rgba(255, 255, 255, 0.4), /* 상단 하이라이트 */
+    inset 0 -2px 1px rgba(0, 0, 0, 0.1); /* 하단 음영 */
+  transform: translateY(-3px);
+  transition: all 0.2s ease-out;
+}
+
+.team-bg-container.active:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 2px 5px rgba(0, 0, 0, 0.2), 
+    inset 0 1px 1px rgba(255, 255, 255, 0.4), 
+    inset 0 -2px 1px rgba(0, 0, 0, 0.1);
 }
 
 .team-bg-image {
-  width: 600px;
-  height: 200px !important;
+  width: 99%;
+  height: 99%;
   border-radius: 16px;
   opacity: 0.25;
   transition: opacity 0.3s;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  background-size: contain !important;
+  background-size: 105% !important;
 }
 
 .team-bg-image.active {
