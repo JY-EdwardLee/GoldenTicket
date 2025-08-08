@@ -17,6 +17,7 @@ import com.ssafy.ticket_backend.model.Waitlist;
 import com.ssafy.ticket_backend.model.WaitlistStatus;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.RequiredArgsConstructor;
@@ -109,12 +110,12 @@ public class TicketServiceImpl implements TicketService {
                 smsService.sendSMS(buyUser.getPhoneNumber(), text);
 
                 // **실시간 알림 전송**
-                String realTimeMessage = "당첨된 티켓: " + game.getHomeTeam() + " vs " + game.getAwayTeam()
-                    + "\n응모하신 티켓이 당첨되었습니다. 30분 이내 결제해주시기 바랍니다.";
+                String realTimeMessage =
+                    "당첨된 티켓 : " + game.getHomeTeam() + " vs " + game.getAwayTeam()
+                        + "\n응모하신 티켓이 당첨되었습니다. 30분 이내 결제해주시기 바랍니다.";
 
                 // WebSocket을 통해 실시간 알림 전송
                 notificationService.sendNotificationToUser(buyUser.getEmail(), realTimeMessage);
-
             } else {  // 대기열이 없다면
                 throw new TicketException("응모자가 없습니다.");
             }
@@ -195,6 +196,8 @@ public class TicketServiceImpl implements TicketService {
 
             ticketResponses.add(ticketResponse);
         }
+
+        ticketResponses.sort(Comparator.comparing(t -> t.getGame().getDate()));
 
         return ticketResponses;
     }
