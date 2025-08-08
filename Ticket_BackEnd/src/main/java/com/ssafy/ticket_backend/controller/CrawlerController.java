@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/crawler")
+@RequestMapping("/api/crawler")
 public class CrawlerController {
 
     private final CrawlMapper crawlMapper;

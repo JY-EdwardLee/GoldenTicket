@@ -1,5 +1,5 @@
-
 package com.ssafy.ticket_backend.controller;
+
 import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.TicketMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/other-platform")
+@RequestMapping("/api/other-platform")
 public class OtherPlatFormController {
     /*
     id            SERIAL PRIMARY KEY,

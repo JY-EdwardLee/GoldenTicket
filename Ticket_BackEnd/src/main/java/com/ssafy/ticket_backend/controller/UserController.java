@@ -37,7 +37,7 @@ import org.springframework.web.servlet.view.RedirectView;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
@@ -52,7 +52,6 @@ public class UserController {
 
     @Value("${BE_BASE_URL}")
     private String BE_BASE_URL;
-
 
 
     /**
