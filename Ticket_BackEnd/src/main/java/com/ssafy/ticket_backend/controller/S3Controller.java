@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/s3")
+@RequestMapping("/s3")
 public class S3Controller {
 
     private final S3UserService s3UserService;
