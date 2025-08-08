@@ -1,16 +1,10 @@
 <template>
-  <!-- 알림 아이콘 (데스크톱에서만 표시) -->
-  <div class="notification-container">
-    <button class="notification-btn" @click="toggleNotificationModal" :class="{ 'active': isNotificationModalOpen }">
-      <span class="notification-icon">🔔</span>
-      <span v-if="notificationCount > 0" class="notification-badge">{{ notificationCount }}</span>
-    </button>
-    
-    <!-- 알림 모달 -->
-    <div v-if="isNotificationModalOpen" class="notification-modal">
+  <!-- 모바일 알림 모달 -->
+  <div v-if="isVisible" class="notification-modal-overlay" @click="closeModal">
+    <div class="notification-modal" @click.stop>
       <div class="notification-header">
         <h3>알림</h3>
-        <button class="close-notification-btn" @click="closeNotificationModal">×</button>
+        <button class="close-notification-btn" @click="closeModal">×</button>
       </div>
       <div class="notification-content">
         <div v-if="notifications.length === 0" class="no-notifications">
@@ -40,17 +34,17 @@
             </div>
           </div>
         </div>
-        
-        <!-- 액션 시트 모달 -->
-        <div v-if="isActionSheetOpen" class="action-sheet-overlay" @click="closeActionSheet">
-          <div class="action-sheet" @click.stop>
-            <div class="action-sheet-item" @click="deleteNotification">
-              <span class="action-icon">🗑️</span>
-              <span class="action-text">삭제하기</span>
-            </div>
-            <div class="action-sheet-cancel" @click="closeActionSheet">
-              취소
-            </div>
+      </div>
+      
+      <!-- 액션 시트 모달 -->
+      <div v-if="isActionSheetOpen" class="action-sheet-overlay" @click="closeActionSheet">
+        <div class="action-sheet" @click.stop>
+          <div class="action-sheet-item" @click="deleteNotification">
+            <span class="action-icon">🗑️</span>
+            <span class="action-text">삭제하기</span>
+          </div>
+          <div class="action-sheet-cancel" @click="closeActionSheet">
+            취소
           </div>
         </div>
       </div>
@@ -63,25 +57,28 @@ import { ref, computed } from 'vue'
 import { useNotificationStore } from '@/stores/notification'
 import { storeToRefs } from 'pinia'
 
+// Props
+const props = defineProps({
+  isVisible: {
+    type: Boolean,
+    default: false
+  }
+})
+
+// Emits
+const emit = defineEmits(['close'])
+
 // notification store 사용
 const notificationStore = useNotificationStore()
-const { notifications, unreadCount, sortedNotifications } = storeToRefs(notificationStore)
+const { notifications, sortedNotifications } = storeToRefs(notificationStore)
 
 // 로컬 상태
-const isNotificationModalOpen = ref(false)
 const isActionSheetOpen = ref(false)
 const selectedNotificationIndex = ref(null)
 
-// 계산된 속성들
-const notificationCount = computed(() => unreadCount.value)
-
 // 메서드들
-const toggleNotificationModal = () => {
-  isNotificationModalOpen.value = !isNotificationModalOpen.value
-}
-
-const closeNotificationModal = () => {
-  isNotificationModalOpen.value = false
+const closeModal = () => {
+  emit('close')
 }
 
 const openActionSheet = (index) => {
@@ -104,81 +101,37 @@ const deleteNotification = () => {
 const markAsRead = (index) => {
   notificationStore.markAsRead(index)
 }
-
-// 외부에서 접근 가능한 메서드들 노출
-defineExpose({
-  toggleNotificationModal,
-  closeNotificationModal
-})
 </script>
 
 <style scoped>
-/* 알림 컨테이너 */
-.notification-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.notification-btn {
-  background: none;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  position: relative;
-  transition: background-color 0.2s;
+/* 모달 오버레이 */
+.notification-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 
-.notification-btn:hover {
-  background-color: #f5f5f5;
-}
-
-.notification-btn.active {
-  background-color: #e0e0e0;
-}
-
-.notification-icon {
-  font-size: 1.2rem;
-  color: #666;
-}
-
-.notification-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  background-color: #e11d48;
-  color: white;
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  font-size: 0.7rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-}
-
-/* 알림 모달 */
+/* 모달 컨테이너 */
 .notification-modal {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  width: 380px;
-  max-height: 500px;
   background: #f5f5f5;
-  border: none;
   border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  z-index: 1000;
-  margin-top: 12px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 80vh;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
+/* 헤더 */
 .notification-header {
   display: flex;
   justify-content: space-between;
@@ -215,8 +168,9 @@ defineExpose({
   background: #f0f0f0;
 }
 
+/* 컨텐츠 */
 .notification-content {
-  max-height: 400px;
+  flex: 1;
   overflow-y: auto;
   background: #f5f5f5;
   padding: 12px;
@@ -239,6 +193,7 @@ defineExpose({
   background: #ccc;
 }
 
+/* 빈 알림 */
 .no-notifications {
   padding: 48px 24px;
   text-align: center;
@@ -258,13 +213,14 @@ defineExpose({
   opacity: 0.5;
 }
 
+/* 알림 리스트 */
 .notification-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-/* 네이버 스타일 알림 카드 */
+/* 알림 카드 */
 .notification-card {
   background: white;
   border-radius: 12px;
@@ -288,7 +244,6 @@ defineExpose({
   background: #e0e7ff;
 }
 
-/* 읽은 알림 스타일 */
 .notification-card:not(.unread) {
   background: #f8f9fa;
   opacity: 0.8;
@@ -299,6 +254,7 @@ defineExpose({
   opacity: 0.9;
 }
 
+/* 카드 헤더 */
 .notification-card-header {
   display: flex;
   justify-content: space-between;
@@ -341,11 +297,6 @@ defineExpose({
   color: #333;
 }
 
-.notification-date {
-  font-size: 0.75rem;
-  color: #999;
-}
-
 .notification-options {
   cursor: pointer;
   padding: 4px;
@@ -363,6 +314,7 @@ defineExpose({
   font-weight: bold;
 }
 
+/* 카드 컨텐츠 */
 .notification-card-content {
   display: flex;
   align-items: flex-start;
@@ -376,7 +328,7 @@ defineExpose({
   white-space: pre-line;
 }
 
-/* 액션 시트 스타일 */
+/* 액션 시트 */
 .action-sheet-overlay {
   position: absolute;
   top: 0;
@@ -459,10 +411,26 @@ defineExpose({
   background-color: #e9ecef;
 }
 
-/* 모바일에서는 숨김 */
-@media (max-width: 768px) {
-  .notification-container {
-    display: none;
+/* 반응형 */
+@media (max-width: 480px) {
+  .notification-modal-overlay {
+    padding: 10px;
+  }
+  
+  .notification-modal {
+    max-height: 90vh;
+  }
+  
+  .notification-header {
+    padding: 14px 16px;
+  }
+  
+  .notification-card {
+    padding: 14px;
+  }
+  
+  .notification-content {
+    padding: 10px;
   }
 }
 </style>

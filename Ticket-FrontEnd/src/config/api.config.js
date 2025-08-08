@@ -7,6 +7,13 @@ const API_BASE_URL =
 import axios from "axios";
 axios.defaults.baseURL = API_BASE_URL;
 
+/**
+ * 메인 페이지 API 엔드포인트
+ * @typedef {Object} MAIN_PAGE
+ * @property {string} USER - 사용자 랭킹 API
+ * @property {string} TEAM - 팀 랭킹 API
+ * @property {string} CHAT - 채팅 API
+ */
 const MAIN_PAGE = {
   USER: `/rank/user`,
   TEAM: `/rank/team`,
@@ -68,7 +75,6 @@ const BOARD = {
   DELETE: (id) => `/posts/${id}`,
   COMMENTS: (boardId) => `/posts/${boardId}/comments`,
 };
-
 
 // API 설정 내보내기
 export const API_CONFIG = {
