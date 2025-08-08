@@ -631,6 +631,29 @@ onMounted(async () => {
   startAutoScroll();
   
   // 튜토리얼은 이제 navbar의 '튜토리얼' 버튼을 통해서만 실행됩니다.
+  // 최초 회원가입 이후 첫 방문 시 자동 튜토리얼 실행
+  try {
+    const firstSignup = localStorage.getItem('firstSignup');
+    if (firstSignup === '0') {
+      if (authStore.isAuthenticated) {
+        // 로그인된 상태면 즉시 튜토리얼 시작
+        startTutorial(authStore, { value: showLoginModal });
+      } else {
+        // 로그인 전이면 로그인 완료를 기다렸다가 시작
+        const unwatch = watch(
+          () => authStore.isAuthenticated,
+          (val) => {
+            if (val && localStorage.getItem('firstSignup') === '0') {
+              startTutorial(authStore, { value: showLoginModal });
+              unwatch && unwatch();
+            }
+          }
+        );
+      }
+    }
+  } catch (e) {
+    console.warn('firstSignup 확인 중 오류:', e);
+  }
 });
 
 // 컴포넌트 언마운트 시 타이머 정리

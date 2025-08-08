@@ -1,7 +1,6 @@
 <template>
   <v-container fluid class="pa-0">
     <div class="guide-wrapper">
-      <!-- 로딩 상태 -->
       <div v-if="isLoading" class="loading-container">
         <v-progress-circular indeterminate color="primary" size="64"></v-progress-circular>
         <p class="mt-4 text-h6">이용가이드를 불러오는 중...</p>
@@ -16,7 +15,6 @@
               <h1 class="text-h3 font-weight-bold mb-4">이용가이드</h1>
               <p class="text-h6 text-grey-darken-1">티켓 응모부터 양도까지, 모든 기능을 쉽게 이용할 수 있습니다.</p>
               
-
             </div>
           </v-container>
         </div>
@@ -296,10 +294,8 @@ const goToMyTickets = () => {
 
 // 로딩 완료 처리
 onMounted(() => {
-  // 1초 후 로딩 완료
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 1000);
+  // 바로 로딩 완료
+  isLoading.value = false;
 });
 </script>
 

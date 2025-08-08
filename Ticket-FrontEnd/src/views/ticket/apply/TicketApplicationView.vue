@@ -225,24 +225,38 @@ const pageText = {
 
 // 사용자가 선택한 팀 저장 & UI 업데이트
 function selectTeam(team) {
-  selectedTeam.value = team;
+  // 이미 ENUM 값인 경우와 한글 팀명인 경우 모두 처리
+  // const teamEnum = teamNameToEnum[team] || (Object.values(teamNameToEnum).includes(team) ? team : null);
+  // selectedTeam.value = teamEnum ? enumToTeamName[teamEnum] : team;
   
-  // 로컬 스토리지에 선택된 팀 저장
-  localStorage.setItem('selectedTeam', team);
-  
+  let teamEnum;
+  if(teamNameToEnum[team]) {
+    teamEnum = teamNameToEnum[team];
+  } else if(Object.values(teamNameToEnum).includes(team)) {
+    teamEnum = team;
+  } else {
+    teamEnum = null;
+  }
+
+  selectedTeam.value = teamEnum ? enumToTeamName[teamEnum] : team;
+
+  if(teamEnum){
+    localStorage.setItem('selectedTeam', teamEnum);
+  }
+
   // 선택된 팀 강조 표시 업데이트
   document.querySelectorAll('.team-card').forEach(card => {
-    if (card.textContent === team) {
+    if (card.textContent === enumToTeamName[teamEnum] || card.textContent === team) {
       card.classList.add('selected');
     } else {
       card.classList.remove('selected');
     }
   });
   
-  // 팀 배경 이미지 업데이트 - SSG 팀일 때만 active 클래스 추가
+  // 팀 배경 이미지 업데이트 - 사용자의 관심팀일 때만 active 클래스 추가
   const teamBg = document.querySelector('.team-bg-image');
   if (teamBg) {
-    if (team === 'SSG랜더스') {
+    if (teamEnum === user?.myTeam) {
       teamBg.classList.add('active');
     } else {
       teamBg.classList.remove('active');
@@ -269,12 +283,7 @@ function updateTeamSelectionPopup() {
   // 현재 활성화된 팝오버 요소 찾기
   const activePopup = document.querySelector('.driver-popover.driver-active-popup');
   if (!activePopup) return;
-  
-  // 설명문 요소 찾기
-  const descriptionEl = activePopup.querySelector('.driver-popover-description');
-  if (descriptionEl) {
-    descriptionEl.textContent = `원하는 팀을 선택해주세요. (현재 선택: ${selectedTeam.value})`;
-  }
+
 }
 
 
@@ -285,7 +294,9 @@ function updateTeamSelectionPopup() {
 // 선택한 날짜가 오늘 이전인지 확인
 function isPastDate(date) {
   const checkDate = new Date(currentYear, currentMonth.value - 1, date);
-  return checkDate < today;
+  const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const compareDate = new Date(checkDate.getFullYear(), checkDate.getMonth(), checkDate.getDate());
+  return compareDate < todayDate; // 시간 정보를 제거하고 날짜만 비교
 }
 
 // 선택한 날짜가 오늘인지 확인
@@ -312,6 +323,44 @@ function nextMonth() {
     currentMonth.value++;
     selectedDate.value = null; // 월 변경 시 선택된 날짜 초기화
     gamesOnDate.value = [];
+  }
+}
+
+
+// 특정 날짜의 경기 목록을 로드하는 함수
+async function loadGamesForDate(date) {
+  try {
+    // 실제 API 호출 대신 더미 데이터로 테스트
+    // 실제 구현 시에는 여기서 API를 호출하여 경기 데이터를 가져와야 합니다
+    const selectedTeamEnum = teamNameToEnum[selectedTeam.value];
+    
+    // 더미 경기 데이터 생성 (실제로는 API에서 가져와야 함)
+    const dummyGames = [
+      {
+        gameId: 1,
+        homeTeam: selectedTeamEnum,
+        awayTeam: 'HANWHA_EAGLES',
+        gameDateTime: `${currentYear}-${String(currentMonth.value).padStart(2, '0')}-${String(date).padStart(2, '0')}T18:30:00`
+      }
+    ];
+    
+    gamesOnDate.value = dummyGames;
+  } catch (error) {
+    console.error('경기 목록 로드 실패:', error);
+    gamesOnDate.value = [];
+  }
+}
+
+// 페이지 진입 시 오늘 날짜 자동 선택 및 경기 목록 로드
+function initializeTodaySelection() {
+  const today = new Date();
+  const todayDate = today.getDate();
+  const todayMonth = today.getMonth() + 1;
+  const todayYear = today.getFullYear();
+  
+  // 현재 달력이 오늘이 속한 달인지 확인
+  if (currentYear === todayYear && currentMonth.value === todayMonth) {
+    selectDate(todayDate);
   }
 }
 
@@ -405,11 +454,18 @@ const startTutorial = () => {
           // 1. 팝오버 스타일링 : tutorial-popover 클래스 -> 팝오버 스타일 커스터마이징
           popoverElement.classList.add('tutorial-popover');
           
-          // 2. 팀 선택 팝오버의 설명문을 실시간으로 업데이트
+          // 2. 단계별 특별 클래스 추가
+          if (state.activeStep === 1) { // 다음 버튼 단계일 때
+            popoverElement.classList.add('next-btn-popover');
+          }
+          
+          // 3. 팀 선택 팝오버의 설명문을 실시간으로 업데이트
           if (state.activeStep === 0) { // 팀 선택 단계일 때만
             const descriptionEl = popoverElement.querySelector('.driver-popover-description');
             if (descriptionEl) {
-              descriptionEl.textContent = `원하는 팀을 선택해주세요. (현재 선택: ${selectedTeam.value})`;
+              const defaultText = '원하는 팀을 선택해주세요.';
+              const selectedTeamText = selectedTeam.value ? ` (현재 선택한 팀 : ${selectedTeam.value})` : '';
+              descriptionEl.innerHTML = defaultText + selectedTeamText;
             }
           }
         }
@@ -448,15 +504,6 @@ const startTutorial = () => {
           description: '원하는 팀을 선택해주세요.',
           side: 'bottom',
           align: 'center',
-          onNext: () => {
-            console.log('팀 선택 단계 onNext 호출');
-            // 팀이 선택되어 있는지 확인
-            if (!selectedTeam.value) {
-              selectedTeam.value = 'SSG랜더스'; // 기본값 설정
-            }
-            console.log('팀 선택 단계 완료, 다음 단계로 진행');
-            return true; // 다음 단계로 진행
-          }
         }
       },
       {
@@ -465,8 +512,8 @@ const startTutorial = () => {
         popover: {
           title: '다음 단계',
           description: '다음 버튼을 눌러주세요.',
-          side: 'left',
-          align: 'start',
+          side: 'top',
+          align: 'center',
           onNext: () => {
             console.log('다음 버튼 단계 onNext 호출');
             // 튜토리얼 종료 후 다음 단계로 이동
@@ -815,6 +862,10 @@ const goToNextStep = () => {
         startCalendarTutorial();
       }
     });
+
+    setTimeout(() => {
+      initializeTodaySelection();
+    }, 100); // DOM 업데이트 후 실행
     
     return true;
   }
@@ -993,6 +1044,8 @@ async function selectDate(date) {
     console.error('응모/경기조회 에러:', error);
     gamesOnDate.value = [];
   }
+
+  loadGamesForDate(date);
 }
 
 // 응모하기 눌렀을 때, 튜토리얼 제거
@@ -1024,9 +1077,9 @@ async function handleApplyClick(game) {
   }
 }
 
-// 팀 ENUM을 팀 이름으로 변환
+// 팀 ENUM을 한글 팀 이름으로 변환
 function getTeamDisplayName(enumName) {
-  return enumName ? enumName.replace(/_/g, ' ') : '';
+  return enumToTeamName[enumName] || enumName;
 }
 
 // 메인 페이지로 이동
@@ -1090,6 +1143,75 @@ function formatGameDateTime(dateTimeStr) {
 
 :global(.driver-popover.tutorial-popover .driver-popover-footer button:hover) {
   background: #b71c1c;
+}
+
+/* 다음 버튼 팝오버 스타일 - 우선순위 높임 */
+:global(.driver-popover.tutorial-popover.next-btn-popover) {
+  background: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  border: none !important;
+  max-width: 200px !important;
+  width: 200px !important;
+  padding: 16px !important;
+  position: fixed !important;
+}
+
+:global(.driver-popover.tutorial-popover.next-btn-popover .driver-popover-title) {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #333 !important;
+  margin-bottom: 8px !important;
+  text-align: center !important;
+}
+
+:global(.driver-popover.tutorial-popover.next-btn-popover .driver-popover-description) {
+  font-size: 14px !important;
+  color: #666 !important;
+  line-height: 1.4 !important;
+  text-align: center !important;
+  margin-bottom: 16px !important;
+}
+
+:global(.driver-popover.tutorial-popover.next-btn-popover .driver-popover-footer) {
+  text-align: center !important;
+  margin-top: 0 !important;
+}
+
+:global(.driver-popover.tutorial-popover.next-btn-popover .driver-popover-footer button) {
+  background: #FF9500 !important;
+  color: white !important;
+  border: none !important;
+  padding: 10px 20px !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  min-width: 60px !important;
+}
+
+:global(.driver-popover.tutorial-popover.next-btn-popover .driver-popover-footer button:hover) {
+  background: #E6850E !important;
+}
+
+:global(.driver-popover.tutorial-popover.next-btn-popover .driver-popover-close-btn) {
+  position: absolute !important;
+  top: 8px !important;
+  right: 8px !important;
+  background: transparent !important;
+  border: none !important;
+  font-size: 18px !important;
+  color: #999 !important;
+  cursor: pointer !important;
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+:global(.driver-popover.tutorial-popover.next-btn-popover .driver-popover-close-btn:hover) {
+  color: #666 !important;
 }
 
 /* calendar-logo 영역을 시각적으로 제외하는 스타일 */
