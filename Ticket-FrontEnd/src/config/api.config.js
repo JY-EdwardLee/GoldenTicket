@@ -1,8 +1,8 @@
 // API 기본 URL 설정
 const API_BASE_URL =
   // 임시 수정
-  import.meta.env.VITE_API_BASE_URL || "http://i13a109.p.ssafy.io:8080";
-// import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+  // import.meta.env.VITE_API_BASE_URL || "http://i13a109.p.ssafy.io:8080";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 import axios from "axios";
 axios.defaults.baseURL = API_BASE_URL;

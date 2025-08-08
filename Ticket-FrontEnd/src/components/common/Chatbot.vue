@@ -118,6 +118,8 @@ const toggleChat = () => {
   isChatOpen.value = !isChatOpen.value;
 };
 
+const sendMessage = ref('');
+
 const sendMessage = async () => {
   if (!newMessage.value.trim()) return;
 
@@ -128,6 +130,7 @@ const sendMessage = async () => {
     text: newMessage.value,
     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   });
+  sendMessage.value = newMessage.value
   newMessage.value = '';
 
   await nextTick();
@@ -138,6 +141,7 @@ const sendMessage = async () => {
 
   // 백엔드에 메시지 전달
   isTyping.value = true;
+  console.log('newMessage.value', newMessage);
   try {
     let headers = {
       'Content-Type': 'application/json',
@@ -151,7 +155,7 @@ const sendMessage = async () => {
     }
     const response = await axios.post(API_CONFIG.MAIN_PAGE.CHAT, {
       userId: user?.userId || null,
-      question: newMessage.value,
+      question: sendMessage.value,
       isLogin: authStore.isAuthenticated.value,
     }, {
       headers: headers,
