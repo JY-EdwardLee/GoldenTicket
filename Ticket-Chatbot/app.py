@@ -26,7 +26,7 @@ if not os.getenv("PINECONE_ENVIRONMENT"):
 
 # --- GMS LLM(ChatUpstage) 객체 생성 ---
 chat_upstage = ChatUpstage(
-    model_name="gpt-4.1",
+    model_name="gpt-4.1-mini",
     temperature=0.3,
     max_tokens=4096,
     base_url="https://gms.ssafy.io/gmsapi/api.openai.com/v1",
@@ -116,7 +116,7 @@ def query_chatbot(req: MessageRequest):
 
 다음 규칙에 따라 답변을 작성해 주세요:
 
-1. 사용자는 시니어이므로, 질문에 대해 친절하고 이해하기 쉬운 문장으로 답변해 주세요.
+1. 주 사용자 연령층이 senior이기 때문에, 질문에 대해 친절하고 이해하기 쉬운 문장으로 간결하게 답변해 주세요.
 
 2. "경기 일정"에 관한 질문일 경우 다음과 같이 답변해 주세요:
    - 챗봇은 최대 1주일 이내의 경기 일정만 알려드릴 수 있다고 안내하세요.
