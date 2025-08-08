@@ -376,7 +376,7 @@ public class UserController {
         @AuthenticationPrincipal CustomUserDetails userDetails) {
         List<PostAllResponse> postAllResponses = userService.selectPostsByUser(
             userDetails.getUsername());
-        
+
         return ResponseEntity.ok(postAllResponses);
     }
 
