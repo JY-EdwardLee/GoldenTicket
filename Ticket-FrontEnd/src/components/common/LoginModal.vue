@@ -92,23 +92,19 @@ const closeModal = () => {
   emit("close");
 };
 
-const handleKakaoLogin = async (e) => {
+const handleKakaoLogin = (e) => {
   e.preventDefault();
-  const state = encodeURIComponent(window.location.pathname);
-  console.log(state);
-  console.log(KAKAO_AUTH_URL.value);
-  const url = new URL(KAKAO_AUTH_URL.value);
-  // url.searchParams.set('state', state);
-  console.log(url.toString());
-  http.get( API_CONFIG.AUTH.KAKAO );
+  const url = new URL(API_CONFIG.AUTH.KAKAO, window.location.origin); // ← base 지정
+  console.log(url.href);
+  window.location.assign(url.href); // 페이지 이동(네비게이션)
 };
 
-const handleNaverLogin = async (e) => {
+const handleNaverLogin = (e) => {
   e.preventDefault();
   const state = encodeURIComponent(window.location.pathname);
-  const url = new URL(NAVER_AUTH_URL.value);
+  const url = new URL(API_CONFIG.AUTH.NAVER, window.location.origin); // ← base 지정
   // url.searchParams.set("state", state);
-  http.get(url.toString());
+  window.location.href = url.toString();
 };
 </script>
 

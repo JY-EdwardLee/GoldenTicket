@@ -75,8 +75,9 @@ const loadPosts = async () => {
   searchResultMessage.value = '';
   
   try {
+    console.log("BOARD_TYPES.FREE url : ", BOARD_TYPES.FREE);
     const result = await boardAPI.getPostsByCategory(BOARD_TYPES.FREE);
-    
+    console.log("result : ", result);
     // 서버가 배열을 직접 반환하므로 result 자체가 배열
     if (Array.isArray(result)) {
       allPosts.value = result;
