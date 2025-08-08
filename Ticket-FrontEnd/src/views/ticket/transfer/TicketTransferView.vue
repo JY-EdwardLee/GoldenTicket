@@ -310,6 +310,7 @@ const activeTab = ref('NOL');
 const hoveredTicket = ref(null);
 const isApplying = ref(false); // 응모 진행중 상태
 const showWarningModal = ref(false); // 경고 모달 표시 상태
+const allowTransferTutorial = ref(false); // 메인 튜토리얼 플로우에서만 하위 튜토리얼 허용
 
 
 
@@ -471,25 +472,24 @@ const getSeatTypeOnly = (seatString) => {
 // 팀 로고 이미지 경로를 가져오는 함수 (getTeamBackgroundImage와 동일한 방식 사용)
 const getTeamLogo = (teamName) => {
   const normalizedTeam = normalizeTeamName(teamName || '').toLowerCase()
-  
   // 디버그: 팀명 로그 출력
   
   // 팀별 로고 매핑 - public 폴더의 로고 파일 사용 (소문자로 통일)
   const teamLogoMap = {
-    'kia타이거즈': '/kia.svg',
-    '삼성라이온즈': '/samsung.svg',
-    'lg트윈스': '/LG.svg',
-    '두산베어스': '/DOOSAN.svg',
-    'kt위즈': '/KT.svg',
-    'ssg랜더스': '/SSG.svg',
-    '롯데자이언츠': '/LOTTE.svg',
-    '한화이글스': '/HanWha.svg',
-    'nc다이노스': '/NC.svg',
-    '키움히어로즈': '/KIWOOM.svg'
+    'kia타이거즈': '/logo/kia.svg',
+    '삼성라이온즈': '/logo/samsung.svg',
+    'lg트윈스': '/logo/LG.svg',
+    '두산베어스': '/logo/DOOSAN.svg',
+    'kt위즈': '/logo/KT.svg',
+    'ssg랜더스': '/logo/SSG.svg',
+    '롯데자이언츠': '/logo/LOTTE.svg',
+    '한화이글스': '/logo/HanWha.svg',
+    'nc다이노스': '/logo/NC.svg',
+    '키움히어로즈': '/logo/KIWOOM.svg'
   }
   
   const logoPath = teamLogoMap[normalizedTeam]
-  
+  console.log(logoPath);
   return logoPath || null
 }
 
@@ -620,12 +620,13 @@ async function fetchTickets(platform) {
     ticketLoading.value = false;
     console.log(` 티켓 로딩 완료`);
     
-    // 티켓이 성공적으로 로드되고 표시된 후 튜토리얼 시작
-    if (tickets.value.length > 0) {
-      // DOM 업데이트 완료를 기다린 후 튜토리얼 시작
+    // 메인 튜토리얼에서 진입했을 때에만 티켓 선택 하위 튜토리얼 자동 시작
+    if (allowTransferTutorial.value && tickets.value.length > 0) {
       setTimeout(() => {
         selectTicketTutorial();
       }, 500);
+      // 중복 트리거 방지
+      allowTransferTutorial.value = false;
     }
   }
 }
@@ -766,12 +767,14 @@ function closeWarningModal() {
   // 1. 티켓 선택 모달 다시 열기
   showTickets.value = true;
   
-  // 2. 튜토리얼이 진행 중이었다면 다시 시작
-  nextTick(() => {
-    setTimeout(() => {
-      selectTicketTutorial(1);
-    }, 100);
-  });
+  // 2. 메인 튜토리얼 플로우에서 온 경우에만 하위 튜토리얼 재시작
+  if (allowTransferTutorial.value) {
+    nextTick(() => {
+      setTimeout(() => {
+        selectTicketTutorial(1);
+      }, 100);
+    });
+  }
 };
 
 // 튜토리얼 관련 로직
@@ -782,16 +785,16 @@ onMounted(() => {
   // localStorage에서 양도 튜토리얼 플래그 확인
   const showTransferTutorialFlag = localStorage.getItem('showTransferTutorial') === 'true';
   
-  // 튜토리얼 모드이거나 양도 튜토리얼 플래그가 설정된 경우 튜토리얼 시작
-  if (isTutorialMode || showTransferTutorialFlag) {
+  // 메인 페이지 튜토리얼에서 명시적으로 진입한 경우에만 하위 튜토리얼 허용
+  allowTransferTutorial.value = isTutorialMode || showTransferTutorialFlag;
+
+  if (allowTransferTutorial.value) {
     console.log('양도 페이지 튜토리얼 조건 충족:', { isTutorialMode, showTransferTutorialFlag });
-    
     // 양도 튜토리얼 플래그 제거 (한 번만 실행되도록)
     if (showTransferTutorialFlag) {
       localStorage.removeItem('showTransferTutorial');
     }
-    
-    // 튜토리얼 시작
+    // 상위(인트로) 단계 시작
     startTransferTutorial();
   }
 });
