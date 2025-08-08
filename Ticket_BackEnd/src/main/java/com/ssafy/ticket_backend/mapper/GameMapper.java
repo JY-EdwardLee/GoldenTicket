@@ -1,5 +1,6 @@
 package com.ssafy.ticket_backend.mapper;
 
+import com.ssafy.ticket_backend.dto.request.GameForChatbotRequest;
 import com.ssafy.ticket_backend.model.BaseballTeams;
 import com.ssafy.ticket_backend.model.Game;
 import com.ssafy.ticket_backend.model.Waitlist;
@@ -37,4 +38,7 @@ public interface GameMapper {
     List<Game> getAllGame();
 
     void cancelWaiting(@Param("userId") Long userId, @Param("gameId") Long gameId);
+
+    // 챗봇에 넘길 게임 정보 가져오기
+    List<GameForChatbotRequest> selectGameForChatbot();
 }

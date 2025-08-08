@@ -76,4 +76,22 @@
     AND game_id = #{gameId}
   </update>
 
+  <!--  챗봇에 넘길 게임 데이터 -->
+  <select id="selectGameForChatbot"
+    resultType="com.ssafy.ticket_backend.dto.request.GameForChatbotRequest">
+    SELECT
+    game_datetime,
+    home_team,
+    away_team,
+    stadium
+    FROM games
+    WHERE
+    game_datetime &gt;= NOW()
+    AND game_datetime &lt;= NOW() + INTERVAL '7 days'
+    AND is_cancelled = false
+    AND is_ended = false
+    ORDER BY game_datetime ASC
+  </select>
+
+
 </mapper>

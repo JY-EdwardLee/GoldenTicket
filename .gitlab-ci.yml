@@ -97,6 +97,8 @@ deploy:
       KAKAOPAY_API_KEY='$KAKAOPAY_API_KEY'
       FE_BASE_URL='$FE_BASE_URL'
       BE_BASE_URL='$BE_BASE_URL'
+      MAIL_USERNAME='$MAIL_USERNAME'
+      MAIL_PASSWORD='$MAIL_PASSWORD'
       bash $DEPLOY_PATH/deploy.sh $JAR_NAME"
 
   only:

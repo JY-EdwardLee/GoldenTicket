@@ -5,9 +5,11 @@
 
   <!-- 그룹 생성기 -->
   <select id="getGames" resultType="com.ssafy.ticket_backend.model.Game">
+    <![CDATA[
     SELECT *
     FROM games
     WHERE game_datetime > NOW();
+    ]]>
   </select>
 
   <!-- 그룹 생성기 -->
@@ -57,25 +59,56 @@
   </select>
 
 
-  <select id="selectOneGroup" parameterType="int">
+  <select id="selectOneGroup" parameterType="long"
+    resultType="com.ssafy.ticket_backend.model.Group">
     SELECT * FROM groups
     WHERE group_id = #{groupId}
   </select>
 
+  <!-- 그룹을 Lock으로 조회 (동시성 제어) -->
+  <select id="selectOneGroupForUpdate" parameterType="long"
+    resultType="com.ssafy.ticket_backend.model.Group">
+    SELECT * FROM groups
+    WHERE group_id = #{groupId}
+    FOR UPDATE
+  </select>
+
   <insert id="insertApplication" parameterType="com.ssafy.ticket_backend.model.Application">
     INSERT INTO group_applications (group_id, user_id)
-    VALUES (#{gameId}, #{userId})
+    VALUES (#{groupId}, #{userId})
   </insert>
 
   <update id="updateGroupCount" parameterType="long">
     UPDATE groups
-    SET 
-      applicants_count = applicants_count + 1,
-      is_active = CASE 
-        WHEN applicants_count + 1 >= 20 THEN false 
-        ELSE is_active 
-      END
+    SET
+    applicants_count = applicants_count + 1,
+    is_active = CASE
+    WHEN applicants_count + 1 >= 20 THEN false
+    ELSE is_active
+    END
     WHERE group_id = #{groupId}
   </update>
+
+  <!-- 게임 시간이 현재 시간보다 지난 그룹들의 is_ended를 true로 업데이트 -->
+  <update id="updateEndedGroups">
+    <![CDATA[
+    UPDATE groups
+    SET is_ended = true
+    WHERE game_id IN (
+      SELECT game_id
+      FROM games
+      WHERE game_datetime < NOW() + INTERVAL '7 days'
+      AND is_ended = false
+    )
+    AND is_ended = false
+    ]]>
+  </update>
+
+  <!-- 그룹의 현재 참가자 수를 조회 -->
+  <select id="selectCountByGroupId" parameterType="long" resultType="int">
+    SELECT applicants_count
+    FROM groups
+    WHERE group_id = #{groupId}
+  </select>
 
 </mapper>
