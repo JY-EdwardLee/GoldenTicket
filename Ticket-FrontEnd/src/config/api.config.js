@@ -1,8 +1,8 @@
 // API 기본 URL 설정
 const API_BASE_URL =
   // 임시 수정
-  import.meta.env.VITE_API_BASE_URL || "https://www.xn--bb0b44m5yw9qd.xn--hu5b25b77nvwc.xn--3e0b707e";
-// import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+  // import.meta.env.VITE_API_BASE_URL || "https://www.xn--bb0b44m5yw9qd.xn--hu5b25b77nvwc.xn--3e0b707e";
+import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 import axios from "axios";
 axios.defaults.baseURL = API_BASE_URL;
