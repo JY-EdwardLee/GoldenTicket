@@ -91,10 +91,13 @@ import { ref, nextTick, computed } from 'vue';
 import {API_CONFIG} from '@/config/api.config.js'
 import { useTeamThemeStore } from '@/stores/teamTheme';
 import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
+import http from '@/utils/http';
 
 const authStore = useAuthStore();
 const themeStore = useTeamThemeStore;
+const router = useRouter();
 themeStore.initializeTheme()
 const themeColors = computed(() => themeStore.currentTheme.value);
 
@@ -154,6 +157,7 @@ const sendMessage = async () => {
       headers: headers,
     });
     console.log(response.data);
+    
     // 봇 응답 추가
     messages.value.push({
       id: Date.now(),
@@ -161,6 +165,13 @@ const sendMessage = async () => {
       text: response.data.answer,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     });
+    
+    // action이 있는 경우 처리
+    if (response.data.action && response.data.action.type === 'navigate' && response.data.action.target === 'application') {
+      await handleApplicationAction(response.data.action.params);
+      router.push(`/mypage/applications`);
+    }
+    
     await nextTick();
     await nextTick();
     scrollToBottom();
