@@ -1,11 +1,10 @@
 package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.response.GroupDetailResponse;
-import com.ssafy.ticket_backend.exception.DatabaseException;
+import com.ssafy.ticket_backend.exception.DuplicateApplicationException;
 import com.ssafy.ticket_backend.exception.GameAlreadyEndedException;
 import com.ssafy.ticket_backend.exception.GroupCapacityExceededException;
 import com.ssafy.ticket_backend.exception.GroupJoinCountException;
-import com.ssafy.ticket_backend.exception.GroupParticipationException;
 import com.ssafy.ticket_backend.mapper.GroupMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.Application;
@@ -24,6 +23,7 @@ public class GroupServiceImpl implements GroupService {
 
     private final GroupMapper groupMapper;
     private final UserMapper userMapper;
+    private final EmailService emailService;
 
 
     /**
@@ -51,40 +51,68 @@ public class GroupServiceImpl implements GroupService {
     }
 
     /**
-     * 그룹 신청하기 Lock 처리 해야할듯.
+     * 단체관람 신청하기 (동시성 제어 포함)
      *
      * @param email, groupId
-     * @return
+     * @return 성공/실패 메세지
      */
+    @Transactional
+    @Override
     public void insertParticipate(String email, long groupId) {
 
+        User user = userMapper.selectUserByEmail(email);
+
+        // Lock으로 그룹 정보 조회 (동시성 제어)
+        Group group = groupMapper.selectOneGroupForUpdate(groupId);
+
+        if (!group.getIsActive()) {
+            throw new GroupCapacityExceededException("정원 초과 하였습니다.");
+        } else if (group.getIsEnded()) {
+            throw new GameAlreadyEndedException("종료된 경기입니다.");
+        }
+
         try {
-            User user = userMapper.selectUserByEmail(email);
-            Group group = groupMapper.selectOneGroup(groupId);
-
-            if (!group.getIsActive()) {
-                throw new GroupCapacityExceededException("정원 초과 하였습니다.");
-            } else if (group.getIsEnded()) {
-                throw new GameAlreadyEndedException("종료된 경기입니다.");
-            }
-
             int result = groupMapper.insertApplication(new Application(groupId, user.getUserId()));
-            if (result != 1) {
-                throw new DatabaseException("회원 정보를 확인해 주세요.");
-            }
-
-            int result2 = groupMapper.updateGroupCount(groupId);
-            if (result2 != 1) {
-                throw new GroupJoinCountException("그룹 집계 중 오류가 발생하였습니다.");
-            }
-
-        } catch (GroupCapacityExceededException | GameAlreadyEndedException |
-                 GroupJoinCountException | DatabaseException e) {
-            throw e;
         } catch (Exception e) {
-            throw new GroupParticipationException("그룹 참여 중 오류가 발생하였습니다.");
+            throw new DuplicateApplicationException("중복 지원은 불가합니다.");
+        }
+
+        int result2 = groupMapper.updateGroupCount(groupId);
+
+        // 그룹 정원이 다 찼을 때 메일 전송
+        int cnt = groupMapper.selectCountByGroupId(groupId);
+
+        // TODO 메일 전송: 비동기 처리
+        if (cnt == 20) {
+            // TODO 파일 생성기 작성해야함.
+
+            String gameInfo = "더미 게임: 삼성 라이온즈 vs KIA 타이거즈 (2024-08-15 18:30)";
+            emailService.sendGroupFullNotification(groupId, gameInfo);
+        }
+
+        if (result2 != 1) {
+            throw new GroupJoinCountException("그룹 집계 중 오류가 발생하였습니다.");
         }
     }
 
+    /**
+     * 스케줄러: 오늘 날짜 + 7일보다 이전 게임 is_ended -> true 업데이트 시점 매일 자정(00:00)
+     */
+    @Override
+    public void updateEndedGroups() {
+        try {
+            // 그룹 테이블만 업데이트 (게임 테이블은 더미 데이터이므로 업데이트하지 않음)
+            // 오늘 날짜 + 7일보다 이전 게임들의 그룹들을 종료 처리
+            int updatedGroupsCount = groupMapper.updateEndedGroups();
+            if (updatedGroupsCount > 0) {
+                System.out.println("스케줄러: " + updatedGroupsCount + "개의 그룹이 종료 처리되었습니다.");
+            } else {
+                System.out.println("스케줄러: 종료할 그룹이 없습니다.");
+            }
+        } catch (Exception e) {
+            System.err.println("스케줄러 실행 중 오류 발생: " + e.getMessage());
+            throw e;
+        }
+    }
 
 }
