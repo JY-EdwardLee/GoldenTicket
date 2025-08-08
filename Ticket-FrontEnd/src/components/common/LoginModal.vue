@@ -97,6 +97,7 @@ const handleKakaoLogin = (e) => {
   const state = encodeURIComponent(window.location.pathname);
   const url = new URL(KAKAO_AUTH_URL.value);
   // url.searchParams.set('state', state);
+  console.log(url.toString());
   window.location.href = url.toString();
 };
 
@@ -105,6 +106,7 @@ const handleNaverLogin = (e) => {
   const state = encodeURIComponent(window.location.pathname);
   const url = new URL(NAVER_AUTH_URL.value);
   // url.searchParams.set("state", state);
+  console.log(url.toString());
   window.location.href = url.toString();
 };
 </script>
