@@ -161,6 +161,7 @@ public class PostServiceImpl implements PostService {
 
             postDetailResponse.setPostUser(postUserResponse);
 
+            System.out.println(postDetailResponse);
             return postDetailResponse;
 
         } catch (PostUserNotFoundException | PostNotFoundException | DatabaseException e) {

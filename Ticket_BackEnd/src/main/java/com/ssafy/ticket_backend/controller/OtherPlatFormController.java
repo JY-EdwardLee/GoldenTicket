@@ -1,5 +1,5 @@
-package com.ssafy.ticket_backend.controller;
 
+package com.ssafy.ticket_backend.controller;
 import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.TicketMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;

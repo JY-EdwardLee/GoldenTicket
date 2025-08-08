@@ -1,6 +1,5 @@
 package com.ssafy.ticket_backend.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -9,12 +8,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig {
 
-    @Value("${FE_BASE_URL}")
-    private String FE_BASE_URL;
+//    @Value("${FE_BASE_URL}")
+//    private String FE_BASE_URL;
+//
+//    @Value("${BE_BASE_URL}")
+//    private String BE_BASE_URL;
 
-    @Value("${BE_BASE_URL}")
-    private String BE_BASE_URL;
 
+    private String FE_BASE_URL = "http://localhost:5173";
+    private String BE_BASE_URL = "http://localhost:8080";
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
