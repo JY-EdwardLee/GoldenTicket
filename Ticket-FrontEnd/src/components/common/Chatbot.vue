@@ -92,6 +92,7 @@ import {API_CONFIG} from '@/config/api.config.js'
 import { useTeamThemeStore } from '@/stores/teamTheme';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
+import { teamNameToEnum } from '@/utils/teamNameMap';
 import axios from 'axios';
 import http from '@/utils/http';
 
@@ -118,7 +119,7 @@ const toggleChat = () => {
   isChatOpen.value = !isChatOpen.value;
 };
 
-const sendMessage = ref('');
+const mainMessage = ref('');
 
 const sendMessage = async () => {
   if (!newMessage.value.trim()) return;
@@ -130,7 +131,7 @@ const sendMessage = async () => {
     text: newMessage.value,
     time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
   });
-  sendMessage.value = newMessage.value
+  mainMessage.value = newMessage.value
   newMessage.value = '';
 
   await nextTick();
@@ -155,7 +156,7 @@ const sendMessage = async () => {
     }
     const response = await axios.post(API_CONFIG.MAIN_PAGE.CHAT, {
       userId: user?.userId || null,
-      question: sendMessage.value,
+      question: mainMessage.value,
       isLogin: authStore.isAuthenticated.value,
     }, {
       headers: headers,
@@ -172,8 +173,19 @@ const sendMessage = async () => {
     
     // action이 있는 경우 처리
     if (response.data.action && response.data.action.type === 'navigate' && response.data.action.target === 'application') {
-      await handleApplicationAction(response.data.action.params);
-      router.push(`/mypage/applications`);
+      const params = response.data.action.params;
+      const confirmation = window.confirm(`${params.date}에 ${params.team} 경기가 있습니다. 바로 응모하시겠어요?`);
+      params.team = teamNameToEnum[params.team];
+      console.log(params);
+      if (confirmation) {
+        const response = await http.post(API_CONFIG.TICKET.GAMES, params)
+        console.log(response.data);
+        const res = await http.post(API_CONFIG.TICKET.APPLY(response.data[0].gameId));
+        console.log(res.data);
+        router.push(`/mypage/applications`);
+      } else {
+        alert('티켓 응모는 응모페이지에서 할 수 있습니다.');
+      }
     }
     
     await nextTick();

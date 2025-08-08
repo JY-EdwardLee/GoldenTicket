@@ -7,6 +7,13 @@ const API_BASE_URL =
 import axios from "axios";
 axios.defaults.baseURL = API_BASE_URL;
 
+/**
+ * 메인 페이지 API 엔드포인트
+ * @typedef {Object} MAIN_PAGE
+ * @property {string} USER - 사용자 랭킹 API
+ * @property {string} TEAM - 팀 랭킹 API
+ * @property {string} CHAT - 채팅 API
+ */
 const MAIN_PAGE = {
   USER: `${API_BASE_URL}/rank/user`,
   TEAM: `${API_BASE_URL}/rank/team`,
@@ -52,7 +59,7 @@ const TICKET = {
   LIST: `${API_BASE_URL}/tickets`,
   DETAIL: (id) => `${API_BASE_URL}/tickets/details/${id}`,
   QR: (id) => `${API_BASE_URL}/qrcode/${id}`,
-  APPLY: `${API_BASE_URL}/tickets/apply`,
+  APPLY: (gameId) => `${API_BASE_URL}/games/${gameId}/applications`,
   GAMES: `${API_BASE_URL}/games`, // 응모 - 경기 목록 불러오기(0729)
   CANCEL: (id) => `${API_BASE_URL}/games/${id}/applications`,
   TRANSFER: `${API_BASE_URL}/tickets/transfer`,

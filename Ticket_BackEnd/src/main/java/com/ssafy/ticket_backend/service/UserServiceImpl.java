@@ -73,12 +73,9 @@ public class UserServiceImpl implements UserService {
     private String naverClientId;
     @Value("${naver.client.secret}")
     private String naverClientSecret;
-//
-//    @Value("${BE_BASE_URL}")
-//    private String BE_BASE_URL;
 
-    private String FE_BASE_URL = "http://localhost:5173";
-    private String BE_BASE_URL = "http://localhost:8080";
+    @Value("${BE_BASE_URL}")
+    private String BE_BASE_URL;
 
 
     /**
