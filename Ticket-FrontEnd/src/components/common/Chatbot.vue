@@ -153,7 +153,6 @@ const sendMessage = async () => {
     }, {
       headers: headers,
     });
-    console.log(response.data);
     // 봇 응답 추가
     messages.value.push({
       id: Date.now(),
