@@ -26,7 +26,7 @@ if not os.getenv("PINECONE_ENVIRONMENT"):
 
 # --- GMS LLM(ChatUpstage) 객체 생성 ---
 chat_upstage = ChatUpstage(
-    model_name="gpt-4.1-mini",
+    model_name="gpt-4.1",
     temperature=0.3,
     max_tokens=4096,
     base_url="https://gms.ssafy.io/gmsapi/api.openai.com/v1",
@@ -108,7 +108,7 @@ def query_chatbot(req: MessageRequest):
         print(f"질문: {question}")
         print(f"세션 ID: {req.sessionId}")
         print(f"유저 정보: {user_info}")
-
+        
         # 사용자 정보 + 질문 포함한 프롬프트 컨텍스트 구성
         context = f"""
 사용자 정보: {user_info}
@@ -149,6 +149,9 @@ def query_chatbot(req: MessageRequest):
   "action": {{ "type": "...", "target": "...", "params": {{...}} }} or null
 }}
 
+7. action.params.team의 명칭은 항상 다음 규칙을 따라서 답변에 담아줘
+  'KIA타이거즈', '삼성라이온즈', 'LG트윈스', '두산베어스', 'KT위즈', 'SSG랜더스', '롯데자이언츠', '한화이글스', 'NC다이노스', '키움히어로즈'
+
 [사용 가능한 링크 목록]
 - 양도: http://i13a109.p.ssafy.io/transfer
 - 응모: http://i13a109.p.ssafy.io/application
@@ -187,6 +190,7 @@ def query_chatbot(req: MessageRequest):
                 reply = raw_output
                 link = None
                 action = None
+
 
             return {
                 "reply": reply,
