@@ -11,6 +11,7 @@ import com.ssafy.ticket_backend.model.Game;
 import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.TicketStatus;
 import com.ssafy.ticket_backend.model.User;
+import com.ssafy.ticket_backend.model.UserRole;
 import com.ssafy.ticket_backend.model.Waitlist;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -59,6 +60,10 @@ public class GameServiceImpl implements GameService {
             // 정지된 사용자라면
             if (user.getIsBlock()) {
                 throw new UserBlockException("정지된 사용자입니다.");
+            }
+
+            if (!user.getUserRole().equals(UserRole.SENIOR)) {  // 시니어 유저가 아니라면
+                throw new UserBlockException("시니어 사용자만 응모 가능합니다.");
             }
 
             // 게임이 있는지 확인
