@@ -19,8 +19,8 @@
       <li><a href="#" @click.prevent="goToApplication">응모</a></li>
       <li><a href="#" @click.prevent="goToTransfer">양도</a></li>
       <li><router-link to="/bulletin">게시판</router-link></li>
-      <li><router-link to="/guide">이용가이드</router-link></li>
-      <li><a href="#" @click.prevent="openTutorial">튜토리얼</a></li>
+      <li><router-link to="/guide">서비스설명</router-link></li>
+      <li><a href="#" @click.prevent="openTutorial">이용가이드</a></li>
     </ul>
     
     <!-- Desktop auth links -->
@@ -486,4 +486,10 @@ const handleLogout = async () => {
     display: none !important;
   }
 }
+
+/* 응모~이용가이드 중앙으로 위치시키기 위한 이동*/
+.nav-links{
+  margin-left: 30px;
+}
+
 </style>

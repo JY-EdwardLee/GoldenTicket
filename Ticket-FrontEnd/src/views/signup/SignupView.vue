@@ -157,6 +157,12 @@ const handleSubmit = async () => {
 
     // 리다이렉트 처리
     console.log(userData);
+    // 회원가입 성공 시 최초 튜토리얼 플래그 초기화 (0: 아직 미노출)
+    try {
+      localStorage.setItem('firstSignup', '0');
+    } catch (e) {
+      console.warn('firstSignup 플래그 저장 실패:', e);
+    }
     if (socialProvider.value === "KAKAO") {
       const url = new URL(KAKAO_AUTH_URL.value);
       window.location.href = url.toString();

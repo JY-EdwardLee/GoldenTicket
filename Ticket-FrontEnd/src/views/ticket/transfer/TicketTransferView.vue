@@ -252,7 +252,7 @@
       </div>
     </main>
 
-    <!-- 경고 모달 -->
+    <!-- 경고 모달(응모 인원 0명일 때) -->
     <div v-if="showWarningModal" class="warning-modal-overlay" @click="closeWarningModal">
       <div class="warning-modal-container" @click.stop>
         <div class="warning-modal-content">
@@ -273,8 +273,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, nextTick } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { driver } from 'driver.js';
+import { useTutorial } from '@/views/tutorial/useTutorial';
 import { teamColortoEnum } from '@/utils/teamColor.js';
 // 화면 렌더에 필요한 기본 변수 선언 (없으면 추가)
 
@@ -560,15 +562,19 @@ const getTicketStyle = (ticket) => {
 }
 
 async function fetchTickets(platform) {
-  console.log(` NOL 버튼 클릭됨 - 플랫폼: ${platform}`);
+
+  // 이전 튜토리얼 닫기
+  const driverObj = driver();
+  if(driverObj){
+    driverObj.destroy();
+  }
+
   showTickets.value = true;
   activeTab.value = platform === 'NOL' ? 'NOL' : '티켓링크';
   ticketLoading.value = true;
   ticketError.value = '';
   try {
-    console.log(` API 요청 시작: tickets/platform/${platform}`);
     const res = await http.get(`tickets/platform/${platform}`);
-    console.log(` API 응답 받음:`, res.data);
     console.log(` 받은 티켓 개수: ${res.data.length}개`);
     
     tickets.value = res.data.map(ticket => {
@@ -613,6 +619,14 @@ async function fetchTickets(platform) {
   } finally {
     ticketLoading.value = false;
     console.log(` 티켓 로딩 완료`);
+    
+    // 티켓이 성공적으로 로드되고 표시된 후 튜토리얼 시작
+    if (tickets.value.length > 0) {
+      // DOM 업데이트 완료를 기다린 후 튜토리얼 시작
+      setTimeout(() => {
+        selectTicketTutorial();
+      }, 500);
+    }
   }
 }
 
@@ -668,9 +682,19 @@ async function switchTab(platform) {
 }
 
 const router = useRouter();
+const route = useRoute();
+const { startTransferTutorial, selectTicketTutorial, transferConfirmTutorial, closeTutorial } = useTutorial();
 
-function handleApply(ticket) {
-  // 응모 인원이 0명인 경우 경고 모달 표시
+// 튜토리얼 닫기 함수는 이제 useTutorial에서 가져옵니다.
+
+async function handleApply(ticket) {
+  // 1. 진행 중인 튜토리얼이 있다면 닫기
+  closeTutorial();
+  
+  // 2. 튜토리얼이 완전히 닫히도록 잠시 대기
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
+  // 3. 응모 인원이 0명인 경우
   if (ticket.waitNumber === 0) {
     showWarningModal.value = true;
     return;
@@ -678,10 +702,19 @@ function handleApply(ticket) {
   
   selectedTicket.value = ticket;
   showDetailPage.value = true;
+  
+  // 4. 상세 페이지 표시 후 양도 확인 튜토리얼 시작
+  setTimeout(() => {
+    transferConfirmTutorial();
+  }, 500); // DOM 렌더링 완료 대기
 }
+
 async function handleApplyComplete() {
   try {
-    // 응모 진행중 상태로 변경
+    // 1. 진행 중인 튜토리얼이 있다면 닫기
+    closeTutorial();
+    
+    // 2. 응모 진행중 상태로 변경
     isApplying.value = true;
     
     // 양도 API 호출
@@ -726,10 +759,42 @@ function handleCompleteConfirm() {
   activeTab.value = 'NOL';
 }
 
-// 경고 모달 닫기 함수
+// 경고 모달 닫기 함수(응모 인원 0명일 때)
 function closeWarningModal() {
   showWarningModal.value = false;
-}
+  
+  // 1. 티켓 선택 모달 다시 열기
+  showTickets.value = true;
+  
+  // 2. 튜토리얼이 진행 중이었다면 다시 시작
+  nextTick(() => {
+    setTimeout(() => {
+      selectTicketTutorial(1);
+    }, 100);
+  });
+};
+
+// 튜토리얼 관련 로직
+onMounted(() => {
+  // URL 파라미터에서 tutorial=true 확인
+  const isTutorialMode = route.query.tutorial === 'true';
+  
+  // localStorage에서 양도 튜토리얼 플래그 확인
+  const showTransferTutorialFlag = localStorage.getItem('showTransferTutorial') === 'true';
+  
+  // 튜토리얼 모드이거나 양도 튜토리얼 플래그가 설정된 경우 튜토리얼 시작
+  if (isTutorialMode || showTransferTutorialFlag) {
+    console.log('양도 페이지 튜토리얼 조건 충족:', { isTutorialMode, showTransferTutorialFlag });
+    
+    // 양도 튜토리얼 플래그 제거 (한 번만 실행되도록)
+    if (showTransferTutorialFlag) {
+      localStorage.removeItem('showTransferTutorial');
+    }
+    
+    // 튜토리얼 시작
+    startTransferTutorial();
+  }
+});
 
 </script>
 
@@ -2576,6 +2641,11 @@ function closeWarningModal() {
   
   .complete-card {
     width: 500px;
+  }
+
+  :deep(button:focus) {
+    outline: none !important;
+    box-shadow: none !important;
   }
 }
 </style>
