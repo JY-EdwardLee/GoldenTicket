@@ -38,12 +38,12 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
   const notificationStore = useNotificationStore();
 
   stompClient = Stomp.over(socket);
-  // console.log("[WebSocket] Stomp 클라이언트 생성 완료");
+  if (import.meta?.env?.DEV) console.log('[WebSocket] creating STOMP client');
 
   stompClient.connect(
     { Authorization: `Bearer ${jwtToken}` },
     () => {
-      console.log("[WebSocket] 연결 성공");
+      if (import.meta?.env?.DEV) console.log("[WebSocket] 연결 성공");
 
       //  특정 유저의 알림을 받아오기 위한 구독
       stompClient.subscribe(`/user/${userEmail}/queue/notify`, (message) => {
@@ -58,8 +58,12 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
         // 알림을 Pinia store에 추가
         notificationStore.addNotification(payload);
 
-        // callback으로 받은 메시지 처리
-        onMessageCallback(payload);
+        if (import.meta?.env?.DEV) console.log('[WebSocket] message received', payload);
+
+        // callback으로 받은 메시지 처리 (선택적)
+        if (typeof onMessageCallback === 'function') {
+          onMessageCallback(payload);
+        }
       });
 
       // console.log("[WebSocket] user/queue/notify 구독 시작");
