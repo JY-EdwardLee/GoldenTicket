@@ -99,7 +99,6 @@ const handleKakaoLogin = (e) => {
   console.log(KAKAO_AUTH_URL.value);
   const url = new URL(KAKAO_AUTH_URL.value);
   // url.searchParams.set('state', state);
-  console.log(url);
   console.log(url.toString());
   window.location.href = url.toString();
 };
