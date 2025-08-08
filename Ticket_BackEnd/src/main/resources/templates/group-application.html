@@ -54,6 +54,24 @@
           font-size: 12px;
           color: #666;
           border: 2px solid #ddd;
+          overflow: hidden;
+      }
+
+      .team-logo img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+          padding: 4px;
+      }
+
+      .fallback-logo {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          color: #666;
       }
 
       .required-note {
@@ -244,28 +262,16 @@
 <div class="container">
   <div class="form-container">
     <h1 class="form-title">
-      <div class="team-logo">로고</div>
+      <div class="team-logo">
+        <img src="/${teamLogoFileName}.svg" alt="${teamName} 로고"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="fallback-logo" style="display: none;">로고</div>
+      </div>
       ${teamName} 단체관람 신청서 작성
     </h1>
     <p class="required-note">* 표시는 필수입력란 입니다.</p>
 
-    <div class="form-section">
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">
-            <span class="required">*</span> 관람일자
-          </label>
-          <div class="date-input-group">
-            <input type="text" class="form-input date-input" value="${viewingDate}" readonly>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">
-            <span class="required">*</span> 인원수
-          </label>
-          <input type="text" class="form-input" value="20명" readonly>
-        </div>
-      </div>
+
 
       <div class="form-row">
         <div class="form-group">
@@ -274,6 +280,9 @@
           </label>
           <input type="text" class="form-input" value="Golden-Ticket" readonly>
         </div>
+      </div>
+
+      <div class="form-row">
         <div class="form-group">
           <label class="form-label">
             <span class="required">*</span> 신청자

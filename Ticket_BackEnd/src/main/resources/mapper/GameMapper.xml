@@ -76,4 +76,12 @@
     AND game_id = #{gameId}
   </update>
 
+  <select id="getUserIdByGroupId" parameterType="long" resultType="long">
+    SELECT user_id
+    FROM group_applications
+    WHERE group_id = #{groupId}
+    ORDER BY created_at ASC
+    LIMIT 1
+  </select>
+
 </mapper>
