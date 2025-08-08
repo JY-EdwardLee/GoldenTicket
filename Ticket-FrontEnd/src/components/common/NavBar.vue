@@ -297,6 +297,7 @@ const handleLogout = async () => {
 
 .nav-links li {
   font-weight: 500;
+  font-size: 1.3rem;
 }
 
 .nav-links a {
