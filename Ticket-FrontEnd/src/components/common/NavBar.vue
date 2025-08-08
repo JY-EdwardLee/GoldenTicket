@@ -46,7 +46,7 @@
             <span>골든 티켓</span>
           </router-link>
         </div>
-        <button class="close-btn" @click="closeMobileMenu">×</button>
+        <!-- <button class="close-btn" @click="closeMobileMenu">x</button> -->
       </div>
       
       <ul class="mobile-nav-links">
@@ -71,6 +71,9 @@
 
      <!-- 로그인 모달 -->
    <LoginModal :isVisible="isLoginModalVisible" @close="closeLoginModal" />
+   
+   <!-- 모바일 알림 모달 -->
+   <NotificationModal :isVisible="isMobileNotificationModalVisible" @close="closeMobileNotificationModal" />
 </template>
 
 <script setup>
@@ -79,6 +82,7 @@ import { useRouter } from "vue-router";
 import LoginModal from "./LoginModal.vue";
 import NotificationDropdown from "./NotificationDropdown.vue";
 import MobileNotificationButton from "./MobileNotificationButton.vue";
+import NotificationModal from "./NotificationModal.vue";
 import { useAuthStore } from "@/stores/auth";
 import { useTutorial } from "@/views/tutorial/useTutorial";
 import axios from "axios";
@@ -103,8 +107,11 @@ const pendingRedirect = ref(null); // 로그인 후 리다이렉트할 경로 �
 // Mobile menu state
 const isMobileMenuOpen = ref(false);
 
-// 알림 드롭다운 컴포넌트 참조
-const notificationDropdown = ref(null);
+// 모바일 알림 모달 상태
+const isMobileNotificationModalVisible = ref(false);
+
+// 알림 드롭다운 컴포넌트 참조 (더 이상 사용하지 않음)
+// const notificationDropdown = ref(null);
 
 // 컴포넌트 마운트 시 로그인 상태 확인
 onMounted(() => {
@@ -177,10 +184,12 @@ const handleMobileLogout = () => {
 // 모바일 알림 처리
 const handleMobileNotification = () => {
   closeMobileMenu();
-  // 알림 드롭다운 토글
-  if (notificationDropdown.value) {
-    notificationDropdown.value.toggleNotificationModal();
-  }
+  isMobileNotificationModalVisible.value = true;
+};
+
+// 모바일 알림 모달 닫기
+const closeMobileNotificationModal = () => {
+  isMobileNotificationModalVisible.value = false;
 };
 
 
@@ -393,7 +402,7 @@ const handleLogout = async () => {
   font-size: 1.5rem;
 }
 
-.close-btn {
+/* .close-btn {
   background: none;
   border: none;
   font-size: 2rem;
@@ -405,7 +414,7 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-}
+} */
 
 .mobile-nav-links {
   list-style: none;
