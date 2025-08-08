@@ -4,9 +4,6 @@ const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "/api";
   // import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
-// const LOGIN_BASE_URL = 
-//   import.meta.env.VITE_LOGIN_BASE_URL || "https://www.xn--bb0b44m5yw9qd.xn--hu5b25b77nvwc.xn--3e0b707e/";
-
 import axios from "axios";
 // axios.defaults.baseURL = API_BASE_URL;
 
@@ -28,48 +25,48 @@ const AUTH = {
 
 // 사용자 관련 엔드포인트
 const USER = {
-  LOGIN: `${API_BASE_URL}/users/login-user`,
-  PROFILE: `${API_BASE_URL}/users/me`,
-  UPDATE_PROFILE: `${API_BASE_URL}/users/me`,
-  APPLICANTS: `${API_BASE_URL}/users/me/applications`,
-  PAYMENTS: `${API_BASE_URL}/users/me/payments`,
-  TICKETS: `${API_BASE_URL}/users/me/tickets`,
-  POSTS: `${API_BASE_URL}/users/me/posts`,
-  PLATFORMS: `${API_BASE_URL}/users/platform-link`,
-  CHANGE_PASSWORD: `${API_BASE_URL}/users/me/password`,
-  DELETE_ACCOUNT: `${API_BASE_URL}/users/me`,
+  LOGIN: `/users/login-user`,
+  PROFILE: `/users/me`,
+  UPDATE_PROFILE: `/users/me`,
+  APPLICANTS: `/users/me/applications`,
+  PAYMENTS: `/users/me/payments`,
+  TICKETS: `/users/me/tickets`,
+  POSTS: `/users/me/posts`,
+  PLATFORMS: `/users/platform-link`,
+  CHANGE_PASSWORD: `/users/me/password`,
+  DELETE_ACCOUNT: `/users/me`,
   PAYMENT: {
     KAKAO: {
-      READY: `${API_BASE_URL}/payment/kakao/ready`,
-      COMPLETE: `${API_BASE_URL}/payment/kakao/complete`,
+      READY: `/payment/kakao/ready`,
+      COMPLETE: `/payment/kakao/complete`,
     },
     NAVER: {
-      READY: `${API_BASE_URL}/payment/naver/ready`,
-      COMPLETE: `${API_BASE_URL}/payment/naver/complete`,
+      READY: `/payment/naver/ready`,
+      COMPLETE: `/payment/naver/complete`,
     },
   },
 };
 
 // 티켓 관련 엔드포인트
 const TICKET = {
-  LIST: `${API_BASE_URL}/tickets`,
-  DETAIL: (id) => `${API_BASE_URL}/tickets/details/${id}`,
-  QR: (id) => `${API_BASE_URL}/qrcode/${id}`,
-  APPLY: `${API_BASE_URL}/tickets/apply`,
-  GAMES: `${API_BASE_URL}/games`, // 응모 - 경기 목록 불러오기(0729)
-  CANCEL: (id) => `${API_BASE_URL}/games/${id}/applications`,
-  TRANSFER: `${API_BASE_URL}/tickets/transfer`,
-  MY_TICKETS: `${API_BASE_URL}/tickets`,
+  LIST: `/tickets`,
+  DETAIL: (id) => `/tickets/details/${id}`,
+  QR: (id) => `/qrcode/${id}`,
+  APPLY: `/tickets/apply`,
+  GAMES: `/games`, // 응모 - 경기 목록 불러오기(0729)
+  CANCEL: (id) => `/games/${id}/applications`,
+  TRANSFER: `/tickets/transfer`,
+  MY_TICKETS: `/tickets`,
 };
 
 // 게시판 관련 엔드포인트
 const BOARD = {
-  LIST: `${API_BASE_URL}/posts`,
-  DETAIL: (id) => `${API_BASE_URL}/posts/${id}`,
-  CREATE: `${API_BASE_URL}/posts`,
-  UPDATE: (id) => `${API_BASE_URL}/posts/${id}`,
-  DELETE: (id) => `${API_BASE_URL}/posts/${id}`,
-  COMMENTS: (boardId) => `${API_BASE_URL}/posts/${boardId}/comments`,
+  LIST: `/posts`,
+  DETAIL: (id) => `/posts/${id}`,
+  CREATE: `/posts`,
+  UPDATE: (id) => `/posts/${id}`,
+  DELETE: (id) => `/posts/${id}`,
+  COMMENTS: (boardId) => `/posts/${boardId}/comments`,
 };
 
 
