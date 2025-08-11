@@ -105,12 +105,12 @@ public class GroupServiceImpl implements GroupService {
                 if (emailService != null && mailUsername != null && !mailUsername.isEmpty()) {
                     emailService.sendEmailWithHtmlAttachment(mailUsername, subject, htmlContent,
                         "");
-                    log.info("단체 관람 신청서 HTML 본문 메일 전송 완료: 그룹 ID {}", groupId);
+//                    log.info("단체 관람 신청서 HTML 본문 메일 전송 완료: 그룹 ID {}", groupId);
                 } else {
-                    log.warn("이메일 서비스가 구성되지 않아 메일을 전송할 수 없습니다. 그룹 ID: {}", groupId);
+//                    log.warn("이메일 서비스가 구성되지 않아 메일을 전송할 수 없습니다. 그룹 ID: {}", groupId);
                 }
             } catch (IOException e) {
-                log.error("HTML 신청서 생성 중 오류 발생: {}", e.getMessage(), e);
+//                log.error("HTML 신청서 생성 중 오류 발생: {}", e.getMessage(), e);
             }
         }
     }
@@ -164,8 +164,7 @@ public class GroupServiceImpl implements GroupService {
 
         data.put("emailList", "참가자 이메일 목록:\n" + emailInfo.toString());
 
-        log.info("HTML 생성 데이터 - 팀명: {}, 게임날짜: {}, 신청자: {}, 전화번호: {}",
-            teamName, gameDate, applicantName, data.get("phoneNumber"));
+//        log.info("HTML 생성 데이터 - 팀명: {}, 게임날짜: {}, 신청자: {}, 전화번호: {}", teamName, gameDate, applicantName, data.get("phoneNumber"));
 
         String htmlContent = htmlTemplateUtil.generateGroupApplicationHtml(data);
 
@@ -180,12 +179,12 @@ public class GroupServiceImpl implements GroupService {
         try {
             int updatedGroupsCount = groupMapper.updateEndedGroups();
             if (updatedGroupsCount > 0) {
-                log.info("스케줄러: {}개의 그룹이 종료 처리되었습니다.", updatedGroupsCount);
+//                log.info("스케줄러: {}개의 그룹이 종료 처리되었습니다.", updatedGroupsCount);
             } else {
-                log.info("스케줄러: 종료할 그룹이 없습니다.");
+//                log.info("스케줄러: 종료할 그룹이 없습니다.");
             }
         } catch (Exception e) {
-            log.error("스케줄러 실행 중 오류 발생: {}", e.getMessage(), e);
+//            log.error("스케줄러 실행 중 오류 발생: {}", e.getMessage(), e);
             throw e;
         }
     }

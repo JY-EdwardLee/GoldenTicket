@@ -28,17 +28,13 @@ public class EmailServiceImpl implements EmailService {
 
             helper.setTo(to);
             helper.setSubject(subject);
-            
+
             // HTML 내용을 이메일 본문으로 직접 설정
             helper.setText(htmlContent, true); // true는 HTML 형식
 
             mailSender.send(message);
-            log.info("HTML 본문 메일 전송 완료: {}", to);
-
         } catch (MessagingException e) {
-            log.error("HTML 본문 메일 전송 중 오류 발생 - 수신자: {}, 오류: {}", to, e.getMessage(), e);
+//            log.error("HTML 본문 메일 전송 중 오류 발생 - 수신자: {}, 오류: {}", to, e.getMessage(), e);
         }
     }
-
-    
 }
