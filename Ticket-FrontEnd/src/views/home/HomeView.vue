@@ -402,7 +402,7 @@ const userRankingData = ref([]);
 const fetchUserRanking = async () => {
   try {
     const response = await axios.get(API_CONFIG.MAIN_PAGE.USER);
-    
+    console.log(response.data);
     // API 응답 데이터를 RankingCard 컴포넌트에 맞는 형태로 변환
     userRankingData.value = response.data.map(item => ({
       name: item.userName,
