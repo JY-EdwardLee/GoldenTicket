@@ -51,4 +51,5 @@ public interface UserMapper {
     void increaseWeightByUserId(@Param("userId") Long userId);
 
     String getNickNameByUserId(Long userId);
+
 }
