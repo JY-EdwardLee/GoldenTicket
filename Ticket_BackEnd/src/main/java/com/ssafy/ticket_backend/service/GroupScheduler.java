@@ -17,12 +17,12 @@ public class GroupScheduler {
      */
     @Scheduled(cron = "0 0 0 * * ?") // 매일 자정 00:00에 실행
     public void updateEndedGroupsScheduler() {
-        log.info("=== 그룹 종료 스케줄러 실행 시작 (매일 자정) ===");
+//        log.info("=== 그룹 종료 스케줄러 실행 시작 (매일 자정) ===");
         try {
             groupService.updateEndedGroups();
-            log.info("=== 그룹 종료 스케줄러 실행 완료 (매일 자정) ===");
+//            log.info("=== 그룹 종료 스케줄러 실행 완료 (매일 자정) ===");
         } catch (Exception e) {
-            log.error("그룹 종료 스케줄러 실행 중 오류 발생: {}", e.getMessage(), e);
+//            log.error("그룹 종료 스케줄러 실행 중 오류 발생: {}", e.getMessage(), e);
         }
     }
 }
