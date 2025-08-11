@@ -76,11 +76,11 @@ public class PostServiceImpl implements PostService {
                             updatedImageUrl);
 
                         if (updateResult != 1) {
-                            System.err.println("이미지 URL 업데이트 실패");
+//                            System.err.println("이미지 URL 업데이트 실패");
                         }
                     }
                 } catch (Exception e) {
-                    System.err.println("이미지 키 변경 실패: " + e.getMessage());
+//                    System.err.println("이미지 키 변경 실패: " + e.getMessage());
                     // 이미지 키 변경 실패해도 게시글 작성은 성공으로 처리
                 }
             }
@@ -160,7 +160,7 @@ public class PostServiceImpl implements PostService {
 
             postDetailResponse.setPostUser(postUserResponse);
 
-            System.out.println(postDetailResponse);
+//            System.out.println(postDetailResponse);
             return postDetailResponse;
 
         } catch (PostUserNotFoundException | PostNotFoundException | DatabaseException e) {

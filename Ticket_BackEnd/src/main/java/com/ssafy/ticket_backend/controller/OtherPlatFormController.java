@@ -94,17 +94,14 @@ public class OtherPlatFormController {
                     ticketMapper.insertOtherPlatformTicket(ticket);
 
                     generatedCount++;
-                    System.out.println(
-                        "생성된 티켓: " + ticket.getPlatform() + " | " + ticket.getSeat() + " | "
-                            + ticket.getPrice() + "원 | " + game.getHomeTeam() + " vs "
-                            + game.getAwayTeam());
+//                    System.out.println("생성된 티켓: " + ticket.getPlatform() + " | " + ticket.getSeat() + " | "+ ticket.getPrice() + "원 | " + game.getHomeTeam() + " vs " + game.getAwayTeam());
                 }
             }
 
             return "더미 데이터 생성 완료 - 생성된 티켓 수: " + generatedCount;
 
         } catch (Exception e) {
-            System.out.println("더미 데이터 생성 중 오류: " + e.getMessage());
+//            System.out.println("더미 데이터 생성 중 오류: " + e.getMessage());
             e.printStackTrace();
             return "더미 데이터 생성 실패: " + e.getMessage();
         }
