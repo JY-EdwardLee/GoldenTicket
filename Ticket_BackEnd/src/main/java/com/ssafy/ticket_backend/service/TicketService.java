@@ -7,6 +7,8 @@ public interface TicketService {
 
     TicketResponse transferTicket(String userEmail, Long ticketId);
 
+    List<TicketResponse> transferGroupTicket(String userEmail, List<Long> ticketId);
+
     List<TicketResponse> getTicketsFromOtherPlatform(String userEmail, String platform);
 
     void completeTransfer(String ticketId, String userId);

@@ -1,5 +1,6 @@
 package com.ssafy.ticket_backend.mapper;
 
+import com.ssafy.ticket_backend.model.GroupWaitlist;
 import com.ssafy.ticket_backend.model.OtherPlatformTicket;
 import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.Waitlist;
@@ -24,6 +25,10 @@ public interface TicketMapper {
     List<Ticket> selectTicketsByBuyerId(Long userId);
 
     List<Waitlist> selectWaitingWaitListByGameId(@Param("gameId") Long gameId);
+
+    List<GroupWaitlist> selectGroupWaitingWaitListByGameIdAndNumberOfPeople(
+        @Param("gameId") Long gameId,
+        @Param("tickets") int tickets);
 
     int countWaitListByGameId(Long gameId);
 

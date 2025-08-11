@@ -1,6 +1,5 @@
 package com.ssafy.ticket_backend.service;
 
-import com.ssafy.ticket_backend.dto.response.GameResponse;
 import com.ssafy.ticket_backend.dto.response.TicketResponse;
 import com.ssafy.ticket_backend.exception.TicketException;
 import com.ssafy.ticket_backend.mapper.GameMapper;
@@ -8,6 +7,8 @@ import com.ssafy.ticket_backend.mapper.TicketMapper;
 import com.ssafy.ticket_backend.mapper.TransactionMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.Game;
+import com.ssafy.ticket_backend.model.GroupTransaction;
+import com.ssafy.ticket_backend.model.GroupWaitlist;
 import com.ssafy.ticket_backend.model.OtherPlatformTicket;
 import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.TicketStatus;
@@ -121,11 +122,121 @@ public class TicketServiceImpl implements TicketService {
             }
 
             TicketResponse ticketResponse = new TicketResponse(ticket);
-            ticketResponse.setGame(
-                new GameResponse(game.getGameId(), game.getGameDateTime(), game.getHomeTeam(),
-                    game.getAwayTeam(), game.getStadium()));
+            ticketResponse.setGame(game.toGameResponse());
 
             return ticketResponse;
+        } catch (TicketException e) {
+            throw e;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new TicketException("티켓 양도 중 오류가 발생했습니다.");
+        }
+    }
+
+    @Transactional
+    @Override
+    public List<TicketResponse> transferGroupTicket(String userEmail, List<Long> ticketId) {
+        try {
+            User seller = userMapper.selectUserByEmail(userEmail);
+            List<Ticket> tickets = new ArrayList<>();
+            Game game = gameMapper.selectGameByGameId(
+                ticketMapper.selectTicketByTicketId(ticketId.get(0)).getGameId());
+
+            if (game.isEnded()) {  // 이미 끝난 경기라면
+                throw new TicketException("이미 종료된 경기입니다.");
+            }
+
+            if (game.getGameDateTime().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new TicketException("게임 시작 2시간 이내에는 양도 할 수 없습니다.");
+            }
+
+            for (Long tId : ticketId) {
+                Ticket ticket = ticketMapper.selectTicketByTicketId(tId);
+
+                if (!seller.getUserId().equals(ticket.getSellerId())) {  // 판매자의 티켓이 아니라면
+                    throw new TicketException("잘못된 티켓입니다.");
+                }
+
+                if (!ticket.getTicketStatus()
+                    .equals(TicketStatus.BEFORE_ASSIGNMENT)) {  // 양도 전 티켓이 아니라면
+                    throw new TicketException("양도 전 티켓이 아닙니다.");
+                }
+
+                tickets.add(ticket);
+            }
+
+            List<GroupWaitlist> groupWaitlists = ticketMapper.selectGroupWaitingWaitListByGameIdAndNumberOfPeople(
+                game.getGameId(), tickets.size());
+            // 대기열이 있다면
+            if (!groupWaitlists.isEmpty()) {
+                // 무작위 추첨
+                List<Long> randomPicks = new ArrayList<>();
+                for (GroupWaitlist w : groupWaitlists) {
+                    User u = userMapper.selectUserByUserId(w.getUserId());
+
+                    do {
+                        randomPicks.add(u.getUserId());
+
+                        u.setWeight(u.getWeight() / 10);
+                    } while (u.getWeight() > 0);
+                }
+
+                Long buyer = randomPicks.get(
+                    ThreadLocalRandom.current().nextInt(randomPicks.size()));
+
+                GroupWaitlist groupWaitlist = transactionMapper.selectGroupWaitlistByUserIdAndGameId(
+                    buyer, game.getGameId());
+                GroupTransaction groupTransaction = new GroupTransaction();
+
+                for (Ticket ticket : tickets) {
+                    ticket.setBuyerId(buyer);
+                    ticket.setTicketStatus(TicketStatus.BEING_PAYING);
+                    ticket.setMatchedDate(LocalDateTime.now());
+
+                    groupTransaction.getTicketIds().add(ticket.getTicketId());
+
+                    ticketMapper.updateTicket(ticket);
+                    userMapper.decreaseWeightByUserId(buyer);  // 가중치 감소
+                }
+
+                groupTransaction.setBuyerId(buyer);
+                groupTransaction.setSellerId(seller.getUserId());
+                groupTransaction.setTransactionStatus("WAITING_PAYING");
+
+                transactionMapper.insertGroupTransaction(groupTransaction);
+                Long transactionId = groupTransaction.getTransactionId();
+
+                groupWaitlist.setWaitlistStatus(WaitlistStatus.WAITING_PAYING);
+                groupWaitlist.setTransactionId(transactionId);
+                transactionMapper.updateGroupWaitlist(groupWaitlist);
+
+                User buyUser = userMapper.selectUserByUserId(buyer);
+
+                String text = "[골든티켓]" + "\n" + groupWaitlist.getCreatedAt().getMonthValue() + "월 "
+                    + groupWaitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다." + "\n"
+                    + "30분 이내 결제해주시기 바랍니다." + "\n";
+                smsService.sendSMS(buyUser.getPhoneNumber(), text);
+
+                // **실시간 알림 전송**
+                String realTimeMessage =
+                    "당첨된 티켓 : " + game.getHomeTeam() + " vs " + game.getAwayTeam()
+                        + "\n응모하신 티켓이 당첨되었습니다. 30분 이내 결제해주시기 바랍니다.";
+
+                // WebSocket을 통해 실시간 알림 전송
+                notificationService.sendNotificationToUser(buyUser.getEmail(), realTimeMessage);
+            } else {  // 대기열이 없다면
+                throw new TicketException("응모자가 없습니다.");
+            }
+
+            List<TicketResponse> ticketResponses = new ArrayList<>();
+
+            for (Ticket ticket : tickets) {
+                TicketResponse ticketResponse = new TicketResponse(ticket);
+                ticketResponse.setGame(game.toGameResponse());
+                ticketResponses.add(ticketResponse);
+            }
+
+            return ticketResponses;
         } catch (TicketException e) {
             throw e;
         } catch (Exception e) {
@@ -137,8 +248,8 @@ public class TicketServiceImpl implements TicketService {
     /**
      * 다른 플랫폼에서 티켓 가져오기
      *
-     * @param userEmail
-     * @param platform
+     * @param userEmail 사용자 이메일
+     * @param platform  NOL, INTERPARK
      * @return
      */
     @Transactional
@@ -205,8 +316,8 @@ public class TicketServiceImpl implements TicketService {
     /**
      * 결제 완료에 따른 상태 변환
      *
-     * @param ticketId
-     * @param userEmail
+     * @param ticketId  티켓 id
+     * @param userEmail 사용자 이메일
      */
     @Transactional
     @Override

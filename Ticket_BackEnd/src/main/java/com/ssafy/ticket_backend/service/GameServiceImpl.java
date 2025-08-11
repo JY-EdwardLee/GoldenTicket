@@ -80,6 +80,13 @@ public class GameServiceImpl implements GameService {
                 }
             }
 
+            for (Game g : games) {   // 그룹 응모도 확인
+                if (gameMapper.checkGroupWaitlistsByUserIdAndGameId(user.getUserId(),
+                    g.getGameId())) {
+                    throw new GameApplyException("이미 같은 날짜에 응모를 하셨습니다.");
+                }
+            }
+
             // 게임 응모
             gameMapper.insertWaitlist(user.getUserId(), game.getGameId());
         } catch (GameApplyException e) {
@@ -91,7 +98,52 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
-    public void cancelGame(String userEmail, Long gameId) {
+    public void groupApplicationGame(String userEmail, Long gameId, Long numberOfPeople) {
+        try {
+            User user = userMapper.selectUserByEmail(userEmail);
+
+            // 정지된 사용자라면
+            if (user.getIsBlock()) {
+                throw new UserBlockException("정지된 사용자입니다.");
+            }
+
+            if (!user.getUserRole().equals(UserRole.SENIOR)) {  // 시니어 유저가 아니라면
+                throw new UserBlockException("시니어 사용자만 응모 가능합니다.");
+            }
+
+            // 게임이 있는지 확인
+            Game game = gameMapper.selectGameByGameId(gameId);
+            if (game == null) {
+                throw new GameApplyException("응모하려는 게임이 존재하지 않습니다.");
+            }
+
+            // 해당 날짜에 있는 게임 중 하나에 응모하였는지 확인
+            List<Game> games = gameMapper.selectGameByDate(game.getGameDateTime().toLocalDate());
+            for (Game g : games) {
+                if (gameMapper.checkWaitlistsByUserIdAndGameId(user.getUserId(), g.getGameId())) {
+                    throw new GameApplyException("이미 같은 날짜에 응모를 하셨습니다.");
+                }
+            }
+
+            for (Game g : games) {   // 그룹 응모도 확인
+                if (gameMapper.checkGroupWaitlistsByUserIdAndGameId(user.getUserId(),
+                    g.getGameId())) {
+                    throw new GameApplyException("이미 같은 날짜에 응모를 하셨습니다.");
+                }
+            }
+
+            // 그룹 응모
+            gameMapper.insertGroupWaitlist(user.getUserId(), game.getGameId(), numberOfPeople);
+        } catch (GameApplyException e) {
+            throw e;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new GameApplyException("응모간 오류가 발생하였습니다.");
+        }
+    }
+
+    @Override
+    public void cancelApplication(String userEmail, Long gameId) {
         try {
             User user = userMapper.selectUserByEmail(userEmail);
 
@@ -102,6 +154,27 @@ public class GameServiceImpl implements GameService {
 
             // 게임 취소
             if (gameMapper.deleteWaitlist(user.getUserId(), gameId) == 0) {
+                throw new GameApplyException("취소 할 대기열이 없습니다.");
+            }
+        } catch (GameApplyException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new GameApplyException("취소간 오류가 발생하였습니다.");
+        }
+    }
+
+    @Override
+    public void cancelGroupApplication(String userEmail, Long gameId, Long numberOfPeople) {
+        try {
+            User user = userMapper.selectUserByEmail(userEmail);
+
+            // 게임이 있는지 확인
+            if (gameMapper.selectGameByGameId(gameId) == null) {
+                throw new GameApplyException("취소하려는 게임이 존재하지 않습니다.");
+            }
+
+            // 게임 취소
+            if (gameMapper.deleteGroupWaitlist(user.getUserId(), gameId, numberOfPeople) == 0) {
                 throw new GameApplyException("취소 할 대기열이 없습니다.");
             }
         } catch (GameApplyException e) {

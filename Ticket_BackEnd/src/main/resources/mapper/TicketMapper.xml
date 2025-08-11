@@ -122,6 +122,14 @@
     WHERE game_id = #{gameId} and waitlist_status = 'BEING_WAITING'
   </select>
 
+  <select id="selectGroupWaitingWaitListByGameIdAndNumberOfPeople"
+    resultType="com.ssafy.ticket_backend.model.GroupWaitlist">
+    SELECT *
+    FROM group_waitlists
+    WHERE game_id = #{gameId} and waitlist_status = 'BEING_WAITING' and number_of_people =
+    #{tickets}
+  </select>
+
   <select id="countWaitListByGameId" resultType="int">
     SELECT COUNT(*)
     FROM waitlists

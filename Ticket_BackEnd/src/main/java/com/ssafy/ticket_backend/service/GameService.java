@@ -10,7 +10,11 @@ public interface GameService {
 
     void applicationGame(String userEmail, Long gameId);
 
-    void cancelGame(String userEmail, Long gameId);
+    void groupApplicationGame(String userEmail, Long gameId, Long numberOfPeople);
+
+    void cancelApplication(String userEmail, Long gameId);
+
+    void cancelGroupApplication(String userEmail, Long gameId, Long numberOfPeople);
 
     void cancelPaying(String userEmail, Long gameId);
 }
