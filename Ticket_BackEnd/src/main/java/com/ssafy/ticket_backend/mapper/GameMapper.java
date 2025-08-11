@@ -37,4 +37,5 @@ public interface GameMapper {
     List<Game> getAllGame();
 
     void cancelWaiting(@Param("userId") Long userId, @Param("gameId") Long gameId);
+
 }

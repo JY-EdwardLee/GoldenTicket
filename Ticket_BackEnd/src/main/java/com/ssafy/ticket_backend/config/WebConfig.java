@@ -1,5 +1,6 @@
 package com.ssafy.ticket_backend.config;
 
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,7 @@ public class WebConfig {
 
     @Value("${BE_BASE_URL}")
     private String BE_BASE_URL;
+
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {

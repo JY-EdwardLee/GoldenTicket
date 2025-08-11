@@ -62,7 +62,6 @@ public class PostServiceImpl implements PostService {
 
             Long actualPostId = postRequest.getPostId();
 
-            //  TODO 이미지 처리 성공 -> 단 나중에 확인 하겠습니다.
             //  생성된 게시글의 postId를 가져와서 이미지 키 변경
             if (postRequest.getImageUrl() != null && !postRequest.getImageUrl().trim().isEmpty()) {
                 try {

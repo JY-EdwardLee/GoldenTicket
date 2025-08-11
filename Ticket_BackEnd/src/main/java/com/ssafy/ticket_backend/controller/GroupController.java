@@ -33,7 +33,7 @@ public class GroupController {
     }
 
     /**
-     * 그룹 조회하기(팀별조회 Home or Away) 최신순 -> front 에서 페이지네이션(양이 많지 않다.)
+     * 그룹 조회하기(팀별조회 Home or Away) 최신순
      *
      * @param baseballTeams
      * @return GroupDetailResponse
@@ -46,7 +46,7 @@ public class GroupController {
     }
 
     /**
-     * 그룹 신청하기 [고려사항] Lock 동시처리 -> 공부좀 해서 수정해야할듯.
+     * 그룹 신청하기
      *
      * @param groupId
      * @return
