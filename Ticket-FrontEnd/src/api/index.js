@@ -252,10 +252,50 @@ export const authAPI = {
   }
 };
 
+// S3 관련 API
+export const s3API = {
+  // Presigned URL 요청 (이미지 업로드용)
+  getPresignedUploadUrl: async (type, refId, fileName) => {
+    try {
+      const response = await authApiClient.get('/s3/upload-url', {
+        params: {
+          type: type,
+          refId: refId,
+          fileName: fileName
+        }
+      });
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
+  },
+
+  // S3 업로드 후 키값 저장
+  saveUploadKey: async (s3SaveRequest) => {
+    try {
+      const response = await authApiClient.post('/s3/save-key', s3SaveRequest);
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
+  },
+
+  // 이미지 URL 조회
+  getImageUrls: async (s3DownloadRequest) => {
+    try {
+      const response = await authApiClient.post('/s3/download', s3DownloadRequest);
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
+  }
+};
+
 export default {
   authApiClient,
   publicApiClient,
   tokenUtils,
   authAPI,
+  s3API,
   apiErrorHandler
 };

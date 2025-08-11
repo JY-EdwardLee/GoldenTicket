@@ -33,7 +33,16 @@
           <div class="post-meta">
             <div class="author-info">
               <div class="profile-section">
-                <div class="profile-icon">👤</div>
+                <div class="profile-icon">
+                  <img 
+                    v-if="post.imageUrl" 
+                    :src="post.imageUrl" 
+                    :alt="post.postUser?.nickname || '프로필'"
+                    class="profile-image"
+                    @error="handleProfileImageError"
+                  />
+                  <span v-else>👤</span>
+                </div>
                 <div class="author-details">
                   <span class="author-name">{{ post.postUser?.nickname || '알 수 없음' }}</span>
                   <div class="post-stats">
@@ -69,9 +78,10 @@
           <div class="content-text" v-html="post.content"></div>
         </div>
 
+
+
         <!-- 작성자 섹션 -->
         <div class="author-section">
-          <div class="profile-icon">👤</div>
           <span class="author-more">{{ post.postUser?.nickname || '알 수 없음' }}님의 게시글 더보기 ></span>
         </div>
 
@@ -316,6 +326,18 @@ const handleImageLoad = (event) => {
 // 이미지 에러 핸들러
 const handleImageError = (event) => {
   console.error('이미지 로드 실패:', {
+    src: event.target.src,
+    alt: event.target.alt,
+    naturalWidth: event.target.naturalWidth,
+    naturalHeight: event.target.naturalHeight,
+    currentSrc: event.target.currentSrc
+  });
+  event.target.style.display = 'none';
+};
+
+// 프로필 이미지 에러 핸들러
+const handleProfileImageError = (event) => {
+  console.error('프로필 이미지 로드 실패:', {
     src: event.target.src,
     alt: event.target.alt,
     naturalWidth: event.target.naturalWidth,
@@ -686,6 +708,14 @@ const handleCommentDelete = async (deleteData) => {
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  overflow: hidden;
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .author-details {
@@ -792,7 +822,6 @@ const handleCommentDelete = async (deleteData) => {
 /* 참여 섹션 */
 .engagement-section {
   padding: 20px 30px;
-  border-bottom: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -893,7 +922,6 @@ const handleCommentDelete = async (deleteData) => {
 /* 작성자 전용 버튼 */
 .author-actions-section {
   padding: 20px 30px;
-  border-top: 1px solid #e5e7eb;
   background: #f9fafb;
   display: flex;
   flex-direction: column;

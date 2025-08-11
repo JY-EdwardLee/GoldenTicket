@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.service;
+package com.ssafy.ticket_backend.handler.service;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
@@ -118,7 +118,7 @@ public class S3PostServiceImpl implements S3PostService {
         // 해당 bucket에 key에 대해서 PUT(업로드) 요청 10시간간 허용 URL 생성
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket,
             key).withMethod(HttpMethod.PUT).withExpiration(expiration);
-        
+
         // 임시 URL 클라이언트에 반환
         return amazonS3.generatePresignedUrl(request).toString();
     }

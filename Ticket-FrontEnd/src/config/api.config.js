@@ -2,7 +2,7 @@
 const API_BASE_URL =
   // 임시 수정
   import.meta.env.VITE_API_BASE_URL || "/api";
-  // import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+  //import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 import axios from "axios";
 axios.defaults.baseURL = API_BASE_URL;
@@ -17,8 +17,12 @@ axios.defaults.baseURL = API_BASE_URL;
 const MAIN_PAGE = {
   USER: `/rank/user`,
   TEAM: `/rank/team`,
-  CHAT: `/chat`,
 };
+
+const CHAT = {
+  CHAT: `/chat`,
+  HISTORY: `/chat/history`,
+}
 
 // 인증 관련 엔드포인트
 const AUTH = {
@@ -82,6 +86,7 @@ const BOARD = {
 export const API_CONFIG = {
   BASE_URL: API_BASE_URL,
   MAIN_PAGE,
+  CHAT,
   AUTH,
   USER,
   TICKET,

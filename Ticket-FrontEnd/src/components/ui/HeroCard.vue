@@ -4,7 +4,10 @@
     :height="height"
     :elevation="elevation"
     :rounded="rounded"
+    @mouseover="isHovered = true"
+    @mouseleave="isHovered = false"
   >
+    <v-icon class="ticket-icon" :class="{ 'animate': isHovered }">mdi-ticket-confirmation-outline</v-icon>
     <v-card-text class="pa-8 d-flex flex-column justify-space-between fill-height">
       <div>
         <h1 class="text-h2 font-weight-bold text-white mb-6">{{ title }}</h1>
@@ -29,8 +32,9 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
+const isHovered = ref(false);
 
 const props = defineProps({
   title: {
@@ -90,12 +94,40 @@ const handleClick = () => {
 <style scoped>
 .hero-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  overflow: hidden; /* 아이콘이 카드 밖으로 나가지 않도록 */
+  position: relative; /* 자식 ticket-icon의 position: absolute 기준점 */
 }
 
-.hero-card.primary {
-  background-color: var(--theme-primary, #ff6b35);
-  transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+.enter-card .ticket-icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  font-size: 150px; /* 아이콘 크기 조정 */
+  color: rgba(255, 255, 255, 0.2); /* 아이콘 색상 및 투명도 조정 */
+  transform: translate(-100%, -50%);
+  transition: transform 0.4s ease-in-out;
+  z-index: 0;
+}
+
+.enter-card .ticket-icon.animate {
+  transform: translate(200%, -50%); /* 호버 시 아이콘 위치 */
+  transition: transform 0.4s ease-in-out;
+}
+
+
+.transfer-card .ticket-icon {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  font-size: 150px; /* 아이콘 크기 조정 */
+  color: rgba(255, 255, 255, 0.2); /* 아이콘 색상 및 투명도 조정 */
+  transform: translate(-100%, -50%);
+  transition: transform 0.4s ease-in-out;
+  z-index: 0;
+}
+
+.transfer-card .ticket-icon.animate {
+  transform: translate(100%, -50%); /* 호버 시 아이콘 위치 */
 }
 
 .hero-card:hover {

@@ -29,7 +29,16 @@
          :class="{ 'new-comment': comment.isNew }"
        >
         <div class="comment-header">
-          <div class="profile-icon">👤</div>
+          <div class="profile-icon">
+            <img 
+              v-if="comment.commentUserUrl" 
+              :src="comment.commentUserUrl" 
+              :alt="comment.nickName || comment.author || '프로필'"
+              class="profile-image"
+              @error="handleProfileImageError"
+            />
+            <span v-else>👤</span>
+          </div>
           <div class="comment-info">
             <span class="commenter-name" :class="{ 'author': isCommentAuthor(comment) }">
               {{ comment.nickName || comment.author || '알 수 없음' }}
@@ -58,7 +67,16 @@
         <div v-if="comment.replies && comment.replies.length > 0" class="replies-list">
           <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
             <div class="reply-header">
-              <div class="profile-icon small">👤</div>
+              <div class="profile-icon small">
+                <img 
+                  v-if="reply.commentUserUrl" 
+                  :src="reply.commentUserUrl" 
+                  :alt="reply.nickName || reply.author || '프로필'"
+                  class="profile-image"
+                  @error="handleProfileImageError"
+                />
+                <span v-else>👤</span>
+              </div>
               <div class="reply-info">
                 <span class="replyer-name" :class="{ 'author': isCommentAuthor(reply) }">
                   {{ reply.nickName || reply.author || '알 수 없음' }}
@@ -91,7 +109,6 @@
     <div class="comment-write">
       <!-- 로그인한 사용자만 댓글 작성 가능 -->
       <div v-if="authStore.isAuthenticated" class="comment-input-section">
-        <div class="profile-icon">👤</div>
         <div class="input-container">
           <div class="user-label">{{ authStore.user?.nickName || authStore.user?.nickname || '사용자' }}</div>
           <textarea 
@@ -281,6 +298,18 @@ const handleInputBlur = () => {
   if (!newComment.value.trim()) {
     isInputActive.value = false;
   }
+};
+
+// 프로필 이미지 에러 핸들러
+const handleProfileImageError = (event) => {
+  console.error('프로필 이미지 로드 실패:', {
+    src: event.target.src,
+    alt: event.target.alt,
+    naturalWidth: event.target.naturalWidth,
+    naturalHeight: event.target.naturalHeight,
+    currentSrc: event.target.currentSrc
+  });
+  event.target.style.display = 'none';
 };
 
 
@@ -761,6 +790,14 @@ input:checked + .toggle-slider:before {
   align-items: center;
   justify-content: center;
   font-size: 18px;
+  overflow: hidden;
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .comment-info {
@@ -904,6 +941,7 @@ input:checked + .toggle-slider:before {
   width: 24px;
   height: 24px;
   font-size: 12px;
+  overflow: hidden;
 }
 
 .reply-info {
