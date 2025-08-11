@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -33,6 +34,21 @@ public class TicketController {
         TicketResponse ticketResponse = ticketService.transferTicket(userDetails.getUsername(),
             ticketId);
 //        return ResponseEntity.ok(ticketResponse);
+
+        return ResponseEntity.ok(Map.of("success", true, "message", "양도완료"));
+    }
+
+    /**
+     * 그룹 양도
+     *
+     * @param userDetails
+     * @param ticketId
+     * @return
+     */
+    @GetMapping("/transfer")
+    public ResponseEntity<?> transferGroupTicket(
+        @AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam List<Long> ticketId) {
+        ticketService.transferGroupTicket(userDetails.getUsername(), ticketId);
 
         return ResponseEntity.ok(Map.of("success", true, "message", "양도완료"));
     }

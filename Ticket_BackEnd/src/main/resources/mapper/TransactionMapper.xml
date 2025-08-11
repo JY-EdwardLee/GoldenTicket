@@ -76,6 +76,25 @@
     )
   </insert>
 
+  <insert id="insertGroupTransaction"
+    parameterType="com.ssafy.ticket_backend.model.GroupTransaction">
+    <selectKey keyProperty="transactionId" resultType="long" order="BEFORE">
+      SELECT nextval('grouptransactionlist_transaction_id_seq')
+    </selectKey>
+    INSERT INTO group_transaction_states (transaction_id,
+    ticket_id,
+    seller_id,
+    buyer_id,
+    transaction_status)
+    VALUES (
+    #{transactionId},
+    #{ticketIds, jdbcType=ARRAY, typeHandler=com.ssafy.ticket_backend.handler.LongArrayTypeHandler},
+    #{sellerId},
+    #{buyerId},
+    #{transactionStatus}
+    )
+  </insert>
+
   <resultMap id="WaitlistResult" type="com.ssafy.ticket_backend.model.Waitlist">
     <id property="id" column="waitlist_id"/>
     <result property="userId" column="user_id"/>
@@ -95,6 +114,33 @@
     LIMIT 1
   </select>
 
+  <resultMap id="GroupWaitlistMap" type="com.ssafy.ticket_backend.model.GroupWaitlist">
+    <result property="groupWaitlistId" column="groupWaitlist_id"/>
+    <result property="ticketIds" column="ticket_ids"
+      typeHandler="com.ssafy.ticket_backend.handler.LongArrayTypeHandler"/>
+    <result property="userId" column="user_id"/>
+    <result property="gameId" column="game_id"/>
+    <result property="createdAt" column="created_at"/>
+    <result property="waitlistStatus" column="waitlist_status"/>
+    <result property="transactionId" column="transaction_id"/>
+    <result property="numberOfPeople" column="number_of_people"/>
+  </resultMap>
+
+  <select id="selectGroupWaitlistByUserId" resultMap="GroupWaitlistMap">
+    SELECT
+    groupWaitlist_id,
+    ticket_ids,
+    user_id,
+    game_id,
+    created_at,
+    waitlist_status,
+    transaction_id,
+    number_of_people
+    FROM group_waitlists
+    WHERE user_id = #{userId}
+    ORDER BY created_at DESC
+  </select>
+
   <update id="updateWaitlist" parameterType="com.ssafy.ticket_backend.model.Waitlist">
     UPDATE waitlists
     <set>
@@ -103,6 +149,26 @@
       </if>
       <if test="transactionId != null">
         transaction_id = #{transactionId},
+      </if>
+      <if test="ticketId != null">
+        ticket_id = #{ticketId},
+      </if>
+    </set>
+    WHERE waitlist_id = #{id}
+  </update>
+
+  <update id="updateGroupWaitlist" parameterType="com.ssafy.ticket_backend.model.GroupWaitlist">
+    UPDATE group_waitlists
+    <set>
+      <if test="status != null">
+        waitlist_status = #{waitlistStatus},
+      </if>
+      <if test="transactionId != null">
+        transaction_id = #{transactionId},
+      </if>
+      <if test="ticketIds != null">
+        ticket_ids =
+        #{ticketIds, jdbcType=ARRAY, typeHandler=com.ssafy.ticket_backend.handler.LongArrayTypeHandler},
       </if>
     </set>
     WHERE waitlist_id = #{id}

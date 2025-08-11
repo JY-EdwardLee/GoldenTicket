@@ -6,7 +6,7 @@
 
   <insert id="insertGame" parameterType="com.ssafy.ticket_backend.model.Game">
     INSERT INTO games (game_datetime, home_team, away_team, is_cancelled, is_ended, stadium)
-    VALUES (#{gameDateTime}, #{homeTeamString}, #{awayTeamString}, #{isCanceled}, #{isEnded}, #{stadiumString})
+    VALUES (#{gameDateTime}, #{homeTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler}, #{awayTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler}, #{isCanceled}, #{isEnded}, #{stadium, typeHandler=com.ssafy.ticket_backend.handler.StadiumTypeHandler})
   </insert>
 
 </mapper>

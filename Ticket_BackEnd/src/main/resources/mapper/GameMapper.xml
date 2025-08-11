@@ -35,6 +35,15 @@
     )
   </select>
 
+  <select id="checkGroupWaitlistsByUserIdAndGameId" resultType="boolean">
+    SELECT EXISTS (
+    SELECT 1
+    FROM group_waitlists
+    WHERE user_id = #{userId}
+    AND game_id = #{gameId}
+    )
+  </select>
+
   <select id="selectWaitlistByUserIdAndGameId" resultType="boolean">
     SELECT *
     FROM waitlists
@@ -48,11 +57,25 @@
     VALUES (#{userId}, #{gameId}, 'BEING_WAITING')
   </insert>
 
+  <!-- 대기열 추가 -->
+  <insert id="insertGroupWaitlist">
+    INSERT INTO group_waitlists (user_id, game_id, waitlist_status, number_of_people)
+    VALUES (#{userId}, #{gameId}, 'BEING_WAITING', #{numberOfPeople})
+  </insert>
+
   <!-- 대기열 삭제 -->
   <delete id="deleteWaitlist">
     DELETE FROM waitlists
     WHERE user_id = #{userId}
     AND game_id = #{gameId}
+  </delete>
+
+  <!-- 그룹 응모 대기열 삭제 -->
+  <delete id="deleteGroupWaitlist">
+    DELETE FROM group_waitlists
+    WHERE user_id = #{userId}
+    AND game_id = #{gameId}
+    AND number_of_people = #{numberOfPeople}
   </delete>
 
   <!-- 더미 생성용 -->
