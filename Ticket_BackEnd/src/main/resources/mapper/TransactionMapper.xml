@@ -76,6 +76,25 @@
     )
   </insert>
 
+  <insert id="insertGroupTransaction"
+    parameterType="com.ssafy.ticket_backend.model.GroupTransaction">
+    <selectKey keyProperty="transactionId" resultType="long" order="BEFORE">
+      SELECT nextval('grouptransactionlist_transaction_id_seq')
+    </selectKey>
+    INSERT INTO group_transaction_states (transaction_id,
+    ticket_id,
+    seller_id,
+    buyer_id,
+    transaction_status)
+    VALUES (
+    #{transactionId},
+    #{ticketIds},
+    #{sellerId},
+    #{buyerId},
+    #{transactionStatus}
+    )
+  </insert>
+
   <resultMap id="WaitlistResult" type="com.ssafy.ticket_backend.model.Waitlist">
     <id property="id" column="waitlist_id"/>
     <result property="userId" column="user_id"/>
@@ -95,6 +114,14 @@
     LIMIT 1
   </select>
 
+  <select id="selectGroupWaitlistByUserIdAndGameId"
+    resultMap="com.ssafy.ticket_backend.model.GroupWaitlist">
+    SELECT *
+    FROM group_waitlists
+    WHERE user_id = #{userId}
+    AND game_id = #{gameId}
+  </select>
+
   <update id="updateWaitlist" parameterType="com.ssafy.ticket_backend.model.Waitlist">
     UPDATE waitlists
     <set>
@@ -103,6 +130,25 @@
       </if>
       <if test="transactionId != null">
         transaction_id = #{transactionId},
+      </if>
+      <if test="ticketId != null">
+        ticket_id = #{ticketId},
+      </if>
+    </set>
+    WHERE waitlist_id = #{id}
+  </update>
+
+  <update id="updateGroupWaitlist" parameterType="com.ssafy.ticket_backend.model.GroupWaitlist">
+    UPDATE group_waitlists
+    <set>
+      <if test="status != null">
+        waitlist_status = #{waitlistStatus},
+      </if>
+      <if test="transactionId != null">
+        transaction_id = #{transactionId},
+      </if>
+      <if test="ticketIds != null">
+        ticket_ids = #{ticketIds},
       </if>
     </set>
     WHERE waitlist_id = #{id}
