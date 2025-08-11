@@ -7,6 +7,7 @@ import lombok.Data;
 public class Waitlist {
 
     private Long id;
+    private Long ticketId;
     private Long userId;
     private Long gameId;
     private Long transactionId;

@@ -38,6 +38,13 @@ public class TicketController {
         return ResponseEntity.ok(Map.of("success", true, "message", "양도완료"));
     }
 
+    /**
+     * 그룹 양도
+     *
+     * @param userDetails
+     * @param ticketId
+     * @return
+     */
     @GetMapping("/transfer")
     public ResponseEntity<?> transferGroupTicket(
         @AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam List<Long> ticketId) {
