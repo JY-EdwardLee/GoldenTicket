@@ -100,20 +100,18 @@ const handleClick = () => {
 
 .enter-card .ticket-icon {
   position: absolute;
-  left: 70%;
+  left: 50%;
   top: 50%;
   font-size: 150px; /* 아이콘 크기 조정 */
   color: rgba(255, 255, 255, 0.2); /* 아이콘 색상 및 투명도 조정 */
   transform: translate(-100%, -50%);
   transition: transform 0.4s ease-in-out;
   z-index: 0;
-  opacity: 0;
 }
 
 .enter-card .ticket-icon.animate {
   transform: translate(200%, -50%); /* 호버 시 아이콘 위치 */
   transition: transform 0.4s ease-in-out;
-  opacity: 1;
 }
 
 
@@ -126,12 +124,10 @@ const handleClick = () => {
   transform: translate(-100%, -50%);
   transition: transform 0.4s ease-in-out;
   z-index: 0;
-  opacity: 0;
 }
 
 .transfer-card .ticket-icon.animate {
-  transform: translate(200%, -50%); /* 호버 시 아이콘 위치 */
-  opacity: 1;
+  transform: translate(100%, -50%); /* 호버 시 아이콘 위치 */
 }
 
 .hero-card:hover {
