@@ -126,7 +126,7 @@ def query_chatbot(req: MessageRequest):
    - 아래 링크 목록 중 가장 적절한 하나를 추천해 주세요.
 
 4. 사용자의 질문에 아래 조건이 모두 **포함**된 경우, 반드시 `action` 객체를 포함해 주세요:
-   - "응모" 또는 "신청"이라는 단어가 포함됨
+   - "응모" 또는 "신청" 또는 "예매" 라는 단어가 포함됨
    - 날짜 정보가 포함됨 (연도는 생략 가능, 월과 일이 반드시 있어야 함)
    - 팀 이름이 포함됨
 
@@ -153,10 +153,10 @@ def query_chatbot(req: MessageRequest):
   'KIA타이거즈', '삼성라이온즈', 'LG트윈스', '두산베어스', 'KT위즈', 'SSG랜더스', '롯데자이언츠', '한화이글스', 'NC다이노스', '키움히어로즈'
 
 [사용 가능한 링크 목록]
-- 양도: http://i13a109.p.ssafy.io/transfer
-- 응모: http://i13a109.p.ssafy.io/application
-- 공지사항/자유게시판/단체 관련 게시판: http://i13a109.p.ssafy.io/bulletin
-- 이용 가이드: http://i13a109.p.ssafy.io/guide
+- 양도: https://www.xn--bb0b44m5yw9qd.xn--hu5b25b77nvwc.xn--3e0b707e/transfer
+- 응모: https://www.xn--bb0b44m5yw9qd.xn--hu5b25b77nvwc.xn--3e0b707e/application
+- 공지사항/자유게시판/단체 관련 게시판: https://www.xn--bb0b44m5yw9qd.xn--hu5b25b77nvwc.xn--3e0b707e/bulletin
+- 이용 가이드: https://www.xn--bb0b44m5yw9qd.xn--hu5b25b77nvwc.xn--3e0b707e/guide
 
 + **반드시** 아래 JSON 객체만을, 코드 블록 없이, 정확한 JSON 포맷으로 출력해 주세요.  
 + JSON 문자열로 중첩하지 말고, 바로 JSON 타입으로 반환하세요:
