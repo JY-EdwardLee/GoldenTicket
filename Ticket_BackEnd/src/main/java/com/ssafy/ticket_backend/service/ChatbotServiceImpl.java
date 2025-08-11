@@ -42,8 +42,8 @@ public class ChatbotServiceImpl implements ChatbotService {
      * 사용자의 질문을 받아서 Python 챗봇 API에 전달하고, 응답을 받아서 저장 및 반환한다.
      *
      * @param request     사용자 질문이 포함된 요청 DTO
-     * @param userEmail   사용자 이메일 (현재 미사용)
-     * @param accessToken 인증 토큰 (세션 ID 역할)
+     * @param userEmail   사용자 이메일 (세션 ID 역할)
+     * @param accessToken 인증 토큰
      * @return 챗봇의 응답과 링크, 액션 정보를 포함한 ChatbotResponse 객체
      */
     @Override
@@ -52,7 +52,7 @@ public class ChatbotServiceImpl implements ChatbotService {
         // 요청 바디 구성
         Map<String, Object> body = new HashMap<>();
         body.put("question", request.getQuestion()); // 질문 내용
-        body.put("sessionId", accessToken); // 토큰으로 세션ID 처리
+        body.put("sessionId", userEmail); // 유저 이메일로 세션ID 처리
 
         // 질문 저장
         appendChatHistory(accessToken, "user", request.getQuestion());
