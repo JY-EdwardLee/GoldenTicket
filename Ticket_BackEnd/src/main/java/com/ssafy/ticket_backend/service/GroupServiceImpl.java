@@ -15,9 +15,7 @@ import com.ssafy.ticket_backend.model.Group;
 import com.ssafy.ticket_backend.model.User;
 import com.ssafy.ticket_backend.util.HtmlTemplateUtil;
 import java.io.IOException;
-import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,7 +103,8 @@ public class GroupServiceImpl implements GroupService {
                 String subject = "[Golden Ticket] 단체 관람 신청서";
 
                 if (emailService != null && mailUsername != null && !mailUsername.isEmpty()) {
-                    emailService.sendEmailWithHtmlAttachment(mailUsername, subject, htmlContent, "");
+                    emailService.sendEmailWithHtmlAttachment(mailUsername, subject, htmlContent,
+                        "");
                     log.info("단체 관람 신청서 HTML 본문 메일 전송 완료: 그룹 ID {}", groupId);
                 } else {
                     log.warn("이메일 서비스가 구성되지 않아 메일을 전송할 수 없습니다. 그룹 ID: {}", groupId);
@@ -138,14 +137,17 @@ public class GroupServiceImpl implements GroupService {
         // 신청자 정보 가져오기
         List<Application> groupList = groupMapper.selectGroupInfo(groupId);
         String applicantName = "Unknown";
+        String phoneNumber = "Unknown";
         if (!groupList.isEmpty()) {
             long firstUserId = groupList.get(0).getUserId();
             User firstUser = userMapper.selectUserByUserId(firstUserId);
             if (firstUser != null) {
                 applicantName = firstUser.getUserName();
+                phoneNumber = firstUser.getPhoneNumber();
             }
         }
         data.put("applicantName", applicantName);
+        data.put("phoneNumber", phoneNumber);
 
         // 참가자 이메일 목록 생성
         StringBuilder emailInfo = new StringBuilder();
@@ -161,15 +163,12 @@ public class GroupServiceImpl implements GroupService {
         }
 
         data.put("emailList", "참가자 이메일 목록:\n" + emailInfo.toString());
-        
-        // 전화번호 정보 (실제로는 DB에서 가져올 예정)
-        data.put("phoneNumber", "010-1234-5678");
-        
-        log.info("HTML 생성 데이터 - 팀명: {}, 게임날짜: {}, 신청자: {}, 전화번호: {}", 
-                teamName, gameDate, applicantName, data.get("phoneNumber"));
-        
+
+        log.info("HTML 생성 데이터 - 팀명: {}, 게임날짜: {}, 신청자: {}, 전화번호: {}",
+            teamName, gameDate, applicantName, data.get("phoneNumber"));
+
         String htmlContent = htmlTemplateUtil.generateGroupApplicationHtml(data);
-        
+
         return htmlContent;
     }
 
