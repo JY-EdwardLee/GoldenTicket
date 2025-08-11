@@ -1050,6 +1050,12 @@ function formatGameDateTime(dateTimeStr) {
   color: #bdbdbd;
   font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.step:hover {
+  transform: translateY(-5px);
 }
 .step.active {
   color: var(--theme-primary, #ff6b35);
@@ -1070,6 +1076,7 @@ function formatGameDateTime(dateTimeStr) {
 }
 .step.active span {
   background: var(--theme-primary, #ff6b35);
+  box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3);
   opacity: 1;
 }
 .bar {
@@ -1105,7 +1112,7 @@ function formatGameDateTime(dateTimeStr) {
 }
 
 .team-bg-container.active {
-  border: 1px solid #d6623c !important;
+  border: 1px solid var(--theme-primary, #e57373) !important;
   border-radius: 16px !important;
   box-shadow: 
     0 5px 10px rgba(0, 0, 0, 0.2), /* 깊이감 있는 그림자 */

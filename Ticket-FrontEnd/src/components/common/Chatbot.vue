@@ -28,9 +28,18 @@
         </v-avatar>
         <v-toolbar-title class="font-weight-bold">골티봇</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn icon>
-          <v-icon>mdi-dots-vertical</v-icon>
-        </v-btn>
+        <v-menu v-model="isSelectModalOpen" offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn icon v-bind="attrs" v-on="on">
+              <v-icon>mdi-dots-vertical</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="clearChat">
+              <v-list-item-title>대화 초기화</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </v-toolbar>
 
       <!-- 메시지 영역 -->
@@ -117,6 +126,15 @@ const messagesContainer = ref(null);
 
 const toggleChat = () => {
   isChatOpen.value = !isChatOpen.value;
+};
+
+const isSelectModalOpen = ref(false);
+
+const clearChat = () => {
+  messages.value = [
+    { id: 1, text: '안녕하세요! 무엇을 도와드릴까요?', sender: 'bot' }
+  ];
+  isSelectModalOpen.value = false;
 };
 
 const mainMessage = ref('');

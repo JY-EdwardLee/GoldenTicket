@@ -10,7 +10,7 @@
                 <HeroCard
                 class="enter-card"
                   title="응모"
-                  :description="['다양한 티켓 응모에 참여하고', '원하는 공연을 만나보세요']"
+                  :description="['원하는 경기를 응모하고', '티켓을 양도받아 보세요.']"
                   button-text="응모하기"
                   type="primary"
                   @click="goToApply"

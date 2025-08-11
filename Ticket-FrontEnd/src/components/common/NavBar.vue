@@ -289,7 +289,7 @@ const handleLogout = async () => {
 
 .nav-links {
   display: flex;
-  gap: 32px;
+  gap: 16px;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -297,12 +297,19 @@ const handleLogout = async () => {
 
 .nav-links li {
   font-weight: 500;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
 }
 
 .nav-links a {
+  padding: 8px 16px;
+  border-radius: 8px;
   text-decoration: none;
   color: #222;
+  transition: background-color 0.3s ease;
+}
+
+.nav-links a:hover {
+  background-color: #f0f0f0;
 }
 
 .nav-links a.router-link-active {
