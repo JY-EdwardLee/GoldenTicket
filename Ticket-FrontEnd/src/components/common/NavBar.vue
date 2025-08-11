@@ -308,22 +308,10 @@ const handleLogout = async () => {
 }
 
 .nav-links a {
-<<<<<<< HEAD
-  padding: 8px 16px;
-  border-radius: 8px;
-  text-decoration: none;
-  color: #222;
-  transition: background-color 0.3s ease;
-}
-
-.nav-links a:hover {
-  background-color: #f0f0f0;
-=======
   position: relative;
   text-decoration: none;
   color: #222;
   transition: color 0.2s ease;
->>>>>>> FE/feat/tutorial
 }
 
 /* Hover underline animation */
