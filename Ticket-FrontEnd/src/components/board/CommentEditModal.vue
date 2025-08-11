@@ -8,7 +8,16 @@
       
       <div class="modal-body">
         <div class="comment-info">
-          <div class="profile-icon">👤</div>
+          <div class="profile-icon">
+            <img 
+              v-if="comment?.commentUserUrl" 
+              :src="comment.commentUserUrl" 
+              :alt="comment?.author || '프로필'"
+              class="profile-image"
+              @error="handleProfileImageError"
+            />
+            <span v-else>👤</span>
+          </div>
           <div class="comment-meta">
             <span class="commenter-name">{{ comment?.author || '사용자' }}</span>
             <span class="comment-date">{{ formatDate(comment?.createdAt) }}</span>
@@ -97,6 +106,18 @@ const formatDate = (dateString) => {
     hour: '2-digit',
     minute: '2-digit'
   });
+};
+
+// 프로필 이미지 에러 핸들러
+const handleProfileImageError = (event) => {
+  console.error('프로필 이미지 로드 실패:', {
+    src: event.target.src,
+    alt: event.target.alt,
+    naturalWidth: event.target.naturalWidth,
+    naturalHeight: event.target.naturalHeight,
+    currentSrc: event.target.currentSrc
+  });
+  event.target.style.display = 'none';
 };
 
 const handleSubmit = async () => {
@@ -242,7 +263,22 @@ const handleOverlayClick = () => {
 }
 
 .profile-icon {
+  width: 40px;
+  height: 40px;
+  background: #f3f4f6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 20px;
+  overflow: hidden;
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 .comment-meta {

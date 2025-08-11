@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // 환경 변수에서 API 기본 URL 가져오기
-const API_BASE_URL = "/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 // JWT 토큰을 헤더에 포함하는 API 클라이언트 (인증이 필요한 요청용)
 export const authApiClient = axios.create({
@@ -252,10 +252,50 @@ export const authAPI = {
   }
 };
 
+// S3 관련 API
+export const s3API = {
+  // Presigned URL 요청 (이미지 업로드용)
+  getPresignedUploadUrl: async (type, refId, fileName) => {
+    try {
+      const response = await authApiClient.get('/s3/upload-url', {
+        params: {
+          type: type,
+          refId: refId,
+          fileName: fileName
+        }
+      });
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
+  },
+
+  // S3 업로드 후 키값 저장
+  saveUploadKey: async (s3SaveRequest) => {
+    try {
+      const response = await authApiClient.post('/s3/save-key', s3SaveRequest);
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
+  },
+
+  // 이미지 URL 조회
+  getImageUrls: async (s3DownloadRequest) => {
+    try {
+      const response = await authApiClient.post('/s3/download', s3DownloadRequest);
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
+  }
+};
+
 export default {
   authApiClient,
   publicApiClient,
   tokenUtils,
   authAPI,
+  s3API,
   apiErrorHandler
 };
