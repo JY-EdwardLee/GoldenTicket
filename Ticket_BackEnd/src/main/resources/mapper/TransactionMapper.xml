@@ -88,7 +88,7 @@
     transaction_status)
     VALUES (
     #{transactionId},
-    #{ticketIds},
+    #{ticketIds, jdbcType=ARRAY, typeHandler=com.example.handler.LongArrayTypeHandler},
     #{sellerId},
     #{buyerId},
     #{transactionStatus}
@@ -148,7 +148,8 @@
         transaction_id = #{transactionId},
       </if>
       <if test="ticketIds != null">
-        ticket_ids = #{ticketIds},
+        ticket_ids =
+        #{ticketIds, jdbcType=ARRAY, typeHandler=com.example.handler.LongArrayTypeHandler},
       </if>
     </set>
     WHERE waitlist_id = #{id}

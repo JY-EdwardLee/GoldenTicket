@@ -154,7 +154,8 @@
     resultType="com.ssafy.ticket_backend.model.GroupWaitlist">
     SELECT
     groupWaitlist_id AS groupWaitlistId,
-    ticket_ids AS ticketIds,
+    ticket_ids AS
+    #{ticketIds, jdbcType=ARRAY, typeHandler=com.example.handler.LongArrayTypeHandler},
     user_id AS userId,
     game_id AS gameId,
     created_at AS createdAt,
