@@ -20,7 +20,7 @@
             </v-avatar>
           </template>
           
-          <v-list-item-title class="text-h6 font-weight-bold mb-1">{{ item.name }}</v-list-item-title>
+          <v-list-item-title class="text-h6 font-weight-bold mb-1">{{ item.name }} {{ icon[index + 1] }}</v-list-item-title>
           <v-list-item-subtitle class="text-body-2">
             {{ item.subtitle }}
             <span 
@@ -45,6 +45,14 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+
+const icon = ref({
+  1: '🥇',
+  2: '🥈',
+  3: '🥉'
+});
+
 const props = defineProps({
   title: {
     type: String,

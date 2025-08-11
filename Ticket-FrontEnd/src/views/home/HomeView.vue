@@ -7,7 +7,7 @@
           <v-row justify="center" align="center" class="fill-height">
             <!-- 양도 카드 -->
             <v-col 
-              cols="6" 
+              cols="12" 
               :md="isTransferCardHovered ? 8 : (isEnterCardHovered ? 4 : 6)" 
               class="pa-4 card-col"
               @mouseover="isTransferCardHovered = true"
