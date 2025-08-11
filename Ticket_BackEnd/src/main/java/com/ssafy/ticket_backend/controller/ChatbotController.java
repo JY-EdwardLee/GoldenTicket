@@ -46,19 +46,21 @@ public class ChatbotController {
         return response;
     }
 
-//    @GetMapping("/history")
-//    public List<ChatbotHistoryResponse> getHistory( @RequestHeader(value = "Authorization", required = false) String authorizationHeader){
-//        String accessToken = null;
-//        if(authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
-//            accessToken = authorizationHeader.substring(7);
-//        }
-//
-//        if (accessToken == null) {
-//            // 토큰 없으면 빈 리스트 반환하거나 401 처리 가능
-//            return List.of();
-//        }
-//
-//        return chatbotService.getChatHistory(accessToken);
-//    }
+    @GetMapping("/history")
+    public List<ChatbotHistoryResponse> getHistory(
+        @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        String accessToken = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            accessToken = authorizationHeader.substring(7);
+        }
+
+        if (accessToken == null) {
+            // 토큰 없으면 빈 리스트 반환하거나 401 처리 가능
+            return List.of();
+        }
+
+        return chatbotService.getChatHistory(accessToken);
+    }
+
 
 }
