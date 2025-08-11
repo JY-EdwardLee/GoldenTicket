@@ -1,8 +1,8 @@
 // API 기본 URL 설정
 const API_BASE_URL =
   // 임시 수정
-  import.meta.env.VITE_API_BASE_URL || "/api";
-  // import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+  // import.meta.env.VITE_API_BASE_URL || "/api";
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
 import axios from "axios";
 axios.defaults.baseURL = API_BASE_URL;
@@ -61,7 +61,7 @@ const TICKET = {
   LIST: `/tickets`,
   DETAIL: (id) => `/tickets/details/${id}`,
   QR: (id) => `/qrcode/${id}`,
-  APPLY: `/tickets/apply`,
+  APPLY: (gameId) => `games/${gameId}/applications`,
   GAMES: `/games`, // 응모 - 경기 목록 불러오기(0729)
   CANCEL: (id) => `/games/${id}/applications`,
   TRANSFER: `/tickets/transfer`,

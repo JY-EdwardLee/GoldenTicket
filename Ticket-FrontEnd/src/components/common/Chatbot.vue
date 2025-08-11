@@ -169,6 +169,7 @@ const sendMessage = async () => {
       text: response.data.answer,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     });
+    console.log(response.data);
     
     // action이 있는 경우 처리
     if (response.data.action && response.data.action.type === 'navigate' && response.data.action.target === 'application') {
@@ -179,9 +180,13 @@ const sendMessage = async () => {
       if (confirmation) {
         const response = await http.post(API_CONFIG.TICKET.GAMES, params)
         console.log(response.data);
-        const res = await http.post(API_CONFIG.TICKET.APPLY(response.data[0].gameId));
-        console.log(res.data);
-        router.push(`/mypage/applications`);
+        try {
+          const res = await http.post(API_CONFIG.TICKET.APPLY(response.data[0].gameId));
+          console.log(res.data);
+          router.push(`/mypage/applications`);
+        } catch (error) {
+          alert('이미 예매된 티켓 입니다.');
+        }
       } else {
         alert('티켓 응모는 응모페이지에서 할 수 있습니다.');
       }
