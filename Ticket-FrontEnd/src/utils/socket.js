@@ -37,13 +37,15 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
   }
 
   // 로컬 테스트 시
-  // const socket = new SockJS("http://localhost:8080/ws-notify");
-  const socket = new SockJS(`${API_BASE_URL}/ws-notify`);
+  // const socketFactory = () => new SockJS("http://localhost:8080/ws-notify");
+  const socketFactory = () => new SockJS(`${API_BASE_URL}/ws-notify`);
 
   // Pinia store 인스턴스 가져오기
   const notificationStore = useNotificationStore();
 
-  stompClient = Stomp.over(socket);
+  // StompClient 생성 시 factory 함수 넘기기 (자동 재연결 지원)
+  stompClient = Stomp.over(socketFactory);
+
   if (import.meta?.env?.DEV) console.log("[WebSocket] creating STOMP client");
 
   stompClient.connect(
