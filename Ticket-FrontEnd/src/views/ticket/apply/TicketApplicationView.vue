@@ -52,9 +52,9 @@
     <div v-else-if="step === 2" class="game-select-main">
       <div class="calendar-area">
         <div class="calendar-header-section">
-          <button class="month-nav-btn" @click="previousMonth"><i class="fas fa-chevron-left"></i></button>
+          <button class="month-nav-btn" @click="previousMonth">‹</button>
           <div class="calendar-title">{{ currentYear }}년 {{ currentMonth }}월</div>
-          <button class="month-nav-btn" @click="nextMonth"><i class="fas fa-chevron-right"></i></button>
+          <button class="month-nav-btn" @click="nextMonth">›</button>
         </div>
         <div class="calendar-grid">
           <div class="calendar-header" v-for="d in days" :key="d">{{ d }}</div>
@@ -259,7 +259,8 @@ const {
   startApplyTutorial,
   startApplyCalendarTutorial,
   setupApplyDateClickListener,
-  startApplyGameListTutorial
+  startApplyGameListTutorial,
+  closeTutorial
 } = useTutorial();
 
 let stopLock;
@@ -758,6 +759,9 @@ async function handleApplyClick(game) {
   selectedGame.value = game;
   console.log('응모 클릭됨')
   
+  // 전역 튜토리얼 팝오버 종료 (useTutorial의 tutorialDriver 정리)
+  try { closeTutorial(); } catch (_) {}
+
   // 모든 튜토리얼 종료 및 이벤트 리스너 제거
   if (driverObj.value) {
     driverObj.value.destroy();
