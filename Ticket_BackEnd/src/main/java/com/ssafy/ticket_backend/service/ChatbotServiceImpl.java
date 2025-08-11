@@ -38,7 +38,14 @@ public class ChatbotServiceImpl implements ChatbotService {
     private static final int MAX_HISTORY_SIZE = 10;
     private static final Duration HISTORY_TTL = Duration.ofDays(7);
 
-
+    /**
+     * 사용자의 질문을 받아서 Python 챗봇 API에 전달하고, 응답을 받아서 저장 및 반환한다.
+     *
+     * @param request     사용자 질문이 포함된 요청 DTO
+     * @param userEmail   사용자 이메일 (현재 미사용)
+     * @param accessToken 인증 토큰 (세션 ID 역할)
+     * @return 챗봇의 응답과 링크, 액션 정보를 포함한 ChatbotResponse 객체
+     */
     @Override
     public ChatbotResponse askPythonChatbot(ChatbotRequest request, String userEmail,
         String accessToken) {
@@ -112,7 +119,12 @@ public class ChatbotServiceImpl implements ChatbotService {
 
     }
 
-
+    /**
+     * Redis에서 세션 ID 기준으로 저장된 최근 대화 히스토리를 불러와 질문-답변 쌍으로 반환한다.
+     *
+     * @param sessionId 사용자 세션 또는 토큰 식별자
+     * @return 질문, 답변, 링크, 타임스탬프를 담은 대화 기록 리스트
+     */
     @Override
     public List<ChatbotHistoryResponse> getChatHistory(String sessionId) {
         ListOperations<String, String> listOps = redisTemplate.opsForList();
@@ -159,7 +171,13 @@ public class ChatbotServiceImpl implements ChatbotService {
     }
 
 
-    // Redis에 새 대화 추가 (최대 10개 유지, TTL 7일)
+    /**
+     * Redis에 새 대화 기록 추가 (role, 내용, 타임스탬프 포함), 최대 저장 개수 유지 및 TTL 갱신 처리.
+     *
+     * @param sessionId 사용자 세션 또는 토큰 식별자
+     * @param role      메시지 발신자 구분 (user 또는 bot)
+     * @param content   메시지 내용
+     */
     private void appendChatHistory(String sessionId, String role, String content) {
         ListOperations<String, String> listOps = redisTemplate.opsForList();
         String entry = role + "::" + content + "::" + LocalDateTime.now().toString();
