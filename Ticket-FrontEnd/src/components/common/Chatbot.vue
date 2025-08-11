@@ -12,7 +12,7 @@
       class="chat-button"
       @click="toggleChat"
     >
-      <v-icon class="white--text" size="32" v-if="!isChatOpen">mdi-chat-processing</v-icon>
+      <img src="/chatbot_img.png" alt="Chatbot Icon" width="32" height="32" v-if="!isChatOpen" />
       <v-icon class="white--text" size="32" v-else>mdi-close</v-icon>
     </v-btn>
 
@@ -226,11 +226,11 @@ const scrollToBottom = async () => {
 <style scoped>
 .chat-button {
   position: fixed;
-  background: linear-gradient(135deg, var(--theme-primary, #ff6b35) 0%, var(--theme-accent, #e55a2e) 100%);
+  border: 1px var(--theme-primary);
   bottom: 24px;
   right: 24px;
   z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px var(--theme-primary);
 }
 
 .white--text {
