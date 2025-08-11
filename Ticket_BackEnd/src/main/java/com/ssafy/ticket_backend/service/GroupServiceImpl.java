@@ -15,16 +15,18 @@ import com.ssafy.ticket_backend.model.Group;
 import com.ssafy.ticket_backend.model.User;
 import com.ssafy.ticket_backend.util.HtmlTemplateUtil;
 import java.io.IOException;
+import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
 @Service
@@ -44,7 +46,7 @@ public class GroupServiceImpl implements GroupService {
 
 
     /**
-     * 그룹 생성기
+     * 그룹 생성
      */
     @Transactional
     @Override
@@ -56,10 +58,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     /**
-     * 그룹 조회하기(팀별조회 Home or Away) 최신순
-     *
-     * @param baseballTeams
-     * @return GroupDetailResponse
+     * 그룹 조회 (팀별)
      */
     @Transactional
     @Override
@@ -68,10 +67,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     /**
-     * 단체관람 신청하기
-     *
-     * @param email, groupId
-     * @return 성공/실패 메세지
+     * 단체관람 신청
      */
     @Transactional
     @Override
@@ -79,7 +75,7 @@ public class GroupServiceImpl implements GroupService {
 
         User user = userMapper.selectUserByEmail(email);
 
-        // Lock으로 그룹 정보 조회 (동시성 제어)
+        // Lock으로 그룹 정보 조회
         Group group = groupMapper.selectOneGroupForUpdate(groupId);
 
         if (!group.getIsActive()) {
@@ -96,74 +92,63 @@ public class GroupServiceImpl implements GroupService {
 
         int result2 = groupMapper.updateGroupCount(groupId);
 
+        if (result2 != 1) {
+            throw new GroupJoinCountException("그룹 집계 중 오류가 발생하였습니다.");
+        }
+
         // 그룹 정원이 다 찼을 때 메일 전송
         int cnt = groupMapper.selectCountByGroupId(groupId);
 
         if (cnt == 20) {
             try {
-                // HTML 신청서 생성
                 String htmlContent = generateGroupApplicationHtml(groupId, user, group);
-                System.out.println("확인 :");
-                System.out.println(htmlContent);
-
                 String subject = "[Golden Ticket] 단체 관람 신청서";
-                
+
                 if (emailService != null && mailUsername != null && !mailUsername.isEmpty()) {
-                    // HTML 내용을 이메일 본문으로 전송
                     emailService.sendEmailWithHtmlAttachment(mailUsername, subject, htmlContent, "");
-                    log.info("단체 관람 신청서 HTML 메일 전송 완료: 그룹 ID {}", groupId);
+                    log.info("단체 관람 신청서 HTML 본문 메일 전송 완료: 그룹 ID {}", groupId);
                 } else {
                     log.warn("이메일 서비스가 구성되지 않아 메일을 전송할 수 없습니다. 그룹 ID: {}", groupId);
                 }
-
             } catch (IOException e) {
                 log.error("HTML 신청서 생성 중 오류 발생: {}", e.getMessage(), e);
             }
         }
-
-        if (result2 != 1) {
-            throw new GroupJoinCountException("그룹 집계 중 오류가 발생하였습니다.");
-        }
     }
 
     /**
-     * 단체 관람 신청서 HTML을 생성
-     *
-     * @param groupId 그룹 ID
-     * @param user    신청자 정보
-     * @param group   그룹 정보
-     * @return HTML 문자열
-     * @throws IOException 템플릿 처리 중 오류 발생 시
+     * 단체 관람 신청서 HTML 생성
      */
     private String generateGroupApplicationHtml(long groupId, User user, Group group)
         throws IOException {
         Map<String, String> data = new HashMap<>();
 
-        // 게임 정보 가져오기
         Game game = gameMapper.selectGameByGameId(group.getGameId());
-
-        // 홈팀
         String teamName = String.valueOf(game.getHomeTeam());
 
-        // 관람일자 설정
-        String viewingDate = "2024-08-15"; // 기본값
+        // 게임 날짜 포맷팅
+        String gameDate = "날짜 미정";
         if (game != null && game.getGameDateTime() != null) {
-            viewingDate = game.getGameDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            gameDate = game.getGameDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         }
 
-        // HTML 템플릿에서 사용되는 플레이스홀더들에 맞게 데이터 설정
-        data.put("teamName", teamName); // 팀 이름
-        data.put("viewingDate", viewingDate); // 관람일자
+        data.put("teamName", teamName);
+        data.put("gameDate", gameDate);
 
-        // 대표자 정보
-        long userId = gameMapper.getUserIdByGroupId(groupId);
-        User delegation = userMapper.selectUserByUserId(userId);
-        data.put("applicantName", delegation.getUserName());
-
-        // groupId 이용해 해당 groupId 회원 이메일 모두 스트링으로 가져오기
+        // 신청자 정보 가져오기
         List<Application> groupList = groupMapper.selectGroupInfo(groupId);
-        StringBuilder emailInfo = new StringBuilder();
+        String applicantName = "Unknown";
+        if (!groupList.isEmpty()) {
+            long firstUserId = groupList.get(0).getUserId();
+            User firstUser = userMapper.selectUserByUserId(firstUserId);
+            if (firstUser != null) {
+                applicantName = firstUser.getUserName();
+            }
+        }
+        data.put("applicantName", applicantName);
 
+        // 참가자 이메일 목록 생성
+        StringBuilder emailInfo = new StringBuilder();
         for (Application ap : groupList) {
             long groupUserId = ap.getUserId();
             User user2 = userMapper.selectUserByUserId(groupUserId);
@@ -175,68 +160,33 @@ public class GroupServiceImpl implements GroupService {
             }
         }
 
-        data.put("emailList", "참가자 이메일 목록:\n" + emailInfo.toString()); // 이메일 리스트
-
-        // 로고 파일명 추가
-        String logoFileName = getTeamLogoFileName(game != null ? game.getHomeTeam() : null);
-        data.put("teamLogoFileName", logoFileName);
-
-        return htmlTemplateUtil.generateGroupApplicationHtml(data);
+        data.put("emailList", "참가자 이메일 목록:\n" + emailInfo.toString());
+        
+        // 전화번호 정보 (실제로는 DB에서 가져올 예정)
+        data.put("phoneNumber", "010-1234-5678");
+        
+        log.info("HTML 생성 데이터 - 팀명: {}, 게임날짜: {}, 신청자: {}, 전화번호: {}", 
+                teamName, gameDate, applicantName, data.get("phoneNumber"));
+        
+        String htmlContent = htmlTemplateUtil.generateGroupApplicationHtml(data);
+        
+        return htmlContent;
     }
 
     /**
-     * 팀별 로고 파일명을 반환합니다.
-     *
-     * @param baseballTeam 야구팀
-     * @return 로고 파일명
-     */
-    private String getTeamLogoFileName(BaseballTeams baseballTeam) {
-        if (baseballTeam == null) {
-            return "SAMSUNG_LIONS";
-        }
-
-        switch (baseballTeam) {
-            case SAMSUNG_LIONS:
-                return "SAMSUNG_LIONS";
-            case KIA_TIGERS:
-                return "KIA_TIGERS";
-            case LG_TWINS:
-                return "LG_TWINS";
-            case DOOSAN_BEARS:
-                return "DOOSAN_BEARS";
-            case KT_WIZ:
-                return "KT_WIZ";
-            case SSG_LANDERS:
-                return "SSG_LANDERS";
-            case LOTTE_GIANTS:
-                return "LOTTE_GIANTS";
-            case HANHWA_EAGLES:
-                return "HANHWA_EAGLES";
-            case NC_DINOS:
-                return "NC_DINOS";
-            case KIWOOM_HEROES:
-                return "KIWOOM_HEROES";
-            default:
-                return "SAMSUNG_LIONS";
-        }
-    }
-
-    /**
-     * 스케줄러: 오늘 날짜 + 7일보다 이전 게임 is_ended -> true 업데이트 시점 매일 자정(00:00)
+     * 스케줄러: 종료된 그룹 업데이트
      */
     @Override
     public void updateEndedGroups() {
         try {
-            // 그룹 테이블만 업데이트 (게임 테이블은 더미 데이터이므로 업데이트하지 않음)
-            // 오늘 날짜 + 7일보다 이전 게임들의 그룹들을 종료 처리
             int updatedGroupsCount = groupMapper.updateEndedGroups();
             if (updatedGroupsCount > 0) {
-                System.out.println("스케줄러: " + updatedGroupsCount + "개의 그룹이 종료 처리되었습니다.");
+                log.info("스케줄러: {}개의 그룹이 종료 처리되었습니다.", updatedGroupsCount);
             } else {
-                System.out.println("스케줄러: 종료할 그룹이 없습니다.");
+                log.info("스케줄러: 종료할 그룹이 없습니다.");
             }
         } catch (Exception e) {
-            System.err.println("스케줄러 실행 중 오류 발생: " + e.getMessage());
+            log.error("스케줄러 실행 중 오류 발생: {}", e.getMessage(), e);
             throw e;
         }
     }

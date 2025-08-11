@@ -47,14 +47,11 @@ public class UserController {
     @Value("${naver.client.id}")
     private String NaverClientId;
 
-//    @Value("${FE_BASE_URL}")
-//    private String FE_BASE_URL;
-//
-//    @Value("${BE_BASE_URL}")
-//    private String BE_BASE_URL;
+    @Value("${FE_BASE_URL}")
+    private String FE_BASE_URL;
 
-    private String BE_BASE_URL = "http://localhost:8080";
-    private String FE_BASE_URL = "http://localhost:5173";
+    @Value("${BE_BASE_URL}")
+    private String BE_BASE_URL;
 
 
     /**

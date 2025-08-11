@@ -74,12 +74,9 @@ public class UserServiceImpl implements UserService {
     @Value("${naver.client.secret}")
     private String naverClientSecret;
 
-//    @Value("${BE_BASE_URL}")
-//    private String BE_BASE_URL;
+    @Value("${BE_BASE_URL}")
+    private String BE_BASE_URL;
 
-
-    private String BE_BASE_URL = "http://localhost:8080";
-    private String FE_BASE_URL = "http://localhost:5173";
 
     /**
      * 이메일로 사용자 정보 조회

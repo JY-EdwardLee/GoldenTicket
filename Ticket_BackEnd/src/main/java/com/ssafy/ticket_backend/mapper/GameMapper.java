@@ -38,6 +38,4 @@ public interface GameMapper {
 
     void cancelWaiting(@Param("userId") Long userId, @Param("gameId") Long gameId);
 
-    long getUserIdByGroupId(long gameId);
-
 }
