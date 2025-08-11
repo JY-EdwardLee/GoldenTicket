@@ -96,7 +96,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, computed } from 'vue';
+import { ref, nextTick, computed, watch } from 'vue';
 import {API_CONFIG} from '@/config/api.config.js'
 import { useTeamThemeStore } from '@/stores/teamTheme';
 import { useAuthStore } from '@/stores/auth';
@@ -113,26 +113,61 @@ const themeColors = computed(() => themeStore.currentTheme.value);
 
 const isChatOpen = ref(false);
 const newMessage = ref('');
-const messages = ref([
-  {
-    id: 0,
-    sender: 'bot',
-    text: '안녕하세요! 무엇을 도와드릴까요?',
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+const props = defineProps({
+  history: {
+    type: Array,
+    default: () => []
   }
-]);
+});
+
+const messages = ref([]);
+
+watch(() => props.history, (newHistory) => {
+  if (newHistory && newHistory.length > 0) {
+    const formattedMessages = [];
+    newHistory.forEach((item, index) => {
+      if (item.question) {
+        formattedMessages.push({
+          id: `hist-q-${item.timestamp}-${index}`,
+          sender: 'user',
+          text: item.question,
+          time: new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+      }
+      if (item.reply) {
+        formattedMessages.push({
+          id: `hist-a-${item.timestamp}-${index}`,
+          sender: 'bot',
+          text: item.reply,
+          time: new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        });
+      }
+    });
+    messages.value = formattedMessages;
+  } else {
+    messages.value = [{
+      id: 0,
+      sender: 'bot',
+      text: '안녕하세요! 무엇을 도와드릴까요?',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }];
+  }
+}, { immediate: true, deep: true },);
 const isTyping = ref(false);
 const messagesContainer = ref(null);
 
-const toggleChat = () => {
-  isChatOpen.value = !isChatOpen.value;
+const toggleChat = async () => {
+  scrollToBottom('directly');
+  setTimeout(() => {
+    isChatOpen.value = !isChatOpen.value;
+  }, 50);
 };
 
 const isSelectModalOpen = ref(false);
 
 const clearChat = () => {
   messages.value = [
-    { id: 1, text: '안녕하세요! 무엇을 도와드릴까요?', sender: 'bot' }
+    { id: 1, text: '안녕하세요! 무엇을 도와드릴까요?', sender: 'bot',   time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }
   ];
   isSelectModalOpen.value = false;
 };
@@ -160,13 +195,12 @@ const sendMessage = async () => {
 
   // 백엔드에 메시지 전달
   isTyping.value = true;
-  console.log('newMessage.value', newMessage);
   try {
     let headers = {
       'Content-Type': 'application/json',
     };
-    if (authStore.token?.value) {
-      const jwToken = authStore.token.value;
+    if (authStore.token) {
+      const jwToken = authStore.token;
       headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${jwToken}`,
@@ -187,14 +221,12 @@ const sendMessage = async () => {
       text: response.data.answer,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     });
-    console.log(response.data);
     
     // action이 있는 경우 처리
     if (response.data.action && response.data.action.type === 'navigate' && response.data.action.target === 'application') {
       const params = response.data.action.params;
       const confirmation = window.confirm(`${params.date}에 ${params.team} 경기가 있습니다. 바로 응모하시겠어요?`);
       params.team = teamNameToEnum[params.team];
-      console.log(params);
       if (confirmation) {
         const response = await http.post(API_CONFIG.TICKET.GAMES, params)
         console.log(response.data);
@@ -228,14 +260,14 @@ const sendMessage = async () => {
   isTyping.value = false;
 };
 
-const scrollToBottom = async () => {
+const scrollToBottom = async (directly = false) => {
   await nextTick(); // DOM 업데이트 대기
   await new Promise(resolve => setTimeout(resolve, 50)); // 추가 대기
   
   if (messagesContainer.value) {
-    messagesContainer.value.scrollTo({
-      top: messagesContainer.value.scrollHeight,
-      behavior: 'smooth' // 부드러운 스크롤
+    messagesContainer.value.$el.scrollTo({
+      top: messagesContainer.value.$el.scrollHeight,
+      behavior : directly ? 'auto' : 'smooth' // 부드러운 스크롤
     });
   }
 };
@@ -252,14 +284,14 @@ const scrollToBottom = async () => {
 }
 
 .white--text {
-  color: white;
+  color: rgb(81, 81, 81);
 }
 
 .chat-window {
   position: fixed;
-  bottom: 24px;
+  bottom: 104px; /* chat-button height (64px) + bottom (24px) + margin (16px) */
   right: 24px;
-  z-index: 1000;
+  z-index: 1001;
   border-radius: 16px;
   box-shadow: 0 5px 25px rgba(0,0,0,0.2);
   display: flex;
