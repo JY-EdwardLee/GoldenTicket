@@ -114,12 +114,31 @@
     LIMIT 1
   </select>
 
-  <select id="selectGroupWaitlistByUserIdAndGameId"
-    resultMap="com.ssafy.ticket_backend.model.GroupWaitlist">
-    SELECT *
+  <resultMap id="GroupWaitlistMap" type="com.ssafy.ticket_backend.model.GroupWaitlist">
+    <result property="groupWaitlistId" column="groupWaitlist_id"/>
+    <result property="ticketIds" column="ticket_ids"
+      typeHandler="com.ssafy.ticket_backend.handler.LongArrayTypeHandler"/>
+    <result property="userId" column="user_id"/>
+    <result property="gameId" column="game_id"/>
+    <result property="createdAt" column="created_at"/>
+    <result property="waitlistStatus" column="waitlist_status"/>
+    <result property="transactionId" column="transaction_id"/>
+    <result property="numberOfPeople" column="number_of_people"/>
+  </resultMap>
+
+  <select id="selectGroupWaitlistByUserId" resultMap="GroupWaitlistMap">
+    SELECT
+    groupWaitlist_id,
+    ticket_ids,
+    user_id,
+    game_id,
+    created_at,
+    waitlist_status,
+    transaction_id,
+    number_of_people
     FROM group_waitlists
     WHERE user_id = #{userId}
-    AND game_id = #{gameId}
+    ORDER BY created_at DESC
   </select>
 
   <update id="updateWaitlist" parameterType="com.ssafy.ticket_backend.model.Waitlist">
