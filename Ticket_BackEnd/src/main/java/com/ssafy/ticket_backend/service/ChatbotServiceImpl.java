@@ -2,16 +2,22 @@ package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.request.ChatbotRequest;
 import com.ssafy.ticket_backend.dto.request.GameForChatbotRequest;
+import com.ssafy.ticket_backend.dto.response.ChatbotHistoryResponse;
 import com.ssafy.ticket_backend.dto.response.ChatbotResponse;
 import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.TicketMapper;
+import com.ssafy.ticket_backend.model.ChatbotSender;
 import com.ssafy.ticket_backend.model.Game;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.ListOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -26,7 +32,11 @@ public class ChatbotServiceImpl implements ChatbotService {
 
     private final RestTemplate restTemplate;
     private final GameMapper gameMapper;
+    private final StringRedisTemplate redisTemplate;
     private String pythonApiUrl = "http://localhost:8000/query";
+
+    private static final int MAX_HISTORY_SIZE = 10;
+    private static final Duration HISTORY_TTL = Duration.ofDays(7);
 
 
     @Override
@@ -36,6 +46,9 @@ public class ChatbotServiceImpl implements ChatbotService {
         Map<String, Object> body = new HashMap<>();
         body.put("question", request.getQuestion()); // 질문 내용
         body.put("sessionId", accessToken); // 토큰으로 세션ID 처리
+
+        // 질문 저장
+        appendChatHistory(accessToken, "user", request.getQuestion());
 
         // 경기 정보 DB에서 조회
         List<GameForChatbotRequest> games = gameMapper.selectGameForChatbot();
@@ -51,7 +64,6 @@ public class ChatbotServiceImpl implements ChatbotService {
 
         Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("gameInfo", gameList);
-
         body.put("userInfo", userInfo);
 
         // 헤더 설정
@@ -84,6 +96,9 @@ public class ChatbotServiceImpl implements ChatbotService {
                     action = new ChatbotResponse.Action(type, target, params);
                 }
 
+                // 챗봇 답변 저장
+                appendChatHistory(accessToken, "bot", answer);
+
                 return new ChatbotResponse(answer, link, action);
             } else {
                 return new ChatbotResponse("챗봇 서버와 통신에 실패했습니다.", null, null);
@@ -97,5 +112,66 @@ public class ChatbotServiceImpl implements ChatbotService {
 
     }
 
+
+    @Override
+    public List<ChatbotHistoryResponse> getChatHistory(String sessionId) {
+        ListOperations<String, String> listOps = redisTemplate.opsForList();
+
+        List<String> entries = listOps.range(sessionId, 0, MAX_HISTORY_SIZE - 1);
+        if (entries == null || entries.isEmpty()) {
+            return List.of();
+        }
+
+        List<ChatbotHistoryResponse> qnaList = new ArrayList<>();
+
+        String lastQuestion = null;
+        LocalDateTime questionTimestamp = null;
+
+        for (String entry : entries) {
+            // entry: "role::message::timestamp"
+            String[] parts = entry.split("::", 3);
+            if (parts.length < 3) {
+                continue;
+            }
+
+            String role = parts[0];
+            String message = parts[1];
+            LocalDateTime timestamp = LocalDateTime.parse(parts[2]);
+
+            if ("user".equalsIgnoreCase(role)) {
+                // user 메시지는 질문이니까 저장해두고 다음 봇 메시지 기다림
+                lastQuestion = message;
+                questionTimestamp = timestamp;
+
+            } else if ("bot".equalsIgnoreCase(role)) {
+                // 봇 메시지는 답변 -> 질문-답변 쌍으로 응답 리스트에 추가
+                if (lastQuestion != null) {
+                    // 링크 정보가 있으면 여기서 넣어야 하는데, 지금 Redis엔 없으니 null로 둠
+                    qnaList.add(
+                        new ChatbotHistoryResponse(lastQuestion, message, null, questionTimestamp));
+                    lastQuestion = null;
+                    questionTimestamp = null;
+                }
+            }
+        }
+
+        return qnaList;
+    }
+
+
+    // Redis에 새 대화 추가 (최대 10개 유지, TTL 7일)
+    private void appendChatHistory(String sessionId, String role, String content) {
+        ListOperations<String, String> listOps = redisTemplate.opsForList();
+        String entry = role + "::" + content + "::" + LocalDateTime.now().toString();
+
+        listOps.rightPush(sessionId, entry);  // key: sessionId, value: entry
+
+        // 최대 히스토리 개수 유지 (최근 10개만)
+        listOps.trim(sessionId, -MAX_HISTORY_SIZE, -1);
+
+        // TTL 설정 (매번 갱신)
+        redisTemplate.expire(sessionId, HISTORY_TTL);
+    }
 }
+
 
