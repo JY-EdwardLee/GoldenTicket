@@ -52,7 +52,6 @@ public class ChatbotServiceImpl implements ChatbotService {
         if (userEmail != null) {
             historyEntries = redisTemplate.opsForList().range(userEmail, 0, MAX_HISTORY_SIZE - 1);
         }
-        System.out.println("historyEntries: " + historyEntries);
 
         // 요청 바디 구성
         Map<String, Object> body = new HashMap<>();

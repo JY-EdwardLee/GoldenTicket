@@ -41,8 +41,6 @@ public class ChatbotController {
             userEmail = userDetails.getUsername();
         }
 
-        System.out.println("userEmail: " + userEmail);
-
         ChatbotResponse response = chatbotService.askPythonChatbot(request, userEmail, accessToken);
 
         return response;

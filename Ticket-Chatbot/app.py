@@ -136,10 +136,10 @@ def query_chatbot(req: MessageRequest):
         history_text = parse_history_entries(history)  # history는 List[str]
 
         # 로그 출력
-        print(f"질문: {question}")
-        print(f"세션 ID: {req.sessionId}")
-        print(f"유저 정보: {user_info}")
-        print(f"이전 대화 내역: {history}")
+        # print(f"질문: {question}")
+        # print(f"세션 ID: {req.sessionId}")
+        # print(f"유저 정보: {user_info}")
+        # print(f"이전 대화 내역: {history}")
         
         # 사용자 정보 + 질문 포함한 프롬프트 컨텍스트 구성
         context = f"""
