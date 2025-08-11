@@ -2,6 +2,12 @@ import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
 import { useNotificationStore } from "@/stores/notification"; // Pinia store 임포트
 
+// API 기본 URL 설정
+const API_BASE_URL =
+  // 임시 수정
+  import.meta.env.VITE_API_BASE_URL || "/api";
+// import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+
 let stompClient = null;
 
 function parseJwt(token) {
@@ -32,13 +38,13 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
 
   // 로컬 테스트 시
   // const socket = new SockJS("http://localhost:8080/ws-notify");
-  const socket = new SockJS("http://i13a109.p.ssafy.io:8080/ws-notify");
+  const socket = new SockJS(`${API_BASE_URL}/ws-notify`);
 
   // Pinia store 인스턴스 가져오기
   const notificationStore = useNotificationStore();
 
   stompClient = Stomp.over(socket);
-  if (import.meta?.env?.DEV) console.log('[WebSocket] creating STOMP client');
+  if (import.meta?.env?.DEV) console.log("[WebSocket] creating STOMP client");
 
   stompClient.connect(
     { Authorization: `Bearer ${jwtToken}` },
@@ -58,10 +64,11 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
         // 알림을 Pinia store에 추가
         notificationStore.addNotification(payload);
 
-        if (import.meta?.env?.DEV) console.log('[WebSocket] message received', payload);
+        if (import.meta?.env?.DEV)
+          console.log("[WebSocket] message received", payload);
 
         // callback으로 받은 메시지 처리 (선택적)
-        if (typeof onMessageCallback === 'function') {
+        if (typeof onMessageCallback === "function") {
           onMessageCallback(payload);
         }
       });
