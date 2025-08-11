@@ -11,11 +11,11 @@
 </div>
     <div v-if="step === 1" class="main-area">
       <h2 class="title">{{ pageText.selectTeamTitle }}</h2>
-      <div class="team-bg-container" :class="{ 'active': selectedTeam === enumToTeamName[user.myTeam] }">
+      <div class="team-bg-container" :class="{ 'active': selectedTeam === myTeamName }">
         <div class="team-bg-image"
-          :class="{ 'active': selectedTeam === enumToTeamName[user.myTeam] }"
-          :style="{ background: `url('/catchphrase/${user.myTeam}_CP.svg') center no-repeat`, backgroundSize: 'cover' }"
-          @click="selectTeam(enumToTeamName[user.myTeam])"
+          :class="{ 'active': selectedTeam === myTeamName }"
+          :style="user?.myTeam ? { background: `url('/catchphrase/${user.myTeam}_CP.svg') center no-repeat`, backgroundSize: 'cover' } : {}"
+          @click="myTeamName && selectTeam(myTeamName)"
           style="cursor:pointer;"
         ></div>
       </div>
@@ -47,7 +47,7 @@
           </div>
         </div>
       </div>
-      <button class="next-btn" :disabled="!selectedTeam" @click="goToNextStep">{{ pageText.nextBtn }}</button>
+      <button class="next-btn" :disabled="!selectedTeam" :style="nextBtnStyle" @click="goToNextStep">{{ pageText.nextBtn }}</button>
     </div>
     <div v-else-if="step === 2" class="game-select-main">
       <div class="calendar-area">
@@ -75,7 +75,7 @@
               past: isPastDate(date),
               today: isToday(date)
             }"
-            @click="selectDate(date)"
+            @click="selectDate(date, $event)"
           >
             {{ date }}
           </div>
@@ -157,15 +157,14 @@ import { getEnumTeamName } from '@/utils/teamNameMap';
 const user = JSON.parse(localStorage.getItem('user'))
 import {useTutorial} from '@/views/tutorial/useTutorial.js'
 
-// 팀 테마 스토어를 가져옵니다.
+// 팀 테마 스토어를 가져옵니다. (싱글톤 인스턴스, 호출하지 않음)
 const themeStore = useTeamThemeStore
 
 // 사용자 정보에 myTeam 값이 있으면 해당 팀으로 테마를 설정합니다.
 // 이 코드는 컴포넌트가 생성될 때마다 실행되어 현재 사용자의 팀 테마를 적용합니다.
 if (user?.myTeam) {
-  themeStore.setSelectedTeam(user.myTeam)
+  try { themeStore.setSelectedTeam(user.myTeam) } catch (_) {}
 }
-
 
 const router = useRouter();
 const route = useRoute();
@@ -174,11 +173,34 @@ const teamRows = [
   ['SSG랜더스', '키움히어로즈', 'LG트윈스', 'KT위즈', 'NC다이노스'],
   ['두산베어스', 'KIA타이거즈', '롯데자이언츠', '한화이글스', '삼성라이온즈']
 ];
-const selectedTeam = ref('');
+// 내 관심팀 한글명을 계산 (user.myTeam가 enum 키일 때만 유효)
+const myTeamName = computed(() => {
+  const key = user?.myTeam;
+  return key && enumToTeamName[key] ? enumToTeamName[key] : '';
+});
+
+// 첫 렌더에서 바로 활성화되도록 선언 시점에 초기화
+const selectedTeam = ref(myTeamName.value);
+
+// 만약 user가 비동기로 세팅되어 나중에 myTeamName이 생긴다면, 비어있을 때 한 번 동기화
+watch(myTeamName, (v) => {
+  if (!selectedTeam.value && v) selectedTeam.value = v;
+});
 const driverObj = ref(null); // 드라이버 인스턴스를 저장할 ref 추가
 // 서버에서 받아올 경기 데이터 배열
 const bgHover = ref(false);
 const step = ref(1);
+// 상태(step) 변경 시 페이지 상단으로 스크롤 (튜토리얼 스크롤 고정과는 무관하게 부드럽게 이동)
+watch(step, async () => {
+  await nextTick();
+  try {
+    // 스크롤이 잠겨있지 않을 때만 이동
+    const bodyFixed = getComputedStyle(document.body).position === 'fixed';
+    if (!bodyFixed) window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (_) {
+    window.scrollTo(0, 0);
+  }
+});
 const days = ['일', '월', '화', '수', '목', '금', '토'];
 const selectedDate = ref(null);
 const selectedTime = ref(null);
@@ -187,13 +209,20 @@ const selectedGame = ref(null);
 // 중복 실행 방지 플래그
 const hasStartedApplyTutorial = ref(false);
 
-// 최초 진입 시 team-bg-image가 활성화되도록 설정
-onMounted(() => {
-  bgHover.value = true;
+// 다음 버튼 색상을 현재 팀 테마 색상으로 반영
+const nextBtnStyle = computed(() => {
+  try {
+    const theme = themeStore.currentTheme?.value || {};
+    const color = theme.primary || 'var(--theme-primary, #ff6b35)';
+    return { background: color, borderColor: color };
+  } catch (_) {
+    return { background: '#ff6b35', borderColor: '#ff6b35' };
+  }
 });
 
 // 페이지 진입 시 튜토리얼 자동 실행 (URL 파라미터 또는 플래그 기반)
 onMounted(() => {
+  bgHover.value = true;
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const tutorialParam = urlParams.get('tutorial');
@@ -310,6 +339,8 @@ function selectTeam(team) {
 
   if(teamEnum){
     localStorage.setItem('selectedTeam', teamEnum);
+    // 팀 테마 즉시 반영 (next 버튼 색상 등)
+    try { themeStore.setSelectedTeam(teamEnum); } catch (_) {}
   }
 
   // 다른 팀을 클릭하면 초기 활성 상태를 해제합니다.
@@ -550,7 +581,8 @@ const applyPopoverStyles = () => {
 //// 경기 목록 튜토리얼 시작 ////
 const startGameListTutorial = () => {
   // 위임: 공통 컴포저블 실행
-  startApplyGameListTutorial();
+  // 통합 투어 사용: 게임 스텝부터 시작 -> Prev 버튼 활성화
+  try { startApplyGameSelectTutorial('game'); } catch (_) { try { startApplyGameListTutorial(); } catch (_) {} }
 };
 
 
@@ -611,15 +643,19 @@ const goToPreviousStep = () => {
 };
 
 
-// 컴포넌트 마운트 시 현재 날짜 자동 선택 및 경기 로드
+// 마운트
 onMounted(async () => {
   // 이전에 선택한 팀이 있으면 복원
   const savedTeam = localStorage.getItem('selectedTeam');
   if (savedTeam) {
-    selectedTeam.value = savedTeam;
-    // UI 업데이트
+    // savedTeam은 ENUM일 가능성이 높음. 한국어 팀명으로 변환하여 선택 상태와 로직 일관성 유지
+    const savedTeamKorean = enumToTeamName[savedTeam] || savedTeam;
+    selectedTeam.value = savedTeamKorean;
+    // 초기 진입 시에도 테마(CSS 변수)가 즉시 반영되도록 전역 테마 스토어 적용
+    try { themeStore.setSelectedTeam(savedTeam); } catch (_) {}
+    // UI 업데이트 (카드 라벨은 한국어)
     document.querySelectorAll('.team-card').forEach(card => {
-      if (card.textContent === savedTeam) {
+      if (card.textContent === savedTeamKorean) {
         card.classList.add('selected');
       } else {
         card.classList.remove('selected');
@@ -653,8 +689,6 @@ onMounted(async () => {
     }
   }
 });
-
-
 
 
 //// 경기 없음 안내 모달 표시 함수 ////
@@ -733,19 +767,21 @@ async function selectDate(date) {
     });
     gamesOnDate.value = data;
     console.log('gamesOnDate.value : ', gamesOnDate.value);
-    // 날짜 선택 후 캘린더 튜토리얼이 활성화되어 있다면 종료하고 경기 목록 튜토리얼 시작
+    // 날짜 선택 후: 캘린더 튜토리얼이 있으면 종료하고, 게임 유무에 따라 분기
     if (driverObj.value) {
-      driverObj.value.destroy();
-      // 경기 데이터가 로드된 후 튜토리얼 시작
-      setTimeout(() => {
-        if (data && data.length > 0) {
-          startGameListTutorial();
-        } else {
-          // 경기가 없는 경우 경고 모달 표시
-          showNoGameModal(date);
-        }
-      }, 500);
+      try { driverObj.value.destroy(); } catch (_) {}
+      driverObj.value = null;
     }
+    // 경기 데이터가 로드된 후 튜토리얼/모달 처리 (항상 실행)
+    setTimeout(() => {
+      if (data && data.length > 0) {
+        // 경기가 있으면 경기 선택 모달(step=1) 오픈
+        startGameListTutorial();
+      } else {
+        // 경기가 없으면 경기 없음 모달 표시
+        showNoGameModal(date);
+      }
+    }, 200);
   } catch (error) {
     console.error('응모/경기조회 에러:', error);
     gamesOnDate.value = [];

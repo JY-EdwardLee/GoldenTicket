@@ -16,8 +16,8 @@
     
     <!-- Desktop navigation -->
     <ul class="nav-links">
-      <li><a href="#" @click.prevent="goToApplication">응모</a></li>
-      <li><a href="#" @click.prevent="goToTransfer">양도</a></li>
+      <li><a href="#" :class="{ active: isActive('/application') }" @click.prevent="goToApplication">응모</a></li>
+      <li><a href="#" :class="{ active: isActive('/transfer') }" @click.prevent="goToTransfer">양도</a></li>
       <li><router-link to="/bulletin">게시판</router-link></li>
       <li><router-link to="/guide">서비스설명</router-link></li>
       <li><a href="#" @click.prevent="openTutorial">이용가이드</a></li>
@@ -78,7 +78,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import LoginModal from "./LoginModal.vue";
 import NotificationDropdown from "./NotificationDropdown.vue";
 import MobileNotificationButton from "./MobileNotificationButton.vue";
@@ -92,6 +92,7 @@ import { storeToRefs } from "pinia";
 // 스토어 및 라우터 초기화
 const authStore = useAuthStore();
 const router = useRouter();
+const route = useRoute();
 
 // 튜토리얼 composable 사용
 const { openTutorialModal } = useTutorial();
@@ -193,6 +194,12 @@ const closeMobileNotificationModal = () => {
 };
 
 
+
+// 현재 라우트 기반 활성 상태
+const isActive = (basePath) => {
+  const path = route.path || router.currentRoute.value.path;
+  return path === basePath || path.startsWith(basePath + '/') ;
+};
 
 // 로그인 모달 열기
 const openLoginModal = () => {
@@ -301,6 +308,7 @@ const handleLogout = async () => {
 }
 
 .nav-links a {
+<<<<<<< HEAD
   padding: 8px 16px;
   border-radius: 8px;
   text-decoration: none;
@@ -310,9 +318,36 @@ const handleLogout = async () => {
 
 .nav-links a:hover {
   background-color: #f0f0f0;
+=======
+  position: relative;
+  text-decoration: none;
+  color: #222;
+  transition: color 0.2s ease;
+>>>>>>> FE/feat/tutorial
 }
 
-.nav-links a.router-link-active {
+/* Hover underline animation */
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 100%;
+  height: 2px;
+  background: #ffb43a;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
+}
+
+.nav-links a:hover::after {
+  transform: scaleX(1);
+}
+
+/* Active color for router links and manual active */
+.nav-links a.router-link-active,
+.nav-links a.active,
+.nav-links a:hover {
   color: #ffb43a;
 }
 

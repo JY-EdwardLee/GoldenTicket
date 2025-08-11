@@ -125,6 +125,62 @@ export function useTutorial() {
     showTutorialModal.value = true;
   };
 
+  // 날짜 선택 + 경기 선택 통합 튜토리얼
+  // startAt: 'calendar' | 'game' (기본 'game'에서 시작하여 Prev 버튼을 바로 노출)
+  const startApplyGameSelectTutorial = (startAt = 'game') => {
+    // 기존 드라이버 정리
+    if (tutorialDriver) {
+      try { tutorialDriver.destroy(); } catch (_) {}
+      tutorialDriver = null;
+    }
+
+    setTimeout(() => {
+      tutorialDriver = driver({
+        showProgress: false,
+        overlayColor: 'rgba(0, 0, 0, 0.7)',
+        animate: 300,
+        allowClose: true,
+        doneBtnText: '완료',
+        nextBtnText: '다음',
+        prevBtnText: '이전',
+        showButtons: ['close', 'next', 'prev'],
+        popoverClass: 'tutorial-game-list-modal',
+        steps: [
+          {
+            element: '.calendar-area',
+            popover: {
+              title: '날짜 선택',
+              description: '원하는 날짜를 클릭하세요. 다음으로 넘어가면 경기 목록이 표시됩니다.',
+              side: 'right',
+              align: 'start'
+            }
+          },
+          {
+            element: '.game-list-box',
+            popover: {
+              title: '경기 선택',
+              description: '선택한 날짜의 경기 목록입니다. 원하는 경기의 "응모하기" 버튼을 클릭하세요.',
+              side: 'left',
+              align: 'start'
+            }
+          }
+        ],
+        onDestroyed: () => {
+          try { unlockScroll(); } catch (_) {}
+          tutorialDriver = null;
+        }
+      });
+
+      tutorialDriver.drive();
+      // game 스텝부터 시작하도록 이동 (Prev 버튼이 즉시 보임)
+      if (startAt === 'game') {
+        setTimeout(() => {
+          try { tutorialDriver.moveNext(); } catch (_) {}
+        }, 50);
+      }
+    }, 300);
+  };
+
   // 특정 모달(reactive boolean)이 열려있는 동안만 스크롤 고정
   // 사용법: const stop = bindScrollLock(showModalRef, 120); // 필요 시 stop()
   const bindScrollLock = (modalVisibleRef, lockY = undefined) => {
@@ -374,6 +430,7 @@ export function useTutorial() {
         ],
         onDestroyed: () => {
           // 달력 팝오버 종료 시 별도 동작 없음
+          unlockScroll();
           tutorialDriver = null;
         }
       });
@@ -402,9 +459,12 @@ export function useTutorial() {
         setTimeout(() => {
           const gameCards = document.querySelectorAll('.game-list-box .game-card');
           if (gameCards && gameCards.length > 0) {
+            // 외부 콜백 유지
             if (typeof onHasGames === 'function') onHasGames();
-            startApplyGameListTutorial();
+            // 통합 투어 사용: 게임 스텝부터 시작 -> Prev 버튼 활성화
+            try { startApplyGameSelectTutorial('game'); } catch (_) { try { startApplyGameListTutorial(); } catch (_) {} }
           } else {
+            // 외부 콜백에서 경기 없음 모달 호출
             if (typeof onNoGames === 'function') onNoGames();
           }
         }, delayMs);
@@ -434,8 +494,8 @@ export function useTutorial() {
         allowClose: true,
         doneBtnText: '완료',
         nextBtnText: '완료',
-        prevBtnText: '',
-        showButtons: ['close', 'next'],
+        prevBtnText: '이전',
+        showButtons: ['close', 'next', 'prev'],
         popoverClass: 'tutorial-game-list-modal',
         steps: [
           {
@@ -458,8 +518,6 @@ export function useTutorial() {
 
       tutorialDriver.drive();
     }, 300);
-
-
 
   };
 
@@ -744,6 +802,7 @@ export function useTutorial() {
     startApplyTutorial,
     startApplyCalendarTutorial,
     setupApplyDateClickListener,
-    startApplyGameListTutorial
+    startApplyGameListTutorial,
+    startApplyGameSelectTutorial
   };
 }

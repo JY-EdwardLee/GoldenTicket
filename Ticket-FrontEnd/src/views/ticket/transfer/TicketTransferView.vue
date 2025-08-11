@@ -273,7 +273,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, nextTick, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { driver } from 'driver.js';
 import { useTutorial } from '@/views/tutorial/useTutorial';
@@ -310,7 +310,22 @@ const activeTab = ref('NOL');
 const hoveredTicket = ref(null);
 const isApplying = ref(false); // 응모 진행중 상태
 const showWarningModal = ref(false); // 경고 모달 표시 상태
+
+// 상태 변화 시 페이지 상단으로 부드럽게 스크롤 (튜토리얼 스크롤 고정과는 무관)
+function scrollTopIfUnlocked() {
+  try {
+    const bodyFixed = getComputedStyle(document.body).position === 'fixed';
+    if (!bodyFixed) window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (_) {
+    window.scrollTo(0, 0);
+  }
+}
+
+watch(showDetailPage, async (v) => { if (v) { await nextTick(); scrollTopIfUnlocked(); } });
+watch(showCompletePage, async (v) => { if (v) { await nextTick(); scrollTopIfUnlocked(); } });
+watch(showTickets, async (v) => { if (v) { await nextTick(); scrollTopIfUnlocked(); } });
 const allowTransferTutorial = ref(false); // 메인 튜토리얼 플로우에서만 하위 튜토리얼 허용
+const allowConfirmTutorial = ref(false); // 튜토리얼 진입 시에만 양도 확인 튜토리얼 허용
 
 
 
@@ -704,10 +719,14 @@ async function handleApply(ticket) {
   selectedTicket.value = ticket;
   showDetailPage.value = true;
   
-  // 4. 상세 페이지 표시 후 양도 확인 튜토리얼 시작
-  setTimeout(() => {
-    transferConfirmTutorial();
-  }, 500); // DOM 렌더링 완료 대기
+  // 4. 상세 페이지 표시 후 (튜토리얼 진입한 경우에만) 양도 확인 튜토리얼 시작
+  if (allowConfirmTutorial.value) {
+    setTimeout(() => {
+      transferConfirmTutorial();
+    }, 500); // DOM 렌더링 완료 대기
+    // 중복 실행 방지
+    allowConfirmTutorial.value = false;
+  }
 }
 
 async function handleApplyComplete() {
@@ -787,6 +806,8 @@ onMounted(() => {
   
   // 메인 페이지 튜토리얼에서 명시적으로 진입한 경우에만 하위 튜토리얼 허용
   allowTransferTutorial.value = isTutorialMode || showTransferTutorialFlag;
+  // 같은 조건으로 이번 방문에서만 확인 튜토리얼 허용
+  allowConfirmTutorial.value = allowTransferTutorial.value;
 
   if (allowTransferTutorial.value) {
     console.log('양도 페이지 튜토리얼 조건 충족:', { isTutorialMode, showTransferTutorialFlag });
