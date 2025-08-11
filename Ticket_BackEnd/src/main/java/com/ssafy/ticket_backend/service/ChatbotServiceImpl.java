@@ -1,9 +1,13 @@
-package com.ssafy.ticket_backend.handler.service;
+package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.request.ChatbotRequest;
 import com.ssafy.ticket_backend.dto.request.GameForChatbotRequest;
 import com.ssafy.ticket_backend.dto.response.ChatbotResponse;
 import com.ssafy.ticket_backend.mapper.GameMapper;
+import com.ssafy.ticket_backend.mapper.TicketMapper;
+import com.ssafy.ticket_backend.model.Game;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

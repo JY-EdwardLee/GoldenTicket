@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChatbotHistoryResponse {
 
-    private ChatbotSender sender; // USER or BOT
-    private String message;
+    private String question;
+    private String reply;
+    private String link;      // 답변 관련 링크 (없으면 null)
     private LocalDateTime timestamp;
 }
