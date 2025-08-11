@@ -203,19 +203,7 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { boardAPI, transformGroupData } from '@/api/board';
-import { useTeamThemeStore } from '@/stores/teamTheme.js'
-
-// 1. 로컬 스토리지에서 사용자 정보를 가져옵니다.
-const user = JSON.parse(localStorage.getItem('user'))
-
-// 2. 팀 테마 스토어를 가져옵니다.
-const themeStore = useTeamThemeStore
-
-// 3. 사용자 정보에 myTeam 값이 있으면 해당 팀으로 테마를 설정합니다.
-// 이 코드는 컴포넌트가 생성될 때마다 실행되어 현재 사용자의 팀 테마를 적용합니다.
-if (user?.myTeam) {
-  themeStore.setSelectedTeam(user.myTeam)
-}
+import { TEAM_MAPPING } from '@/api/board';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -227,6 +215,33 @@ const selectedTeam = ref('all');
 
 const allPosts = ref([]);
 const displayedPosts = ref([]);
+
+// 한글 팀명 -> UI 팀키 매핑
+const KOREAN_TEAM_TO_UI = {
+  'SSG 랜더스': 'SSG',
+  'KIA 타이거즈': 'KIA',
+  'LG 트윈스': 'LG',
+  'KT 위즈': 'KT',
+  '키움 히어로즈': 'KIWOOM',
+  '삼성 라이온즈': 'SAMSUNG',
+  '롯데 자이언츠': 'LOTTE',
+  '두산 베어스': 'DOOSAN',
+  '한화 이글스': 'HANWHA',
+  'NC 다이노스': 'NC'
+};
+
+// API 팀코드/한글명 -> UI 팀키 변환
+const apiTeamToUiTeam = (teamName) => {
+  if (!teamName) return null;
+  // 1) 이미 UI 키로 들어온 경우
+  if (TEAM_MAPPING[teamName]) return teamName;
+  // 2) API 코드에서 역매핑
+  const apiFound = Object.entries(TEAM_MAPPING).find(([, apiVal]) => apiVal === teamName);
+  if (apiFound) return apiFound[0];
+  // 3) 한글 팀명 매핑
+  if (KOREAN_TEAM_TO_UI[teamName]) return KOREAN_TEAM_TO_UI[teamName];
+  return null;
+};
 
 // 선택된 팀의 제목
 const selectedTeamTitle = computed(() => {
@@ -329,9 +344,23 @@ const handleTabClick = (tab) => {
   // TODO: 탭 변경 로직 구현
 };
 
-const handleFavoriteTeamClick = () => {
-  console.log('내 관심팀 클릭');
-  // TODO: 관심팀 설정 페이지로 이동
+const handleFavoriteTeamClick = async () => {
+  try {
+    if (!authStore.user) {
+      await authStore.getUserInfo?.();
+    }
+    const u = authStore.user || {};
+    const myTeam = u.myTeam || u.favoriteTeam || u.favoriteBaseballTeam;
+    const uiTeam = apiTeamToUiTeam(myTeam);
+    if (!uiTeam) {
+      alert('관심팀이 설정되어 있지 않거나 알 수 없습니다.');
+      return;
+    }
+    selectedTeam.value = uiTeam; // watch가 자동으로 재조회
+  } catch (e) {
+    console.error('관심팀 불러오기 실패:', e);
+    alert('관심팀 정보를 불러오는 중 오류가 발생했습니다.');
+  }
 };
 
 const handlePostClick = (post) => {
@@ -344,12 +373,19 @@ const handlePostClick = (post) => {
 
 const handleInterestClick = (post) => {
   console.log('관심 클릭:', post);
-  // TODO: 관심 등록/해제 로직
 };
 
-const handleApplyClick = (post) => {
-  console.log('참가 신청 클릭:', post);
-  // TODO: 참가 신청 로직
+const handleApplyClick = async (post) => {
+  try {
+    const res = await boardAPI.applyGroup(post.groupId);
+    const msg = res?.message || '신청 성공';
+    if (typeof window !== 'undefined') alert(msg);
+    await loadPosts();
+  } catch (err) {
+    const msg = err?.message || '신청에 실패했습니다.';
+    if (typeof window !== 'undefined') alert(msg);
+    console.error('단체관람 신청 실패:', err);
+  }
 };
 
 const handlePageChange = (page) => {

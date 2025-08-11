@@ -7,6 +7,11 @@
       @searchTypeChange="handleSearchTypeChange"
       @clearSearch="handleClearSearch"
     />
+
+    <!-- 상단 우측 액션 (관리자 전용) -->
+    <div class="actions-row" v-if="isAdmin">
+      <button class="write-btn" @click="goToCreate">글쓰기</button>
+    </div>
     
     <!-- 로딩 상태 -->
     <div v-if="isLoading" class="loading-container">
@@ -38,7 +43,7 @@
     <BoardPagination 
       :currentPage="currentPage"
       :totalPages="totalPages"
-      :hasWriteButton="false"
+      :hasWriteButton="isAdmin"
       @pageChange="handlePageChange"
     />
   </div>
@@ -46,21 +51,46 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import BoardHeader from './BoardHeader.vue';
 import BoardTable from './BoardTable.vue';
 import BoardPagination from './BoardPagination.vue';
 import { boardAPI, BOARD_TYPES } from '@/api/board.js';
 
+const router = useRouter();
+const authStore = useAuthStore();
+
 const searchValue = ref('');
 const searchType = ref('title');
 const searchResultMessage = ref('');
 const currentPage = ref(1);
-const itemsPerPage = 10; // 페이지당 게시글 수
+const itemsPerPage = ref(10); // 페이지당 게시글 수
 const isLoading = ref(false);
 const error = ref('');
 
 const noticePosts = ref([]);
 const allPosts = ref([]); // 전체 게시글 저장
+
+// 관리자 여부 판별
+const isAdmin = computed(() => {
+  const u = authStore.user || JSON.parse(localStorage.getItem('user') || 'null');
+  if (!u) return false;
+  if (u.role && (u.role === 'ADMIN' || u.role === 'ROLE_ADMIN')) return true;
+  if (Array.isArray(u.roles) && (u.roles.includes('ADMIN') || u.roles.includes('ROLE_ADMIN'))) return true;
+  if (Array.isArray(u.authorities)) {
+    return u.authorities.some(a => {
+      const v = a?.authority ?? a;
+      return v === 'ADMIN' || v === 'ROLE_ADMIN';
+    });
+  }
+  return false;
+});
+
+// 글쓰기 이동
+const goToCreate = () => {
+  router.push({ name: 'BulletinCreate', query: { type: 'notice' } });
+};
 
 // 게시글 목록 로드
 const loadPosts = async () => {
@@ -71,7 +101,6 @@ const loadPosts = async () => {
   try {
     const result = await boardAPI.getPostsByCategory(BOARD_TYPES.NOTICE);
     
-    // 서버가 배열을 직접 반환하므로 result 자체가 배열
     if (Array.isArray(result)) {
       allPosts.value = result;
       updateDisplayedPosts();
@@ -96,7 +125,6 @@ const handleSearchTypeChange = (type) => {
 // 검색 실행
 const handleSearch = async (searchTypeParam, searchValueParam) => {
   if (!searchValueParam || !searchValueParam.trim()) {
-    // 검색어가 비어있으면 전체 목록 표시
     handleClearSearch();
     return;
   }
@@ -107,201 +135,72 @@ const handleSearch = async (searchTypeParam, searchValueParam) => {
   try {
     const result = await boardAPI.searchPosts(BOARD_TYPES.NOTICE, searchTypeParam, searchValueParam.trim());
     
-    // 서버가 배열을 직접 반환하므로 result 자체가 배열
     if (Array.isArray(result)) {
       allPosts.value = result;
-      currentPage.value = 1; // 검색 시 첫 페이지로 이동
+      currentPage.value = 1;
       updateDisplayedPosts();
       
     } else {
-      error.value = '데이터 형식이 올바르지 않습니다.';
-      searchResultMessage.value = '';
-      console.error('검색 실패: 잘못된 데이터 형식');
+      error.value = '검색 결과 형식이 올바르지 않습니다.';
+      console.error('검색 결과 로드 실패: 잘못된 데이터 형식');
     }
   } catch (err) {
-    error.value = '등록된 게시글이 없습니다. 다시 검색해 주세요.';
-    searchResultMessage.value = '';
+    error.value = '검색 중 오류가 발생했습니다.';
     console.error('검색 중 오류:', err);
   } finally {
     isLoading.value = false;
   }
 };
 
-// 페이지네이션 계산
-const totalPages = computed(() => {
-  return Math.ceil(allPosts.value.length / itemsPerPage);
-});
-
-// 현재 페이지의 게시글만 표시하는 함수 (최신순 정렬)
-const updateDisplayedPosts = () => {
-  // 게시글을 최신순으로 정렬 (createdAt 기준 내림차순)
-  const sortedPosts = [...allPosts.value].sort((a, b) => {
-    const dateA = new Date(a.createdAt);
-    const dateB = new Date(b.createdAt);
-    return dateB - dateA; // 최신순 (내림차순)
-  });
-  
-  const startIndex = (currentPage.value - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  noticePosts.value = sortedPosts.slice(startIndex, endIndex);
-};
-
-// 컴포넌트 마운트 시 게시글 목록 로드
-onMounted(() => {
-  loadPosts();
-});
-
-const handlePostClick = (post) => {
-  console.log('게시글 클릭:', post);
-  // TODO: 게시글 상세 페이지로 이동
-};
-
-const handlePageChange = (page) => {
-  currentPage.value = page;
-  updateDisplayedPosts();
-  console.log('페이지 변경:', page);
-};
-
 // 검색 초기화
 const handleClearSearch = () => {
   searchValue.value = '';
+  currentPage.value = 1;
+  updateDisplayedPosts();
   searchResultMessage.value = '';
-  loadPosts(); // 전체 게시글 다시 로드
-  console.log('검색 초기화');
 };
+
+// 페이지네이션 계산
+const totalPages = computed(() => Math.ceil(allPosts.value.length / itemsPerPage.value));
+
+const updateDisplayedPosts = () => {
+  const startIndex = (currentPage.value - 1) * itemsPerPage.value;
+  const endIndex = startIndex + itemsPerPage.value;
+  noticePosts.value = allPosts.value.slice(startIndex, endIndex);
+};
+
+// 페이지 변경
+const handlePageChange = (page) => {
+  currentPage.value = page;
+  updateDisplayedPosts();
+};
+
+// 게시글 클릭
+const handlePostClick = (post) => {
+  router.push({ name: 'BoardDetail', params: { postId: post.postId } });
+};
+
+onMounted(() => {
+  loadPosts();
+});
 </script>
 
 <style scoped>
-/* 로딩 스타일 */
-.loading-container {
+.actions-row {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  color: #6b7280;
+  justify-content: flex-end;
+  margin: 12px 0;
 }
-
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f4f6;
-  border-top: 4px solid #e11d48;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* 에러 스타일 */
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  color: var(--theme-primary, #ff6b35);
-}
-
-.error-message {
-  margin-bottom: 16px;
-  text-align: center;
-}
-
-.retry-btn {
+.write-btn {
   background: var(--theme-primary, #ff6b35);
-  color: white;
-  border: none;
+  color: #fff;
+  border: 1px solid var(--theme-primary, #ff6b35);
   border-radius: 6px;
   padding: 8px 16px;
   cursor: pointer;
-  transition: background 0.2s;
+  font-weight: 600;
 }
-
-.retry-btn:hover {
+.write-btn:hover {
   filter: brightness(90%);
-}
-
-/* 검색 결과 메시지 */
-.search-result-message {
-  text-align: center;
-  padding: 12px;
-  margin: 16px 32px;
-  background: #f0f9ff;
-  border: 1px solid #0ea5e9;
-  border-radius: 6px;
-  color: #0369a1;
-  font-size: 14px;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .loading-container {
-    padding: 40px 16px;
-  }
-  
-  .loading-spinner {
-    width: 32px;
-    height: 32px;
-    border-width: 3px;
-    margin-bottom: 12px;
-  }
-  
-  .error-container {
-    padding: 40px 16px;
-  }
-  
-  .error-message {
-    margin-bottom: 12px;
-    font-size: 14px;
-  }
-  
-  .retry-btn {
-    padding: 6px 12px;
-    font-size: 13px;
-  }
-  
-  .search-result-message {
-    margin: 12px 16px;
-    padding: 10px;
-    font-size: 13px;
-  }
-}
-
-@media (max-width: 480px) {
-  .loading-container {
-    padding: 32px 12px;
-  }
-  
-  .loading-spinner {
-    width: 28px;
-    height: 28px;
-    border-width: 2px;
-    margin-bottom: 10px;
-  }
-  
-  .error-container {
-    padding: 32px 12px;
-  }
-  
-  .error-message {
-    margin-bottom: 10px;
-    font-size: 13px;
-  }
-  
-  .retry-btn {
-    padding: 5px 10px;
-    font-size: 12px;
-  }
-  
-  .search-result-message {
-    margin: 10px 12px;
-    padding: 8px;
-    font-size: 12px;
-  }
 }
 </style> 
