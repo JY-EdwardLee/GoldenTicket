@@ -9,6 +9,9 @@ import { ref, onMounted, onBeforeUnmount, watch } from "vue";
 import { useAuthStore } from "@/stores/auth"; // Pinia authStore 임포트
 import { useNotificationStore } from "@/stores/notification";
 
+import { API_CONFIG } from "@/config/api.config.js";
+import http from "@/utils/http";
+
 const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
 // 토큰을 reactive하게 추적 (Pinia store의 토큰)
@@ -16,6 +19,13 @@ const token = ref(authStore.token);
 
 onMounted(() => {
   authStore.checkTokenValidity();
+  http.get(API_CONFIG.CHAT.HISTORY)
+    .then((response) => {
+      console.log(response.data);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 });
 
 // Pinia authStore의 토큰 변화를 감지해서 웹소켓 연결/해제 처리

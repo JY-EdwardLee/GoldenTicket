@@ -28,14 +28,14 @@
         </v-avatar>
         <v-toolbar-title class="font-weight-bold">골티봇</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-menu v-model="isSelectModalOpen" offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn icon v-bind="attrs" v-on="on">
+                <v-menu v-model="isSelectModalOpen" location="bottom">
+          <template v-slot:activator="{ props }">
+            <v-btn icon v-bind="props">
               <v-icon>mdi-dots-vertical</v-icon>
             </v-btn>
           </template>
           <v-list>
-            <v-list-item @click="clearChat">
+            <v-list-item :value="'clear'" @click="clearChat">
               <v-list-item-title>대화 초기화</v-list-item-title>
             </v-list-item>
           </v-list>
@@ -172,7 +172,7 @@ const sendMessage = async () => {
         'Authorization': `Bearer ${jwToken}`,
       };
     }
-    const response = await axios.post(API_CONFIG.MAIN_PAGE.CHAT, {
+    const response = await axios.post(API_CONFIG.CHAT.CHAT, {
       userId: user?.userId || null,
       question: mainMessage.value,
       isLogin: authStore.isAuthenticated.value,
@@ -299,7 +299,8 @@ const scrollToBottom = async () => {
 }
 
 .message-row.user {
-  justify-content: flex-end;
+  justify-content: flex-start;
+  flex-direction: row-reverse;
 }
 
 .bot-avatar {
