@@ -1,22 +1,67 @@
-CREATE TABLE users
+CREATE TABLE IF NOT EXISTS public.users
 (
-    user_id           BIGSERIAL PRIMARY KEY,
-
-    email             VARCHAR(255) NOT NULL UNIQUE,
-    gender            VARCHAR(10),
-    user_name         VARCHAR(100),
-    user_role         VARCHAR(50),
-    nickname          VARCHAR(100),
-    birth_date        DATE,
-    profile_photo_url TEXT,
-    phone_number      VARCHAR(20),
-
-    my_team           VARCHAR(50),
-    social_provider   VARCHAR(50),
-    weight            NUMERIC(5, 2) DEFAULT 0.0, -- 0.0~999.99
-    transfer_number   INTEGER       DEFAULT 0,
-    receive_number    INTEGER       DEFAULT 0,
-    panelty_point     INTEGER       DEFAULT 0,
-    is_block          BOOLEAN       DEFAULT FALSE,
-    is_delete         BOOLEAN       DEFAULT FALSE
-);
+    user_id
+    bigint
+    NOT
+    NULL
+    DEFAULT
+    nextval
+(
+    'users_user_id_seq'
+    :
+    :
+    regclass
+),
+    email character varying
+(
+    255
+) COLLATE pg_catalog."default" NOT NULL,
+    gender character varying
+(
+    10
+) COLLATE pg_catalog."default",
+    user_name character varying
+(
+    100
+) COLLATE pg_catalog."default",
+    user_role character varying
+(
+    50
+) COLLATE pg_catalog."default",
+    nick_name character varying
+(
+    100
+) COLLATE pg_catalog."default",
+    birth_date date,
+    profile_photo_url text COLLATE pg_catalog."default",
+    phone_number character varying
+(
+    20
+) COLLATE pg_catalog."default",
+    my_team character varying
+(
+    50
+) COLLATE pg_catalog."default",
+    social_provider character varying
+(
+    50
+) COLLATE pg_catalog."default",
+    weight numeric
+(
+    5,
+    2
+) DEFAULT 0.0,
+    transfer_number integer DEFAULT 0,
+    receive_number integer DEFAULT 0,
+    panelty_point integer DEFAULT 0,
+    is_block boolean DEFAULT false,
+    is_delete boolean DEFAULT false,
+    CONSTRAINT users_pkey PRIMARY KEY
+(
+    user_id
+),
+    CONSTRAINT users_email_key UNIQUE
+(
+    email
+)
+    )

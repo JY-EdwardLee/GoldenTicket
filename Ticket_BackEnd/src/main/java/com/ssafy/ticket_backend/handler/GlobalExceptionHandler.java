@@ -4,6 +4,7 @@ import com.ssafy.ticket_backend.dto.response.ErrorResponse;
 import com.ssafy.ticket_backend.exception.BoardException;
 import com.ssafy.ticket_backend.exception.CommentException;
 import com.ssafy.ticket_backend.exception.DatabaseException;
+import com.ssafy.ticket_backend.exception.DuplicateApplicationException;
 import com.ssafy.ticket_backend.exception.GameAlreadyEndedException;
 import com.ssafy.ticket_backend.exception.GameApplyException;
 import com.ssafy.ticket_backend.exception.GroupCapacityExceededException;
@@ -206,4 +207,13 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse("GROUP_PARTICIPATION_ERROR", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+
+
+    @ExceptionHandler(DuplicateApplicationException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateApplication(
+        DuplicateApplicationException e) {
+        ErrorResponse response = new ErrorResponse("DUPLICATE_APPLICATION_ERROR", e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
 }

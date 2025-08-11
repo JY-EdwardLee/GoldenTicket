@@ -53,6 +53,7 @@ public class UserController {
     @Value("${BE_BASE_URL}")
     private String BE_BASE_URL;
 
+
     /**
      * 카카오 로그인 페이지로 리다이렉트
      *
@@ -103,19 +104,19 @@ public class UserController {
 
             // 2) 회원가입 페이지로 리다이렉트하면서 tempUserId 전달
             return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http:///signup?tempUserId=" + tempUserId).build();
+                .header("Location", FE_BASE_URL + "/signup?tempUserId=" + tempUserId).build();
         }
 
         // 이미 가입된 유저라면 JWT를 HttpOnly 쿠키에 저장
         JwtTokenResponse tokens = userResponse.getToken();
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", tokens.getAccessToken())
-            .httpOnly(true).secure(false) // 배포시 true로 변경
+            .httpOnly(true).secure(true) // 배포시 true로 변경
             .path("/").sameSite("Lax").maxAge(60 * 60) // 1시간
             .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token",
-                tokens.getRefreshToken()).httpOnly(true).secure(false).path("/").sameSite("Lax")
+                tokens.getRefreshToken()).httpOnly(true).secure(true).path("/").sameSite("Lax")
             .maxAge(7 * 24 * 60 * 60) // 7일
             .build();
         response.addHeader("Set-Cookie", accessCookie.toString());
@@ -244,12 +245,12 @@ public class UserController {
         JwtTokenResponse tokens = userService.signup(userSignupRequest);
         // accessToken 쿠키 설정
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", tokens.getAccessToken())
-            .httpOnly(true).secure(false).sameSite("Lax").path("/").maxAge(Duration.ofMinutes(30))
+            .httpOnly(true).secure(true).sameSite("Lax").path("/").maxAge(Duration.ofMinutes(30))
             .build();
 
         // refreshToken 쿠키 설정
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokens.getRefreshToken())
-            .httpOnly(true).secure(false).sameSite("Lax").path("/auth/refresh")
+            .httpOnly(true).secure(true).sameSite("Lax").path("/auth/refresh")
             .maxAge(Duration.ofDays(14)).build();
 
         response.addHeader("Set-Cookie", accessCookie.toString());
@@ -376,7 +377,7 @@ public class UserController {
         @AuthenticationPrincipal CustomUserDetails userDetails) {
         List<PostAllResponse> postAllResponses = userService.selectPostsByUser(
             userDetails.getUsername());
-        
+
         return ResponseEntity.ok(postAllResponses);
     }
 

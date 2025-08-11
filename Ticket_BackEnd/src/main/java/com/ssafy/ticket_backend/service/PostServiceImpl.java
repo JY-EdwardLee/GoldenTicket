@@ -121,8 +121,13 @@ public class PostServiceImpl implements PostService {
             List<CommentDetailResponse> comments = commentMapper.getComments(postId);
 
             for (CommentDetailResponse cd : comments) {
-                String nickName = userMapper.getNickNameByUserId(cd.getUserId());
-                cd.setNickName(nickName);
+                User user = userMapper.selectUserByUserId(cd.getUserId());
+
+                S3DownloadResponse CommentUserProfileUrl = s3UserService.getImageUrlsByTypeAndRefId(
+                    new S3DownloadRequest(S3Type.UserProfile, cd.getUserId()));
+
+                cd.setCommentUserUrl(CommentUserProfileUrl.getDownloadUrl());
+                cd.setNickName(user.getNickname());
             }
 
             postDetailResponse.setCommentList(comments);
@@ -156,6 +161,7 @@ public class PostServiceImpl implements PostService {
 
             postDetailResponse.setPostUser(postUserResponse);
 
+            System.out.println(postDetailResponse);
             return postDetailResponse;
 
         } catch (PostUserNotFoundException | PostNotFoundException | DatabaseException e) {

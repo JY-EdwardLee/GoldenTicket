@@ -15,6 +15,8 @@ public class WebConfig {
     @Value("${BE_BASE_URL}")
     private String BE_BASE_URL;
 
+
+
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
