@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.handler.service;
+package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.response.GroupDetailResponse;
 import com.ssafy.ticket_backend.exception.DuplicateApplicationException;

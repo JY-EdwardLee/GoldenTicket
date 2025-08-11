@@ -1,8 +1,8 @@
 package com.ssafy.ticket_backend.controller;
 
 import com.ssafy.ticket_backend.dto.response.TicketResponse;
-import com.ssafy.ticket_backend.handler.service.CustomUserDetails;
-import com.ssafy.ticket_backend.handler.service.TicketService;
+import com.ssafy.ticket_backend.service.CustomUserDetails;
+import com.ssafy.ticket_backend.service.TicketService;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;

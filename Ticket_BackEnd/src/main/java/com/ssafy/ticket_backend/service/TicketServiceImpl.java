@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.handler.service;
+package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.response.GameResponse;
 import com.ssafy.ticket_backend.dto.response.TicketResponse;

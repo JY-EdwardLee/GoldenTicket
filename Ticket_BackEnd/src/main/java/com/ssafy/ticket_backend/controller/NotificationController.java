@@ -1,6 +1,6 @@
 package com.ssafy.ticket_backend.controller;
 
-import com.ssafy.ticket_backend.handler.service.NotificationService;
+import com.ssafy.ticket_backend.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 

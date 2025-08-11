@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.handler.service;
+package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.exception.TicketException;
 import com.ssafy.ticket_backend.mapper.GameMapper;

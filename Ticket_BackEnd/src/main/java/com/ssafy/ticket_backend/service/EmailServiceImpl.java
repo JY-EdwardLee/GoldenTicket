@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.handler.service;
+package com.ssafy.ticket_backend.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
