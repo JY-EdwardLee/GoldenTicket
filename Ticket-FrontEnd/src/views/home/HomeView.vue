@@ -5,27 +5,39 @@
       <v-container fluid class="hero-section pa-8">
         <v-container>
           <v-row justify="center" align="center" class="fill-height">
-            <!-- 응모 카드 -->
-            <v-col cols="12" md="6" class="pa-4">
+            <!-- 양도 카드 -->
+            <v-col 
+              cols="6" 
+              :md="isTransferCardHovered ? 8 : (isEnterCardHovered ? 4 : 6)" 
+              class="pa-4 card-col"
+              @mouseover="isTransferCardHovered = true"
+              @mouseleave="isTransferCardHovered = false"
+            >
                 <HeroCard
                 class="enter-card"
-                  title="응모"
-                  :description="['원하는 경기를 응모하고', '티켓을 양도받아 보세요.']"
-                  button-text="응모하기"
-                  type="primary"
-                  @click="goToApply"
-                />
-            </v-col>
-            
-            <!-- 양도 카드 -->
-            <v-col cols="12" md="6" class="pa-4">
-                <HeroCard
-                  class="transfer-card"
                   title="양도"
                   :description="['티켓을 안전하게 양도하고', '필요한 사람에게 전달하세요']"
                   button-text="양도하기"
-                  type="secondary"
+                  type="primary"
                   @click="goToTransfer"
+                />
+            </v-col>
+            
+            <!-- 응모 카드 -->
+            <v-col 
+              cols="12" 
+              :md="isEnterCardHovered ? 8 : (isTransferCardHovered ? 4 : 6)"
+              @mouseover="isEnterCardHovered = true"
+              @mouseleave="isEnterCardHovered = false"
+              class="pa-4 card-col"
+            >
+                <HeroCard
+                  class="transfer-card"
+                  title="응모"
+                  :description="['원하는 경기를 응모하고', '티켓을 양도받아 보세요.']"
+                  button-text="응모하기"
+                  type="secondary"
+                  @click="goToApply"
                 />
             </v-col>
           </v-row>
@@ -164,6 +176,9 @@
 <script setup>
 import { ref, watch, onMounted, onUnmounted, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
+
+const isEnterCardHovered = ref(false);
+const isTransferCardHovered = ref(false);
 import { useAuthStore } from '@/stores/auth';
 import { useTutorial } from '@/views/tutorial/useTutorial';
 import { driver } from 'driver.js';
@@ -408,7 +423,7 @@ const fetchUserRanking = async () => {
       name: item.userName,
       subtitle: `${item.rank}위`,
       score: item.transferAllCount,
-      avatar: '/default-avatar.png'
+      avatar: item.profileImage
     }));
   } catch (error) {
     console.error('사용자 랭킹 데이터 가져오기 실패:', error);
@@ -452,7 +467,7 @@ const fetchTeamRanking = async () => {
       subtitle: `${item.rank}위`,
       score: item.transferAllCount,
       change: `+${item.growthRate}%`,
-      avatar: `/team-logos/${item.teamName.toLowerCase()}.png`
+      avatar: `/orglogo/${item.teamName}.svg`
     }));
   } catch (error) {
     console.error('팀 랭킹 데이터 가져오기 실패:', error);
@@ -669,6 +684,10 @@ onUnmounted(() => {
 /* Vuetify 커스텀 스타일 */
 .hero-section {
   min-height: 500px;
+}
+
+.card-col {
+  transition: all 0.4s ease-in-out;
 }
 
 .enter-card {
