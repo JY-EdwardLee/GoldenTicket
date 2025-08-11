@@ -88,7 +88,7 @@
     transaction_status)
     VALUES (
     #{transactionId},
-    #{ticketIds, jdbcType=ARRAY, typeHandler=com.example.handler.LongArrayTypeHandler},
+    #{ticketIds, jdbcType=ARRAY, typeHandler=com.ssafy.ticket_backend.handler.LongArrayTypeHandler},
     #{sellerId},
     #{buyerId},
     #{transactionStatus}
@@ -149,7 +149,7 @@
       </if>
       <if test="ticketIds != null">
         ticket_ids =
-        #{ticketIds, jdbcType=ARRAY, typeHandler=com.example.handler.LongArrayTypeHandler},
+        #{ticketIds, jdbcType=ARRAY, typeHandler=com.ssafy.ticket_backend.handler.LongArrayTypeHandler},
       </if>
     </set>
     WHERE waitlist_id = #{id}
