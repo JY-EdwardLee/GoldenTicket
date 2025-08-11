@@ -100,24 +100,6 @@
             </v-expansion-panels>
           </v-container>
         </div>
-        
-        <!-- 문의 섹션 -->
-        <div class="contact-section">
-          <v-container class="py-8">
-            <v-card class="text-center pa-8" color="primary" dark>
-              <v-icon size="64" class="mb-4">mdi-headset</v-icon>
-              <h2 class="text-h5 mb-4">추가 도움이 필요하신가요?</h2>
-              <p class="text-body-1 mb-6">기타 문의사항이 있으시면 고객센터로 연락주세요.</p>
-              <v-btn 
-                color="white"
-                size="large"
-                prepend-icon="mdi-phone"
-              >
-                고객센터 연락하기
-              </v-btn>
-            </v-card>
-          </v-container>
-        </div>
       </div>
     </div>
   </v-container>
@@ -256,7 +238,7 @@ const faqs = [
   {
     id: 1,
     question: '티켓 응모는 언제까지 가능한가요?',
-    answer: '경기 시작 2시간 전까지 응모가 가능합니다. 응모 마감 시간은 각 구단별로 다를 수 있으니 상세 페이지에서 확인해주세요.'
+    answer: '경기 시작 2시간 전까지 응모가 가능합니다. 응모 마감 시간은 각 구단별 다를 수 있습니다.'
   },
   {
     id: 2,
@@ -266,7 +248,7 @@ const faqs = [
   {
     id: 3,
     question: '결제는 어떻게 진행되나요?',
-    answer: '당첨 확정 후 30분 이내에 결제를 완료해야 합니다. 간편결제, 무통장입금을 지원합니다.'
+    answer: '당첨 확정 후 30분 이내에 결제를 완료해야 합니다. 간편결제와 무통장입금을 지원합니다.'
   },
   {
     id: 4,
@@ -276,7 +258,7 @@ const faqs = [
   {
     id: 5,
     question: '한 사람이 여러 경기에 동시 응모할 수 있나요?',
-    answer: '네, 여러 경기에 동시 응모가 가능합니다. 단, 같은 경기에 대해서는 중복 응모가 불가능합니다.'
+    answer: '네, 여러 경기에 동시 응모가 가능합니다. 단, 같은 날짜에 중복 응모는 불가능합니다.'
   }
 ];
 
