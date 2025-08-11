@@ -75,7 +75,6 @@
     WHERE email = #{email}
   </select>
 
-
   <!-- 마이페이지 -->
   <select id="getMyPageByEmail" resultType="com.ssafy.ticket_backend.dto.response.MyPageResponse">
     SELECT

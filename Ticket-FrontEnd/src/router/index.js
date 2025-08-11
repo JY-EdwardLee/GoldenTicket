@@ -23,6 +23,7 @@ import PaymentView from '../views/payment/PaymentView.vue';
 const MyTicketDetailComponent = () => import('../components/user/MyTicketDetailComponent.vue');
 const SignupView = () => import('@/views/signup/SignupView.vue');
 const OAuthCallbackView = () => import('@/views/auth/OAuthCallbackView.vue');
+const MagicLinkView = () => import('@/views/auth/MagicLinkView.vue');
 
 
 const routes = [
@@ -94,6 +95,13 @@ const router = createRouter({
       path: '/oauth/callback',
       name: 'OAuthCallback',
       component: OAuthCallbackView,
+      meta: { requiresAuth: false }
+    },
+    // 매직 링크 라우트
+    {
+      path: '/magic-link',
+      name: 'MagicLink',
+      component: MagicLinkView,
       meta: { requiresAuth: false }
     }
   ],

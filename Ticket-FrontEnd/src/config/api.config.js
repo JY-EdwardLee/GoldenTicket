@@ -48,6 +48,8 @@ const USER = {
   PLATFORMS: `/users/platform-link`,
   CHANGE_PASSWORD: `/users/me/password`,
   DELETE_ACCOUNT: `/users/me`,
+  ADMIN: `/users/administrator`,
+  GENERAL_USER: `/users/general-user`,
   PAYMENT: {
     KAKAO: {
       READY: `/payment/kakao/ready`,
