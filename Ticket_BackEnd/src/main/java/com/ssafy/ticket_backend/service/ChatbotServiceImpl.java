@@ -47,14 +47,22 @@ public class ChatbotServiceImpl implements ChatbotService {
     @Override
     public ChatbotResponse askPythonChatbot(ChatbotRequest request, String userEmail,
         String accessToken) {
+        // 최근 대화 가져오기  (컨텍스트 용)
+        List<String> historyEntries = List.of();
+        if (userEmail != null) {
+            historyEntries = redisTemplate.opsForList().range(userEmail, 0, MAX_HISTORY_SIZE - 1);
+        }
+
         // 요청 바디 구성
         Map<String, Object> body = new HashMap<>();
+        body.put("history", historyEntries != null ? historyEntries : List.of()); // 컨텍스트 전달
         body.put("question", request.getQuestion()); // 질문 내용
         body.put("sessionId", userEmail); // 유저 이메일로 세션ID 처리
 
         // 질문 저장
-        appendChatHistory(accessToken, "user", request.getQuestion());
-
+        if (userEmail != null) {
+            appendChatHistory(userEmail, "user", request.getQuestion(), null);
+        }
         // 경기 정보 DB에서 조회
         List<GameForChatbotRequest> games = gameMapper.selectGameForChatbot();
 
@@ -102,7 +110,9 @@ public class ChatbotServiceImpl implements ChatbotService {
                 }
 
                 // 챗봇 답변 저장
-                appendChatHistory(accessToken, "bot", answer);
+                if (userEmail != null) {
+                    appendChatHistory(userEmail, "bot", answer, link);
+                }
 
                 return new ChatbotResponse(answer, link, action);
             } else {
@@ -121,7 +131,7 @@ public class ChatbotServiceImpl implements ChatbotService {
     /**
      * Redis에서 세션 ID 기준으로 저장된 최근 대화 히스토리를 불러와 질문-답변 쌍으로 반환한다.
      *
-     * @param sessionId 사용자 세션 또는 토큰 식별자
+     * @param sessionId 사용자 userEmail
      * @return 질문, 답변, 링크, 타임스탬프를 담은 대화 기록 리스트
      */
     @Override
@@ -140,14 +150,15 @@ public class ChatbotServiceImpl implements ChatbotService {
 
         for (String entry : entries) {
             // entry: "role::message::timestamp"
-            String[] parts = entry.split("::", 3);
-            if (parts.length < 3) {
+            String[] parts = entry.split("::", 4);
+            if (parts.length < 4) {
                 continue;
             }
 
             String role = parts[0];
             String message = parts[1];
-            LocalDateTime timestamp = LocalDateTime.parse(parts[2]);
+            String link = parts[2].isEmpty() ? null : parts[2];
+            LocalDateTime timestamp = LocalDateTime.parse(parts[3]);
 
             if ("user".equalsIgnoreCase(role)) {
                 // user 메시지는 질문이니까 저장해두고 다음 봇 메시지 기다림
@@ -159,7 +170,7 @@ public class ChatbotServiceImpl implements ChatbotService {
                 if (lastQuestion != null) {
                     // 링크 정보가 있으면 여기서 넣어야 하는데, 지금 Redis엔 없으니 null로 둠
                     qnaList.add(
-                        new ChatbotHistoryResponse(lastQuestion, message, null, questionTimestamp));
+                        new ChatbotHistoryResponse(lastQuestion, message, link, questionTimestamp));
                     lastQuestion = null;
                     questionTimestamp = null;
                 }
@@ -177,9 +188,9 @@ public class ChatbotServiceImpl implements ChatbotService {
      * @param role      메시지 발신자 구분 (user 또는 bot)
      * @param content   메시지 내용
      */
-    private void appendChatHistory(String sessionId, String role, String content) {
+    private void appendChatHistory(String sessionId, String role, String content, String link) {
         ListOperations<String, String> listOps = redisTemplate.opsForList();
-        String entry = role + "::" + content + "::" + LocalDateTime.now().toString();
+        String entry = role + "::" + content + "::" + (link != null ? link : "") + "::" + LocalDateTime.now().toString();
 
         listOps.rightPush(sessionId, entry);  // key: sessionId, value: entry
 
