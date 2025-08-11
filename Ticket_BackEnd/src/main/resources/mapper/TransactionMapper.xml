@@ -43,6 +43,16 @@
     buyer_id = #{userId} and transaction_status = 'TRANSACTION_COMPLETE'
   </select>
 
+  <select id="selectGroupBuyListByUserId" parameterType="long"
+    resultType="com.ssafy.ticket_backend.model.GroupTransaction">
+    SELECT
+    *
+    FROM
+    group_transaction_states
+    WHERE
+    buyer_id = #{userId} and transaction_status = 'TRANSACTION_COMPLETE'
+  </select>
+
   <select id="selectTicketByTransactionId" resultType="com.ssafy.ticket_backend.model.Ticket"
     parameterType="long">
     SELECT t.*
