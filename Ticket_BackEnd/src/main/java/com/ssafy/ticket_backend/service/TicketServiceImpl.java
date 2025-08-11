@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.service;
+package com.ssafy.ticket_backend.handler.service;
 
 import com.ssafy.ticket_backend.dto.response.GameResponse;
 import com.ssafy.ticket_backend.dto.response.TicketResponse;
@@ -109,8 +109,9 @@ public class TicketServiceImpl implements TicketService {
                 smsService.sendSMS(buyUser.getPhoneNumber(), text);
 
                 // **실시간 알림 전송**
-                String realTimeMessage = "당첨된 티켓: " + game.getHomeTeam() + " vs " + game.getAwayTeam()
-                    + "\n응모하신 티켓이 당첨되었습니다. 30분 이내 결제해주시기 바랍니다.";
+                String realTimeMessage =
+                    "당첨된 티켓: " + game.getHomeTeam() + " vs " + game.getAwayTeam()
+                        + "\n응모하신 티켓이 당첨되었습니다. 30분 이내 결제해주시기 바랍니다.";
 
                 // WebSocket을 통해 실시간 알림 전송
                 notificationService.sendNotificationToUser(buyUser.getEmail(), realTimeMessage);

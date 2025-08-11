@@ -14,9 +14,32 @@
 
       <!-- 사용자 프로필 카드 -->
       <div class="profile-card">
-        <div class="avatar">
-          <div class="avatar-icon">👤</div>
+        <div class="avatar" :class="{ 'uploading': isUploading }" @click="!isUploading && openImageUpload()">
+          <div v-if="!profileImageUrl" class="avatar-icon">👤</div>
+          <img 
+            v-else 
+            :src="profileImageUrl" 
+            :alt="user?.nickName || '프로필 이미지'"
+            class="profile-image"
+            @error="handleProfileImageError"
+          >
+          <div class="upload-overlay" v-if="!isUploading">
+            <span class="upload-text">📷</span>
+          </div>
+          <!-- 업로드 중 로딩 표시 -->
+          <div v-if="isUploading" class="upload-loading">
+            <div class="loading-spinner"></div>
+          </div>
         </div>
+        
+
+        <input
+          ref="fileInput"
+          type="file"
+          accept="image/*"
+          style="display: none"
+          @change="handleFileChange"
+        >
         <div class="user-info">
           <h3 class="username">{{ user?.nickName || '' }}</h3>
           <div class="team-section">
@@ -128,14 +151,20 @@
 </template>
 
 <script setup>
-import { ref, onActivated, computed } from 'vue'
+import { ref, onActivated, computed, onMounted } from 'vue'
 import { useDeleteUserModal } from '../../composables/useDeleteUserModal.js'
 import { useTeamThemeStore } from '../../stores/teamTheme.js'
 import { enumToTeamName, teamNameToLogo } from '@/utils/teamNameMap'
+import { s3API } from '../../api/index.js'
 
 const user = ref(null)
 user.value = JSON.parse(localStorage.getItem('user'))
 console.log("user", user.value)
+
+// 프로필 이미지 관련 상태
+const profileImageUrl = ref('')
+const fileInput = ref(null)
+const isUploading = ref(false)
 
 // 팀 테마 스토어 (이미 인스턴스로 export됨)
 const themeStore = useTeamThemeStore
@@ -151,6 +180,119 @@ const isSidebarOpen = ref(false)
 
 // 회원탈퇴 모달 관리
 const { isDeleteUserModalVisible, openDeleteUserModal, closeDeleteUserModal, handleDeleteUser } = useDeleteUserModal()
+
+// 컴포넌트 마운트 시 프로필 이미지 로드
+onMounted(async () => {
+  await loadProfileImage()
+})
+
+// 프로필 이미지 로드
+const loadProfileImage = async () => {
+  try {
+    const response = await s3API.getImageUrls({
+      type: 'UserProfile',
+      refId: -1 // 백엔드에서 시큐리티에서 사용자 ID를 가져옴
+    })
+    
+    if (response.downloadUrl) {
+      profileImageUrl.value = response.downloadUrl
+    } else {
+      profileImageUrl.value = ''
+    }
+  } catch (error) {
+    console.error('프로필 이미지 로드 실패:', error)
+    profileImageUrl.value = ''
+  }
+}
+
+// 이미지 업로드 모달 열기
+const openImageUpload = () => {
+  fileInput.value?.click()
+}
+
+// 파일 선택 처리
+const handleFileChange = async (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  // 파일 크기 검증 (5MB 제한)
+  if (file.size > 5 * 1024 * 1024) {
+    alert('파일 크기는 5MB 이하여야 합니다.')
+    return
+  }
+
+  // 파일 타입 검증
+  if (!file.type.startsWith('image/')) {
+    alert('이미지 파일만 업로드 가능합니다.')
+    return
+  }
+
+  await uploadProfileImage(file)
+  
+  // 파일 입력 초기화
+  event.target.value = ''
+}
+
+// 프로필 이미지 업로드
+const uploadProfileImage = async (file) => {
+  try {
+    isUploading.value = true
+
+    // 1. Presigned URL 요청
+    const presignedResponse = await s3API.getPresignedUploadUrl(
+      'UserProfile', // 백엔드에서 S3Type.UserProfile으로 변환
+      -1, // 백엔드에서 시큐리티에서 사용자 ID를 가져옴
+      file.name
+    )
+
+    if (!presignedResponse.presignedUrl || !presignedResponse.key) {
+      throw new Error('Presigned URL 요청 실패')
+    }
+
+    const { presignedUrl, key } = presignedResponse
+
+    // 2. S3에 파일 업로드
+    const uploadResponse = await fetch(presignedUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': file.type
+      }
+    })
+
+    if (!uploadResponse.ok) {
+      throw new Error('S3 업로드 실패')
+    }
+
+    // 3. 업로드된 키값 저장
+    const saveResponse = await s3API.saveUploadKey({
+      type: 'UserProfile', // 백엔드에서 S3Type.UserProfile으로 변환
+      refId: -1, // 백엔드에서 시큐리티에서 사용자 ID를 가져옴
+      key: key
+    })
+
+    if (!saveResponse.success) {
+      throw new Error('키값 저장 실패')
+    }
+
+    // 4. 프로필 이미지 새로고침
+    await loadProfileImage()
+    
+    alert('프로필 이미지가 성공적으로 업로드되었습니다.')
+  } catch (error) {
+    console.error('프로필 이미지 업로드 실패:', error)
+    alert('프로필 이미지 업로드에 실패했습니다: ' + error.message)
+  } finally {
+    isUploading.value = false
+  }
+}
+
+
+
+// 프로필 이미지 에러 처리
+const handleProfileImageError = () => {
+  profileImageUrl.value = ''
+}
 
 // 사이드바 토글 함수
 const toggleSidebar = () => {
@@ -199,6 +341,12 @@ const handleLogoError = (event) => {
 
 .avatar {
   margin-bottom: 15px;
+  position: relative;
+  cursor: pointer;
+}
+
+.avatar.uploading {
+  cursor: not-allowed;
 }
 
 .avatar-icon {
@@ -212,6 +360,69 @@ const handleLogoError = (event) => {
   font-size: 40px;
   margin: 0 auto;
   color: white;
+}
+
+.profile-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ff6b35;
+}
+
+.upload-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.avatar:hover .upload-overlay {
+  opacity: 1;
+}
+
+.upload-text {
+  color: white;
+  font-size: 24px;
+}
+
+
+
+.upload-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .username {

@@ -2,7 +2,7 @@ package com.ssafy.ticket_backend.controller;
 
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
 import com.ssafy.ticket_backend.model.BoardType;
-import com.ssafy.ticket_backend.service.BoardService;
+import com.ssafy.ticket_backend.handler.service.BoardService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.service;
+package com.ssafy.ticket_backend.handler.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -128,7 +128,7 @@ public class RankingServiceImpl implements RankingService {
     @Scheduled(cron = "0 0 0 * * *") // 매일 자정
     public void backupTeamRankingForYesterday() {
         String todayData = redisTemplate.opsForValue().get(TEAM_RANKING_TODAY_KEY);
-        
+
         if (todayData != null) {
             redisTemplate.opsForValue().set(TEAM_RANKING_YESTERDAY_KEY, todayData);
         }

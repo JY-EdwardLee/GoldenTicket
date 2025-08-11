@@ -3,8 +3,8 @@ package com.ssafy.ticket_backend.controller;
 
 import com.ssafy.ticket_backend.dto.request.ChatbotRequest;
 import com.ssafy.ticket_backend.dto.response.ChatbotResponse;
-import com.ssafy.ticket_backend.service.ChatbotService;
-import com.ssafy.ticket_backend.service.CustomUserDetails;
+import com.ssafy.ticket_backend.handler.service.ChatbotService;
+import com.ssafy.ticket_backend.handler.service.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;

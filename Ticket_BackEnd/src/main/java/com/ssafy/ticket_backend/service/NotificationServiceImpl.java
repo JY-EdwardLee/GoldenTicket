@@ -1,8 +1,7 @@
-package com.ssafy.ticket_backend.service;
+package com.ssafy.ticket_backend.handler.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service

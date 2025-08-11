@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.service;
+package com.ssafy.ticket_backend.handler.service;
 
 import com.ssafy.ticket_backend.dto.response.TicketResponse;
 import java.util.List;

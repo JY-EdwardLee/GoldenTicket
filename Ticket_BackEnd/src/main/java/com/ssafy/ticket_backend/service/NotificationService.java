@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.service;
+package com.ssafy.ticket_backend.handler.service;
 
 public interface NotificationService {
 
