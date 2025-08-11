@@ -203,6 +203,19 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { boardAPI, transformGroupData } from '@/api/board';
+import { useTeamThemeStore } from '@/stores/teamTheme.js'
+
+// 1. 로컬 스토리지에서 사용자 정보를 가져옵니다.
+const user = JSON.parse(localStorage.getItem('user'))
+
+// 2. 팀 테마 스토어를 가져옵니다.
+const themeStore = useTeamThemeStore
+
+// 3. 사용자 정보에 myTeam 값이 있으면 해당 팀으로 테마를 설정합니다.
+// 이 코드는 컴포넌트가 생성될 때마다 실행되어 현재 사용자의 팀 테마를 적용합니다.
+if (user?.myTeam) {
+  themeStore.setSelectedTeam(user.myTeam)
+}
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -431,7 +444,7 @@ watch(selectedTeam, onTeamChange);
 }
 
 .favorite-team-btn {
-  background: #e11d48;
+  background: var(--theme-primary);
   color: white;
   border: none;
   border-radius: 8px;
@@ -491,10 +504,10 @@ watch(selectedTeam, onTeamChange);
 }
 
 .team-item.active {
-  background: #e11d48;
+  background: var(--theme-primary);
   color: white;
-  border-color: #e11d48;
-  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.3);
+  border-color: var(--theme-primary);
+  box-shadow: 0 2px 8px rgba(var(--theme-primary), 0.3);
 }
 
 .team-name {
@@ -759,12 +772,12 @@ watch(selectedTeam, onTeamChange);
 }
 
 .apply-btn {
-  background: #e11d48;
+  background: var(--theme-primary);
   color: white;
 }
 
 .apply-btn:hover {
-  background: #be123c;
+  background: var(--theme-gradient);
 }
 
 

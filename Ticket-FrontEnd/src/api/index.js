@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // 환경 변수에서 API 기본 URL 가져오기
-const API_BASE_URL = "/api";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 // JWT 토큰을 헤더에 포함하는 API 클라이언트 (인증이 필요한 요청용)
 export const authApiClient = axios.create({
