@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import List
 
 from langchain.chains import RetrievalQA
 from langchain_upstage import UpstageEmbeddings, ChatUpstage
@@ -96,6 +97,34 @@ class MessageRequest(BaseModel):
     question: str
     sessionId: Optional[str] = None
     userInfo: Optional[dict] = None
+    history: Optional[List[str]] = []  # 추가
+
+def parse_history_entries(history_entries: List[str]) -> str:
+    """
+    history_entries 예시:
+    [
+      "user::삼성 언제 있어2222?::::2025-08-11T14:38:52.781721400",
+      "bot::삼성 라이온즈의 경기는 ... ::https://...::2025-08-11T14:39:01.462134300",
+      ...
+    ]
+    """
+    formatted = []
+    for entry in history_entries:
+        # "user::내용::::타임스탬프" or "bot::내용::링크::타임스탬프"
+        if entry.startswith("user::"):
+            # user::내용::::timestamp
+            parts = entry.split("::", 2)  # 최대 3개로 나누기
+            if len(parts) >= 2:
+                message = parts[1]
+                formatted.append(f"사용자: {message}")
+        elif entry.startswith("bot::"):
+            # bot::내용::링크::timestamp
+            parts = entry.split("::", 3)  # 최대 4개로 나누기
+            if len(parts) >= 2:
+                message = parts[1]
+                formatted.append(f"챗봇: {message}")
+    return "\n".join(formatted)
+
 
 # --- 질문 처리 API ---
 @app.post("/query")
@@ -103,24 +132,38 @@ def query_chatbot(req: MessageRequest):
     try:
         question = req.question
         user_info = req.userInfo or {}
+        history = req.history or []
+        history_text = parse_history_entries(history)  # history는 List[str]
 
         # 로그 출력
-        print(f"질문: {question}")
-        print(f"세션 ID: {req.sessionId}")
-        print(f"유저 정보: {user_info}")
+        # print(f"질문: {question}")
+        # print(f"세션 ID: {req.sessionId}")
+        # print(f"유저 정보: {user_info}")
+        # print(f"이전 대화 내역: {history}")
         
         # 사용자 정보 + 질문 포함한 프롬프트 컨텍스트 구성
         context = f"""
+이전 대화 기록:
+{history_text}
+
 사용자 정보: {user_info}
 질문: {question}
 
 다음 규칙에 따라 답변을 작성해 주세요:
 
+0. 이전 대화 기록은 다음과 같은 형식으로 제공됩니다:
+   사용자: [사용자 발화]
+   챗봇: [챗봇 답변]
+   이 기록을 참고하여 이전 대화의 맥락을 반영한 자연스러운 답변을 작성해 주세요.
+
 1. 주 사용자 연령층이 senior이기 때문에, 질문에 대해 친절하고 이해하기 쉬운 문장으로 간결하게 답변해 주세요.
 
-2. "경기 일정"에 관한 질문일 경우 다음과 같이 답변해 주세요:
-   - 챗봇은 최대 1주일 이내의 경기 일정만 알려드릴 수 있다고 안내하세요.
-   - 더 자세한 일정은 "응모 페이지"에서 확인하실 수 있다고 덧붙여 주세요.
+2. 질문이 다음 중 하나라도 포함되어 명확히 "경기 일정"에 관한 내용임을 판단한 경우에만, 아래 문구를 답변에 포함하세요:
+   - "경기 일정", "언제", "몇 시", "경기 시작", "경기 시간"
+   
+   만약 질문이 위 키워드를 포함하지 않거나 명확하지 않으면, 아래 문구를 포함하지 마세요:
+   - "챗봇은 최대 1주일 이내의 경기 일정만 알려드릴 수 있습니다."
+   - "더 자세한 일정은 응모 페이지에서 확인하실 수 있습니다."
 
 3. 사용자가 티켓 서비스의 특정 기능(예: 양도, 응모, 게시판 등)을 이용하려는 의도가 명확하면:
    - 아래 링크 목록 중 가장 적절한 하나를 추천해 주세요.
