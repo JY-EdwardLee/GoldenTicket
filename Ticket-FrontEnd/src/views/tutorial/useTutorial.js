@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 
@@ -84,10 +84,63 @@ const showTutorialModal = ref(false);
 // 전역 변수로 driver 인스턴스 저장
 let tutorialDriver = null;
 
+// 스크롤 잠금 유틸리티 (튜토리얼 중에만 사용)
+let __scrollLocked = false;
+let __lockedScrollY = 0;
+function lockScroll(targetY) {
+  if (__scrollLocked) return;
+    const current = window.scrollY || window.pageYOffset || 0;
+    const y = typeof targetY === 'number' ? Math.max(0, targetY) : current;
+    if (y !== current) {
+      window.scrollTo(0, y);
+    }
+    __lockedScrollY = y;
+    const b = document.body;
+    b.style.position = 'fixed';
+    b.style.top = `-${__lockedScrollY}px`;
+    b.style.left = '0';
+    b.style.right = '0';
+    b.style.width = '100%';
+    b.style.overflow = 'hidden';
+  __scrollLocked = true;
+}
+function unlockScroll() {
+  if (!__scrollLocked) return;
+    const b = document.body;
+    const y = Math.abs(parseInt(b.style.top || '0', 10)) || 0;
+    b.style.position = '';
+    b.style.top = '';
+    b.style.left = '';
+    b.style.right = '';
+    b.style.width = '';
+    b.style.overflow = '';
+    __scrollLocked = false;
+  // 원래 위치로 복구
+    window.scrollTo(0, y);
+}
+
 export function useTutorial() {
   // 튜토리얼 모달 열기
   const openTutorialModal = () => {
     showTutorialModal.value = true;
+  };
+
+  // 특정 모달(reactive boolean)이 열려있는 동안만 스크롤 고정
+  // 사용법: const stop = bindScrollLock(showModalRef, 120); // 필요 시 stop()
+  const bindScrollLock = (modalVisibleRef, lockY = undefined) => {
+    if (!modalVisibleRef || typeof modalVisibleRef !== 'object' || !('value' in modalVisibleRef)) {
+      console.warn('bindScrollLock: modalVisibleRef는 ref여야 합니다.');
+      return () => {};
+    }
+    const stop = watch(
+      modalVisibleRef,
+      (v) => { if (v) lockScroll(lockY); else unlockScroll(); },
+      { immediate: false } // 변경
+    )
+    return () => {
+      stop();
+      unlockScroll();
+    };
   };
 
   // 튜토리얼 모달 닫기
@@ -109,6 +162,8 @@ export function useTutorial() {
         console.error('튜토리얼 닫기 중 오류 발생:', e);
       }
     }
+    // 튜토리얼 강제 종료 시에도 스크롤 복구
+    unlockScroll();
   };
 
   // 아이콘 클래스 적용 함수
@@ -118,7 +173,7 @@ export function useTutorial() {
   };
 
   // 튜토리얼 시작
-  const startTutorial = (authStore = null, showLoginModal = null) => {
+  const startTutorial = (authStore = null, showLoginModal = null, lockY = undefined) => {
     // 로그인 상태 확인 (매개변수로 전달된 경우)
     if (authStore && showLoginModal && !authStore.isAuthenticated) {
       console.log('비로그인 상태에서 튜토리얼 시도 - 로그인 모달 표시');
@@ -133,6 +188,8 @@ export function useTutorial() {
     // 약간의 지연 후 튜토리얼 시작 (모달이 완전히 닫히는 시간 확보)
     setTimeout(() => {
       // 간단한 설정으로 드라이버 초기화
+      // 튜토리얼 시작 시 스크롤 잠금 (원하는 위치로)
+      lockScroll(lockY);
       const TutorialDriver = driver({
         showProgress: false,
         overlayColor: 'rgba(0, 0, 0, 0.7)',
@@ -162,6 +219,8 @@ export function useTutorial() {
         
         // 튜토리얼 완료 시 실행
         onDestroyed: () => {
+          // 스크롤 복구
+          unlockScroll();
           // 튜토리얼 완료/종료 시 로컬 스토리지에 기록
           localStorage.setItem('tutorialCompleted', 'true');
           // 최초 가입 튜토리얼은 한 번만 자동 실행되도록 플래그 업데이트
@@ -223,15 +282,203 @@ export function useTutorial() {
     }, 100);
   };
 
+  // =========================
+  // [APPLY] 응모 페이지 튜토리얼
+  // =========================
+  // 팀 선택 튜토리얼 (초기) - lockScroll(70)로 스크롤 70px 아래 고정 후 시작
+  const startApplyTutorial = () => {
+
+    unlockScroll();
+
+    // 기존 드라이버 정리
+    if (tutorialDriver) {
+      try { tutorialDriver.destroy(); } catch (_) {}
+      tutorialDriver = null;
+    }
+
+    // 요구사항: 70px 위치로 스크롤 고정
+    lockScroll(70);
+
+    // 레이아웃이 스크롤 잠금 상태로 완전히 정착된 후 드라이버 초기화
+    requestAnimationFrame(() => {
+        tutorialDriver = driver({
+          showProgress: false,
+          overlayColor: 'rgba(0, 0, 0, 0.7)',
+          animate: 300,
+          allowClose: true,
+          doneBtnText: '완료',
+          nextBtnText: '다음',
+          showButtons: ['next', 'close'],
+          onDestroyed: () => {
+            // 응모 초기 튜토리얼이 닫히면 스크롤 복구
+            unlockScroll();
+            tutorialDriver = null;
+          },
+          steps: [
+            {
+              element: '.team-list',
+              popover: {
+                title: '팀 선택',
+                description: '원하는 팀을 선택해주세요.',
+                side: 'bottom',
+                align: 'center'
+              }
+            },
+            {
+              element: '.next-btn',
+              popover: {
+                title: '다음 단계',
+                description: '다음 버튼을 눌러주세요.',
+                side: 'top',
+                align: 'center'
+              }
+            }
+          ]
+        });
+        tutorialDriver.drive();
+    });
+  };
+
+  // 날짜 선택 튜토리얼 (캘린더)
+  const startApplyCalendarTutorial = () => {
+    // 기존 드라이버 정리
+    if (tutorialDriver) {
+      try { tutorialDriver.destroy(); } catch (_) {}
+      tutorialDriver = null;
+    }
+
+    lockScroll(70);
+
+    // 약간 지연 후 시작 (DOM 안정화)
+    setTimeout(() => {
+      tutorialDriver = driver({
+        showProgress: true,
+        overlayColor: 'rgba(0, 0, 0, 0.7)',
+        animate: false,
+        allowClose: true,
+        doneBtnText: '완료',
+        nextBtnText: '다음',
+        prevBtnText: '이전',
+        showButtons: ['close'],
+        popoverClass: 'tutorial-calendar-modal',
+        steps: [
+          {
+            element: '.calendar-area',
+            popover: {
+              title: '날짜 선택',
+              description: '원하는 경기 날짜를 선택해주세요. 선택한 날짜의 경기 목록이 아래에 표시됩니다.',
+              side: 'right',
+              align: 'start',
+            }
+          }
+        ],
+        onDestroyed: () => {
+          // 달력 팝오버 종료 시 별도 동작 없음
+          tutorialDriver = null;
+        }
+      });
+
+      tutorialDriver.drive();
+
+      setupApplyDateClickListener();
+    }, 500);
+  };
+
+  // 날짜 클릭 리스너: 날짜 클릭 시 경기 목록 튜토리얼 또는 '경기 없음' 안내로 분기
+  // options: { onHasGames: () => void, onNoGames: () => void, delayMs?: number }
+  const setupApplyDateClickListener = (options = {}) => {
+    console.log('setupApplyDateClickListener 진입');
+    const { onHasGames, onNoGames, delayMs = 100 } = options;
+
+    const handleDateClick = (event) => {
+      const dateCell = event.target.closest('.calendar-cell');
+      if (dateCell && !dateCell.classList.contains('disabled')) {
+        // 기존 드라이버가 있으면 닫기 (중복 방지)
+        if (tutorialDriver) {
+          try { tutorialDriver.destroy(); } catch (_) {}
+          tutorialDriver = null;
+        }
+        document.removeEventListener('click', handleDateClick);
+        setTimeout(() => {
+          const gameCards = document.querySelectorAll('.game-list-box .game-card');
+          if (gameCards && gameCards.length > 0) {
+            if (typeof onHasGames === 'function') onHasGames();
+            startApplyGameListTutorial();
+          } else {
+            if (typeof onNoGames === 'function') onNoGames();
+          }
+        }, delayMs);
+      }
+    };
+
+    document.addEventListener('click', handleDateClick);
+    setTimeout(() => {
+      document.removeEventListener('click', handleDateClick);
+    }, 30000);
+
+  };
+
+  // 경기 목록 튜토리얼
+  const startApplyGameListTutorial = () => {
+    // 기존 드라이버 정리
+    if (tutorialDriver) {
+      try { tutorialDriver.destroy(); } catch (_) {}
+      tutorialDriver = null;
+    }
+
+    setTimeout(() => {
+      tutorialDriver = driver({
+        showProgress: false,
+        overlayColor: 'rgba(0, 0, 0, 0.7)',
+        animate: 300,
+        allowClose: true,
+        doneBtnText: '완료',
+        nextBtnText: '완료',
+        prevBtnText: '',
+        showButtons: ['close', 'next'],
+        popoverClass: 'tutorial-game-list-modal',
+        steps: [
+          {
+            element: '.game-list-box',
+            popover: {
+              title: '경기 선택',
+              description: '선택한 날짜의 경기 목록입니다. 원하는 경기의 "응모하기" 버튼을 직접 클릭해주세요.',
+              side: 'left',
+              align: 'start'
+            }
+          }
+        ],
+        onDestroyed: () => {
+          console.log('응모 튜토리얼 완료');
+          // 스크롤 복구
+          unlockScroll();
+          tutorialDriver = null;
+        },
+      });
+
+      tutorialDriver.drive();
+    }, 300);
+
+
+
+  };
+
   // 양도 페이지 전용 튜토리얼
-  const startTransferTutorial = () => {
+  const startTransferTutorial = (lockY = undefined) => {
     console.log('양도 튜토리얼 시작');
     
     // Store the driver instance in the module-level variable
+    // 튜토리얼 시작 시 스크롤 잠금 (원하는 위치로)
+    lockScroll(lockY);
     tutorialDriver = driver({
       showProgress: true,
       doneBtnText: '확인',
       showButtons: ['next'],
+      onDestroyed: () => {
+        // 초기 드라이버가 닫히는 경우에도 스크롤 복구 보장
+        unlockScroll();
+        tutorialDriver = null;
+      },
       steps: [
           {
             element: '.provider-row',
@@ -287,24 +534,11 @@ export function useTutorial() {
         // 튜토리얼 완료 시 실행
         onDestroyed: () => {
           console.log('양도 튜토리얼 완료');
+          // 스크롤 복구
+          unlockScroll();
           tutorialDriver = null;
         },
-        
-        // steps: [
-        //   {
-        //     element: '.provider-row',
-        //     popover: {
-        //       title: '플랫폼 선택',
-        //       description: 'NOL 또는 티켓링크 바로가기를 눌러주세요. 각 플랫폼별로 보유한 티켓을 확인할 수 있습니다.',
-        //       side: 'top',
-        //       align: 'center'
-        //     }
-        //   }
-        // ]
       });
-      
-      // 튜토리얼 시작
-      // tutorialDriver.drive();
     }, 500);
   };
 
@@ -418,6 +652,9 @@ export function useTutorial() {
   const transferConfirmTutorial = () => {
     console.log('양도 확인 튜토리얼 시작');
     
+    window.scrollTo(0, 10);
+    lockScroll(10);
+
     // 기존 튜토리얼이 있으면 정리
     if (tutorialDriver) {
       try {
@@ -466,7 +703,9 @@ export function useTutorial() {
       
       // 튜토리얼 완료 시 실행
       onDestroyed: () => {
-        console.log('양도 확인 튜토리얼 완료');
+        console.log('양도 튜토리얼 완료');
+        // 스크롤 복구
+        unlockScroll();
         tutorialDriver = null;
       },
       
@@ -497,6 +736,14 @@ export function useTutorial() {
     startTransferTutorial,
     selectTicketTutorial,
     transferConfirmTutorial, // 새로운 함수 추가
-    closeTutorial // closeTutorial 함수 내보내기 추가
+    closeTutorial, // closeTutorial 함수 내보내기 추가
+    // 페이지별에서 직접 사용 가능하도록 노출`
+    lockScrollAt: lockScroll,
+    unlockScroll,
+    bindScrollLock,
+    startApplyTutorial,
+    startApplyCalendarTutorial,
+    setupApplyDateClickListener,
+    startApplyGameListTutorial
   };
 }

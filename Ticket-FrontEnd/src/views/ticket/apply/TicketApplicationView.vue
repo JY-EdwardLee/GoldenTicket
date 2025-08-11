@@ -15,8 +15,6 @@
         <div class="team-bg-image"
           :class="{ 'active': selectedTeam === enumToTeamName[user.myTeam] }"
           :style="{ background: `url('/catchphrase/${user.myTeam}_CP.svg') center no-repeat`, backgroundSize: 'cover' }"
-          @mouseenter="bgHover = true"
-          @mouseleave="bgHover = false"
           @click="selectTeam(enumToTeamName[user.myTeam])"
           style="cursor:pointer;"
         ></div>
@@ -54,9 +52,9 @@
     <div v-else-if="step === 2" class="game-select-main">
       <div class="calendar-area">
         <div class="calendar-header-section">
-          <button class="month-nav-btn" @click="previousMonth"><i class="fas fa-chevron-left"></i></button>
+          <button class="month-nav-btn" @click="previousMonth">‹</button>
           <div class="calendar-title">{{ currentYear }}년 {{ currentMonth }}월</div>
-          <button class="month-nav-btn" @click="nextMonth"><i class="fas fa-chevron-right"></i></button>
+          <button class="month-nav-btn" @click="nextMonth">›</button>
         </div>
         <div class="calendar-grid">
           <div class="calendar-header" v-for="d in days" :key="d">{{ d }}</div>
@@ -149,13 +147,15 @@ import API_CONFIG from '@/config/api.config';
 import { stadiumNameToEnum } from '@/utils/teamStadium';
 import { teamNameToEnum, enumToTeamName } from '@/utils/teamNameMap';
 import http from '@/utils/http'
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
 import { useTeamThemeStore } from '@/stores/teamTheme.js'
+import { watch, onUnmounted } from 'vue';
 import { getEnumTeamName } from '@/utils/teamNameMap';
 
 const user = JSON.parse(localStorage.getItem('user'))
+import {useTutorial} from '@/views/tutorial/useTutorial.js'
 
 // 팀 테마 스토어를 가져옵니다.
 const themeStore = useTeamThemeStore
@@ -168,16 +168,13 @@ if (user?.myTeam) {
 
 
 const router = useRouter();
-
-// 튜토리얼 관련 변수
-const showTutorial = ref(false);
+const route = useRoute();
 
 const teamRows = [
   ['SSG랜더스', '키움히어로즈', 'LG트윈스', 'KT위즈', 'NC다이노스'],
   ['두산베어스', 'KIA타이거즈', '롯데자이언츠', '한화이글스', '삼성라이온즈']
 ];
-// 기본 팀을 SSG랜더스로 설정
-const selectedTeam = ref('SSG랜더스');
+const selectedTeam = ref('');
 const driverObj = ref(null); // 드라이버 인스턴스를 저장할 ref 추가
 // 서버에서 받아올 경기 데이터 배열
 const bgHover = ref(false);
@@ -187,6 +184,31 @@ const selectedDate = ref(null);
 const selectedTime = ref(null);
 const gamesOnDate = ref([]);
 const selectedGame = ref(null);
+// 중복 실행 방지 플래그
+const hasStartedApplyTutorial = ref(false);
+
+// 최초 진입 시 team-bg-image가 활성화되도록 설정
+onMounted(() => {
+  bgHover.value = true;
+});
+
+// 페이지 진입 시 튜토리얼 자동 실행 (URL 파라미터 또는 플래그 기반)
+onMounted(() => {
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tutorialParam = urlParams.get('tutorial');
+    const shouldStart = tutorialParam === 'true' || localStorage.getItem('showApplyTutorial') === 'true';
+    if (shouldStart && !hasStartedApplyTutorial.value) {
+      hasStartedApplyTutorial.value = true;
+      // 한 번만 실행되도록 플래그 제거
+      localStorage.removeItem('showApplyTutorial');
+      // 약간의 지연으로 초기 렌더 보장 후 시작
+      setTimeout(() => {
+        startApplyTutorial();
+      }, 10);
+    }
+  } catch (_) { /* ignore */ }
+});
 
 // 달력 관련 변수들
 const currentYear = new Date().getFullYear();
@@ -230,6 +252,29 @@ const pageText = {
   prevBtn: '이전'
 };
 
+// 튜토리얼 유틸/함수
+const showTutorial = ref(false);
+const { 
+  bindScrollLock,
+  startApplyTutorial,
+  startApplyCalendarTutorial,
+  setupApplyDateClickListener,
+  startApplyGameListTutorial,
+  closeTutorial
+} = useTutorial();
+
+let stopLock;
+onMounted(() => {
+  stopLock = bindScrollLock(showTutorial, 70)
+})
+
+onUnmounted(() => {
+  stopLock && stopLock();
+})
+
+////////////////// 팀 선택 관련 //////////////////
+
+// 사용자가 선택한 팀 저장 & UI 업데이트
 // 팀 이름을 ID로 변환하는 함수
 function getTeamId(teamName) {
   const teamMap = {
@@ -267,6 +312,9 @@ function selectTeam(team) {
     localStorage.setItem('selectedTeam', teamEnum);
   }
 
+  // 다른 팀을 클릭하면 초기 활성 상태를 해제합니다.
+  bgHover.value = false;
+
   // 선택된 팀 강조 표시 업데이트
   document.querySelectorAll('.team-card').forEach(card => {
     if (card.textContent === enumToTeamName[teamEnum] || card.textContent === team) {
@@ -302,11 +350,15 @@ function updateTeamSelectionPopup() {
   // 현재 활성화된 팝오버 요소 찾기
   const activePopup = document.querySelector('.driver-popover.driver-active-popup');
   if (!activePopup) return;
-
+  
+  // 팝오버 설명문 업데이트
+  const descriptionEl = activePopup.querySelector('.driver-popover-description');
+  if (descriptionEl) {
+    const defaultText = '원하는 팀을 선택해주세요.';
+    const selectedTeamText = selectedTeam.value ? ` (현재 선택한 팀 : ${selectedTeam.value})` : '';
+    descriptionEl.innerHTML = defaultText + selectedTeamText;
+  }
 }
-
-
-
 
 ////////////////// 달력 관련 //////////////////
 
@@ -384,351 +436,38 @@ function initializeTodaySelection() {
 }
 
 
-
-
 ////////////////// 튜토리얼(팝오버) 관련 //////////////////
 
 //// 초기 팀 선택 튜토리얼 시작 ////
-const startTutorial = () => {
-  // 초기화 (이미 실행 중인 튜토리얼 있다면 제거하고 새로 시작)
+const startTutorial = async () => {
+  // 기존 로컬 드라이버 정리는 유지
   if (driverObj.value) {
-    driverObj.value.destroy();
+    try { driverObj.value.destroy(); } catch (_) {}
+    driverObj.value = null;
   }
-
-  // handleNextClick() : 다음 버튼 클릭 핸들러
-  const handleNextClick = (fromTutorial = false) => {
-    
-    // 1. 팀이 선택되어 있는지 확인
-    if (!selectedTeam.value) {
-      selectedTeam.value = 'SSG랜더스'; // 기본값 설정
-    }
-    
-    // 2. 현재 단계 확인
-    const currentStep = step.value;
-    
-    // 3. 튜토리얼에서 호출된 경우
-    if (fromTutorial) {
-      // 튜토리얼 종료
-      if (driverObj.value) {
-        driverObj.value.destroy();
-        driverObj.value = null;
-      }
-      
-      // 다음 단계로 이동
-      if (currentStep === 1) {
-        step.value = 2;
-        // 캘린더 튜토리얼 시작
-        setTimeout(() => {
-          startCalendarTutorial();
-        }, 300);
-      }
-      return true;
-    }
-    
-    // 일반 버튼 클릭에서 호출된 경우
-    const nextButton = document.querySelector('.next-btn');
-    if (nextButton && !nextButton.disabled) {
-      // 현재 튜토리얼 종료
-      if (driverObj.value) {
-        driverObj.value.destroy();
-        driverObj.value = null;
-      }
-      
-      // 다음 버튼 클릭
-      nextButton.click();
-      
-      // 단계가 1에서 2로 변경되었을 때 날짜 선택 튜토리얼 시작
-      if (currentStep === 1) {
-        setTimeout(() => {
-          if (step.value === 2) {
-            startCalendarTutorial();
-          }
-        }, 500);
-      }
-      
-      return true;
-    }
-    return false;
-  };
-
-  // 드라이버 설정 -> driver.js 사용해 튜토리얼 구성
-  driverObj.value = driver({
-    showProgress: false,
-    overlayColor: 'rgba(0, 0, 0, 0.7)',
-    animate: 300,
-    allowClose: true,
-    doneBtnText: '완료',
-    nextBtnText: '다음',
-    // prevBtnText: '이전',
-    showButtons: ['next', 'close'],
-    
-    // 글로벌 onNextClick 핸들러 제거 - 개별 step의 onNext 핸들러 사용
-    
-    // driver.js 튜토리얼 라이브러리에서 제공하는 콜백 함수
-    // 각 단계에서 팝오버가 렌더링될 때마다 호출된다
-    onPopoverRender: (popover, { config, state }) => {
-      if (popover && typeof popover.querySelector === 'function') {
-        const popoverElement = popover.nodeType === 1 ? popover : popover.querySelector('.driver-popover');
-        if (popoverElement && popoverElement.classList) {
-          // 1. 팝오버 스타일링 : tutorial-popover 클래스 -> 팝오버 스타일 커스터마이징
-          popoverElement.classList.add('tutorial-popover');
-          
-          // 2. 단계별 특별 클래스 추가
-          if (state.activeStep === 1) { // 다음 버튼 단계일 때
-            popoverElement.classList.add('next-btn-popover');
-          }
-          
-          // 3. 팀 선택 팝오버의 설명문을 실시간으로 업데이트
-          if (state.activeStep === 0) { // 팀 선택 단계일 때만
-            const descriptionEl = popoverElement.querySelector('.driver-popover-description');
-            if (descriptionEl) {
-              const defaultText = '원하는 팀을 선택해주세요.';
-              const selectedTeamText = selectedTeam.value ? ` (현재 선택한 팀 : ${selectedTeam.value})` : '';
-              descriptionEl.innerHTML = defaultText + selectedTeamText;
-            }
-          }
-        }
-        
-        // 3. 다음 버튼 활성화
-        const possibleSelectors = [
-          '.driver-next-btn',
-          '.driver-popover-next-btn', 
-          '[data-driver-popover-next-btn]',
-          'button:contains("다음")',
-          '.driver-popover button:last-child'
-        ];
-        
-        let nextButton = null;
-        for (const selector of possibleSelectors) {
-          nextButton = popover.querySelector(selector);
-          if (nextButton) break;
-        }
-        
-        if (nextButton) {
-          nextButton.disabled = false;
-          console.log('다음 버튼 찾음:', nextButton.className);
-        } else {
-          console.warn('다음 버튼을 찾을 수 없음');
-        }
-      }
-    },
-    
-    // 튜토리얼 전체 흐름 정의
-    steps: [
-      {
-        // 1. 팀 선택 단계
-        element: '.team-list',
-        popover: {
-          title: '팀 선택',
-          description: '원하는 팀을 선택해주세요.',
-          side: 'bottom',
-          align: 'center',
-        }
-      },
-      {
-        // 2. 팀 선택 후 다음 버튼 클릭 단계
-        element: '.next-btn',
-        popover: {
-          title: '다음 단계',
-          description: '다음 버튼을 눌러주세요.',
-          side: 'top',
-          align: 'center',
-          onNext: () => {
-            console.log('다음 버튼 단계 onNext 호출');
-            // 튜토리얼 종료 후 다음 단계로 이동
-            const result = goToNextStep();
-            console.log('goToNextStep 결과:', result);
-            return result;
-          }
-        }
-      }
-    ]
-  });
-  
-  // 튜토리얼 시작
-  driverObj.value.drive();
+  await nextTick();
+  // 응모 페이지 공통 컴포저블 함수 호출 (lockScroll(70) 내장)
+  startApplyTutorial();
 };
 
 
 //// 날짜 선택 튜토리얼 시작 ////
 const startCalendarTutorial = () => {
-  
-  // 1. 기존 driver 인스턴스(튜토리얼) 완전히 정리
-  if (driverObj.value) {
-    try {
-      driverObj.value.destroy();
-    } catch (e) {
-      console.warn('startCalendarTutorial driver 종료 오류:', e);
-    }
-    driverObj.value = null;
-  }
-  
-  // 팝오버 위치 미리 계산
-  const calculatePopoverPosition = () => {
-    const calendarArea = document.querySelector('.calendar-area');
-    if (!calendarArea) return null;
-    
-    const rect = calendarArea.getBoundingClientRect();
-    const rightPosition = rect.right + 20;
-    const minTopPosition = 100;
-    const maxTopPosition = window.innerHeight - 200;
-    let topPosition = rect.top + (rect.height / 2) - 100;
-    
-    if (topPosition < minTopPosition) {
-      topPosition = minTopPosition;
-    } else if (topPosition > maxTopPosition) {
-      topPosition = maxTopPosition;
-    }
-    
-    return { rightPosition, topPosition };
-  };
-  
-  // 팝오버 위치 고정 CSS 추가
-  const addPopoverPositionCSS = (position) => {
-    const existingStyle = document.getElementById('calendar-tutorial-style');
-    if (existingStyle) {
-      existingStyle.remove();
-    }
-    
-    const style = document.createElement('style');
-    style.id = 'calendar-tutorial-style';
-    style.textContent = `
-      .tutorial-calendar-modal {
-        position: fixed !important;
-        left: ${position.rightPosition}px !important;
-        top: ${position.topPosition}px !important;
-        transform: none !important;
-        width: 400px !important;
-        max-width: 500px !important;
-        min-width: 300px !important;
-        max-height: 250px !important;
-        margin: 10px !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-        z-index: 10001 !important;
-        transition: none !important;
-      }
-    `;
-    document.head.appendChild(style);
-  };
-  
-  setTimeout(() => {
-    // 타겟 요소 존재 여부 확인
-    const calendarArea = document.querySelector('.calendar-area');
-    console.log('캘린더 영역 찾기:', calendarArea);
-    
-    if (!calendarArea) {
-      console.error('.calendar-area 요소를 찾을 수 없습니다!');
-      return;
-    }
-    
-    // 팝오버 위치 미리 계산 및 CSS 적용
-    const position = calculatePopoverPosition();
-    if (position) {
-      addPopoverPositionCSS(position);
-      console.log('팝오버 위치 미리 설정:', position);
-    }
-    
-    console.log('driver.js 초기화 시작...');
-    
-    // 2. 새 튜토리얼 설정
-    try {
-      driverObj.value = driver({
-        showProgress: true,
-        overlayColor: 'rgba(0, 0, 0, 0.7)',
-        animate: false, // 애니메이션 비활성화 -> 잔상 방지
-        allowClose: true,
-        doneBtnText: '완료',
-        nextBtnText: '다음',
-        prevBtnText: '이전',
-        showButtons: ['close'],
-        popoverClass: 'tutorial-calendar-modal',
-        
-        // 3. 튜토리얼 단계 정의
-        steps: [
-          {
-            // 날짜 선택 안내
-            element: '.calendar-area',
-            popover: {
-              title: '날짜 선택',
-              description: '원하는 경기 날짜를 선택해주세요. 선택한 날짜의 경기 목록이 아래에 표시됩니다.',
-              side: 'right',
-              align: 'start',
-              onNext: () => {
-                // 날짜 클릭했을 때의 이벤트 핸들러
-                setupDateClickListener();
-                return true;
-              }
-            }
-          }
-        ],
-        
-        // 콜백 이벤트
-        onHighlighted: (element, step, options) => {
-          console.log('onHighlighted 호출됨 - 위치 고정됨:', element);
-        },
-        
-        onDeselected: (element, step, options) => {
-          console.log('onDeselected 호출됨:', element);
-        },
-        
-        onDestroyed: () => {
-          console.log('onDestroyed 호출됨');
-          // 튜토리얼 종료 시 추가된 스타일 제거
-          const style = document.getElementById('calendar-tutorial-style');
-          if (style) {
-            style.remove();
-          }
-        }
-      });
-      
-      driverObj.value.drive();
-      
-    } catch (error) {
-      console.error('driver.js 초기화 오류:', error);
-    }
-  }, 500);
+  // 위임: 공통 컴포저블 캘린더 튜토리얼 실행
+  startApplyCalendarTutorial();
 };
 
 // 사용자가 캘린더에서 날짜를 클릭했을 때 발생하는 이벤트 핸들러
 // : 날짜 클릭하면, 경기 목록 튜토리얼 시작
 const setupDateClickListener = () => {
-  
-  // 1. 기존 튜토리얼 종료 (중복 방지)
-  if (driverObj.value) {
-    driverObj.value.destroy();
-    driverObj.value = null;
-  }
-  
-  // 날짜 클릭 이벤트 리스너 추가
-  const handleDateClick = (event) => {
-    
-    // 클릭된 요소가 날짜 셀인지 확인
-    const dateCell = event.target.closest('.calendar-date');
-    if (dateCell && !dateCell.classList.contains('disabled')) {
-      
-      // 이벤트 리스너 제거
-      document.removeEventListener('click', handleDateClick);
-      
-      // 경기 목록이 로드될 때까지 잠시 대기 후 경기 목록 튜토리얼 시작
-      setTimeout(() => {
-        const gameList = document.querySelector('.game-list');
-        if (gameList && gameList.children.length > 0) {
-          startGameListTutorial();
-        } else {
-          showNoGameMessage();
-        }
-      }, 500);
-    }
-  };
-  
-  // 전역 클릭 이벤트 리스너 추가
-  document.addEventListener('click', handleDateClick);
-  
-  // 30초 후 자동으로 리스너 제거 (타임아웃 방지)
-  setTimeout(() => {
-    document.removeEventListener('click', handleDateClick);
-    console.log('날짜 클릭 리스너 타임아웃으로 제거됨');
-  }, 30000);
+  // 위임: 클릭 후 분기 콜백 연결
+  setupApplyDateClickListener({
+    onHasGames: () => startGameListTutorial(),
+    onNoGames: () => {
+      try { showNoGameModal(selectedDate.value); } catch (_) {}
+    },
+    delayMs: 100
+  });
 };
 
 
@@ -810,48 +549,8 @@ const applyPopoverStyles = () => {
 
 //// 경기 목록 튜토리얼 시작 ////
 const startGameListTutorial = () => {
-  
-  // 1. 기존 driver 인스턴스 정리
-  if (driverObj.value) {
-    driverObj.value.destroy();
-    driverObj.value = null;
-  }
-  
-  // 2. 튜토리얼 설정 (300ms 지연 후 실행)
-  setTimeout(() => {
-    driverObj.value = driver({
-      showProgress: false,
-      overlayColor: 'rgba(0, 0, 0, 0.7)',
-      animate: 300,
-      allowClose: true,
-      doneBtnText: '완료',
-      nextBtnText: '완료',
-      prevBtnText: '', // 이전 버튼 텍스트 비우기
-      showButtons: ['close', 'next'], // next 버튼을 완료 버튼으로 사용
-      popoverClass: 'tutorial-game-list-modal', // 경기 목록 모달 고유 클래스
-      
-      // 3. 튜토리얼 단계
-      steps: [
-        {
-          element: '.game-list-box',
-          popover: {
-            title: '경기 선택',
-            description: '선택한 날짜의 경기 목록입니다. 원하는 경기의 "응모하기" 버튼을 직접 클릭해주세요.',
-            side: 'left',
-            align: 'start'
-          }
-        }
-      ],
-      
-      // 4. 이벤트 핸들러
-      onHighlighted: (element, step, options) => {
-        console.log('경기 목록 onHighlighted 호출됨:', element);
-      },
-    });
-    
-    // 5. 튜토리얼 시작
-    driverObj.value.drive();
-  }, 300);
+  // 위임: 공통 컴포저블 실행
+  startApplyGameListTutorial();
 };
 
 
@@ -926,18 +625,6 @@ onMounted(async () => {
         card.classList.remove('selected');
       }
     });
-  }
-
-  // URL에서 튜토리얼 파라미터 확인
-  // URL에 ?tutorial=true 가 있으면 튜토리얼을 자동으로 시작한다
-  const urlParams = new URLSearchParams(window.location.search);
-  const tutorialParam = urlParams.get('tutorial');
-  
-  if (tutorialParam === 'true') {
-    // 약간의 지연 후 튜토리얼 시작 (컴포넌트 렌더링 완료 대기)
-    setTimeout(() => {
-      startTutorial();
-    }, 500); // 로딩 시간을 좀 더 여유롭게 조정
   }
   
   // 현재 날짜 가져오기 (동적)
@@ -1072,6 +759,9 @@ async function handleApplyClick(game) {
   selectedGame.value = game;
   console.log('응모 클릭됨')
   
+  // 전역 튜토리얼 팝오버 종료 (useTutorial의 tutorialDriver 정리)
+  try { closeTutorial(); } catch (_) {}
+
   // 모든 튜토리얼 종료 및 이벤트 리스너 제거
   if (driverObj.value) {
     driverObj.value.destroy();
@@ -1119,6 +809,7 @@ function formatGameDateTime(dateTimeStr) {
   const min = String(date.getMinutes()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
 }
+
 </script>
 
 <style>
