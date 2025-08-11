@@ -4,7 +4,7 @@
     <div class="board-tabs">
       <button class="tab" :class="{active: selectedTab==='notice'}" @click="selectedTab='notice'">공지사항</button>
       <button class="tab" :class="{active: selectedTab==='free'}" @click="selectedTab='free'">자유게시판</button>
-      <button class="tab" :class="{active: selectedTab==='group'}" @click="selectedTab='group'">단체 관련 게시판</button>
+      <button class="tab" :class="{active: selectedTab==='group'}" @click="selectedTab='group'">단체 관람 게시판</button>
     </div>
 
     <main class="main-content">

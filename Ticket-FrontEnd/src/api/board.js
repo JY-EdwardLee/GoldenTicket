@@ -182,36 +182,44 @@ export const boardAPI = {
   getGroupList: async (team = 'all') => {
     try {
       if (team === 'all') {
-        const allTeamKeys = Object.values(TEAM_MAPPING);
-        const requests = allTeamKeys.map((apiName) => 
-          publicApiClient.get(`/group/${apiName}`).catch((err) => ({ data: [] }))
+        // Deduplicate API team names to avoid duplicate requests when aliases exist
+        const allApiTeamNames = Array.from(new Set(Object.values(TEAM_MAPPING)));
+        const requests = allApiTeamNames.map((apiName) => 
+          publicApiClient.get(`/group/${apiName}`).catch(() => ({ data: [] }))
         );
         const results = await Promise.all(requests);
 
-        console.log(results);
-
-        // 각 응답에 team 표시를 붙이려면, 재매핑 필요
-        const merged = [];
-        results.forEach((res, idx) => {
-          const apiName = allTeamKeys[idx];
-          const displayName = Object.keys(TEAM_MAPPING).find(
-            (k) => TEAM_MAPPING[k] === apiName
-          );
+        // 중복 제거: 같은 groupId가 여러 팀 응답에 섞여 올 수 있으므로 Map으로 유니크 처리
+        const byId = new Map();
+        results.forEach((res) => {
           const arr = Array.isArray(res.data) ? res.data : [];
-          merged.push(
-            ...arr.map((g) => ({ ...g, team: displayName }))
-          );
+          arr.forEach((g) => {
+            if (g && g.groupId != null && !byId.has(g.groupId)) {
+              byId.set(g.groupId, g);
+            }
+          });
         });
-        return merged;
+        return Array.from(byId.values());
       } else {
         const apiTeamName = TEAM_MAPPING[team];
         if (!apiTeamName) throw new Error(`알 수 없는 팀: ${team}`);
         const response = await publicApiClient.get(`/group/${apiTeamName}`);
         const arr = Array.isArray(response.data) ? response.data : [];
+        // 선택된 팀 필터가 동작하도록 team 태그를 부여
         return arr.map((g) => ({ ...g, team }));
       }
     } catch (error) {
       console.error('단체관람 목록 조회 실패:', error);
+      throw apiErrorHandler(error);
+    }
+  },
+
+  // 단체관람 신청
+  applyGroup: async (groupId) => {
+    try {
+      const response = await authApiClient.post(`/group/${groupId}`);
+      return response.data;
+    } catch (error) {
       throw apiErrorHandler(error);
     }
   }
@@ -256,8 +264,26 @@ export const TEAM_MAPPING = {
   LOTTE: 'LOTTE_GIANTS',
   DOOSAN: 'DOOSAN_BEARS',
   HANHWA: 'HANHWA_EAGLES',
+  // Allow common misspelling as alias
+  HANWHA: 'HANHWA_EAGLES',
   NC: 'NC_DINOS'
 };
+
+// API 팀코드 → 한글 팀명 매핑
+const API_TEAM_TO_KOREAN = {
+  SSG_LANDERS: 'SSG 랜더스',
+  KIA_TIGERS: 'KIA 타이거즈',
+  LG_TWINS: 'LG 트윈스',
+  KT_WIZ: 'KT 위즈',
+  KIWOOM_HEROES: '키움 히어로즈',
+  SAMSUNG_LIONS: '삼성 라이온즈',
+  LOTTE_GIANTS: '롯데 자이언츠',
+  DOOSAN_BEARS: '두산 베어스',
+  HANHWA_EAGLES: '한화 이글스',
+  NC_DINOS: 'NC 다이노스'
+};
+
+const toKoreanTeamName = (apiTeamName) => API_TEAM_TO_KOREAN[apiTeamName] || apiTeamName;
 
 // 홈팀 -> 홈구장 코드 매핑
 const TEAM_HOME_STADIUM_CODE = {
@@ -285,16 +311,19 @@ export const transformGroupData = (apiData) => {
     const stadiumCode = game.stadium || TEAM_HOME_STADIUM_CODE[game.home] || null;
     const stadiumName = getStadiumName(stadiumCode);
 
+    const homeKo = toKoreanTeamName(game.home);
+    const awayKo = toKoreanTeamName(game.away);
+
     return {
       postId: group.groupId,
-      title: `${game.home || '홈팀'} vs ${game.away || '원정팀'}`,
+      title: `${homeKo || '홈팀'} vs ${awayKo || '원정팀'}`,
       gameDate: d || '',
       gameTime: (t || '').substring(0,5),
       location: stadiumName,
       organizer: group.organizer || '단체관람 모집자',
       currentParticipants: group.applicantsCount || 0,
       maxParticipants: group.maxParticipants || 20,
-      description: group.description || `${game.home || '홈팀'}와 ${game.away || '원정팀'}의 경기를 함께 관람하실 분들을 모집합니다.`,
+      description: group.description || `${homeKo || '홈팀'}와 ${awayKo || '원정팀'}의 경기를 함께 관람하실 분들을 모집합니다.`,
       meetingPlace: group.meetingPlace || `${stadiumName} 정문`,
       meetingTime: (t || '').substring(0,5),
       hashtags: group.hashtags || ['단체관람', '함께관람', '응원'],
@@ -326,21 +355,22 @@ const getStadiumName = (stadiumCode) => {
   return stadiums[stadiumCode] || '야구장';
 };
 
-// 팀별 이미지 URL (임시 플레이스홀더)
+// 팀별 이미지 URL (로컬 자산 사용)
+const TEAM_IMAGE_MAP = {
+  SSG_LANDERS: new URL('../assets/stadium/INCHON.jpg', import.meta.url).href,
+  KIA_TIGERS: new URL('../assets/stadium/GWANGJU.webp', import.meta.url).href,
+  LG_TWINS: new URL('../assets/stadium/JAMSIL.webp', import.meta.url).href,
+  KT_WIZ: new URL('../assets/stadium/SUWON.jpg', import.meta.url).href,
+  KIWOOM_HEROES: new URL('../assets/stadium/GOCHUK.webp', import.meta.url).href,
+  SAMSUNG_LIONS: new URL('../assets/stadium/DAEGU.jpg', import.meta.url).href,
+  LOTTE_GIANTS: new URL('../assets/stadium/BUSAN.jpg', import.meta.url).href,
+  DOOSAN_BEARS: new URL('../assets/stadium/JAMSIL.webp', import.meta.url).href,
+  HANHWA_EAGLES: new URL('../assets/stadium/DAEJEON.jpg', import.meta.url).href,
+  NC_DINOS: new URL('../assets/stadium/CHANGWON.png', import.meta.url).href
+};
+
 const getTeamImageUrl = (teamName) => {
-  const map = {
-    SSG_LANDERS: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&h=320&fit=crop',
-    KIA_TIGERS: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=640&h=320&fit=crop',
-    LG_TWINS: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&h=320&fit=crop',
-    KT_WIZ: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=640&h=320&fit=crop',
-    KIWOOM_HEROES: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&h=320&fit=crop',
-    SAMSUNG_LIONS: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=640&h=320&fit=crop',
-    LOTTE_GIANTS: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&h=320&fit=crop',
-    DOOSAN_BEARS: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=640&h=320&fit=crop',
-    HANHWA_EAGLES: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&h=320&fit=crop',
-    NC_DINOS: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=640&h=320&fit=crop'
-  };
-  return map[teamName] || 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=640&h=320&fit=crop';
+  return TEAM_IMAGE_MAP[teamName] || new URL('../assets/stadium/JAMSIL.webp', import.meta.url).href;
 };
 
 // API 팀코드에서 화면 팀코드 추론
