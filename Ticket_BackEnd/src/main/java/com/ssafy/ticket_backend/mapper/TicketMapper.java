@@ -41,4 +41,6 @@ public interface TicketMapper {
     int insertOtherPlatformTicket(OtherPlatformTicket otherPlatformTicket);
 
     Ticket selectTicketByGame(Long gameId, String seat, Long userId);
+
+    List<Ticket> checkPayingOver30Minutes();
 }

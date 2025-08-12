@@ -209,4 +209,18 @@
     </set>
     WHERE transaction_id = #{transactionId}
   </update>
+
+  <select id="selectWaitlistByTransactionId"
+    resultType="com.ssafy.ticket_backend.model.Waitlist">
+    SELECT
+    waitlist_id AS waitlistId,
+    ticket_id AS ticketId,
+    user_id AS userId,
+    game_id AS gameId,
+    created_at AS createdAt,
+    waitlist_status AS status,
+    transaction_id AS transactionId
+    FROM waitlists
+    WHERE transaction_id = #{transactionId}
+  </select>
 </mapper>
