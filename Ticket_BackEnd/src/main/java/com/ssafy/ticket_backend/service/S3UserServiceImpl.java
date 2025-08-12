@@ -67,8 +67,6 @@ public class S3UserServiceImpl implements S3UserService {
                 if (existingKey != null && !existingKey.isEmpty()) {
                     // 기존 key가 있으면 업데이트 모드
                     isUpdate = true;
-                } else {
-                    // 새로운 이미지 업로드 모드
                 }
             } catch (Exception e) {
                 throw new PresignedUrlGenerationException("사용자 정보 조회에 실패하였습니다.");
@@ -92,7 +90,6 @@ public class S3UserServiceImpl implements S3UserService {
     }
 
     private String generateKey(String type, Long refId, String originalFileName) {
-        // 파일명이 null이거나 빈 문자열인 경우
         if (originalFileName == null || originalFileName.trim().isEmpty()) {
             throw new IllegalArgumentException("파일명이 비어있습니다.");
         }
@@ -117,7 +114,6 @@ public class S3UserServiceImpl implements S3UserService {
             cal.add(java.util.Calendar.HOUR, 10); // 10시간 후로 설정
             Date expiration = cal.getTime();
 
-            // 해당 bucket에 key에 대해서 PUT(업로드) 요청 10시간간 허용 URL 생성
             GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucket,
                 key).withMethod(HttpMethod.PUT).withExpiration(expiration);
 
@@ -138,7 +134,6 @@ public class S3UserServiceImpl implements S3UserService {
     @Override
     public S3SaveResponse saveUploadKey(S3SaverRequest s3SaverRequest) {
         try {
-            // 파라미터 검증
             if (s3SaverRequest == null) {
                 throw new IllegalArgumentException("요청 객체가 null입니다.");
             }
@@ -151,7 +146,6 @@ public class S3UserServiceImpl implements S3UserService {
                 throw new IllegalArgumentException("S3 키가 비어있습니다.");
             }
 
-            // 기존 key가 있는지 확인하여 업데이트 여부 판단
             boolean isUpdate = false;
             String existingKey = null;
 
@@ -172,11 +166,7 @@ public class S3UserServiceImpl implements S3UserService {
 
             // 업데이트인 경우 기존 S3 객체 삭제
             if (isUpdate && existingKey != null) {
-                try {
-                    amazonS3.deleteObject(bucket, existingKey);
-                } catch (Exception e) {
-                    // S3 삭제 실패는 치명적이지 않으므로 경고만 남기고 계속 진행
-                }
+                amazonS3.deleteObject(bucket, existingKey);
             }
 
             S3SaveResponse response = new S3SaveResponse();
@@ -192,16 +182,13 @@ public class S3UserServiceImpl implements S3UserService {
         } catch (IllegalArgumentException | UserProfileKeyQueryException | DataAccessException e) {
             throw e;
         } catch (Exception e) {
-            throw new SaveUploadKeyException("이미지 파일 저장에 실패하였습니다..");   // 데이터 베이스 키 저장 오류
+            throw new SaveUploadKeyException("이미지 파일 저장에 실패하였습니다..");
         }
     }
 
-    // DB에 업로드 정보 저장 - UserProfile 전용
     private void saveUploadInfo(String key, Long refId) {
         userMapper.updateUserProfileImage(refId, key);
     }
-
-    // Presigned Download URL 생성 - UserProfileㄴ 전용
 
 
     /**
@@ -276,7 +263,6 @@ public class S3UserServiceImpl implements S3UserService {
         }
     }
 
-    // 버킷 설정 검증
     private void validateBucketConfiguration() {
         if (bucket == null || bucket.trim().isEmpty()) {
             throw new IllegalStateException("S3 버킷 설정이 올바르지 않습니다.");

@@ -66,14 +66,7 @@ public interface UserService {
 
     // 테스트 용도
     JwtTokenResponse testUser();
-
-    // 공개용 관리자
-    JwtTokenResponse adminUser();
-
-    // 공개용 일반 사용자
-    JwtTokenResponse generalUser();
-
-    // 공개용 관리자 (LoginUserResponse 반환)
+    
     LoginUserResponse adminUserWithInfo();
 
     // 공개용 일반 사용자 (LoginUserResponse 반환)

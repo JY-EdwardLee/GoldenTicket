@@ -89,7 +89,6 @@
     WHERE group_id = #{groupId}
   </update>
 
-  <!-- 게임 시간이 현재 시간보다 지난 그룹들의 is_ended를 true로 업데이트 -->
   <update id="updateEndedGroups">
     <![CDATA[
     UPDATE groups
@@ -104,7 +103,6 @@
     ]]>
   </update>
 
-  <!-- 그룹의 현재 참가자 수를 조회 -->
   <select id="selectCountByGroupId" parameterType="long" resultType="int">
     SELECT applicants_count
     FROM groups
@@ -118,5 +116,16 @@
     WHERE group_id = #{groupId}
   </select>
 
+  <update id="updateGroupCountForDelete" parameterType="long">
+    UPDATE groups
+    SET
+    applicants_count = applicants_count - 1
+    WHERE group_id = #{groupId}
+  </update>
+
+  <delete id="deleteApplication" parameterType="com.ssafy.ticket_backend.model.Application">
+    DELETE FROM group_applications
+    WHERE group_id = #{groupId} AND user_id = #{userId}
+  </delete>
 
 </mapper>

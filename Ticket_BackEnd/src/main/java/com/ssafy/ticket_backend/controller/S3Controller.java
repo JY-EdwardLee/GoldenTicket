@@ -33,8 +33,8 @@ public class S3Controller {
   /*
   [정리]
   [마이페이지 업로드]
-  front 업로드 url 요청 -> Front에서 S3 업로드 및 덮어쓰기 -> Save로직 DB 저장->
-  보여주기용도 Download 메서드 사용 or 서비스 단에서 로직처리
+  front 업로드 url 요청 -> Front에서 S3 업로드 및 덮어쓰기 -> Save로직 DB 저장
+  -> 보여주기용도 Download 메서드 사용 or 서비스 단에서 로직처리
 
   [게시물 로직]
   1. 게시물 (수정, 업로드) 시  getPresignedUploadUrl
@@ -122,7 +122,7 @@ public class S3Controller {
         S3DownloadResponse s3DownloadResponse;
 
         // [마이페이지]
-        // s3DownloadRequest.getRefId() 값 -1이면 시큐리티에서 값 빼와.
+        // s3DownloadRequest.getRefId() 값 -1이면 시큐리티에서 값 빼오기
         if (S3Type.UserProfile.equals(s3DownloadRequest.getType())
             && s3DownloadRequest.getRefId() == -1) {
             String email = userDetails.getUsername();
