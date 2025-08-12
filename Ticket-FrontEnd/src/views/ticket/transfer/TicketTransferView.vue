@@ -4,7 +4,7 @@
 
     <!-- 응모 진행중 상태 표시 -->
     <div v-if="isApplying" class="applying-status">
-      <div class="applying-message">응모 진행중입니다.</div>
+      <div class="applying-message">양도 진행중입니다.</div>
     </div>
 
     <!-- Main -->
@@ -74,16 +74,37 @@
             <div class="detail-header-bg"><img :src="getTeamLogo(selectedTicket.homeKor || selectedTicket.game?.home)" :alt="selectedTicket.homeKor || selectedTicket.game?.home" /></div>
             <div class="detail-header-info-row">
               <div class="detail-header-info-line">
-                <div class="detail-header-info-col"><span class="info-icon">📅</span>{{ selectedTicket.game?.date?.split('T')[0] || selectedTicket.date }}</div>
-                <div class="detail-header-info-col"><span class="info-icon">⏰</span>{{ selectedTicket.game?.date?.split('T')[1]?.slice(0,5) || selectedTicket.time }}</div>
+                <div class="detail-header-info-col">
+                  <span class="info-icon">
+                    <img src="/icon/calendar.svg" alt="날짜" class="info-icon-img" />
+                  </span>
+                  {{ selectedTicket.game?.date?.split('T')[0] || selectedTicket.date }}
+                </div>
+                <div class="detail-header-info-col">
+                  <span class="info-icon">
+                    <img src="/icon/clock.svg" alt="시간" class="info-icon-img" />
+                  </span>
+                  {{ selectedTicket.game?.date?.split('T')[1]?.slice(0,5) || selectedTicket.time }}
+                </div>
               </div>
               <div class="detail-header-info-line">
-                <div class="detail-header-info-col"><span class="info-icon">📍</span>{{ truncateText(getStadiumName(selectedTicket.homeKor || selectedTicket.game?.home), 15) }}</div>
-                <div class="detail-header-info-col"><span class="info-icon">🪑</span>{{ getSeatTypeOnly(selectedTicket.seat) }}</div>
+                <div class="detail-header-info-col">
+                  <span class="info-icon">
+                    <img src="/icon/stadium.svg" alt="경기장" class="info-icon-img" />
+                  </span>
+                  {{ truncateText(getStadiumName(selectedTicket.homeKor || selectedTicket.game?.home), 15) }}
+                </div>
+                <div class="detail-header-info-col">
+                  <span class="info-icon">
+                    <img src="/icon/chair.svg" alt="좌석" class="info-icon-img" />
+                  </span>
+                  {{ getSeatTypeOnly(selectedTicket.seat) }}
+                </div>
               </div>
             </div>
           </div>
-          <div class="detail-price-row" style="position: relative; z-index: 3;">
+          <div class="detail-price-row" style="position: relative; z-index: 3; display: flex; align-items: center; gap: 8px; justify-content: center;">
+            <img src="/icon/credit_card.svg" alt="가격" class="price-icon" style="width: 1em; height: 1em;" />
             <span class="detail-price">₩{{ selectedTicket.price?.toLocaleString() }}</span>
           </div>
 
@@ -169,9 +190,9 @@
                 <span class="ticket-people">현재 응모 인원 : {{ ticket.waitNumber }}명</span>
               </div>
               <div class="ticket-info-row" style="justify-content:space-between;">
-                <span>📅 {{ ticket.game.date.split('T')[0] }}</span>
-                <span>🪑 {{ ticket.seat }}</span>
-                <span>₩{{ ticket.price.toLocaleString() }}</span>
+                <span> <img src="/icon/calendar.svg" alt="날짜" style="width: 25px; height: 25px;" />{{ ticket.game.date.split('T')[0] }}</span>
+                <span> <img src="/icon/chair.svg" alt="좌석" style="width: 25px; height: 25px;" />{{ ticket.seat }}</span>
+                <span> <img src="/icon/credit_card.svg" alt="가격" style="width: 25px; height: 25px;" />{{ ticket.price.toLocaleString() }}</span>
                 <span style="margin-left:auto;font-weight:600;">{{ ticket.statusText }}</span>
               </div>
               <!-- 상세 정보: hover 시에만 표시 -->
@@ -190,7 +211,9 @@
                      class="ticket-detail ticket-detail-horizontal ticket-detail-being-assignment" 
                      :style="getTicketDetailStyle(ticket)">
                   <div class="ticket-detail-being-assignment-content">
-                    <div class="being-assignment-icon">💳</div>
+                    <div class="being-assignment-icon">
+                      <img src="/icon/credit_card.svg" alt="결제중" style="width: 24px; height: 24px;" />
+                    </div>
                     <div class="being-assignment-text">결제중입니다</div>
                   </div>
                 </div>
@@ -213,29 +236,44 @@
                     <span class="ticket-detail-title">{{ ticket.header }}</span>
                   </div>
                   <div class="ticket-detail-info-row">
-                    <span>📅 {{ ticket.game.date.split('T')[0] }}</span>
-                    <span>⏰ {{ ticket.game.date.split('T')[1]?.slice(0,5) }}</span>
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                      <img src="/icon/calendar.svg" alt="날짜"/>
+                      {{ ticket.game.date.split('T')[0] }}
+                    </span>
+                    <span style="display: flex; align-items: center; gap: 4px;">
+                      <img src="/icon/clock.svg" alt="시간"/>
+                      {{ ticket.game.date.split('T')[1]?.slice(0,5) }}
+                    </span>
                     <span>현재 응모 인원 : {{ ticket.waitNumber }}명</span>
                   </div>
                   <div class="ticket-detail-horizontal-row-centered">
                     <div class="ticket-detail-block block-horizontal">
-                      <div class="block-title"><span class="block-icon">🏦</span>경기장</div>
+                      <div class="block-title" style="display: flex; align-items: center; gap: 4px; font-size: 20px">
+                        <img src="/icon/stadium.svg" alt="경기장" style="width: 20px; height: 20px" />
+                        경기장
+                      </div>
                       <div class="block-content">{{ getStadiumName(ticket.homeKor || ticket.game?.home) }}</div>
                     </div>
                     <div class="ticket-detail-block block-horizontal">
-                      <div class="block-title"><span class="block-icon">🪑</span>좌석</div>
+                      <div class="block-title" style="display: flex; align-items: center; gap: 4px; font-size: 20px">
+                        <img src="/icon/chair.svg" alt="좌석" style="width: 20px; height: 20px;" />
+                        좌석
+                      </div>
                       <div class="block-content">{{ ticket.seat }}</div>
                     </div>
                     <div class="ticket-detail-block block-horizontal">
-                      <div class="block-title"><span class="block-icon">💰</span>가격</div>
-                      <div class="block-content">₩{{ ticket.price.toLocaleString() }}</div>
+                      <div class="block-title" style="display: flex; align-items: center; gap: 4px; font-size: 20px">
+                        <img src="/icon/credit_card.svg" alt="가격" style="width: 20px; height: 20px;" />
+                        가격
+                      </div>
+                      <div class="block-content">{{ ticket.price.toLocaleString() }}</div>
                     </div>
                   </div>
                   <div class="ticket-detail-transfer-btn-row">
                     <button 
                       class="ticket-detail-transfer-btn" 
                       :style="{ 
-                                                backgroundColor: lightenHexColor(getTeamColor(ticket.homeKor || ticket.game?.home), 40),
+                        backgroundColor: lightenHexColor(getTeamColor(ticket.homeKor || ticket.game?.home), 40),
                         border: `2px solid ${getTeamColor(ticket.homeKor || ticket.game?.home)}` 
                       }"
                       @click="handleApply(ticket)"
@@ -885,7 +923,7 @@ onMounted(() => {
   background: #fafbfc;
   border-radius: 18px;
   border: 1.5px solid #e5e7eb;
-  width: 800px; /* 스크롤바까지 포함하여 너비 확장 */
+  width: 1100px; /* 스크롤바까지 포함하여 너비 확장 */
   max-width: 95vw;
   margin: 48px 0 64px 0;
   display: flex;
@@ -1036,13 +1074,14 @@ onMounted(() => {
   box-shadow: 0 2px 8px 0 #ce0e2d22;
 }
 .ticket-list {
+  width: 1100px;
   display: flex;
   flex-direction: column;
   gap: 18px;
   align-items: center;
 }
 .ticket-card {
-  width: 660px;
+  width: 900px;
   max-width: 95vw;
   /* background 제거 - 인라인 스타일로 팀 색상 동적 적용 */
   border-radius: 8px;
@@ -1184,32 +1223,47 @@ onMounted(() => {
   font-weight: 700;
 }
 .ticket-card .ticket-info-row {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 400;
   margin-top: 20px;
   display: flex;
-  gap: 20px;
+  gap: 50px;
 }
 .ticket-card .landers {
   color: #fff;
   font-family: 'Pretendard', 'Montserrat', sans-serif;
   font-size: 28px;
   letter-spacing: 1px;
-}
-.ticket-card.highlighted {
-  /* 인라인 스타일로 동적 팀 색상 적용하므로 CSS 고정 색상 제거 */
-  transition: all 0.3s ease;
-}
-.ticket-card .ticket-header {
-  display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: 12px;
+  font-size: 15px;
+  color: #333;
+  line-height: 1.5;
 }
+
+.ticket-info-row span {
+  display: inline-flex;
+  align-items: flex-end; /* Changed from center to flex-end to align to bottom */
+  gap: 4px;
+  height: 100%;
+}
+
+.ticket-info-row img {
+  width: 25px; /* Match the inline style width */
+  height: 25px; /* Match the inline style height */
+  margin-right: 4px;
+  vertical-align: bottom; /* Align to bottom */
+  position: relative;
+  top: 0; /* Reset any vertical offset */
+}
+
 .ticket-card .ticket-people {
   font-size: 18px;
   color: #fff;
   font-weight: 500;
   white-space: nowrap;
+  right: 0;
 }
 .ticket-card .ticket-detail {
   position: absolute;
@@ -1253,9 +1307,9 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
   gap: 18px;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 400;
-  color: #fff;
+  color: #fff !important;
   margin-bottom: 18px;
   padding-left: 2px;
   padding-right: 0;
@@ -1295,7 +1349,7 @@ onMounted(() => {
   z-index: 10;
 }
 .ticket-detail-block.block-horizontal .block-content {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 400;
   color: #fff;
   margin-left: 2px;
@@ -1374,7 +1428,7 @@ onMounted(() => {
 .ticket-detail-bg {
   position: absolute;
   left: 0; right: 0; top: 0; bottom: 0;
-  opacity: 0.18;
+  opacity: 0.06;
   z-index: 1;
   display: flex;
   align-items: center;
@@ -1598,6 +1652,36 @@ onMounted(() => {
   background: #b1002b;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(206, 14, 45, 0.4);
+}
+.ticket-card .ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 40px; /* Fixed height for consistent vertical centering */
+  position: relative;
+}
+
+.ticket-card .ticket-title {
+  font-size: 25px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.ticket-card .ticket-people {
+  font-size: 18px;
+  color: #fff;
+  font-weight: 500;
+  white-space: nowrap;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+  padding: 0;
 }
 .detail-seat-row {
   display: flex;
@@ -1857,8 +1941,31 @@ onMounted(() => {
 }
 
 .warning-modal-icon {
-  font-size: 48px;
-  margin-bottom: 20px;
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+/* Icon styles */
+.info-icon-img,
+.ticket-info-row img,
+.block-title img,
+.being-assignment-icon img,
+.warning-modal-icon img,
+.detail-header-info-col img,
+.detail-header-info-line .info-icon img,
+.detail-header-info-line img[src*='.svg'],
+.ticket-detail-info-row img {
+  height: 20px;
+  width: 20px;
+  filter: brightness(0) invert(1);
+  vertical-align: middle;
+}
+
+/* Ensure all icons in detail header are white */
+.detail-header img[src*='.svg'],
+.detail-header .info-icon img,
+.ticket-detail-info-row img {
+  filter: brightness(0) invert(1) !important;
 }
 
 .warning-modal-title {
@@ -2051,8 +2158,7 @@ onMounted(() => {
   }
   
   .main-center-card {
-    width: 100%;
-    max-width: 100%;
+    width: 900px;
     margin: 24px 0 32px 0;
     min-height: 300px;
   }

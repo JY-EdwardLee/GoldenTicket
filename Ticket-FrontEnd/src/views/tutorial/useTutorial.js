@@ -437,7 +437,7 @@ export function useTutorial() {
 
       tutorialDriver.drive();
 
-      setupApplyDateClickListener();
+      // setupApplyDateClickListener();
     }, 500);
   };
 

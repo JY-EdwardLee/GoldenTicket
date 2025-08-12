@@ -466,8 +466,8 @@ const fetchTeamRanking = async () => {
       name: getTeamKoreanName(item.teamName),
       subtitle: `${item.rank}위`,
       score: item.transferAllCount,
-      change: `+${item.growthRate}%`,
-      avatar: `/orglogo/${item.teamName}.svg`
+      ...(item.growthRate !== null && { change: `+${item.growthRate}%` }),
+      avatar: `/team-logos/${item.teamName.toLowerCase()}.png`
     }));
   } catch (error) {
     console.error('팀 랭킹 데이터 가져오기 실패:', error);
