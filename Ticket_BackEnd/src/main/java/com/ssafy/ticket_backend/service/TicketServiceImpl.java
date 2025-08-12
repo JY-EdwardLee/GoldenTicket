@@ -108,7 +108,7 @@ public class TicketServiceImpl implements TicketService {
                 String text = "[골든티켓]" + "\n" + waitlist.getCreatedAt().getMonthValue() + "월 "
                     + waitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다." + "\n"
                     + "30분 이내 결제해주시기 바랍니다." + "\n";
-                smsService.sendSMS(buyUser.getPhoneNumber(), text);
+//                smsService.sendSMS(buyUser.getPhoneNumber(), text);
 
                 // **실시간 알림 전송**
                 String realTimeMessage =
@@ -216,8 +216,7 @@ public class TicketServiceImpl implements TicketService {
                 String text =
                     "[서비스 테스트]" + "\n" + groupWaitlist.getCreatedAt().getMonthValue() + "월 "
                         + groupWaitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다."
-                        + "\n"
-                        + "30분 이내 결제해주시기 바랍니다." + "\n";
+                        + "\n" + "30분 이내 결제해주시기 바랍니다." + "\n";
 //                smsService.sendSMS(buyUser.getPhoneNumber(), text);  // 서비스 차단으로 인한 주석 처리
 
                 // **실시간 알림 전송**
