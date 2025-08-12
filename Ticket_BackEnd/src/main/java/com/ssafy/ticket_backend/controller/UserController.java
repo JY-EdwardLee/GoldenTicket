@@ -47,13 +47,9 @@ public class UserController {
     @Value("${naver.client.id}")
     private String NaverClientId;
     @Value("${FE_BASE_URL}")
-//    private String FE_BASE_URL;
-//    @Value("${BE_BASE_URL}")
-//    private String BE_BASE_URL;
-
-    private String FE_BASE_URL = "http://localhost:5173";
-    private String BE_BASE_URL = "http://localhost:8080";
-
+    private String FE_BASE_URL;
+    @Value("${BE_BASE_URL}")
+    private String BE_BASE_URL;
 
     /**
      * 카카오 로그인 페이지로 리다이렉트
