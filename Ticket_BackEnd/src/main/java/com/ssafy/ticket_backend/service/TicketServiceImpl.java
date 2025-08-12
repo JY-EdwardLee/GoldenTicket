@@ -212,10 +212,11 @@ public class TicketServiceImpl implements TicketService {
 
                 User buyUser = userMapper.selectUserByUserId(buyer);
 
+                // 당첨 메시지 전송
                 String text = "[골든티켓]" + "\n" + groupWaitlist.getCreatedAt().getMonthValue() + "월 "
                     + groupWaitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다." + "\n"
                     + "30분 이내 결제해주시기 바랍니다." + "\n";
-                smsService.sendSMS(buyUser.getPhoneNumber(), text);
+//                smsService.sendSMS(buyUser.getPhoneNumber(), text);  // 서비스 차단으로 인한 주석 처리
 
                 // **실시간 알림 전송**
                 String realTimeMessage =
