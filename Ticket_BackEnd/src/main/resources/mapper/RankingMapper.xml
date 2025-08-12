@@ -5,8 +5,10 @@
 
   <!-- 유저 양도 랭킹 조회 (상위 3명)-->
   <select id="selectUserRanking"
+    parameterType="Long"
     resultType="com.ssafy.ticket_backend.dto.response.UserRankingResponse">
     SELECT
+    user_id AS userId,
     user_name AS userName,
     transfer_number AS transferAllCount
     FROM users
@@ -26,4 +28,12 @@
     ORDER BY transferAllCount DESC
     LIMIT 3
   </select>
+
+  <!-- 유저 랭킹 응답 시에 userId로 프로필 url도 응답하기 위함-->
+  <select id="selectUserId" resultType="Long">
+    SELECT user_id
+    FROM users
+    WHERE user_name = #{userName}
+  </select>
+
 </mapper>
