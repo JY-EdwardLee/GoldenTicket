@@ -6,9 +6,6 @@ import com.ssafy.ticket_backend.dto.response.S3DownloadResponse;
 import com.ssafy.ticket_backend.dto.response.S3SaveResponse;
 import com.ssafy.ticket_backend.dto.response.S3UploadUrlResponse;
 
-/**
- * 게시글 이미지 S3 서비스 인터페이스
- */
 public interface S3PostService {
 
     S3UploadUrlResponse generatePresignedUploadUrl(Long refId, String fileName);

@@ -9,6 +9,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,7 +50,7 @@ public class GroupController {
      * 그룹 신청하기
      *
      * @param groupId
-     * @return
+     * @return GroupResponse
      */
     @PostMapping("/{groupId}")
     public ResponseEntity<GroupResponse> participateGroup(@PathVariable long groupId,
@@ -59,9 +60,15 @@ public class GroupController {
     }
 
     /**
-     * 기타사항 -> 마이페이지 나의 그룹신청 조회여부
+     * 그룹 취소하기
      *
+     * @param groupId
+     * @return GroupResponse
      */
-
-
+    @DeleteMapping("/{groupId}")
+    public ResponseEntity<GroupResponse> deleteApplication(@PathVariable long groupId,
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        groupService.deleteApplication(userDetails.getUsername(), groupId);
+        return ResponseEntity.ok(new GroupResponse(true, "응모취소 성공"));
+    }
 }
