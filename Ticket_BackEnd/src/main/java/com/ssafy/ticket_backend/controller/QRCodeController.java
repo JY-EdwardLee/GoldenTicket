@@ -1,7 +1,7 @@
 package com.ssafy.ticket_backend.controller;
 
-import com.ssafy.ticket_backend.handler.service.CustomUserDetails;
-import com.ssafy.ticket_backend.handler.service.QRCodeService;
+import com.ssafy.ticket_backend.service.CustomUserDetails;
+import com.ssafy.ticket_backend.service.QRCodeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

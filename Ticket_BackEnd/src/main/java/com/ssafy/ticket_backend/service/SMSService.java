@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.handler.service;
+package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.request.SMSVerificationCheckRequest;
 import com.ssafy.ticket_backend.exception.UserSignupException;
@@ -63,7 +63,7 @@ public class SMSService {
 
             messageService.sendOne(new SingleMessageSendingRequest(message));
         } catch (Exception e) {
-            log.error("SMS API 오류: ", e);
+//            log.error("SMS API 오류: ", e);
             throw new RuntimeException("메시지 발송 도중 오류가 발생하였습니다.");
         }
     }

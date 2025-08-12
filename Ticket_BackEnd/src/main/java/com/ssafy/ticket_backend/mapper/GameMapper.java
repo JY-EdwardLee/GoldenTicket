@@ -25,14 +25,25 @@ public interface GameMapper {
     boolean checkWaitlistsByUserIdAndGameId(@Param("userId") Long userId,
         @Param("gameId") Long gameId);
 
+    boolean checkGroupWaitlistsByUserIdAndGameId(@Param("userId") Long userId,
+        @Param("gameId") Long gameId);
+
     Waitlist selectWaitlistByUserIdAndGameId(@Param("userId") Long userId,
         @Param("gameId") Long gameId);
 
     // 대기열 추가
     void insertWaitlist(@Param("userId") Long userId, @Param("gameId") Long gameId);
 
+    // 그룹 응모 대기열 추가
+    void insertGroupWaitlist(@Param("userId") Long userId, @Param("gameId") Long gameId,
+        @Param("numberOfPeople") Long numberOfPeople);
+
     // 대기열 삭제
     int deleteWaitlist(@Param("userId") Long userId, @Param("gameId") Long gameId);
+
+    // 그룹 응모 대기열 삭제
+    int deleteGroupWaitlist(@Param("userId") Long userId, @Param("gameId") Long gameId,
+        @Param("numberOfPeople") Long numberOfPeople);
 
     // 더미 생성용 게임 가져오기
     List<Game> getAllGame();

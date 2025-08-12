@@ -3,8 +3,8 @@ package com.ssafy.ticket_backend.controller;
 import com.ssafy.ticket_backend.dto.request.GameCheckRequest;
 import com.ssafy.ticket_backend.dto.response.ApplicationGameResponse;
 import com.ssafy.ticket_backend.model.Game;
-import com.ssafy.ticket_backend.handler.service.CustomUserDetails;
-import com.ssafy.ticket_backend.handler.service.GameService;
+import com.ssafy.ticket_backend.service.CustomUserDetails;
+import com.ssafy.ticket_backend.service.GameService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +53,23 @@ public class GameController {
     }
 
     /**
+     * 그룹 응모하기
+     *
+     * @param userDetails
+     * @param gameId
+     * @param numberOfPeople
+     * @return
+     */
+    @PostMapping("/{gameId}/applications/{numberOfPeople}")
+    public ResponseEntity<ApplicationGameResponse> groupApplicationGame(
+        @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long gameId,
+        @PathVariable Long numberOfPeople) {
+        gameService.groupApplicationGame(userDetails.getUsername(), gameId, numberOfPeople);
+
+        return ResponseEntity.ok(new ApplicationGameResponse(true, "응모 완료"));
+    }
+
+    /**
      * 응모 취소
      *
      * @param userDetails
@@ -60,9 +77,26 @@ public class GameController {
      * @return
      */
     @DeleteMapping("/{gameId}/applications")
-    public ResponseEntity<ApplicationGameResponse> cancelGame(
+    public ResponseEntity<ApplicationGameResponse> cancelApplication(
         @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long gameId) {
-        gameService.cancelGame(userDetails.getUsername(), gameId);
+        gameService.cancelApplication(userDetails.getUsername(), gameId);
+
+        return ResponseEntity.ok(new ApplicationGameResponse(true, "취소 완료"));
+    }
+
+    /**
+     * 그룹 응모 취소
+     *
+     * @param userDetails
+     * @param gameId
+     * @param numberOfPeople
+     * @return
+     */
+    @DeleteMapping("/{gameId}/applications/{numberOfPeople}")
+    public ResponseEntity<ApplicationGameResponse> cancelGroupApplication(
+        @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long gameId,
+        @PathVariable Long numberOfPeople) {
+        gameService.cancelGroupApplication(userDetails.getUsername(), gameId, numberOfPeople);
 
         return ResponseEntity.ok(new ApplicationGameResponse(true, "취소 완료"));
     }

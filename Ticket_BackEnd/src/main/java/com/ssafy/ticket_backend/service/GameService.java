@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.handler.service;
+package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.request.GameCheckRequest;
 import com.ssafy.ticket_backend.model.Game;
@@ -10,7 +10,11 @@ public interface GameService {
 
     void applicationGame(String userEmail, Long gameId);
 
-    void cancelGame(String userEmail, Long gameId);
+    void groupApplicationGame(String userEmail, Long gameId, Long numberOfPeople);
+
+    void cancelApplication(String userEmail, Long gameId);
+
+    void cancelGroupApplication(String userEmail, Long gameId, Long numberOfPeople);
 
     void cancelPaying(String userEmail, Long gameId);
 }

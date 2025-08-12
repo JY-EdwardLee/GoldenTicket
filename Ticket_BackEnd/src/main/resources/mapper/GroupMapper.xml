@@ -111,4 +111,12 @@
     WHERE group_id = #{groupId}
   </select>
 
+  <select id="selectGroupInfo" parameterType="long"
+    resultType="com.ssafy.ticket_backend.model.Application">
+    SELECT group_id, user_id
+    FROM group_applications
+    WHERE group_id = #{groupId}
+  </select>
+
+
 </mapper>

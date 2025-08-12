@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.handler.service;
+package com.ssafy.ticket_backend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +19,8 @@ import com.ssafy.ticket_backend.mapper.TicketMapper;
 import com.ssafy.ticket_backend.mapper.TransactionMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.Game;
+import com.ssafy.ticket_backend.model.GroupTransaction;
+import com.ssafy.ticket_backend.model.GroupWaitlist;
 import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.Transaction;
 import com.ssafy.ticket_backend.model.User;
@@ -404,11 +406,13 @@ public class UserServiceImpl implements UserService {
 
         List<Waitlist> waitlists = ticketMapper.selectWaitlistByUserId(user.getUserId());
         List<MyApplicationResponse> myApplicationResponses = new ArrayList<>();
+        List<GroupWaitlist> groupWaitlists = ticketMapper.selectGroupWaitlistByUserId(
+            user.getUserId());
 
         for (Waitlist waitlist : waitlists) {
-            Game game = gameMapper.selectGameByGameId(waitlist.getGameId());
-
             MyApplicationResponse myApplicationResponse = new MyApplicationResponse();
+
+            Game game = gameMapper.selectGameByGameId(waitlist.getGameId());
 
             if (waitlist.getTransactionId() != null) {
                 myApplicationResponse.setTicketId(
@@ -429,6 +433,31 @@ public class UserServiceImpl implements UserService {
             myApplicationResponses.add(myApplicationResponse);
         }
 
+        for (GroupWaitlist groupWaitlist : groupWaitlists) {  // TODO 이렇게 하면 결제가 안됨 ㅠㅠ
+            MyApplicationResponse myApplicationResponse = new MyApplicationResponse();
+
+            Game game = gameMapper.selectGameByGameId(groupWaitlist.getGameId());
+
+            if (!groupWaitlist.getTicketIds().isEmpty()) {
+                for (Long ticketId : groupWaitlist.getTicketIds()) {
+                    Ticket ticket = transactionMapper.selectTicketByTicketId(ticketId);
+
+                    myApplicationResponse.setPrice(
+                        myApplicationResponse.getPrice() + ticket.getPrice());
+                    myApplicationResponse.setMatchedDate(ticket.getMatchedDate());
+                }
+            }
+
+            myApplicationResponse.setWaitlist_id(groupWaitlist.getGroupWaitlistId());
+            myApplicationResponse.setTicketId(-1L);
+            myApplicationResponse.setStatus(groupWaitlist.getWaitlistStatus());
+            myApplicationResponse.setGame(game.toGameResponse());
+
+            myApplicationResponses.add(myApplicationResponse);
+        }
+
+        myApplicationResponses.sort((o1, o2) -> o2.getDate().compareTo(o1.getDate()));  // 내림차순 정렬
+
         return myApplicationResponses;
     }
 
@@ -437,6 +466,8 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.selectUserByEmail(email);
 
         List<Transaction> transactions = transactionMapper.selectBuyListByUserId(user.getUserId());
+        List<GroupTransaction> groupTransactions = transactionMapper.selectGroupBuyListByUserId(
+            user.getUserId());
         List<TransactionResponse> transactionResponses = new ArrayList<>();
 
         for (Transaction transaction : transactions) {
@@ -448,6 +479,19 @@ public class UserServiceImpl implements UserService {
             transactionResponse.setTicket(new TicketResponse(ticket));
 
             transactionResponses.add(transactionResponse);
+        }
+
+        for (GroupTransaction groupTransaction : groupTransactions) {
+            TransactionResponse transactionResponse = new TransactionResponse();
+
+            for (Long ticketId : groupTransaction.getTicketIds()) {
+                Ticket ticket = ticketMapper.selectTicketByTicketId(ticketId);
+
+                transactionResponse.setTransactionId(groupTransaction.getTransactionId());
+                transactionResponse.setTicket(new TicketResponse(ticket));
+
+                transactionResponses.add(transactionResponse);
+            }
         }
 
         return transactionResponses;

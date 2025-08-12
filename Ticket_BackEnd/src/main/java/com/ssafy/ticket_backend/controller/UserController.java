@@ -10,8 +10,8 @@ import com.ssafy.ticket_backend.dto.response.OAuthUserResponse;
 import com.ssafy.ticket_backend.dto.response.PostAllResponse;
 import com.ssafy.ticket_backend.dto.response.TicketResponse;
 import com.ssafy.ticket_backend.dto.response.TransactionResponse;
-import com.ssafy.ticket_backend.handler.service.CustomUserDetails;
-import com.ssafy.ticket_backend.handler.service.UserService;
+import com.ssafy.ticket_backend.service.CustomUserDetails;
+import com.ssafy.ticket_backend.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -46,13 +46,10 @@ public class UserController {
     private String KakaoRestApiKey;
     @Value("${naver.client.id}")
     private String NaverClientId;
-
     @Value("${FE_BASE_URL}")
     private String FE_BASE_URL;
-
     @Value("${BE_BASE_URL}")
     private String BE_BASE_URL;
-
 
     /**
      * 카카오 로그인 페이지로 리다이렉트

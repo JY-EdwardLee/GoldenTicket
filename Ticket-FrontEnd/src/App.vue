@@ -17,14 +17,17 @@ const notificationStore = useNotificationStore();
 // 토큰을 reactive하게 추적 (Pinia store의 토큰)
 const token = ref(authStore.token);
 
+const chatHistory = ref([]);
+
 onMounted(() => {
   authStore.checkTokenValidity();
   http.get(API_CONFIG.CHAT.HISTORY)
     .then((response) => {
-      console.log(response.data);
+      chatHistory.value = response.data;
+      console.log('chatHistory.value', chatHistory.value);
     })
     .catch((error) => {
-      console.error(error);
+      console.error('Error fetching chat history:', error);
     });
 });
 
@@ -73,6 +76,6 @@ const { isDeleteUserModalVisible, closeDeleteUserModal, handleDeleteUser } =
     />
     
     <!-- 전역 챗봇 -->
-    <Chatbot />
+    <Chatbot :history="chatHistory" />
   </DefaultLayout>
 </template>

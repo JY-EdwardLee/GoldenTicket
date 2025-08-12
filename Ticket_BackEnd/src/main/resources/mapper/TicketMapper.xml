@@ -122,6 +122,14 @@
     WHERE game_id = #{gameId} and waitlist_status = 'BEING_WAITING'
   </select>
 
+  <select id="selectGroupWaitingWaitListByGameIdAndNumberOfPeople"
+    resultType="com.ssafy.ticket_backend.model.GroupWaitlist">
+    SELECT *
+    FROM group_waitlists
+    WHERE game_id = #{gameId} and waitlist_status = 'BEING_WAITING' and number_of_people =
+    #{tickets}
+  </select>
+
   <select id="countWaitListByGameId" resultType="int">
     SELECT COUNT(*)
     FROM waitlists
@@ -131,12 +139,29 @@
   <select id="selectWaitlistByUserId" resultType="com.ssafy.ticket_backend.model.Waitlist">
     SELECT
     waitlist_id AS id,
+    ticket_id AS ticketId,
     user_id AS userId,
     game_id AS gameId,
     transaction_id AS transactionId,
     created_at AS createdAt,
     waitlist_status AS status
     FROM waitlists
+    WHERE user_id = #{userId}
+    ORDER BY created_at DESC
+  </select>
+
+  <select id="selectGroupWaitlistByUserId"
+    resultType="com.ssafy.ticket_backend.model.GroupWaitlist">
+    SELECT
+    groupWaitlist_id AS groupWaitlistId,
+    ticket_ids AS ticketIds,
+    user_id AS userId,
+    game_id AS gameId,
+    created_at AS createdAt,
+    waitlist_status AS waitlistStatus,
+    transaction_id AS transactionId,
+    number_of_people AS numberOfPeople
+    FROM group_waitlists
     WHERE user_id = #{userId}
     ORDER BY created_at DESC
   </select>

@@ -290,7 +290,6 @@ const handleImageError = (event) => {
 onMounted(async () => {
   
   await authStore.getUserInfo()
-  
   // 저장된 팀이 있으면 해당 팀으로 설정
   const userInfo = localStorage.getItem('user')
   const savedTeam = authStore.user.value?.myTeam

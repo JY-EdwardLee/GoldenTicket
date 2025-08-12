@@ -2,7 +2,7 @@ package com.ssafy.ticket_backend.controller;
 
 import com.ssafy.ticket_backend.dto.response.TeamRankingResponse;
 import com.ssafy.ticket_backend.dto.response.UserRankingResponse;
-import com.ssafy.ticket_backend.handler.service.RankingService;
+import com.ssafy.ticket_backend.service.RankingService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

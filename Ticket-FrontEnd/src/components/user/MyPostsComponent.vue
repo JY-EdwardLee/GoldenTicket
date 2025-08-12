@@ -44,7 +44,7 @@
                   {{ post.title }}
                 </router-link>
               </td>
-              <td class="date-column">{{ post.createdAt }}</td>
+              <td class="date-column">{{ formatDate(post.createdAt) }}</td>
               <td class="views-column">{{ post.viewCount }}</td>
             </tr>
           </tbody>
@@ -109,6 +109,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { API_CONFIG } from '@/config/api.config'
+import { formatDate } from '@/utils/dateUtils'
 import http from '@/utils/http'
 import router from '@/router'
 

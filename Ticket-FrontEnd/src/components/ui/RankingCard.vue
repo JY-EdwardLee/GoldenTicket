@@ -12,12 +12,15 @@
           class="px-0 py-4"
         >
           <template v-slot:prepend>
-            <v-avatar :color="getAvatarColor(index)" class="mr-4" size="large">
-              <v-icon color="white" size="large">{{ getAvatarIcon(item.type) }}</v-icon>
+            <div v-if="type === 'team'" class="team-image">
+            <img :src="item.avatar" class="avatar-image">
+            </div>
+            <v-avatar v-else :color="getAvatarColor(index)" class="mr-4" size="large">
+              <img :src="item.avatar" class="avatar-image">
             </v-avatar>
           </template>
           
-          <v-list-item-title class="text-h6 font-weight-bold mb-1">{{ item.name }}</v-list-item-title>
+          <v-list-item-title class="text-h6 font-weight-bold mb-1">{{ item.name }} {{ icon[index + 1] }}</v-list-item-title>
           <v-list-item-subtitle class="text-body-2">
             {{ item.subtitle }}
             <span 
@@ -42,6 +45,14 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+
+const icon = ref({
+  1: '🥇',
+  2: '🥈',
+  3: '🥉'
+});
+
 const props = defineProps({
   title: {
     type: String,
@@ -107,6 +118,17 @@ const formatNumber = (number) => {
 </script>
 
 <style scoped>
+.avatar-image {
+  width: px;
+  height: 40px;
+  object-fit: cover;
+}
+.team-image {
+  width: 68px;
+  text-align: center;
+  object-fit: cover;
+  margin-right: 16px;
+}
 .v-card:hover {
   transform: translateY(-2px);
   transition: transform 0.3s ease;

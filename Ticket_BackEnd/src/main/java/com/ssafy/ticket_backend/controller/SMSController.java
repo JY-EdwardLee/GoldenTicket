@@ -2,7 +2,7 @@ package com.ssafy.ticket_backend.controller;
 
 import com.ssafy.ticket_backend.dto.request.SMSVerificationCheckRequest;
 import com.ssafy.ticket_backend.dto.request.SMSVerificationRequest;
-import com.ssafy.ticket_backend.handler.service.SMSService;
+import com.ssafy.ticket_backend.service.SMSService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
