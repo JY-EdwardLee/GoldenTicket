@@ -1,11 +1,12 @@
 <template>
   <v-card
-    :class="['hero-card', cardClass]"
+    :class="['hero-card', cardClass, 'cursor-pointer']"
     :height="height"
     :elevation="0"
     :rounded="rounded"
     @mouseover="isHovered = true"
     @mouseleave="isHovered = false"
+    @click="handleClick"
   >
     <div v-if="type === 'sub'" class="hero-card-sub-bg" :style="{ backgroundImage: `url('/components/default_card_sub.svg')` }"></div>
     <div v-else class="hero-card-bg" :style="{ backgroundImage: `url('/components/default_card_main.svg')` }"></div>
@@ -23,11 +24,6 @@
         </span>
       </div>
               <div v-if="type === 'primary' || type === 'secondary'" class="d-flex justify-space-between">
-        <!-- <div class="text-h6 text-black mb-8" v-if="isHovered">
-          <p class="mb-2" v-for="(line, index) in descriptionLines" :key="index">
-            {{ line }}
-          </p>
-        </div> -->
         </div>
       </div>
       <div v-if="type === 'primary' || type === 'secondary'" class="ticket-image-container justify-center pt-10">
@@ -58,18 +54,7 @@
            class="ticket-sub-image"
            />
       </div>
-      <!-- <v-btn
-        v-if="type === 'primary' || type === 'secondary'"
-        size="large"
-        variant="elevated"
-        color="white"
-        rounded="lg"
-        :class="buttonClass"
-        @click="handleClick"
-      >
-        {{ buttonText }}
-        <v-icon end>{{ buttonIcon }}</v-icon>
-      </v-btn> -->
+
     </v-card-text>
     </div>
     <slot></slot>
@@ -180,7 +165,7 @@ const handleClick = () => {
   right: 0;
   bottom: 0;  
   background-size: cover;
-  background-position: leftt;
+  background-position: left;
   background-repeat: no-repeat;
   z-index: 0;
   transition: none !important;
