@@ -439,8 +439,10 @@ public class TicketServiceImpl implements TicketService {
             Waitlist waitlist = transactionMapper.selectWaitlistByTransactionId(
                 transaction.getTransactionId());
 
-            waitlist.setStatus(WaitlistStatus.CANCEL_WAITING);
-            transactionMapper.updateWaitlist(waitlist);
+            if (waitlist != null) {
+                waitlist.setStatus(WaitlistStatus.CANCEL_WAITING);
+                transactionMapper.updateWaitlist(waitlist);
+            }
 
             this.reTransferTicket(ticket);
         }
