@@ -52,8 +52,8 @@
         </div>
         
         <div class="comment-actions">
-          <button class="edit-btn" @click="openEditModal(comment)" v-if="isCommentAuthor(comment)">수정</button>
-          <button class="delete-btn" @click="openDeleteModal(comment)" v-if="isCommentAuthor(comment)">삭제</button>
+          <button class="edit-btn" @click="openEditModal(comment)" v-if="isCommentAuthor(comment) || authStore.isAdmin">수정</button>
+          <button class="delete-btn" @click="openDeleteModal(comment)" v-if="isCommentAuthor(comment) || authStore.isAdmin">삭제</button>
           <button class="like-btn" @click="toggleCommentLike(comment)">
             <span class="like-icon" :class="{ 'liked': comment.isLiked }">
               {{ comment.isLiked ? '❤️' : '🤍' }}
@@ -90,8 +90,8 @@
             </div>
             
             <div class="reply-actions">
-              <button class="edit-btn small" @click="openEditModal(reply)" v-if="isCommentAuthor(reply)">수정</button>
-              <button class="delete-btn small" @click="openDeleteModal(reply)" v-if="isCommentAuthor(reply)">삭제</button>
+              <button class="edit-btn small" @click="openEditModal(reply)" v-if="isCommentAuthor(reply) || authStore.isAdmin">수정</button>
+              <button class="delete-btn small" @click="openDeleteModal(reply)" v-if="isCommentAuthor(reply) || authStore.isAdmin">삭제</button>
               <button class="like-btn small" @click="toggleCommentLike(reply)">
                 <span class="like-icon" :class="{ 'liked': reply.isLiked }">
                   {{ reply.isLiked ? '❤️' : '🤍' }}
@@ -129,6 +129,7 @@
               @click="submitComment"
               :disabled="!newComment.trim() || isSubmitting"
               :class="{ 'submitting': isSubmitting }"
+              title=""
             >
               <span v-if="isSubmitting" class="loading-text">
                 <span class="loading-dots">등록 중</span>
@@ -436,7 +437,7 @@ const openEditModal = (comment) => {
   }
   
   // 댓글 작성자 권한 확인
-  if (!isCommentAuthor(comment)) {
+  if (!isCommentAuthor(comment) && !authStore.isAdmin) {
     alert('본인이 작성한 댓글만 수정할 수 있습니다.');
     return;
   }
@@ -471,7 +472,7 @@ const openDeleteModal = (comment) => {
   }
   
   // 댓글 작성자 권한 확인
-  if (!isCommentAuthor(comment)) {
+  if (!isCommentAuthor(comment) && !authStore.isAdmin) {
     alert('본인이 작성한 댓글만 삭제할 수 있습니다.');
     return;
   }
@@ -1081,16 +1082,21 @@ input:checked + .toggle-slider:before {
   cursor: pointer;
   transition: all 0.2s;
   font-weight: 500;
+  outline: none;
+  user-select: none;
 }
 
 .submit-btn:hover:not(:disabled) {
   background: #be185d;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(225, 29, 72, 0.2);
 }
 
 .submit-btn:disabled {
   background: #d1d5db;
   color: #9ca3af;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 .submit-btn.submitting {

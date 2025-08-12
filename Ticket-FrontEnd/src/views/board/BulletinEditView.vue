@@ -22,6 +22,12 @@
         <button @click="loadPostDetail" class="retry-btn">다시 시도</button>
       </div>
       
+      <!-- 권한 없음 상태 -->
+      <div v-else-if="!canEditPost" class="permission-error-container">
+        <p class="error-message">이 게시글을 수정할 권한이 없습니다.</p>
+        <button @click="handleCancel" class="retry-btn">돌아가기</button>
+      </div>
+      
       <!-- 수정 폼 -->
       <form v-else @submit.prevent="handleSubmit" class="edit-form">
         <!-- 게시판 타입 표시 (수정 불가) -->
@@ -170,6 +176,7 @@ import { QuillEditor } from '@vueup/vue-quill';
 import '@vueup/vue-quill/dist/vue-quill.snow.css';
 import { boardAPI, validatePostData, BOARD_TYPE_NAMES, uploadImageToS3, uploadToS3 } from '@/api/board.js';
 import { useTeamThemeStore } from '@/stores/teamTheme.js'
+import { useAuthStore } from '@/stores/auth.js';
 
 // 1. 로컬 스토리지에서 사용자 정보를 가져옵니다.
 const user = JSON.parse(localStorage.getItem('user'))
@@ -185,6 +192,7 @@ if (user?.myTeam) {
 
 const router = useRouter();
 const route = useRoute();
+const authStore = useAuthStore();
 
 // 상태 관리
 const isLoading = ref(false);
@@ -204,6 +212,18 @@ const formData = ref({
 
 // 게시글 정보
 const postInfo = ref({});
+
+// 게시글 작성자 권한 확인
+const canEditPost = computed(() => {
+  if (!authStore.isAuthenticated) return false;
+  if (authStore.isAdmin) return true; // ADMIN은 모든 게시글 수정 가능
+  
+  // 게시글 작성자와 현재 사용자 비교
+  const postUserId = postInfo.value.userId;
+  const currentUserId = authStore.user?.userId;
+  
+  return postUserId === currentUserId;
+});
 
 // 게시판 타입 이름 (읽기 전용)
 const boardTypeName = computed(() => {
@@ -671,6 +691,21 @@ const handleCancel = () => {
 
 .retry-btn:hover {
   filter: brightness(90%);
+}
+
+/* 권한 없음 스타일 */
+.permission-error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 20px;
+  color: #dc2626; /* 빨간색으로 변경 */
+}
+
+.permission-error-message {
+  margin-bottom: 16px;
+  text-align: center;
 }
 
 .edit-form {

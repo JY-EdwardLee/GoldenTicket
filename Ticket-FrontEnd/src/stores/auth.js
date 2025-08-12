@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
   const token = ref(localStorage.getItem('accessToken') || null);
   const user = ref(JSON.parse(localStorage.getItem('user') || 'null'));
+  const userRole = ref(localStorage.getItem('userRole') || null);
   const redirectPath = ref(localStorage.getItem('redirectPath') || null);
 
   const isTokenExpired = (tokenString) => {
@@ -23,10 +24,19 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
-
   const isAuthenticated = computed(() => {
     const t = token.value;
     return !!t && !isTokenExpired(t);
+  });
+
+  // ADMIN 권한 확인
+  const isAdmin = computed(() => {
+    return userRole.value === 'ADMIN';
+  });
+
+  // 사용자 권한 확인 (ADMIN이거나 일반 사용자)
+  const hasPermission = computed(() => {
+    return isAuthenticated.value && (isAdmin.value || userRole.value === 'USER');
   });
 
   const checkTokenValidity = () => {
@@ -45,6 +55,15 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = userData;
     localStorage.removeItem('user')
     localStorage.setItem('user', JSON.stringify(userData));
+  }
+
+  function setUserRole(role) {
+    userRole.value = role;
+    if (role) {
+      localStorage.setItem('userRole', role);
+    } else {
+      localStorage.removeItem('userRole');
+    }
   }
 
   function setRedirectPath(path) {
@@ -97,8 +116,10 @@ export const useAuthStore = defineStore('auth', () => {
       // First, clear the local state
       token.value = null;
       user.value = null;
+      userRole.value = null;
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('userRole');
       // Always redirect to home after logout
       router.push('/');
     }
@@ -116,8 +137,10 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('Failed to fetch user info:', error);
       token.value = null;
       user.value = null;
+      userRole.value = null;
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('userRole');
     }
     // 여기서는 간단히 토큰 존재 여부만 확인
     // 실제로는 API 호출을 통해 토큰 검증이 필요할 수 있음
@@ -127,10 +150,14 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     token,
     user,
+    userRole,
     isAuthenticated,
+    isAdmin,
+    hasPermission,
     redirectPath,
     setToken,
     setUser,
+    setUserRole,
     setRedirectPath,
     getAndClearRedirectPath,
     logout,
