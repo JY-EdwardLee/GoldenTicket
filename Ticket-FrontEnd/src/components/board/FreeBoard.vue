@@ -1,8 +1,11 @@
 <template>
   <div>
+    <!-- 상단: 제목만 표시 -->
     <BoardHeader 
       title="자유게시판"
       v-model:searchValue="searchValue"
+      :showSearch="false"
+      :showTitle="true"
       @search="handleSearch"
       @searchTypeChange="handleSearchTypeChange"
       @clearSearch="handleClearSearch"
@@ -34,15 +37,33 @@
     <div v-if="searchResultMessage" class="search-result-message">
       {{ searchResultMessage }}
     </div>
-    
+
+    <!-- 페이지네이션 위 글쓰기 버튼 -->
+    <div class="actions-row">
+      <button v-if="authStore.isAuthenticated" class="write-btn" @click="handleWriteClick">글쓰기</button>
+    </div>
+
+    <!-- 페이지네이션 -->
     <BoardPagination 
       :currentPage="currentPage"
       :totalPages="totalPages"
       :hasWriteButton="true"
       @pageChange="handlePageChange"
     />
+
+    <!-- 하단: 검색창만 표시 (제목은 위에 유지) -->
+    <div class="search-below">
+      <BoardHeader 
+        title="자유게시판"
+        v-model:searchValue="searchValue"
+        :showSearch="true"
+        :showTitle="false"
+        @search="handleSearch"
+        @searchTypeChange="handleSearchTypeChange"
+        @clearSearch="handleClearSearch"
+      />
+    </div>
     
-    <button v-if="authStore.isAuthenticated" class="write-btn" @click="handleWriteClick">글쓰기</button>
   </div>
 </template>
 
@@ -286,6 +307,13 @@ const handleWriteClick = () => {
 .write-btn:hover {
   background: #e11d48;
 }
+
+.actions-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.search-below { margin-top: 12px; }
 
 /* Responsive design */
 @media (max-width: 768px) {
