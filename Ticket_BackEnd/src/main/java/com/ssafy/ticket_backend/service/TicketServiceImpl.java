@@ -432,7 +432,7 @@ public class TicketServiceImpl implements TicketService {
             Transaction transaction = transactionMapper.selectTransactionByTicketId(
                 ticket.getTicketId());
 
-            transaction.setTicketId(null);
+            transaction.setTicketId(0L);
             transaction.setTransactionStatus(WaitlistStatus.CANCEL_WAITING.toString());
             transactionMapper.updateTransaction(transaction);
 
