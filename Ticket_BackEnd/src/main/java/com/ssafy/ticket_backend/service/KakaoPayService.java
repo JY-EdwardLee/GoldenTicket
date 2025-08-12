@@ -8,6 +8,7 @@ import com.ssafy.ticket_backend.mapper.UserMapper;
 import com.ssafy.ticket_backend.model.Ticket;
 import com.ssafy.ticket_backend.model.TicketStatus;
 import com.ssafy.ticket_backend.model.Transaction;
+import com.ssafy.ticket_backend.model.User;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -127,9 +128,11 @@ public class KakaoPayService {
         Ticket ticket = transactionMapper.selectTicketByTicketId(
             Long.parseLong(approveResponse.getItem_code()));
 
+        User user = userMapper.selectUserByEmail(approveResponse.getPartner_user_id());
+
         // 거래 기록 갱신
         Transaction transaction = transactionMapper.selectTransactionByTicketIdAndUserId(
-            ticket.getTicketId(), Long.parseLong(approveResponse.getPartner_user_id()));
+            ticket.getTicketId(), user.getUserId());
         transaction.setTransactionStatus(String.valueOf(TicketStatus.TRANSACTION_COMPLETE));
         transactionMapper.updateTransaction(transaction);
         transactionMapper.transactionComplete(ticket.getTicketId());  // 티켓의 거래 상태 변경
