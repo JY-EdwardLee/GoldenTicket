@@ -1,6 +1,6 @@
 package com.ssafy.ticket_backend.config;
 
-import com.ssafy.ticket_backend.util.CustomHandshakeHandler;
+import com.ssafy.ticket_backend.handler.CustomHandshakeHandler;
 import com.ssafy.ticket_backend.util.JwtHandshakeInterceptor;
 import com.ssafy.ticket_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
