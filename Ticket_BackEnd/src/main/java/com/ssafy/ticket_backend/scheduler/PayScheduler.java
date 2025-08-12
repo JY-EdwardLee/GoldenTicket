@@ -31,7 +31,7 @@ public class PayScheduler {
             Transaction transaction = transactionMapper.selectTransactionByTicketId(
                 ticket.getTicketId());
 
-            transaction.setTicketId(-1L);
+            transaction.setTicketId(null);
             transaction.setTransactionStatus(WaitlistStatus.CANCEL_WAITING.toString());
             transactionMapper.updateTransaction(transaction);
 
