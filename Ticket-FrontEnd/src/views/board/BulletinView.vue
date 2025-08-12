@@ -10,18 +10,18 @@
     <main class="main-content">
       <NoticeBoard v-if="selectedTab==='notice'" />
       <FreeBoard v-else-if="selectedTab==='free'" />
-      <GroupBoard v-else />
+      <GroupBoard v-else :initialTeam="initialTeam" />
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, onMounted, computed, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import NoticeBoard from '@/components/board/NoticeBoard.vue';
 import FreeBoard from '@/components/board/FreeBoard.vue';
 import GroupBoard from '@/components/board/GroupBoard.vue';
-import { boardAPI } from '@/api/board.js';
+import { TEAM_MAPPING } from '@/api/board.js';
 import { useTeamThemeStore } from '@/stores/teamTheme.js'
 
 // 1. 로컬 스토리지에서 사용자 정보를 가져옵니다.
@@ -31,20 +31,47 @@ const user = JSON.parse(localStorage.getItem('user'))
 const themeStore = useTeamThemeStore
 
 // 3. 사용자 정보에 myTeam 값이 있으면 해당 팀으로 테마를 설정합니다.
-// 이 코드는 컴포넌트가 생성될 때마다 실행되어 현재 사용자의 팀 테마를 적용합니다.
 if (user?.myTeam) {
   themeStore.setSelectedTeam(user.myTeam)
 }
 
+// myTeam을 UI 키로 변환
+const KOREAN_TO_UI = {
+  'SSG 랜더스': 'SSG',
+  'KIA 타이거즈': 'KIA',
+  'LG 트윈스': 'LG',
+  'KT 위즈': 'KT',
+  '키움 히어로즈': 'KIWOOM',
+  '삼성 라이온즈': 'SAMSUNG',
+  '롯데 자이언츠': 'LOTTE',
+  '두산 베어스': 'DOOSAN',
+  '한화 이글스': 'HANHWA',
+  'NC 다이노스': 'NC'
+};
+
+const toUiTeam = (team) => {
+  if (!team) return null;
+  if (TEAM_MAPPING[team]) return team; // already UI key
+  const entry = Object.entries(TEAM_MAPPING).find(([, api]) => api === team);
+  if (entry) return entry[0];
+  return KOREAN_TO_UI[team] || null;
+};
+
 const route = useRoute();
+const router = useRouter();
 const selectedTab = ref('notice');
+const initialTeam = computed(() => toUiTeam(user?.myTeam) || 'all');
 
 onMounted(() => {
-  // 쿼리 파라미터에서 tab 값을 확인하여 탭 설정
   const tabParam = route.query.tab;
   if (tabParam && ['notice', 'free', 'group'].includes(tabParam)) {
     selectedTab.value = tabParam;
   }
+});
+
+// 탭 변경 시 URL 쿼리 동기화 (뒤로가기 시 정확한 탭으로 복귀)
+watch(selectedTab, (tab) => {
+  router.replace({ query: { ...route.query, tab } });
 });
 </script>
 
