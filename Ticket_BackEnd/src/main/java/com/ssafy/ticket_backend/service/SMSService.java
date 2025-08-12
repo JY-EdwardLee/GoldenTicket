@@ -27,7 +27,7 @@ public class SMSService {
 
             redisTemplate.opsForValue().set(phoneNumber, verificationCode, 5, TimeUnit.MINUTES);
 
-            String text = "안녕하세요. 골든티켓입니다." + "\n" + "인증번호 : " + verificationCode;
+            String text = "[테스트]안녕하세요. 골든티켓입니다." + "\n" + "인증번호 : " + verificationCode;
             this.sendSMS(phoneNumber, text);
         } catch (Exception e) {
             throw new UserSignupException("메시지 발송 도중 오류가 발생하였습니다.");
