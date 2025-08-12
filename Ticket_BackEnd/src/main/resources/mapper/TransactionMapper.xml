@@ -191,6 +191,13 @@
     WHERE ticket_id = #{ticketId}
   </select>
 
+  <select id="selectTransactionByTicketIdAndUserId" parameterType="long"
+    resultType="com.ssafy.ticket_backend.model.Transaction">
+    SELECT *
+    FROM transaction_states
+    WHERE ticket_id = #{ticketId} and buyer_id = #{userId}
+  </select>
+
   <update id="updateTransaction" parameterType="com.ssafy.ticket_backend.model.Transaction">
     UPDATE transaction_states
     <set>
