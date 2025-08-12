@@ -105,10 +105,7 @@ public class TicketServiceImpl implements TicketService {
 
                 User buyUser = userMapper.selectUserByUserId(buyer);
 
-                String text = "[골든티켓]" + "\n" + waitlist.getCreatedAt().getMonthValue() + "월 "
-                    + waitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다." + "\n"
-                    + "30분 이내 결제해주시기 바랍니다." + "\n";
-                smsService.sendSMS(buyUser.getPhoneNumber(), text);
+                smsService.sendWinSMS(buyUser, waitlist);
 
                 // **실시간 알림 전송**
                 String realTimeMessage =
@@ -242,6 +239,86 @@ public class TicketServiceImpl implements TicketService {
         } catch (Exception e) {
             e.printStackTrace();
             throw new TicketException("티켓 양도 중 오류가 발생했습니다.");
+        }
+    }
+
+    @Transactional
+    @Override
+    public void reTransferTicket(Ticket ticket) {
+        try {
+            Game game = gameMapper.selectGameByGameId(ticket.getGameId());
+
+            if (game.isEnded()) {  // 이미 끝난 경기라면
+
+            }
+
+            List<Waitlist> waitlists = ticketMapper.selectWaitingWaitListByGameId(game.getGameId());
+            // 대기열이 있다면
+            if (!waitlists.isEmpty()) {
+                // 무작위 추첨
+                List<Long> randomPicks = new ArrayList<>();
+                for (Waitlist w : waitlists) {
+                    User u = userMapper.selectUserByUserId(w.getUserId());
+
+                    do {
+                        randomPicks.add(u.getUserId());
+
+                        u.setWeight(u.getWeight() / 10);
+                    } while (u.getWeight() > 0);
+                }
+
+                Long buyer = randomPicks.get(
+                    ThreadLocalRandom.current().nextInt(randomPicks.size()));
+
+                Waitlist waitlist = transactionMapper.selectWaitlistByUserIdAndGameId(buyer,
+                    game.getGameId());
+
+                ticket.setBuyerId(buyer);
+                ticket.setMatchedDate(LocalDateTime.now());
+
+                Transaction transaction = new Transaction();
+                transaction.setTicketId(ticket.getTicketId());
+                transaction.setBuyerId(ticket.getBuyerId());
+                transaction.setSellerId(ticket.getSellerId());
+                transaction.setTransactionStatus("WAITING_PAYING");
+
+                ticketMapper.updateTicket(ticket);
+                userMapper.decreaseWeightByUserId(buyer);  // 가중치 감소
+
+                transactionMapper.insertTransaction(transaction);
+                Long transactionId = transaction.getTransactionId();
+
+                waitlist.setStatus(WaitlistStatus.WAITING_PAYING);
+                waitlist.setTransactionId(transactionId);
+                transactionMapper.updateWaitlist(waitlist);
+
+                User buyUser = userMapper.selectUserByUserId(buyer);
+
+                smsService.sendWinSMS(buyUser, waitlist);
+
+                // **실시간 알림 전송**
+                String realTimeMessage =
+                    "당첨된 티켓 : " + game.getHomeTeam() + " vs " + game.getAwayTeam()
+                        + "\n응모하신 티켓이 당첨되었습니다. 30분 이내 결제해주시기 바랍니다.";
+
+                // WebSocket을 통해 실시간 알림 전송
+                notificationService.sendNotificationToUser(buyUser.getEmail(), realTimeMessage);
+            } else {  // 대기열이 없다면
+                ticket.setTicketStatus(TicketStatus.BEFORE_ASSIGNMENT);
+                ticket.setBuyerId(null);
+                ticket.setMatchedDate(null);
+
+                smsService.sendSMS(
+                    userMapper.selectUserByUserId(ticket.getSellerId()).getPhoneNumber(),
+                    "양도자가 없어 양도 취소!");
+            }
+
+            ticketMapper.updateTicket(ticket);
+        } catch (TicketException e) {
+            throw e;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new TicketException("티켓 재양도간 오류 발생");
         }
     }
 
