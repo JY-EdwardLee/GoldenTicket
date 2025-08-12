@@ -51,7 +51,6 @@ public class UserController {
     @Value("${BE_BASE_URL}")
     private String BE_BASE_URL;
 
-
     /**
      * 카카오 로그인 페이지로 리다이렉트
      *

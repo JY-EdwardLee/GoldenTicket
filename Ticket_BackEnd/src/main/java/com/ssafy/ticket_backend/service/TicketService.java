@@ -17,4 +17,6 @@ public interface TicketService {
     void completeTransfer(String ticketId, String userId);
 
     TicketResponse getTicketDetail(String userEmail, Long ticketId);
+
+    void CancelTicket();
 }
