@@ -1,17 +1,14 @@
 <template>
   <div>
+    <!-- 상단: 제목만 표시 -->
     <BoardHeader 
       title="공지사항"
       v-model:searchValue="searchValue"
+      :showSearch="false"
       @search="handleSearch"
       @searchTypeChange="handleSearchTypeChange"
       @clearSearch="handleClearSearch"
     />
-
-    <!-- 상단 우측 액션 (관리자 전용) -->
-    <div class="actions-row" v-if="isAdmin">
-      <button class="write-btn" @click="goToCreate">글쓰기</button>
-    </div>
     
     <!-- 로딩 상태 -->
     <div v-if="isLoading" class="loading-container">
@@ -39,13 +36,32 @@
     <div v-if="searchResultMessage" class="search-result-message">
       {{ searchResultMessage }}
     </div>
-    
+
+    <!-- 페이지네이션 위 글쓰기 버튼 (관리자 전용) -->
+    <div class="actions-row" v-if="isAdmin">
+      <button class="write-btn" @click="goToCreate">글쓰기</button>
+    </div>
+
+    <!-- 페이지네이션 -->
     <BoardPagination 
       :currentPage="currentPage"
       :totalPages="totalPages"
       :hasWriteButton="isAdmin"
       @pageChange="handlePageChange"
     />
+
+    <!-- 하단: 검색창만 표시 (제목은 위에 유지) -->
+    <div class="search-below">
+      <BoardHeader 
+        title="공지사항"
+        v-model:searchValue="searchValue"
+        :showSearch="true"
+        :showTitle="false"
+        @search="handleSearch"
+        @searchTypeChange="handleSearchTypeChange"
+        @clearSearch="handleClearSearch"
+      />
+    </div>
   </div>
 </template>
 
@@ -119,7 +135,6 @@ const loadPosts = async () => {
 // 검색 타입 변경
 const handleSearchTypeChange = (type) => {
   searchType.value = type;
-  console.log('검색 타입 변경:', type);
 };
 
 // 검색 실행
@@ -137,7 +152,7 @@ const handleSearch = async (searchTypeParam, searchValueParam) => {
     
     if (Array.isArray(result)) {
       allPosts.value = result;
-      currentPage.value = 1;
+      currentPage.value = 1; // 검색 시 첫 페이지로 이동
       updateDisplayedPosts();
       
     } else {
@@ -189,18 +204,29 @@ onMounted(() => {
 .actions-row {
   display: flex;
   justify-content: flex-end;
-  margin: 12px 0;
 }
 .write-btn {
-  background: var(--theme-primary, #ff6b35);
+  background: #888; /* 기존 버튼 색상 유지 */
   color: #fff;
-  border: 1px solid var(--theme-primary, #ff6b35);
+  border: none;
   border-radius: 6px;
-  padding: 8px 16px;
+  padding: 8px 18px;
   cursor: pointer;
+  transition: background 0.2s;
   font-weight: 600;
+  margin-top: 8px;
 }
-.write-btn:hover {
-  filter: brightness(90%);
-}
+.write-btn:hover { filter: brightness(90%); }
+
+.search-below { margin-top: 12px; }
+
+/* 로딩/에러/검색 메시지 스타일은 FreeBoard와 동일 구조 유지 */
+.loading-container { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; }
+.loading-spinner { width:40px; height:40px; border:4px solid #f3f4f6; border-top:4px solid #e11d48; border-radius:50%; animation: spin 1s linear infinite; margin-bottom:16px; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+.error-container { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; color: var(--theme-primary, #ff6b35); }
+.error-message { margin-bottom:16px; text-align:center; }
+.retry-btn { background: var(--theme-primary, #ff6b35); color:#fff; border:none; border-radius:6px; padding:8px 16px; cursor:pointer; transition: background 0.2s; }
+.retry-btn:hover { filter: brightness(90%); }
+.search-result-message { text-align:center; padding:12px; margin:16px 32px; background:#f0f9ff; border:1px solid #0ea5e9; border-radius:6px; color:#0369a1; font-size:14px; }
 </style> 

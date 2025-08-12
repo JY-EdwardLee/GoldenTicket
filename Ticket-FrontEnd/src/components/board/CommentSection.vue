@@ -16,7 +16,6 @@
          >
            최신순
          </button>
-         <button class="refresh-btn" @click="refreshComments">🔄</button>
        </div>
     </div>
 
@@ -232,11 +231,6 @@ const changeSortType = (type) => {
   sortType.value = type;
 };
 
-// 댓글 새로고침
-const refreshComments = () => {
-  // 부모 컴포넌트에 새로고침 이벤트 발생
-  emit('refresh');
-};
 
 // 댓글 좋아요 상태 복원
 const restoreCommentLikeStates = () => {
