@@ -128,8 +128,8 @@ public class KakaoPayService {
             Long.parseLong(approveResponse.getItem_code()));
 
         // 거래 기록 갱신
-        Transaction transaction = transactionMapper.selectTransactionByTicketId(
-            ticket.getTicketId());
+        Transaction transaction = transactionMapper.selectTransactionByTicketIdAndUserId(
+            ticket.getTicketId(), Long.parseLong(approveResponse.getPartner_user_id()));
         transaction.setTransactionStatus(String.valueOf(TicketStatus.TRANSACTION_COMPLETE));
         transactionMapper.updateTransaction(transaction);
         transactionMapper.transactionComplete(ticket.getTicketId());  // 티켓의 거래 상태 변경

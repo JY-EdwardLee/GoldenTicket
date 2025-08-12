@@ -429,10 +429,9 @@ public class TicketServiceImpl implements TicketService {
         List<Ticket> tickets = ticketMapper.checkPayingOver30Minutes();
 
         for (Ticket ticket : tickets) {
-            Transaction transaction = transactionMapper.selectTransactionByTicketId(
-                ticket.getTicketId());
+            Transaction transaction = transactionMapper.selectTransactionByTicketIdAndUserId(
+                ticket.getTicketId(), ticket.getBuyerId());
 
-            transaction.setTicketId(0L);
             transaction.setTransactionStatus(WaitlistStatus.CANCEL_WAITING.toString());
             transactionMapper.updateTransaction(transaction);
 
