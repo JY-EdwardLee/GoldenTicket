@@ -65,6 +65,7 @@
     SELECT
     user_id,
     user_name,
+    user_role,
     email,
     nick_name,
     social_provider,
