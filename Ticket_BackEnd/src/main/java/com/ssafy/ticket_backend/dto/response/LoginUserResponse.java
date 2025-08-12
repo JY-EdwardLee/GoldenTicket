@@ -1,5 +1,6 @@
 package com.ssafy.ticket_backend.dto.response;
 
+import com.ssafy.ticket_backend.model.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class LoginUserResponse {
 
     private Long userId;
+    private UserRole userRole;
     private String accessToken;
     private String userName;
     private String email;

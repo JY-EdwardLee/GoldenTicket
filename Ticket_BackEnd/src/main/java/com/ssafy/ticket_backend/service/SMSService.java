@@ -2,6 +2,8 @@ package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.request.SMSVerificationCheckRequest;
 import com.ssafy.ticket_backend.exception.UserSignupException;
+import com.ssafy.ticket_backend.model.User;
+import com.ssafy.ticket_backend.model.Waitlist;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +29,7 @@ public class SMSService {
 
             redisTemplate.opsForValue().set(phoneNumber, verificationCode, 5, TimeUnit.MINUTES);
 
-            String text = "안녕하세요. 골든티켓입니다." + "\n" + "인증번호 : " + verificationCode;
+            String text = "[테스트]안녕하세요. 골든티켓입니다." + "\n" + "인증번호 : " + verificationCode;
             this.sendSMS(phoneNumber, text);
         } catch (Exception e) {
             throw new UserSignupException("메시지 발송 도중 오류가 발생하였습니다.");
@@ -45,6 +47,14 @@ public class SMSService {
         } else {
             throw new UserSignupException("유효하지 않은 인증번호입니다.");
         }
+    }
+
+    public void sendWinSMS(User user, Waitlist waitlist) {
+        String text = "[테스트 골든티켓]" + "\n" + waitlist.getCreatedAt().getMonthValue() + "월 "
+            + waitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다." + "\n"
+            + "30분 이내 결제해주시기 바랍니다." + "\n";
+
+        this.sendSMS(user.getPhoneNumber(), text);
     }
 
     /**

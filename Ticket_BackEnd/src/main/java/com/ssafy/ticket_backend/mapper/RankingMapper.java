@@ -13,4 +13,7 @@ public interface RankingMapper {
 
     // 팀별 양도 랭킹 조회
     List<TeamRankingResponse> selectTeamRanking();
+
+    // 유저 랭킹 응답 할 때 프로필 url 호출하기 위해
+    Long selectUserId(String userName);
 }

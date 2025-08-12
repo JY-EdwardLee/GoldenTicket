@@ -2,9 +2,12 @@ package com.ssafy.ticket_backend.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.ticket_backend.dto.request.S3DownloadRequest;
+import com.ssafy.ticket_backend.dto.response.S3DownloadResponse;
 import com.ssafy.ticket_backend.dto.response.TeamRankingResponse;
 import com.ssafy.ticket_backend.dto.response.UserRankingResponse;
 import com.ssafy.ticket_backend.mapper.RankingMapper;
+import com.ssafy.ticket_backend.model.S3Type;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
@@ -21,37 +24,72 @@ public class RankingServiceImpl implements RankingService {
     private final RankingMapper rankingMapper;
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
+    private final S3UserService s3UserService;
 
     private static final String USER_RANKING_KEY = "ranking:user";
     private static final String TEAM_RANKING_TODAY_KEY = "ranking:team_today";
     private static final String TEAM_RANKING_YESTERDAY_KEY = "ranking:team_yesterday";
-    private static final Duration TTL = Duration.ofDays(1); // 1일 캐시
-
+    private static final Duration TTL = Duration.ofDays(1); // 팀 랭킹 TTL 1일 캐시
+    private  static final Duration userTTL = Duration.ofHours(1); // 유저 랭킹 TTL 1시간
     // 유저 양도 랭킹 조회
     @Override
-    public List<UserRankingResponse> getUserRanking() {
+    public List<UserRankingResponse> getUserRanking()
+    {
         try {
             // 레디스에서 유저 랭킹 가져오기
             String cached = redisTemplate.opsForValue().get(USER_RANKING_KEY);
 
             // 캐시에 데이터가 있으면 -> JSON -> List 변환
             if (cached != null) {
-                return objectMapper.readValue(cached, new TypeReference<>() {
-                });
+                List<UserRankingResponse> cachedList = objectMapper.readValue(cached,
+                    new TypeReference<>() {
+                    });
+                // 캐시에도 프로필 이미지가 없을 경우, 이미지 URL 세팅 (필요시)
+                for (UserRankingResponse userRanking : cachedList) {
+//                    System.out.println("1.userId: " + userRanking.getUserId());
+//                    System.out.println("2.userName: " + userRanking.getUserName());
+
+                    // 만약 userId가 없으면 DB에서 조회하여 userId 설정
+                    if (userRanking.getUserId() == null) {
+                        // DB에서 해당 유저 정보 조회
+                        Long userId = rankingMapper.selectUserId(userRanking.getUserName()); // 예시로 userName으로 조회
+
+                        userRanking.setUserId(userId);
+
+                    }
+
+                    if (userRanking.getImageUrl() == null || userRanking.getImageUrl().isEmpty()) {
+//                        System.out.println("3.userId: " + userRanking.getUserId());
+
+                        S3DownloadResponse userProfileUrl = s3UserService.getImageUrlsByTypeAndRefId(
+                            new S3DownloadRequest(S3Type.UserProfile, userRanking.getUserId()));
+                        userRanking.setImageUrl(userProfileUrl.getDownloadUrl());
+                    }
+                }
+                return cachedList;
             }
+
             // 레디스에 없으면 DB에서 랭킹 조회
             List<UserRankingResponse> userRankingList = rankingMapper.selectUserRanking();
-
+            userRankingList.forEach(r -> {
+//                System.out.println("3.userId: " + r.getUserId());
+//                System.out.println("4.userName: " + r.getUserName());
+            });
             int rank = 1;
 
             for (UserRankingResponse userRankingResponse : userRankingList) {
                 userRankingResponse.setRank(rank++);
+
+                // 유저 프로필 이미지 URL 세팅
+                S3DownloadResponse userProfileUrl = s3UserService.getImageUrlsByTypeAndRefId(
+                    new S3DownloadRequest(S3Type.UserProfile, userRankingResponse.getUserId()));
+                userRankingResponse.setImageUrl(userProfileUrl.getDownloadUrl());
             }
 
             // 조회한 랭킹 리스트를 JSON 문자열로 변환해서 레디스에 저장
             redisTemplate.opsForValue().set(USER_RANKING_KEY, // 저정할 키
                 objectMapper.writeValueAsString(userRankingList), // 저정할 제이슨
-                TTL);
+                userTTL);
 
             return userRankingList;
         } catch (Exception e) {

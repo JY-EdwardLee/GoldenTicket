@@ -184,4 +184,10 @@
     ,#{userEmail})
   </insert>
 
+  <select id="checkPayingOver30Minutes" resultType="com.ssafy.ticket_backend.model.Ticket">
+    SELECT *
+    FROM tickets
+    WHERE ticket_status = 'BEING_PAYING'
+    AND matched_date &lt; NOW() - INTERVAL '30 minutes'
+  </select>
 </mapper>
