@@ -52,4 +52,6 @@ public interface GameMapper {
 
     // 챗봇에 넘길 게임 정보 가져오기
     List<GameForChatbotRequest> selectGameForChatbot();
+
+    void PatchGameToEnd();
 }

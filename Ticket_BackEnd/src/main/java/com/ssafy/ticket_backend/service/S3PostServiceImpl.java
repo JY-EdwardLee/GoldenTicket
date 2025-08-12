@@ -188,7 +188,7 @@ public class S3PostServiceImpl implements S3PostService {
     }
 
     /**
-     * 게시글 이미지 조회용 다운로드 URL 발급 [게시글조회] -> db에서 postId와 type을 이용해서 -> key값 조회 -> url 발급
+     * 게시글 이미지 조회용 다운로드 URL 발급 [게시글조회] DB(postId, type) 이용 -> key값 조회 -> url 발급
      *
      * @param request 게시글 ID 정보
      * @return S3DownloadResponse 임시 다운로드 URL

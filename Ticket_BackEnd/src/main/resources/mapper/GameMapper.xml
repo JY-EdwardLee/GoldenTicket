@@ -116,5 +116,10 @@
     ORDER BY game_datetime ASC
   </select>
 
-
+  <update id="PatchGameToEnd">
+    UPDATE games
+    SET
+    is_ended = true
+    where game_datetime &lt; NOW();
+  </update>
 </mapper>

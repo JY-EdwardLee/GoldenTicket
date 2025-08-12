@@ -46,6 +46,7 @@ public class UserController {
     private String KakaoRestApiKey;
     @Value("${naver.client.id}")
     private String NaverClientId;
+
     @Value("${FE_BASE_URL}")
     private String FE_BASE_URL;
     @Value("${BE_BASE_URL}")
@@ -390,4 +391,23 @@ public class UserController {
 
         return ResponseEntity.ok(tokens);
     }
+
+    /*
+        공개용 관리자
+     */
+    @PostMapping("/administrator")
+    public ResponseEntity<LoginUserResponse> adminLogin() {
+        LoginUserResponse userResponse = userService.adminUserWithInfo();
+        return ResponseEntity.ok(userResponse);
+    }
+
+    /*
+        공객용 사용자
+     */
+    @PostMapping("/general-user")
+    public ResponseEntity<LoginUserResponse> generalUserLogin() {
+        LoginUserResponse userResponse = userService.generalUserWithInfo();
+        return ResponseEntity.ok(userResponse);
+    }
+
 }

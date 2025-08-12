@@ -1,58 +1,79 @@
 <template>
   <div class="group-board-container">
 
-         <!-- 메인 헤더 -->
-     <div class="main-header">
-       <div class="header-content">
-                   <div class="title-section">
-            <h1 class="main-title">{{ selectedTeamTitle }}</h1>
-            <button class="favorite-team-btn" @click="handleFavoriteTeamClick">
-              <span class="btn-icon">🔍</span>
-              내 관심팀
-            </button>
-          </div>
-       </div>
-     </div>
+    <!-- 메인 헤더 -->
+    <div class="main-header">
+      <div class="header-content">
+        <div class="title-section">
+          <h1 class="main-title">{{ selectedTeamTitle }}</h1>
+        </div>
+        <!-- 모바일 전용 햄버거 버튼 -->
+        <button class="mobile-menu-btn" @click="toggleMobileMenu" aria-label="팀 메뉴 열기">☰</button>
+      </div>
+    </div>
 
-                     <!-- 야구 팀 리스트 -->
-       <div class="team-list-container">
-         <div class="team-list">
-           <div class="team-item" :class="{ 'active': selectedTeam === 'all' }" @click="selectedTeam = 'all'">
-             <span class="team-name">전체</span>
-           </div>
-           <div class="team-item" :class="{ 'active': selectedTeam === 'SSG' }" @click="selectedTeam = 'SSG'">
-             <span class="team-name">SSG 랜더스</span>
-           </div>
-           <div class="team-item" :class="{ 'active': selectedTeam === 'KIA' }" @click="selectedTeam = 'KIA'">
-             <span class="team-name">KIA 타이거즈</span>
-           </div>
-           <div class="team-item" :class="{ 'active': selectedTeam === 'LG' }" @click="selectedTeam = 'LG'">
-             <span class="team-name">LG 트윈스</span>
-           </div>
-           <div class="team-item" :class="{ 'active': selectedTeam === 'KT' }" @click="selectedTeam = 'KT'">
-             <span class="team-name">KT 위즈</span>
-           </div>
-           <div class="team-item" :class="{ 'active': selectedTeam === 'KIWOOM' }" @click="selectedTeam = 'KIWOOM'">
-             <span class="team-name">키움 히어로즈</span>
-           </div>
-           <div class="team-item" :class="{ 'active': selectedTeam === 'SAMSUNG' }" @click="selectedTeam = 'SAMSUNG'">
-             <span class="team-name">삼성 라이온즈</span>
-           </div>
-           <div class="team-item" :class="{ 'active': selectedTeam === 'LOTTE' }" @click="selectedTeam = 'LOTTE'">
-             <span class="team-name">롯데 자이언츠</span>
-           </div>
-           <div class="team-item" :class="{ 'active': selectedTeam === 'DOOSAN' }" @click="selectedTeam = 'DOOSAN'">
-             <span class="team-name">두산 베어스</span>
-           </div>
-           <div class="team-item" :class="{ 'active': selectedTeam === 'HANWHA' }" @click="selectedTeam = 'HANWHA'">
-             <span class="team-name">한화 이글스</span>
-           </div>
-           <div class="team-item" :class="{ 'active': selectedTeam === 'NC' }" @click="selectedTeam = 'NC'">
-             <span class="team-name">NC 다이노스</span>
-           </div>
-         </div>
-       </div>
-    
+    <!-- 모바일 팀 선택 드로어 -->
+    <div v-if="isMobileMenuOpen" class="mobile-overlay" @click="closeMobileMenu">
+      <div class="mobile-drawer" @click.stop>
+        <div class="drawer-header">
+          <span>팀 선택</span>
+          <button class="drawer-close" @click="closeMobileMenu" aria-label="닫기">✕</button>
+        </div>
+        <div class="drawer-team-list">
+          <div class="drawer-team-item" :class="{ active: selectedTeam === 'all' }" @click="selectTeam('all')">전체</div>
+          <div class="drawer-team-item" :class="{ active: selectedTeam === 'SSG' }" @click="selectTeam('SSG')">SSG 랜더스</div>
+          <div class="drawer-team-item" :class="{ active: selectedTeam === 'KIA' }" @click="selectTeam('KIA')">KIA 타이거즈</div>
+          <div class="drawer-team-item" :class="{ active: selectedTeam === 'LG' }" @click="selectTeam('LG')">LG 트윈스</div>
+          <div class="drawer-team-item" :class="{ active: selectedTeam === 'KT' }" @click="selectTeam('KT')">KT 위즈</div>
+          <div class="drawer-team-item" :class="{ active: selectedTeam === 'KIWOOM' }" @click="selectTeam('KIWOOM')">키움 히어로즈</div>
+          <div class="drawer-team-item" :class="{ active: selectedTeam === 'SAMSUNG' }" @click="selectTeam('SAMSUNG')">삼성 라이온즈</div>
+          <div class="drawer-team-item" :class="{ active: selectedTeam === 'LOTTE' }" @click="selectTeam('LOTTE')">롯데 자이언츠</div>
+          <div class="drawer-team-item" :class="{ active: selectedTeam === 'DOOSAN' }" @click="selectTeam('DOOSAN')">두산 베어스</div>
+          <div class="drawer-team-item" :class="{ active: selectedTeam === 'HANHWA' }" @click="selectTeam('HANHWA')">한화 이글스</div>
+          <div class="drawer-team-item" :class="{ active: selectedTeam === 'NC' }" @click="selectTeam('NC')">NC 다이노스</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 야구 팀 리스트 (데스크톱/태블릿 표시) -->
+    <div class="team-list-container">
+      <div class="team-list">
+        <div class="team-item" :class="{ 'active': selectedTeam === 'all' }" @click="selectedTeam = 'all'">
+          <span class="team-name">전체</span>
+        </div>
+        <div class="team-item" :class="{ 'active': selectedTeam === 'SSG' }" @click="selectedTeam = 'SSG'">
+          <span class="team-name">SSG 랜더스</span>
+        </div>
+        <div class="team-item" :class="{ 'active': selectedTeam === 'KIA' }" @click="selectedTeam = 'KIA'">
+          <span class="team-name">KIA 타이거즈</span>
+        </div>
+        <div class="team-item" :class="{ 'active': selectedTeam === 'LG' }" @click="selectedTeam = 'LG'">
+          <span class="team-name">LG 트윈스</span>
+        </div>
+        <div class="team-item" :class="{ 'active': selectedTeam === 'KT' }" @click="selectedTeam = 'KT'">
+          <span class="team-name">KT 위즈</span>
+        </div>
+        <div class="team-item" :class="{ 'active': selectedTeam === 'KIWOOM' }" @click="selectedTeam = 'KIWOOM'">
+          <span class="team-name">키움 히어로즈</span>
+        </div>
+        <div class="team-item" :class="{ 'active': selectedTeam === 'SAMSUNG' }" @click="selectedTeam = 'SAMSUNG'">
+          <span class="team-name">삼성 라이온즈</span>
+        </div>
+        <div class="team-item" :class="{ 'active': selectedTeam === 'LOTTE' }" @click="selectedTeam = 'LOTTE'">
+          <span class="team-name">롯데 자이언츠</span>
+        </div>
+        <div class="team-item" :class="{ 'active': selectedTeam === 'DOOSAN' }" @click="selectedTeam = 'DOOSAN'">
+          <span class="team-name">두산 베어스</span>
+        </div>
+        <div class="team-item" :class="{ 'active': selectedTeam === 'HANHWA' }" @click="selectedTeam = 'HANHWA'">
+          <span class="team-name">한화 이글스</span>
+        </div>
+        <div class="team-item" :class="{ 'active': selectedTeam === 'NC' }" @click="selectedTeam = 'NC'">
+          <span class="team-name">NC 다이노스</span>
+        </div>
+      </div>
+    </div>
+
     <!-- 로딩 상태 -->
     <div v-if="isLoading" class="loading-container">
       <div class="loading-spinner"></div>
@@ -67,70 +88,56 @@
     
     <!-- 게시글 목록 -->
     <div v-else class="posts-grid">
-             <div 
-         v-for="post in displayedPosts" 
-         :key="post.postId" 
-         :class="['post-card', { 'completed': post.status === 'completed' }]"
-         @click="handlePostClick(post)"
-       >
-        <!-- 카드 이미지 영역 -->
-        <div class="card-image-section">
+      <div 
+        v-for="post in displayedPosts" 
+        :key="post.postId" 
+        :class="['post-card', { 'completed': post.status === 'completed' }]"
+        @click="handlePostClick(post)"
+      >
+        <div class="post-main">
+          <!-- 카드 이미지 영역 -->
+          <div class="card-image-section">
           <img 
             :src="post.imageUrl || '@/assets/images/default-group.jpg'" 
             :alt="post.title"
             class="card-image"
             @error="handleImageError"
           />
-                     <!-- 상태 배지 -->
-           <div class="status-badges">
-             <span 
-               v-if="getStatusBadge(post)" 
-               :class="['status-badge', getStatusBadge(post).type]"
-             >
-               {{ getStatusBadge(post).text }}
-             </span>
-           </div>
+          <!-- 상태 배지 -->
+          <div class="status-badges">
+            <span 
+              v-if="getStatusBadge(post)" 
+              :class="['status-badge', getStatusBadge(post).type]"
+            >
+              {{ getStatusBadge(post).text }}
+            </span>
+          </div>
           <!-- 참가 인원 -->
           <div class="participant-count">
             {{ post.currentParticipants || 0 }}/{{ post.maxParticipants || 20 }}명
           </div>
-        </div>
+          </div>
 
-        <!-- 카드 내용 영역 -->
-        <div class="card-content">
+          <!-- 카드 내용 영역 -->
+          <div class="card-content">
           <h3 class="post-title">{{ post.title }}</h3>
           
           <div class="post-info">
             <div class="info-item">
-              <span class="info-icon">📅</span>
+              <span class="info-icon"><i class="fa-regular fa-calendar-check fa-lg"></i></span>
               <span>{{ formatDate(post.gameDate) }} {{ post.gameTime }}</span>
             </div>
             <div class="info-item">
-              <span class="info-icon">📍</span>
+              <span class="info-icon"><i class="fa-solid fa-baseball-bat-ball"></i></span>
               <span>{{ post.location }}</span>
             </div>
             <div class="info-item">
-              <span class="info-icon">👤</span>
-              <span>{{ post.organizer }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-icon">👥</span>
+              <span class="info-icon"><i class="fa-solid fa-users"></i></span>
               <span>{{ post.currentParticipants || 0 }}/{{ post.maxParticipants || 20 }}명 참가</span>
             </div>
           </div>
 
           <p class="post-description">{{ post.description }}</p>
-
-          <div class="meeting-info">
-            <div class="meeting-item">
-              <span class="meeting-label">집합 장소:</span>
-              <span>{{ post.meetingPlace }}</span>
-            </div>
-            <div class="meeting-item">
-              <span class="meeting-label">집합 시간:</span>
-              <span>{{ post.meetingTime }}</span>
-            </div>
-          </div>
 
           <div class="hashtags">
             <span 
@@ -141,37 +148,31 @@
               #{{ tag }}
             </span>
           </div>
-
-          <div class="participation-rate">
+          </div>
+        </div>
+        <!-- 카드 하단 풋터 (이미지 아래 전체 폭) -->
+        <div class="card-footer">
+          <div class="footer-top participation-rate">
             <span class="rate-label">참가율</span>
             <div class="progress-bar">
-              <div 
-                class="progress-fill" 
-                :style="{ width: getParticipationRate(post) + '%' }"
-              ></div>
+              <div class="progress-fill" :style="{ width: getParticipationRate(post) + '%' }"></div>
             </div>
             <span class="rate-percentage">{{ getParticipationRate(post) }}%</span>
           </div>
-
-          <div class="post-footer">
+          <div class="footer-bottom">
             <div class="registration-info">
               <span class="reg-date">{{ formatDate(post.createdAt) }} 등록</span>
               <span class="conditions">{{ post.conditions }}</span>
             </div>
             <div class="action-buttons">
-              <button class="interest-btn" @click.stop="handleInterestClick(post)">
-                <span class="heart-icon">❤️</span>
-                관심
-              </button>
-              <button class="apply-btn" @click.stop="handleApplyClick(post)">
+              <button class="apply-btn" @click.stop="handleApplyClick(post)" :disabled="!post.isApplied && isDateLocked(post.gameDate)">
                 <span class="apply-icon">👤</span>
-                참가 신청
+                {{ post.isApplied ? '신청 취소' : (isDateLocked(post.gameDate) ? '동일 날짜 신청 불가' : '참가 신청') }}
               </button>
             </div>
           </div>
         </div>
-
-        
+         
       </div>
     </div>
     
@@ -203,7 +204,10 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { boardAPI, transformGroupData } from '@/api/board';
-import { TEAM_MAPPING } from '@/api/board';
+
+const props = defineProps({
+  initialTeam: { type: String, default: 'all' }
+});
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -211,37 +215,15 @@ const currentPage = ref(1);
 const itemsPerPage = 6; // 페이지당 카드 수
 const isLoading = ref(false);
 const error = ref('');
-const selectedTeam = ref('all');
+const selectedTeam = ref(props.initialTeam || 'all');
+
+const isMobileMenuOpen = ref(false);
+const toggleMobileMenu = () => { isMobileMenuOpen.value = !isMobileMenuOpen.value; };
+const closeMobileMenu = () => { isMobileMenuOpen.value = false; };
+const selectTeam = (teamKey) => { selectedTeam.value = teamKey; closeMobileMenu(); };
 
 const allPosts = ref([]);
 const displayedPosts = ref([]);
-
-// 한글 팀명 -> UI 팀키 매핑
-const KOREAN_TEAM_TO_UI = {
-  'SSG 랜더스': 'SSG',
-  'KIA 타이거즈': 'KIA',
-  'LG 트윈스': 'LG',
-  'KT 위즈': 'KT',
-  '키움 히어로즈': 'KIWOOM',
-  '삼성 라이온즈': 'SAMSUNG',
-  '롯데 자이언츠': 'LOTTE',
-  '두산 베어스': 'DOOSAN',
-  '한화 이글스': 'HANWHA',
-  'NC 다이노스': 'NC'
-};
-
-// API 팀코드/한글명 -> UI 팀키 변환
-const apiTeamToUiTeam = (teamName) => {
-  if (!teamName) return null;
-  // 1) 이미 UI 키로 들어온 경우
-  if (TEAM_MAPPING[teamName]) return teamName;
-  // 2) API 코드에서 역매핑
-  const apiFound = Object.entries(TEAM_MAPPING).find(([, apiVal]) => apiVal === teamName);
-  if (apiFound) return apiFound[0];
-  // 3) 한글 팀명 매핑
-  if (KOREAN_TEAM_TO_UI[teamName]) return KOREAN_TEAM_TO_UI[teamName];
-  return null;
-};
 
 // 선택된 팀의 제목
 const selectedTeamTitle = computed(() => {
@@ -255,7 +237,7 @@ const selectedTeamTitle = computed(() => {
     'SAMSUNG': '삼성 라이온즈 단체 관람 모집',
     'LOTTE': '롯데 자이언츠 단체 관람 모집',
     'DOOSAN': '두산 베어스 단체 관람 모집',
-    'HANWHA': '한화 이글스 단체 관람 모집',
+    'HANHWA': '한화 이글스 단체 관람 모집',
     'NC': 'NC 다이노스 단체 관람 모집'
   };
   return teamNames[selectedTeam.value] || '단체 관람 게시판';
@@ -272,6 +254,16 @@ const filteredPosts = computed(() => {
 });
 
 const totalPages = computed(() => Math.ceil(filteredPosts.value.length / itemsPerPage));
+
+// 이미 신청한 날짜 집합 (YYYY-MM-DD)
+const appliedDateSet = computed(() => {
+  const set = new Set();
+  for (const p of allPosts.value) {
+    if (p.isApplied && p.gameDate) set.add(p.gameDate);
+  }
+  return set;
+});
+const isDateLocked = (dateStr) => { return !!dateStr && appliedDateSet.value.has(dateStr); };
 
 // 게시글 목록 로드 (API 사용)
 const loadPosts = async () => {
@@ -331,73 +323,43 @@ const formatDate = (dateString) => {
   }).replace(/\./g, '.');
 };
 
-
-
 // 이미지 에러 처리
 const handleImageError = (event) => {
   event.target.src = '@/assets/images/default-group.jpg';
 };
 
 // 이벤트 핸들러들
-const handleTabClick = (tab) => {
-  console.log('탭 클릭:', tab);
-  // TODO: 탭 변경 로직 구현
-};
-
-const handleFavoriteTeamClick = async () => {
-  try {
-    if (!authStore.user) {
-      await authStore.getUserInfo?.();
-    }
-    const u = authStore.user || {};
-    const myTeam = u.myTeam || u.favoriteTeam || u.favoriteBaseballTeam;
-    const uiTeam = apiTeamToUiTeam(myTeam);
-    if (!uiTeam) {
-      alert('관심팀이 설정되어 있지 않거나 알 수 없습니다.');
-      return;
-    }
-    selectedTeam.value = uiTeam; // watch가 자동으로 재조회
-  } catch (e) {
-    console.error('관심팀 불러오기 실패:', e);
-    alert('관심팀 정보를 불러오는 중 오류가 발생했습니다.');
-  }
-};
-
 const handlePostClick = (post) => {
-  console.log('게시글 클릭:', post);
   router.push({
     name: 'BoardDetail',
     params: { postId: post.postId }
   });
 };
 
-const handleInterestClick = (post) => {
-  console.log('관심 클릭:', post);
-};
-
 const handleApplyClick = async (post) => {
   try {
-    const res = await boardAPI.applyGroup(post.groupId);
-    const msg = res?.message || '신청 성공';
-    if (typeof window !== 'undefined') alert(msg);
+    if (!post.isApplied && isDateLocked(post.gameDate)) {
+      alert('해당 날짜에 이미 다른 경기에 신청하셨습니다. 하루에 한 경기만 신청 가능합니다.');
+      return;
+    }
+
+    if (post.isApplied) {
+      const res = await boardAPI.cancelGroup(post.groupId);
+      alert(res?.message || '신청이 취소되었습니다.');
+    } else {
+      const res = await boardAPI.applyGroup(post.groupId);
+      alert(res?.message || '신청 성공');
+    }
     await loadPosts();
   } catch (err) {
-    const msg = err?.message || '신청에 실패했습니다.';
-    if (typeof window !== 'undefined') alert(msg);
-    console.error('단체관람 신청 실패:', err);
+    const msg = err?.message || '요청 처리에 실패했습니다.';
+    alert(msg);
+    console.error('단체관람 신청/취소 실패:', err);
   }
 };
 
 const handlePageChange = (page) => {
   currentPage.value = page;
-  updateDisplayedPosts();
-};
-
-
-
-// 필터/정렬 변경 감지
-const watchFilterAndSort = () => {
-  currentPage.value = 1;
   updateDisplayedPosts();
 };
 
@@ -407,13 +369,11 @@ const onTeamChange = async () => {
   await loadPosts();
 };
 
-// 컴포넌트 마운트
+watch(selectedTeam, onTeamChange);
+
 onMounted(async () => {
   await loadPosts();
 });
-
-// 팀 선택 변경 감지
-watch(selectedTeam, onTeamChange);
 </script>
 
 <style scoped>
@@ -571,8 +531,14 @@ watch(selectedTeam, onTeamChange);
   transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
   display: flex;
+  flex-direction: column; /* 상단 본문 + 하단 풋터 수직 배치 */
   width: 100%;
   min-height: 300px;
+}
+
+/* 이미지 + 본문 가로 정렬 */
+.post-main {
+  display: flex;
 }
 
 .post-card.completed {
@@ -646,15 +612,17 @@ watch(selectedTeam, onTeamChange);
 /* 카드 내용 */
 .card-content {
   padding: 20px;
+  padding-bottom: 0px;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   min-height: 280px;
+  font-size: 15px; /* 기본 본문 글씨 크기 증가 */
 }
 
 .post-title {
-  font-size: 18px;
+  font-size: 20px; /* 제목 크기 증가 */
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 12px 0;
@@ -672,18 +640,19 @@ watch(selectedTeam, onTeamChange);
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
+  font-size: 15px; /* 정보 항목 크기 증가 */
   color: #6b7280;
 }
 
 .info-icon {
-  font-size: 14px;
+  font-size: 15px;
+  padding: 5px;
 }
 
 .post-description {
-  font-size: 14px;
+  font-size: 15px; /* 본문 설명 크기 증가 */
   color: #374151;
-  line-height: 1.5;
+  line-height: 1.6;
   margin-bottom: 12px;
   display: -webkit-box;
   /* -webkit-line-clamp: 2; */
@@ -719,10 +688,30 @@ watch(selectedTeam, onTeamChange);
   color: #6b7280;
   padding: 4px 8px;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 13px; /* 해시태그 크기 증가 */
   font-weight: 500;
 }
 
+/* 카드 하단 풋터 */
+.card-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 20px;
+  border-top: 1px solid #f1f5f9;
+}
+.card-footer .footer-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-footer .footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* participation-rate 내부 공용 스타일 재사용 */
 .participation-rate {
   display: flex;
   align-items: center;
@@ -731,7 +720,7 @@ watch(selectedTeam, onTeamChange);
 }
 
 .rate-label {
-  font-size: 14px;
+  font-size: 15px; /* 라벨 크기 증가 */
   color: #6b7280;
   font-weight: 500;
 }
@@ -751,7 +740,7 @@ watch(selectedTeam, onTeamChange);
 }
 
 .rate-percentage {
-  font-size: 13px;
+  font-size: 14px; /* 퍼센트 크기 증가 */
   font-weight: 600;
   color: #1a1a1a;
   min-width: 35px;
@@ -770,12 +759,12 @@ watch(selectedTeam, onTeamChange);
 }
 
 .reg-date {
-  font-size: 11px;
+  font-size: 12px; /* 등록일 크기 증가 */
   color: #6b7280;
 }
 
 .conditions {
-  font-size: 11px;
+  font-size: 12px; /* 조건 크기 증가 */
   color: #6b7280;
 }
 
@@ -816,6 +805,13 @@ watch(selectedTeam, onTeamChange);
   background: var(--theme-gradient);
 }
 
+/* 비활성화 상태 명시 (모바일/데스크톱 공통) */
+.apply-btn:disabled {
+  background: #9ca3af;
+  color: #ffffff;
+  cursor: not-allowed;
+  filter: none;
+}
 
 
 /* 페이지네이션 */
@@ -928,11 +924,12 @@ watch(selectedTeam, onTeamChange);
   .post-card {
     flex-direction: column;
   }
-  
-  .card-image-section {
-    width: 100%;
-    height: 200px;
+
+  /* 본문을 세로로 쌓기 */
+  .post-main {
+    flex-direction: column;
   }
+  .card-image-section { width: 100%; height: 200px; }
   
   .card-content {
     min-height: auto;
@@ -954,5 +951,92 @@ watch(selectedTeam, onTeamChange);
   .team-filter-select {
     align-self: flex-end;
   }
+
+  /* 모바일에서 푸터/버튼 정렬 개선 */
+  .post-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .action-buttons {
+    flex-direction: column;
+  }
+  .apply-btn {
+    width: 100%;
+    min-height: 40px;
+    font-size: 14px;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-footer { padding: 12px 16px; }
+  .card-footer .footer-bottom { flex-direction: column; align-items: stretch; gap: 10px; }
+}
+
+/* 모바일 햄버거 버튼 */
+.mobile-menu-btn {
+  display: none;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 18px;
+}
+
+/* 모바일 드로어/오버레이 */
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 1000;
+}
+.mobile-drawer {
+  width: 80%;
+  max-width: 320px;
+  background: #fff;
+  height: 100%;
+  padding: 16px;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+}
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.drawer-close {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+}
+.drawer-team-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+.drawer-team-item {
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #fff;
+}
+.drawer-team-item.active {
+  background: #e11d48;
+  color: #fff;
+  border-color: #e11d48;
+}
+
+/* 기존 팀 리스트는 모바일에서 숨김 */
+@media (max-width: 768px) {
+  .mobile-menu-btn { display: inline-flex; align-items: center; }
+  .team-list-container { display: none; }
 }
 </style> 

@@ -40,5 +40,10 @@ public interface TransactionMapper {
 
     Transaction selectTransactionByTicketId(@Param("ticketId") Long ticketId);
 
+    Transaction selectTransactionByTicketIdAndUserId(@Param("ticketId") Long ticketId,
+        @Param("userId") Long userId);
+
     void updateTransaction(Transaction transaction);
+
+    Waitlist selectWaitlistByTransactionId(@Param("transactionId") Long transactionId);
 }

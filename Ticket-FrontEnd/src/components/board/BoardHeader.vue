@@ -1,11 +1,9 @@
 <template>
-  <div class="board-header">
-    <div class="header-left">
-      <span class="board-title">{{ title }}</span>
-    </div>
+  <div class="board-header" :class="{ 'center-search': showSearch && !showTitle }">
+    
     
     <!-- 웹용 검색 컨테이너 -->
-    <div class="search-container desktop-search">
+    <div v-if="showSearch" class="search-container desktop-search">
       <!-- 검색 타입 선택 -->
       <div class="search-type-wrapper">
         <select 
@@ -45,38 +43,38 @@
       </button>
     </div>
     
-         <!-- 모바일용 검색 컨테이너 -->
-     <div class="mobile-search-container" ref="mobileSearchContainer">
-       <!-- 돋보기 버튼 (검색창이 숨겨져 있을 때) -->
-       <div v-if="!isMobileSearchVisible" class="mobile-search-toggle" @click.stop="toggleMobileSearch">
-         <span class="mobile-search-icon">🔍</span>
-       </div>
-       
-       <!-- 모바일 검색 입력창 -->
-       <div v-else class="mobile-search-input-container">
-         <!-- 모바일 검색 타입 선택 -->
-         <select 
-           v-model="searchType" 
-           class="mobile-search-type-select"
-           @change="handleSearchTypeChange"
-         >
-           <option value="title">제목</option>
-           <option value="content">내용</option>
-           <option value="writer">작성자</option>
-         </select>
-         
-         <input 
-           type="text" 
-           :placeholder="`${searchTypeName}을 입력하세요`"
-           :value="searchValue"
-           @input="handleSearchInput"
-           @keyup.enter="handleSearch"
-           class="mobile-search-input"
-           ref="mobileSearchInput"
-         />
-         <button class="mobile-search-btn" @click="handleSearch">검색</button>
-       </div>
-     </div>
+    <!-- 모바일용 검색 컨테이너 -->
+    <div v-if="showSearch" class="mobile-search-container" ref="mobileSearchContainer">
+      <!-- 돋보기 버튼 (검색창이 숨겨져 있을 때) -->
+      <div v-if="!isMobileSearchVisible" class="mobile-search-toggle" @click.stop="toggleMobileSearch">
+        <span class="mobile-search-icon">🔍</span>
+      </div>
+      
+      <!-- 모바일 검색 입력창 -->
+      <div v-else class="mobile-search-input-container">
+        <!-- 모바일 검색 타입 선택 -->
+        <select 
+          v-model="searchType" 
+          class="mobile-search-type-select"
+          @change="handleSearchTypeChange"
+        >
+          <option value="title">제목</option>
+          <option value="content">내용</option>
+          <option value="writer">작성자</option>
+        </select>
+        
+        <input 
+          type="text" 
+          :placeholder="`${searchTypeName}을 입력하세요`"
+          :value="searchValue"
+          @input="handleSearchInput"
+          @keyup.enter="handleSearch"
+          class="mobile-search-input"
+          ref="mobileSearchInput"
+        />
+        <button class="mobile-search-btn" @click="handleSearch">검색</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -92,6 +90,14 @@ const props = defineProps({
   searchValue: {
     type: String,
     default: ''
+  },
+  showSearch: {
+    type: Boolean,
+    default: true
+  },
+  showTitle: {
+    type: Boolean,
+    default: true
   }
 });
 
@@ -112,66 +118,52 @@ const handleSearchInput = (event) => {
   const value = event.target.value;
   emit('update:searchValue', value);
   
-  // 검색어가 비어있을 때만 전체 목록 표시
   if (value.trim() === '') {
     emit('clearSearch');
   }
 };
 
-// 검색 실행 (엔터키 또는 검색 버튼 클릭 시)
 const handleSearch = () => {
   if (!props.searchValue.trim()) {
     emit('clearSearch');
     return;
   }
-  
-  // 한글, 영어 모두 2자 이상인지 확인
   if (props.searchValue.trim().length < 2) {
-    return; // 2자 미만이면 검색하지 않음
+    return;
   }
-  
   emit('search', searchType.value, props.searchValue.trim());
 };
 
-// 검색 타입 변경 시 이벤트 발생
 const handleSearchTypeChange = () => {
   emit('searchTypeChange', searchType.value);
 };
 
-// 검색 초기화
 const handleClearSearch = () => {
   emit('update:searchValue', '');
   emit('clearSearch');
 };
 
-// 모바일 검색 토글
 const toggleMobileSearch = async () => {
   isMobileSearchVisible.value = true;
   await nextTick();
   mobileSearchInput.value?.focus();
 };
 
-// document 클릭 이벤트 처리
 const handleDocumentClick = (event) => {
-  // 돋보기 버튼 클릭은 무시 (이미 toggleMobileSearch에서 처리됨)
   if (event.target.closest('.mobile-search-toggle')) {
     return;
   }
-  
   if (isMobileSearchVisible.value && mobileSearchContainer.value) {
-    // 검색 컨테이너 외부를 클릭한 경우에만 검색창 닫기
     if (!mobileSearchContainer.value.contains(event.target)) {
       isMobileSearchVisible.value = false;
     }
   }
 };
 
-// 컴포넌트 마운트 시 document 클릭 이벤트 리스너 추가
 onMounted(() => {
   document.addEventListener('click', handleDocumentClick);
 });
 
-// 컴포넌트 언마운트 시 이벤트 리스너 제거
 onUnmounted(() => {
   document.removeEventListener('click', handleDocumentClick);
 });
@@ -185,9 +177,25 @@ onUnmounted(() => {
   margin-bottom: 16px;
   padding: 16px 24px;
   background: #ffffff;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* 테두리 제거 */
+  border: none;
+  box-shadow: none;
+}
+
+/* 검색만 있는 경우 중앙 정렬 */
+.board-header.center-search {
+  justify-content: center;
+}
+
+/* 검색 컨테이너를 중앙으로 */
+.desktop-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.board-header.center-search .desktop-search {
+  margin: 0 auto;
 }
 
 .header-left {
@@ -207,9 +215,7 @@ onUnmounted(() => {
   gap: 12px;
 }
 
-.search-type-wrapper {
-  position: relative;
-}
+.search-type-wrapper { position: relative; }
 
 .search-type-select {
   padding: 8px 12px;
@@ -260,9 +266,7 @@ onUnmounted(() => {
   color: #333333;
 }
 
-.search-input::placeholder {
-  color: #999;
-}
+.search-input::placeholder { color: #999; }
 
 .search-button {
   background: #007acc;
@@ -275,14 +279,9 @@ onUnmounted(() => {
   justify-content: center;
 }
 
-.search-button:hover {
-  background: #005a9e;
-}
+.search-button:hover { background: #005a9e; }
 
-.search-icon {
-  font-size: 16px;
-  color: #ffffff;
-}
+.search-icon { font-size: 14px; }
 
 .clear-button {
   background: #f5f5f5;

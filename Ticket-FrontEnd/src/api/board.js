@@ -222,6 +222,16 @@ export const boardAPI = {
     } catch (error) {
       throw apiErrorHandler(error);
     }
+  },
+
+  // 단체관람 신청 취소
+  cancelGroup: async (groupId) => {
+    try {
+      const response = await authApiClient.delete(`/group/${groupId}`);
+      return response.data;
+    } catch (error) {
+      throw apiErrorHandler(error);
+    }
   }
 };
 
@@ -316,7 +326,7 @@ export const transformGroupData = (apiData) => {
 
     return {
       postId: group.groupId,
-      title: `${homeKo || '홈팀'} vs ${awayKo || '원정팀'}`,
+      title: `${awayKo || '원정팀'} vs ${homeKo || '홈팀'}`,
       gameDate: d || '',
       gameTime: (t || '').substring(0,5),
       location: stadiumName,
