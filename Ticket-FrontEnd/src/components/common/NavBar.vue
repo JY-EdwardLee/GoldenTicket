@@ -1,9 +1,8 @@
 <template>
   <nav class="navbar">
-    <div class="logo">
+    <div class="navbar-logo">
       <router-link to="/">
         <span>골든 티켓</span>
-        <!-- <img src="@/assets/images/logo1.png" alt="logo" /> -->
       </router-link>
     </div>
     
@@ -278,23 +277,34 @@ const handleLogout = async () => {
   background: #fff;
   border-bottom: 1px solid #eee;
   padding: 0 32px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
 
-.logo {
-  font-weight: bold;
-  font-size: 2rem;
-  font-family: "Bagel Fat One", system-ui;
-  font-style: normal;
-}
+  .navbar-logo {
+    font-weight: bold;
+    font-size: 2rem;
+    font-family: "Bagel Fat One", system-ui;
+    font-style: normal;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
-.logo span {
-  color: #d79508;
-}
+  .navbar-logo span {
+    color: #d79508;
+  }
 
-.nav-links {
+  .navbar-logo img {
+    height: 32px;
+    width: auto;
+    display: block;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 16px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
   display: flex;
   gap: 16px;
   list-style: none;

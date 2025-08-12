@@ -47,7 +47,10 @@
           </div>
         </div>
       </div>
-      <button class="next-btn" :disabled="!selectedTeam" :style="nextBtnStyle" @click="goToNextStep">{{ pageText.nextBtn }}</button>
+      <button class="next-btn" :class="{ 'gradient-hover': selectedTeam }" :disabled="!selectedTeam" @click="goToNextStep">
+        {{ pageText.nextBtn }}
+        <span class="btn-arrow">→</span>
+      </button>
     </div>
     <div v-else-if="step === 2" class="game-select-main">
       <div class="calendar-area">
@@ -87,11 +90,24 @@
       <div class="info-area">
         <div class="selected-date-box">
           <b>{{ pageText.selectedDateTitle }}</b>
-          <div v-if="selectedDate" style="margin-top: 20px;">
-            {{ getFormattedDate() }}<span v-if="selectedTime"> {{ selectedTime }}</span>
+          <div class="selected-info" style="margin-top: 16px; font-size: 30px; display: flex; align-items: center; gap: 8px;">
+            <template v-if="selectedDate">
+              <span class="selected-date">{{ getFormattedDate() }}</span>
+              <span v-if="selectedTime" class="selected-time">{{ selectedTime }}</span>
+              <span class="divider">|</span>
+            </template>
+            <span v-else class="select-date-guide">{{ pageText.selectDateGuide }}</span>
+            <div class="team-name-container" style="display: flex; align-items: center; gap: 6px;">
+              <span class="selected-team-name">{{ selectedTeam || '팀을 선택해주세요' }}</span>
+              <img
+                v-if="selectedTeam"
+                class="selected-team-logo"
+                :src="`/small_logo/${getEnumTeamName(selectedTeam)}.svg`"
+                alt="team logo"
+                style="width: 24px; height: 24px;"
+              />
+            </div>
           </div>
-          <div v-else style="margin-top: 20px; ">{{ pageText.selectDateGuide }}</div>
-          <div class="selected-team" style="margin-top: 20px;">{{ pageText.selectedTeam }} <span class="selected-team-name">{{ selectedTeam }}</span></div>
         </div>
         <div class="game-list-box">
           <b style="font-size: 30px;">{{ pageText.gameListTitle }}</b>
@@ -101,6 +117,9 @@
                 <div class="game-title">{{ getTeamDisplayName(game.homeTeam) }} vs {{ getTeamDisplayName(game.awayTeam) }}</div>
                 <div class="game-datetime" style="font-weight: normal; color: inherit;">
                   {{ formatGameDateTime(game.gameDateTime) }}
+                </div>
+                <div class="game-stadium">
+                  {{ stadiumNameToEnum[getTeamDisplayName(game.homeTeam)] }}
                 </div>
                 <button class="apply-btn" @click="() => handleApplyClick(game)">{{ pageText.applyBtn }}</button>
               </div>
@@ -160,6 +179,8 @@ import {useTutorial} from '@/views/tutorial/useTutorial.js'
 // 팀 테마 스토어를 가져옵니다. (싱글톤 인스턴스, 호출하지 않음)
 const themeStore = useTeamThemeStore
 
+// small_logo 사용 고정 (옵션 A)
+
 // 사용자 정보에 myTeam 값이 있으면 해당 팀으로 테마를 설정합니다.
 // 이 코드는 컴포넌트가 생성될 때마다 실행되어 현재 사용자의 팀 테마를 적용합니다.
 if (user?.myTeam) {
@@ -209,16 +230,7 @@ const selectedGame = ref(null);
 // 중복 실행 방지 플래그
 const hasStartedApplyTutorial = ref(false);
 
-// 다음 버튼 색상을 현재 팀 테마 색상으로 반영
-const nextBtnStyle = computed(() => {
-  try {
-    const theme = themeStore.currentTheme?.value || {};
-    const color = theme.primary || 'var(--theme-primary, #ff6b35)';
-    return { background: color, borderColor: color };
-  } catch (_) {
-    return { background: '#ff6b35', borderColor: '#ff6b35' };
-  }
-});
+ 
 
 // 페이지 진입 시 튜토리얼 자동 실행 (URL 파라미터 또는 플래그 기반)
 onMounted(() => {
@@ -262,12 +274,12 @@ const filteredGamesOnDate = computed(() => {
 // 기존 변수들을 제거하고 새로운 달력 로직 사용
 function getFormattedDate() {
   if (!selectedDate.value) return '';
-  return `${currentYear}년 ${String(currentMonth.value).padStart(2, '0')}월 ${String(selectedDate.value).padStart(2, '0')}일`;
+  return `${String(currentMonth.value).padStart(2, '0')}월 ${String(selectedDate.value).padStart(2, '0')}일`;
 }
 
 const pageText = {
   stepper: ['팀 선택', '경기 선택', '응모하기', '결제'],
-  selectTeamTitle: '팀을 선택하세요',
+  selectTeamTitle: '팀을 선택해주세요',
   nextBtn: '다음',
   calendarTitle: '달력',
   selectedDateTitle: '선택된 날짜',
@@ -339,8 +351,7 @@ function selectTeam(team) {
 
   if(teamEnum){
     localStorage.setItem('selectedTeam', teamEnum);
-    // 팀 테마 즉시 반영 (next 버튼 색상 등)
-    try { themeStore.setSelectedTeam(teamEnum); } catch (_) {}
+    // 테마는 사용자 myTeam 기준으로 고정하므로 변경하지 않습니다.
   }
 
   // 다른 팀을 클릭하면 초기 활성 상태를 해제합니다.
@@ -462,7 +473,10 @@ function initializeTodaySelection() {
   
   // 현재 달력이 오늘이 속한 달인지 확인
   if (currentYear === todayYear && currentMonth.value === todayMonth) {
-    selectDate(todayDate);
+    // 초기 진입 시 자동 날짜 선택을 중지하여
+    // 캘린더 튜토리얼이 먼저 안정적으로 표시되도록 합니다.
+    // 사용자가 날짜를 직접 선택하면 그때 경기 유무에 따라 분기합니다.
+    // selectDate(todayDate);
   }
 }
 
@@ -485,6 +499,7 @@ const startTutorial = async () => {
 //// 날짜 선택 튜토리얼 시작 ////
 const startCalendarTutorial = () => {
   // 위임: 공통 컴포저블 캘린더 튜토리얼 실행
+  // 날짜 선택 튜토리얼을 우선 표시합니다.
   startApplyCalendarTutorial();
 };
 
@@ -651,16 +666,7 @@ onMounted(async () => {
     // savedTeam은 ENUM일 가능성이 높음. 한국어 팀명으로 변환하여 선택 상태와 로직 일관성 유지
     const savedTeamKorean = enumToTeamName[savedTeam] || savedTeam;
     selectedTeam.value = savedTeamKorean;
-    // 초기 진입 시에도 테마(CSS 변수)가 즉시 반영되도록 전역 테마 스토어 적용
-    try { themeStore.setSelectedTeam(savedTeam); } catch (_) {}
-    // UI 업데이트 (카드 라벨은 한국어)
-    document.querySelectorAll('.team-card').forEach(card => {
-      if (card.textContent === savedTeamKorean) {
-        card.classList.add('selected');
-      } else {
-        card.classList.remove('selected');
-      }
-    });
+    // 테마는 사용자 myTeam 기준으로 고정하므로 변경하지 않습니다.
   }
   
   // 현재 날짜 가져오기 (동적)
@@ -775,8 +781,15 @@ async function selectDate(date) {
     // 경기 데이터가 로드된 후 튜토리얼/모달 처리 (항상 실행)
     setTimeout(() => {
       if (data && data.length > 0) {
-        // 경기가 있으면 경기 선택 모달(step=1) 오픈
-        startGameListTutorial();
+        // 경기가 있으면: 튜토리얼 모드일 때만 경기 선택 모달(step=1) 오픈
+        try {
+          const isTutorialMode = localStorage.getItem('showApplyTutorial') === 'true';
+          if (isTutorialMode) {
+            startGameListTutorial();
+          }
+        } catch (_) {
+          // 로컬스토리지 접근 불가 시 조용히 패스
+        }
       } else {
         // 경기가 없으면 경기 없음 모달 표시
         showNoGameModal(date);
@@ -849,6 +862,73 @@ function formatGameDateTime(dateTimeStr) {
 </script>
 
 <style>
+/* Next button with gradient hover */
+.next-btn {
+  padding: 12px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  background: var(--theme-gradient, linear-gradient(90deg, #ff4d4d, #f9cb28));
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.next-btn.gradient-hover {
+  background-size: 200% auto;
+}
+
+.next-btn:hover {
+  animation: gradientMove 0.5s linear forwards;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  filter: brightness(1.05);
+}
+
+/* 움직이는 그라데이션 애니메이션 */
+@keyframes gradientMove {
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+/* 눌렀을 때 효과 */
+.next-btn:active {
+  transform: translateY(0) scale(0.99);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.16);
+  filter: brightness(0.98);
+}
+
+.next-btn:disabled {
+  background: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.btn-arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.next-btn:hover .btn-arrow {
+  transform: translateX(4px);
+}
+
+.next-btn:disabled .btn-arrow {
+  transform: none;
+}
+
 /* Global tutorial styles */
 :global(.driver-popover.tutorial-popover) {
   border-radius: 10px;
@@ -1064,20 +1144,13 @@ function formatGameDateTime(dateTimeStr) {
 
 <style scoped>
 *{
-  font-size: 20px;
+  font-size: 16px;
 }
 .apply-wrapper {
   min-height: 100vh;
   background: #fff;
   display: flex;
   flex-direction: column;
-}
-.stepper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 20px 0 20px;
-  gap: 0 5px;
 }
 .step {
   display: flex;
@@ -1089,38 +1162,16 @@ function formatGameDateTime(dateTimeStr) {
   cursor: pointer;
   transition: transform 0.2s ease-in-out;
 }
-
 .step:hover {
   transform: translateY(-5px);
 }
 .step.active {
-  color: var(--theme-primary, #ff6b35);
-}
-.step span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--theme-primary, #ff6b35);
-  opacity: 0.25;
-  color: #fff;
-  font-weight: bold;
-  margin-bottom: 6px;
-  font-size: 18px;
+  color: var(--theme-gradient, #e57373);
 }
 .step.active span {
-  background: var(--theme-primary, #ff6b35);
+  background: var(--theme-gradient, #e57373);
   box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3);
   opacity: 1;
-}
-.bar {
-  width: 60px;
-  height: 4px;
-  background: var(--theme-primary, #ff6b35);
-  border-radius: 2px;
-  margin-bottom: 35px;
 }
 .main-area {
   display: flex;
@@ -1131,55 +1182,45 @@ function formatGameDateTime(dateTimeStr) {
 .title {
   font-size: 28px;
   font-weight: 700;
-  margin: 0px 0 30px 0;
+  margin-bottom: 10px;
   color: #222;
   letter-spacing: -1.5px;
   text-align: center;
   width: 100%;
   max-width: 700px;
 }
-.team-bg-container {
-  width: 650px;
-  height: 200px;
-  margin: 0 auto 30px auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 .team-bg-container.active {
-  border: 1px solid var(--theme-primary, #e57373) !important;
+  border: none !important;
   border-radius: 16px !important;
-  box-shadow: 
-    0 5px 10px rgba(0, 0, 0, 0.2), /* 깊이감 있는 그림자 */
-    inset 0 1px 1px rgba(255, 255, 255, 0.4), /* 상단 하이라이트 */
-    inset 0 -2px 1px rgba(0, 0, 0, 0.1); /* 하단 음영 */
-  transform: translateY(-3px);
-  transition: all 0.2s ease-out;
+  box-shadow: none !important;
+  transform: none;
+  transition: opacity 0.2s ease-out;
 }
 
 .team-bg-container.active:hover {
-  transform: translateY(-1px);
-  box-shadow: 
-    0 2px 5px rgba(0, 0, 0, 0.2), 
-    inset 0 1px 1px rgba(255, 255, 255, 0.4), 
-    inset 0 -2px 1px rgba(0, 0, 0, 0.1);
+  transform: none;
+  box-shadow: none !important;
 }
 
 .team-bg-image {
-  width: 99%;
-  height: 99%;
-  border-radius: 16px;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
   opacity: 0.25;
   transition: opacity 0.3s;
   background-position: center !important;
   background-repeat: no-repeat !important;
-  background-size: 105% !important;
+  background-size: cover !important;
+  border-radius: 0;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .team-bg-image.active {
   opacity: 1;
 }
+
 .team-bg-image:hover {
   opacity: 1;
 }
@@ -1196,31 +1237,7 @@ function formatGameDateTime(dateTimeStr) {
   flex-direction: row;
   gap: 28px;
 }
-.team-card {
-  width: 200px;
-  height: 110px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-  z-index: 1;
-  padding: 15px;
-  box-sizing: border-box;
-  opacity: 0.5;
-  /* Glass 3D Button Style */
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  transform: translateY(0);
-  box-shadow:
-    0 8px 15px rgba(0, 0, 0, 0.1),
-    0 4px 6px rgba(0, 0, 0, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+
 
 .team-card-image {
   width: 60px;
@@ -1267,15 +1284,28 @@ function formatGameDateTime(dateTimeStr) {
   opacity: 1 !important;
 }
 .next-btn {
-  padding: 10px 36px;
-  background: #bdbdbd;
+  padding: 12px 40px;
+  font-size: 20px;
+  font-weight: 500;
   color: #fff;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 500;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.2s;
+  background-image: linear-gradient(
+    90deg,
+    var(--theme-primary),
+    color-mix(in oklab, var(--theme-primary) 80%, white 20%),
+    var(--theme-primary)
+  );
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, background-position 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 .next-btn:disabled {
   background: #e0e0e0;
@@ -1307,20 +1337,10 @@ function formatGameDateTime(dateTimeStr) {
   flex-direction: row;
   align-items: flex-start;
   justify-content: center;
-  gap: 48px;
+  gap: 20px;
   margin-bottom: 48px;
 }
-.calendar-area {
-  width: 500px;
-  height: fit-content;
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 2px 16px 0 #f8bbd04d;
-  padding: 24px 18px 24px 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+
 .calendar-header-section {
   display: flex;
   align-items: center;
@@ -1336,7 +1356,7 @@ function formatGameDateTime(dateTimeStr) {
   min-width: 200px;
 }
 .month-nav-btn {
-  background: var(--theme-primary, #ff6b35);
+  background: var(--theme-gradient, #ff6b35);
   color: white;
   border: none;
   border-radius: 50%;
@@ -1346,7 +1366,8 @@ function formatGameDateTime(dateTimeStr) {
   min-height: 40px !important;
   max-width: 40px !important;
   max-height: 40px !important;
-  font-size: 20px;
+  font-size: 26px;
+  line-height: 1;
   font-weight: bold;
   cursor: pointer;
   display: flex;
@@ -1360,7 +1381,6 @@ function formatGameDateTime(dateTimeStr) {
   box-sizing: border-box;
   padding: 0 !important;
   margin: 0 !important;
-  line-height: 1;
   text-align: center;
 }
 .month-nav-btn:hover {
@@ -1370,15 +1390,7 @@ function formatGameDateTime(dateTimeStr) {
   background: #ccc;
   cursor: not-allowed;
 }
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 20px;
-  margin-bottom: 18px;
-  font-family: "Poppins", sans-serif;
-  font-weight: 500;
-  font-style: normal;
-}
+
 .calendar-header {
   font-size: 23px;
   font-weight: 600;
@@ -1386,22 +1398,7 @@ function formatGameDateTime(dateTimeStr) {
   text-align: center;
   padding: 2px 0;
 }
-.calendar-cell {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: transparent;
-  color: #444;
-  font-size: 23px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-}
+
 .calendar-cell.selected {
   background: var(--theme-gradient, #ff6b35) !important;
   color: #fff !important;
@@ -1420,6 +1417,26 @@ function formatGameDateTime(dateTimeStr) {
 .calendar-cell:hover:not(.past):not(.blank) {
   background: #f8bbd0;
   color: #fff;
+}
+/* 선택된 날짜 박스 우측 작은 팀 로고 */
+.selected-date-box {
+  position: relative;
+  padding-right: 96px; /* 우측 로고 공간 확보 */
+}
+.selected-date-small-logo {
+  position: absolute;
+  right: 20px;
+  top: 80%;
+  width: 100%;
+  height: 100%;
+  max-width: 60px;
+  max-height: 60px;
+  transform: translateY(-50%);
+  
+  width: auto;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 2;
 }
 .calendar-cell.past {
   color: #ccc;
@@ -1474,43 +1491,72 @@ function formatGameDateTime(dateTimeStr) {
   margin-left: 0;
   display: block;
 }
-.info-area {
-  width: 420px;
+
+.selected-info {
   display: flex;
-  flex-direction: column;
-  gap: 28px;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  line-height: 1.4;
 }
-.selected-date-box {
-  background: var(--theme-background, #fff);
-  border-radius: 14px;
-  width: 400px;
-  height: 200px;
-  box-shadow: 0 2px 16px 0 #f8bbd04d;
-  padding: 20px 20px 16px 20px;
-}
+
 .selected-date-box b {
-  color: var(--theme-primary, #e57373);
-  font-size: 30px;
+  color: inherit;
+  font-size: 20px;
+  display: block;
+  margin-bottom: 8px;
 }
+
+.selected-date,
+.selected-time,
+.selected-team-name,
+.select-date-guide {
+  font-size: 30px;
+  font-weight: 500;
+  color: #333;
+}
+
+.divider {
+  color: #ddd;
+  margin: 0 4px;
+  opacity: 0.7;
+}
+
+.selected-team-name {
+  color: var(--theme-primary, #ff6b35);
+  font-weight: 600;
+}
+
+.team-name-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.selected-team-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.team-name-container:hover .selected-team-logo {
+  transform: scale(1.1);
+}
+
+.selected-team-name {
+  color: inherit;
+  font-weight: bold;
+}
+
 .selected-team {
   margin-top: 20px;
   font-size: 15px;
   color: #888;
 }
-.selected-team-name {
-  color: var(--theme-primary, #e57373);
-  font-weight: bold;
-}
-.game-list-box {
-  background: var(--theme-background, #fff);
-  border-radius: 14px;
-  box-shadow: 0 2px 16px 0 #f8bbd04d;
-  padding: 20px 20px 20px 20px;
-  width: 400px;
-  height: 260px;
-}
+
 .game-list-box b {
-  color: var(--theme-primary, #e57373);
+  color: inherit;
   font-size: 16px;
 }
 .game-card {
@@ -1533,6 +1579,11 @@ function formatGameDateTime(dateTimeStr) {
   margin-top: 10px;
   color: #888;
 }
+.game-stadium {
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #888;
+}
 .game-buttons {
   display: flex;
   justify-content: space-between;
@@ -1547,12 +1598,32 @@ function formatGameDateTime(dateTimeStr) {
   font-size: 20px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 0.2s;
+  background-image: linear-gradient(
+    90deg,
+    var(--theme-primary),
+    color-mix(in oklab, var(--theme-primary) 80%, white 20%),
+    var(--theme-primary)
+  );
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease, background-position 0.2s ease;
+}
+/* 움직이는 그라데이션 공통 키프레임 */
+@keyframes gradientMove {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
 }
 .apply-btn:hover {
-  background: var(--theme-gradient, #e57373);
-  box-shadow: 0 10px 20px 0 #f8bbd04d;
-  transform: translateY(-2px);
+  animation: gradientMove 0.5s linear forwards;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  filter: brightness(1.05);
+}
+/* 눌렀을 때 */
+.apply-btn:active {
+  transform: translateY(0) scale(0.99);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.16);
+  filter: brightness(0.98);
 }
 .no-game {
   color: #bbb;
@@ -1608,7 +1679,7 @@ function formatGameDateTime(dateTimeStr) {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--theme-primary, #e57373);
+  background: var(--theme-gradient, #e57373);
   color: #fff;
   font-weight: bold;
   margin-bottom: 4px;
@@ -1718,7 +1789,7 @@ function formatGameDateTime(dateTimeStr) {
   justify-content: center;
   min-height: 120px;
   font-size: 22px;
-  color: #555;
+  color: #b9b8b8;
 }
 
 /* Responsive design */
@@ -1728,7 +1799,7 @@ function formatGameDateTime(dateTimeStr) {
   }
   
   .stepper {
-    margin: 20px 0 16px;
+    margin: 16px 0 16px;
     gap: 0 8px;
   }
   
@@ -1753,19 +1824,32 @@ function formatGameDateTime(dateTimeStr) {
     padding: 0 16px;
   }
   
-  .team-bg-container {
+  /* Banner container: no border/shadow and clip edges */
+  .team-bg-container,
+  .team-bg-container.active,
+  .team-bg-container:hover {
     width: 100%;
-    max-width: 400px;
-    height: 80px;
-    margin: 0 auto 20px auto;
+    max-width: 700px;
+    height: 300px;
+    margin: 0 auto 30px auto;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    outline: none !important;
+    background-color: #fff !important;
   }
   
+  /* Inner background: keep radius 0, and slightly enlarge to hide inherent edge */
   .team-bg-image {
-    width: 100%;
-    height: 100px;
+    width: 100% !important;
+    height: 100% !important;
     background-position: center !important;
     background-repeat: no-repeat !important;
-    background-size: contain !important;
+    background-size: 103% !important; /* cover -> slight zoom to hide 1px edge */
+    border-radius: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
   }
   
   .team-list.team-list-row {
@@ -1820,14 +1904,10 @@ function formatGameDateTime(dateTimeStr) {
   }
   
   .month-nav-btn {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
-    max-width: 36px !important;
-    max-height: 36px !important;
-    font-size: 18px;
-    flex-basis: 36px !important;
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 26px;
+    flex-basis: 40px !important;
   }
   
   .calendar-grid {
@@ -1857,7 +1937,6 @@ function formatGameDateTime(dateTimeStr) {
   .info-area {
     width: 100%;
     max-width: 400px;
-    gap: 20px;
   }
   
   .selected-date-box {
@@ -1865,6 +1944,7 @@ function formatGameDateTime(dateTimeStr) {
     height: auto;
     min-height: 160px;
     padding: 16px;
+    padding-right: 96px; /* 우측 로고 공간 확보 (모바일) */
   }
   
   .selected-date-box b {
@@ -2003,7 +2083,7 @@ function formatGameDateTime(dateTimeStr) {
   }
   
   .team-bg-image {
-    height: 80px;
+    /* height: 80px; */
     background-position: center !important;
     background-repeat: no-repeat !important;
     background-size: contain !important;
@@ -2124,7 +2204,7 @@ function formatGameDateTime(dateTimeStr) {
   }
   
   .game-select-main {
-    gap: 32px;
+    gap: 10px;
   }
   
   .calendar-area {
@@ -2146,4 +2226,294 @@ function formatGameDateTime(dateTimeStr) {
     height: 240px;
   }
 }
+
+
+
+/* 디자인 모음 */
+
+/* 배너 */
+.stepper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 10px auto; /* 상단 마진 10px 유지, 좌우 자동 마진으로 중앙 정렬 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.step span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--theme-gradient, #e57373);
+  opacity: 0.25;
+  color: #fff;
+  font-weight: bold;
+  margin-bottom: 6px;
+  font-size: 18px;
+}
+.bar {
+  flex: 1 1 auto;
+  height: 4px;
+  background: var(--theme-gradient, #e57373);
+  border-radius: 2px;
+  margin-bottom: 35px;
+}
+
+/* 대표 팀 배경 */
+.team-bg-container {
+  width: 900px;
+  height: 260px;
+  margin: 0 auto 30px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* 팀 카드 */
+.team-card {
+  width: 160px;
+  height: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  padding: 15px;
+  box-sizing: border-box;
+  opacity: 0.5;
+  /* Glass 3D Button Style */
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transform: translateY(0);
+  box-shadow:
+    0 8px 15px rgba(0, 0, 0, 0.1),
+    0 4px 6px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* 캘린더 영역 */
+.calendar-area {
+  width: 650px;
+  height: 500px;
+  background: var(--theme-primary, #ff6b35);
+  color: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 16px 0 #f8bbd04d;
+  padding: 24px 18px 24px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative; /* for logo positioning */
+  overflow: hidden;   /* hide overflow of large logos */
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 16px;
+  margin-bottom: 10px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+  position: relative; /* keep above bg logo */
+  z-index: 1;
+}
+/* 요일 헤더 */
+.calendar-header {
+  color: #fff;
+  opacity: 0.9;
+}
+/* header section above bg logo */
+.calendar-header-section {
+  position: relative;
+  z-index: 1;
+}
+.calendar-cell {
+  width: 40px;
+  height: 40px;
+  margin: auto 16px;
+  font-size: 26px;
+  border-radius: 50%;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+.calendar-cell:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+.calendar-cell.past {
+  color: rgba(255, 255, 255, 0.45);
+  cursor: not-allowed;
+}
+.calendar-cell.today,
+.calendar-cell.selected {
+  background: rgba(255, 255, 255, 0.25);
+  border: 2px solid #fff;
+}
+/* 캘린더 내부 로고 (마이팀) */
+.calendar-area {
+  position: relative;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.326);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  /* overflow: hidden; */
+  margin-bottom: 8px;
+}
+.calendar-logo {
+  position: absolute;
+  inset: 0; /* fill container */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.1; /* 10% 투명도 */
+  pointer-events: none; /* UI 방해 금지 */
+  z-index: 0; /* behind content */
+}
+.calendar-logo img {
+  width: 85%;
+  max-width: 900px;
+  height: auto;
+}
+/* 캘린더 헤더 텍스트/버튼 시인성 향상 */
+.calendar-header-section .calendar-title {
+  color: #fff;
+}
+.month-nav-btn {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+}
+
+/* 우측 정보 영역 간격 재도입 + 여백 강화 */
+.info-area {
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 선택된 날짜 영역 */
+.selected-date-box {
+  background: var(--theme-primary, #ff6b35);
+  color: #fff;
+  border-radius: 14px;
+  width: 500px;
+  height: 200px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.326);
+  padding: 20px 20px 16px 20px;
+  padding-right: 120px; /* 우측 로고 공간 확보 */
+  margin-bottom: 20px; /* 안전 간격 */
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: saturate(140%) blur(2px);
+  position: relative; /* 워터마크 배치를 위한 기준 컨테이너 */
+  overflow: hidden;   /* 워터마크 이미지 넘침 방지 */
+}
+/* 선택된 날짜 상자 텍스트 가독성 보강 */
+.selected-date-box b,
+.selected-date-box div,
+.selected-date-box .selected-team,
+.selected-date-box .selected-team-name {
+  color: #fff;
+}
+/* Primary + Secondary subtle layered overlay */
+.selected-date-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--theme-primary, #ff6b35) 0%, var(--theme-secondary, rgba(0,0,0,0.4)) 100%);
+  opacity: 0.25; /* 은은한 레이어 */
+  border-radius: inherit;
+  z-index: 0;
+}
+.selected-date-box > :not(.selected-date-small-logo) {
+  position: relative;
+  z-index: 1;
+}
+/* 게임 리스트 영역 */
+.game-list-box {
+  background: var(--theme-primary, #ff6b35);
+  color: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.326);
+  padding: 20px 20px 20px 20px;
+  width: 500px;
+  height: 280px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: saturate(140%) blur(2px);
+}
+
+/* 게임 리스트 텍스트 가독성 보강 */
+.game-list-box b,
+.game-list-box .no-game,
+.game-list-box .game-title,
+.game-list-box .game-datetime,
+.game-list-box .game-stadium {
+  color: #fff;
+}
+
+/* 1) 카드 배경 위로 은은한 하이라이트가 좌→우 흐르는 애니메이션 */
+@keyframes cardGradientFlow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+/* 경기 목록 박스: Option A - 세컨더리 글래스 카드 (은은함 + 가독성) */
+.game-card {
+  height: 180px;
+  position: relative;
+  margin: 14px 0;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: color-mix(in oklab, var(--theme-primary, #2a2a2a) 75%, white);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(4px) saturate(120%);
+  -webkit-backdrop-filter: blur(4px) saturate(120%);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  color: #fff;
+}
+/* 3) 흐르는 하이라이트 오버레이 */
+.game-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+
+  /* 팀 컬러톤을 아주 약하게 섞은 하이라이트 + 투명 그라데이션 */
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--theme-primary) 15%, white 85%) 25%,
+    transparent 50%,
+    color-mix(in oklab, var(--theme-primary) 15%, white 85%) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-position: 0% 50%;
+
+  /* 너무 과하지 않게 전체 투명도 조절 */
+  opacity: 0.18;
+
+  /* 자동으로 계속 흐르게 */
+  animation: cardGradientFlow 3s linear infinite;
+}
+
+
 </style>

@@ -451,7 +451,7 @@ const fetchTeamRanking = async () => {
       name: getTeamKoreanName(item.teamName),
       subtitle: `${item.rank}위`,
       score: item.transferAllCount,
-      change: `+${item.growthRate}%`,
+      ...(item.growthRate !== null && { change: `+${item.growthRate}%` }),
       avatar: `/team-logos/${item.teamName.toLowerCase()}.png`
     }));
   } catch (error) {
