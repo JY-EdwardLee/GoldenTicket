@@ -13,7 +13,7 @@
                 <v-col 
                   cols="12"
                   :md="isTransferCardHovered ? 8 : (isEnterCardHovered ? 4 : 6)" 
-                  class="pa-4 card-col"
+                  class="pa-4 card-col flex-column"
                   :class="{ 'card-col-hover': isTransferCardHovered }"
                 >
                   <HeroCard
@@ -26,6 +26,11 @@
                     @mouseleave="isTransferCardHovered = false"
                     @click="goToTransfer"
                   />
+                  <div class="text-white text-h6 mt-3 px-2" v-if="isTransferCardHovered">
+                    <p class="mb-1">
+                      티켓을 안전하게 양도하고 필요한 사람에게 전달하세요.
+                    </p>
+                  </div>  
                 </v-col>
                 
                 <!-- 응모 카드 -->
@@ -33,7 +38,7 @@
                   cols="12"
                   :md="isEnterCardHovered ? 8 : (isTransferCardHovered ? 4 : 6)"
                   :pb="isEnterCardHovered ? 8 : 4"
-                  class="pa-4 card-col"
+                  class="pa-4 card-col flex-column"
                   :class="{ 'card-col-hover': isEnterCardHovered }"
                 >
                   <HeroCard
@@ -46,6 +51,11 @@
                     @mouseleave="isEnterCardHovered = false"
                     @click="goToApply"
                   />
+                  <div class="text-white text-h6 mt-3 px-2" v-if="isEnterCardHovered">
+                    <p class="mb-1">
+                      원하는 경기를 응모하고 티켓을 양도받아 보세요.
+                    </p>
+                  </div>  
                 </v-col>
               </v-row>
             </v-col>
@@ -76,7 +86,7 @@
                rounded="lg">
               <HeroCard
                 :height="180"
-                title="티켓 보기"
+                title="나의 티켓"
                 :description="['내 티켓을 확인하세요']"
                 button-text="내 티켓 확인"
                 type="sub"
@@ -149,7 +159,7 @@
             <v-col cols="12" lg="6" class="pa-4">
               <RankingCard
                 title="이달의 양도자"
-                title-icon="mdi-star"
+                title-icon="star"
                 :items="userRankingData"
                 type="user"
               />
@@ -159,7 +169,7 @@
             <v-col cols="12" lg="6" class="pa-4">
               <RankingCard
                 title="팀별 양도랭킹"
-                title-icon="mdi-trophy"
+                title-icon="trophy"
                 :items="teamRankingData"
                 type="team"
               />
@@ -978,7 +988,7 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   overflow: hidden;
-  min-height: 400px;
+  /* min-height: 400px; */
   background: #f8f9fa;
   border-radius: 16px;
   padding: 24px 0;

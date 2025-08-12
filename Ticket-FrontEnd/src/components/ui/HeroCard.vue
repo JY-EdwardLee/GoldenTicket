@@ -21,7 +21,8 @@
           <span class="orange-dot"></span>
           {{ title }}
         </span>
-        <div v-if="type === 'primary' || type === 'secondary'" class="d-flex justify-space-between">
+      </div>
+              <div v-if="type === 'primary' || type === 'secondary'" class="d-flex justify-space-between">
         <!-- <div class="text-h6 text-black mb-8" v-if="isHovered">
           <p class="mb-2" v-for="(line, index) in descriptionLines" :key="index">
             {{ line }}
@@ -29,8 +30,7 @@
         </div> -->
         </div>
       </div>
-      </div>
-      <div class="ticket-image-container justify-center pt-10">
+      <div v-if="type === 'primary' || type === 'secondary'" class="ticket-image-container justify-center pt-10">
           <img
           v-if="type === 'primary'"
            src="/avatar/ticket_transfer.png"
@@ -43,7 +43,21 @@
            alt="apply"
            class="ticket-image"
            />
-        </div> 
+        </div>
+      <div v-if="type === 'sub'" class="ticket-sub-image-container justify-center pt-10">
+        <img 
+           v-if="title === '응모 내역'"
+           src="/avatar/my_application.png"
+           alt="응모 내역"
+           class="ticket-sub-image"
+           />
+           <img 
+           v-if="title === '나의 티켓'"
+           src="/avatar/my_ticket.png"
+           alt="나의 티켓"
+           class="ticket-sub-image"
+           />
+      </div>
       <!-- <v-btn
         v-if="type === 'primary' || type === 'secondary'"
         size="large"
@@ -138,6 +152,19 @@ const handleClick = () => {
   transform: scale(0.4);
 }
 
+.ticket-sub-image-container {
+  width: 200px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.ticket-sub-image {
+  object-fit: cover;
+  transform: scale(0.15);
+}
 .hero-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   overflow: hidden; /* 아이콘이 카드 밖으로 나가지 않도록 */

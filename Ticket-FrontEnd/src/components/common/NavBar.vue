@@ -271,7 +271,7 @@ const handleLogout = async () => {
 <style scoped>
 .navbar {
   width: 100%;
-  height: 56px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -294,9 +294,10 @@ const handleLogout = async () => {
   color: #d79508;
 }
 
+
 .nav-links {
   display: flex;
-  gap: 16px;
+  gap: 24px;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -304,7 +305,7 @@ const handleLogout = async () => {
 
 .nav-links li {
   font-weight: 500;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
 }
 
 .nav-links a {
@@ -347,7 +348,7 @@ const handleLogout = async () => {
 .auth-links a {
   color: #888;
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   margin-top: 12px;
 }
 

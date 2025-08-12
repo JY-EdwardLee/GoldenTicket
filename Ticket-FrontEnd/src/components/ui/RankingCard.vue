@@ -1,8 +1,7 @@
 <template>
   <v-card elevation="4" rounded="xl" class="h-100">
     <v-card-title class="d-flex align-center pa-4">
-      <v-icon :color="iconColor" size="large" class="mr-3">{{ titleIcon }}</v-icon>
-      <span class="text-h5 font-weight-bold">{{ title }}</span>
+      <span class="text-h5 font-weight-bold">{{ icon[titleIcon] }} {{ title }}</span>
     </v-card-title>
     <v-card-text class="pa-4">
       <v-list class="transparent">
@@ -50,7 +49,9 @@ import { ref } from 'vue';
 const icon = ref({
   1: '🥇',
   2: '🥈',
-  3: '🥉'
+  3: '🥉',
+  'star': '⭐',
+  'trophy': '🏆'
 });
 
 const props = defineProps({
