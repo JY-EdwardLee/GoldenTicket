@@ -3,7 +3,7 @@
     <v-main>
       <!-- 히어로 섹션 -->
       <v-container fluid class="hero-section pa-4">
-        <v-container class="pa-0">
+        <v-container class="pa-0" :class="{ 'hovered': isTransferCardHovered || isEnterCardHovered }">
           <!-- 데스크톱 레이아웃 -->
           <v-row no-gutters class="fill-height d-none d-md-flex">
             <!-- 왼쪽 영역 - 두 개의 메인 카드 -->
@@ -14,15 +14,16 @@
                   cols="12"
                   :md="isTransferCardHovered ? 8 : (isEnterCardHovered ? 4 : 6)" 
                   class="pa-4 card-col"
-                  @mouseover="isTransferCardHovered = true"
-                  @mouseleave="isTransferCardHovered = false"
+                  :class="{ 'card-col-hover': isTransferCardHovered }"
                 >
                   <HeroCard
-                    class="enter-card h-100"
+                    class="transfer-card h-100"
                     title="양도하기"
                     :description="['티켓을 안전하게 양도하고', '필요한 사람에게 전달하세요']"
                     button-text="양도하기"
                     type="primary"
+                    @mouseover="isTransferCardHovered = true"
+                    @mouseleave="isTransferCardHovered = false"
                     @click="goToTransfer"
                   />
                 </v-col>
@@ -31,16 +32,18 @@
                 <v-col 
                   cols="12"
                   :md="isEnterCardHovered ? 8 : (isTransferCardHovered ? 4 : 6)"
-                  @mouseover="isEnterCardHovered = true"
-                  @mouseleave="isEnterCardHovered = false"
+                  :pb="isEnterCardHovered ? 8 : 4"
                   class="pa-4 card-col"
+                  :class="{ 'card-col-hover': isEnterCardHovered }"
                 >
                   <HeroCard
-                    class="h-100"
+                    class="enter-card h-100"
                     title="응모하기"
                     :description="['원하는 경기를 응모하고', '티켓을 양도받아 보세요.']"
                     button-text="응모하기"
                     type="secondary"
+                    @mouseover="isEnterCardHovered = true"
+                    @mouseleave="isEnterCardHovered = false"
                     @click="goToApply"
                   />
                 </v-col>
@@ -48,25 +51,37 @@
             </v-col>
             
             <!-- 오른쪽 영역 - 세로 카드들 -->
-            <v-col cols="12" md="3" class="pa-0 pt-4 pl-2 d-flex flex-column">
+            <v-col cols="12" md="3" class="pl-2 d-flex flex-column card-col">
               <!-- 첫 번째 작은 카드 -->
-              <v-card class="mb-2 flex-grow-1 d-flex flex-column" :elevation="0" rounded="lg" style="background-color: #f8f9fa;">
+              <v-card
+               class="card-col mb-2 flex-grow-1 d-flex flex-column pa-4" 
+               :class="{ 'card-col-hover': isApplyCardHovered }"
+               :elevation="0" 
+               rounded="lg">
               <HeroCard
                 :height="180"
                 title="응모 내역"
                 :description="['나의 응모 내역을 확인하세요']"
                 button-text="응모 내역 확인"
                 type="sub"
+                @mouseover="isApplyCardHovered = true"
+                @mouseleave="isApplyCardHovered = false"
               />
               </v-card>              
               <!-- 두 번째 작은 카드 -->
-              <v-card class="mb-2 flex-grow-1 d-flex flex-column" :elevation="0" rounded="lg" style="background-color: #f8f9fa;">
+              <v-card
+               class="card-col mb-2 flex-grow-1 d-flex flex-column pa-4" 
+               :class="{ 'card-col-hover': isTicketCardHovered }"
+               :elevation="0" 
+               rounded="lg">
               <HeroCard
                 :height="180"
                 title="티켓 보기"
                 :description="['내 티켓을 확인하세요']"
                 button-text="내 티켓 확인"
                 type="sub"
+                @mouseover="isTicketCardHovered = true"
+                @mouseleave="isTicketCardHovered = false"
               />
               </v-card>            
             </v-col>
@@ -82,6 +97,8 @@
                 :description="['티켓을 안전하게 양도하고', '필요한 사람에게 전달하세요']"
                 button-text="양도하기"
                 type="primary"
+                @mouseover="isTransferCardHovered = true"
+                @mouseleave="isTransferCardHovered = false"
                 @click="goToTransfer"
               />
             </div>
@@ -94,6 +111,8 @@
                 :description="['원하는 경기를 응모하고', '티켓을 양도받아 보세요.']"
                 button-text="응모하기"
                 type="secondary"
+                @mouseover="isEnterCardHovered = true"
+                @mouseleave="isEnterCardHovered = false"
                 @click="goToApply"
               />
             </div>
@@ -255,6 +274,8 @@
 import { ref, watch, onMounted, onUnmounted, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 
+const isApplyCardHovered = ref(false);
+const isTicketCardHovered = ref(false);
 const isEnterCardHovered = ref(false);
 const isTransferCardHovered = ref(false);
 import { useAuthStore } from '@/stores/auth';
@@ -759,18 +780,18 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+
 /* Vuetify 커스텀 스타일 */
-.hero-section {
-  min-height: 300px;
-  height: 60vh;
-  display: flex;
-  align-items: center;
-}
 
 .hero-section .v-container {
   padding: 0 !important;
-  height: 100%;
+  transition: height 0.3s ease;
+  height: 60vh;
 }
+
+/* .hero-section .v-container.hovered {
+  height: 65vh;
+} */
 
 .hero-section .v-row {
   height: 100%;
@@ -799,10 +820,68 @@ onUnmounted(() => {
 .hero-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+/* Card hover effects */
+.card-col {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+  border-radius: 16px;
+  overflow: hidden;
+}
 
-.hero-card:hover {
-  transform: translateY(-8px);
-  border: 1px solid #000;
+.card-col::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: #B29735;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.card-col-hover::before {
+  width: 300%;
+  height: 300%;
+  opacity: 1;
+  border-radius: 0;
+}
+
+.card-col-hover {
+  z-index: 2;
+}
+
+.hero-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-card::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: #B29735;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero-card:hover::before {
+  width: 300%;
+  height: 300%;
+  opacity: 1;
+  border-radius: 0;
 }
 
 .sub-card {

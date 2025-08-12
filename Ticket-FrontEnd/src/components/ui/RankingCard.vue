@@ -1,5 +1,5 @@
 <template>
-  <v-card elevation="4" rounded="lg" class="h-100">
+  <v-card elevation="4" rounded="xl" class="h-100">
     <v-card-title class="d-flex align-center pa-4">
       <v-icon :color="iconColor" size="large" class="mr-3">{{ titleIcon }}</v-icon>
       <span class="text-h5 font-weight-bold">{{ title }}</span>

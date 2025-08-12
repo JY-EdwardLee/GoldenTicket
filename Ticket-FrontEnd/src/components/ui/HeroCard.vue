@@ -10,8 +10,8 @@
     <div v-if="type === 'sub'" class="hero-card-sub-bg" :style="{ backgroundImage: `url('/components/default_card_sub.svg')` }"></div>
     <div v-else class="hero-card-bg" :style="{ backgroundImage: `url('/components/default_card_main.svg')` }"></div>
     <div class="d-flex fill-height">
-      <v-card-text class="pt-2 px-5 pb-8 d-flex flex-column justify-space-between fill-height">
-      <div class="d-flex">
+      <v-card-text class="pt-2 px-5 pb-8 d-flex flex-column fill-height">
+      <div class="d-flex justify-space-between">
         <div class="d-flex flex-column">
         <span v-if="type === 'sub'" class="title-sub-text font-weight-medium text-black mt-2 mb-6 position-relative">
           <span class="orange-dot"></span>
@@ -22,18 +22,29 @@
           {{ title }}
         </span>
         <div v-if="type === 'primary' || type === 'secondary'" class="d-flex justify-space-between">
-        <div class="text-h6 text-black mb-8" v-if="isHovered">
+        <!-- <div class="text-h6 text-black mb-8" v-if="isHovered">
           <p class="mb-2" v-for="(line, index) in descriptionLines" :key="index">
             {{ line }}
           </p>
-        </div>
-        <!-- <div class="pitcher-image-container" v-if="!isHovered">
-          <img src="/avatar/pitcher3.png" alt="Pitcher" class="pitcher-image" />
-        </div>  -->
+        </div> -->
         </div>
       </div>
       </div>
-      <v-btn
+      <div class="ticket-image-container justify-center pt-10">
+          <img
+          v-if="type === 'primary'"
+           src="/avatar/ticket_transfer.png"
+           alt="ticket"
+           class="ticket-image"
+           />
+          <img
+          v-if="type === 'secondary'"
+           src="/avatar/stadium_apply.png"
+           alt="apply"
+           class="ticket-image"
+           />
+        </div> 
+      <!-- <v-btn
         v-if="type === 'primary' || type === 'secondary'"
         size="large"
         variant="elevated"
@@ -44,7 +55,7 @@
       >
         {{ buttonText }}
         <v-icon end>{{ buttonIcon }}</v-icon>
-      </v-btn>
+      </v-btn> -->
     </v-card-text>
     </div>
     <slot></slot>
@@ -113,19 +124,18 @@ const handleClick = () => {
 </script>
 
 <style scoped>
-.pitcher-image-container {
-  width: 250px;
-  height: 100%;
+.ticket-image-container {
+  width: 200px;
+  height: 300px;
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 0 auto;
 }
 
-.pitcher-image {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+.ticket-image {
+  object-fit: cover;
+  transform: scale(0.4);
 }
 
 .hero-card {
@@ -168,19 +178,32 @@ const handleClick = () => {
   z-index: 1;
 }
 
+/* Title text styles with enhanced hover effect */
 .title-text {
   display: inline-block;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  transition: color 0.3s ease;
 }
+
+.hero-card:hover .title-text {
+  color: #ffffff !important;
+}
+
+/* Sub title text styles with enhanced hover effect */
 .title-sub-text {
   display: inline-block;
   font-size: 1.1rem;
+  transition: color 0.3s ease;
+}
+
+.hero-card:hover .title-sub-text {
+  color: #ffffff !important;
 }
 .orange-dot {
   display: inline-block;
   width: 12px;
   height: 12px;
-  background-color: #e55a2e  ; /* Orange color */
+  background-color: #e0bc2a  ; /* Orange color */
   border-radius: 50%;
   margin-right: 16px;
   vertical-align: middle;
@@ -188,8 +211,12 @@ const handleClick = () => {
   top: -2px;
 }
 
+.hero-card:hover .orange-dot {
+  background-color: #ffffff !important;
+}
+
 .hero-card:hover {
-  transform: translateY(-8px);
+  /* transform: translateY(-8px); */
   /* box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important; */
 }
 
