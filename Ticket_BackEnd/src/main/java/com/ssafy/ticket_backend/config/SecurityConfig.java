@@ -38,8 +38,7 @@ public class SecurityConfig {
 
         http.csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 활성화
-            .authorizeHttpRequests(auth -> auth
-
+            .authorizeHttpRequests(auth -> auth  //
                 .requestMatchers("/users/signup", "/users/signup/**", "/users/auth/**",
                     "/users/login-user").permitAll()  // 로그인 관리
                 .requestMatchers(HttpMethod.POST, "/s3/download").permitAll()  // S3 이미지 요청
@@ -49,6 +48,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/boards/*").permitAll()  // 게시판 별 게시글 조회
                 .requestMatchers(HttpMethod.GET, "/posts/*").permitAll()  // 게시글 상세보기
                 .requestMatchers(HttpMethod.GET, "/rank/**").permitAll()  // 양도 순위
+                .requestMatchers("/ws-notify/**").permitAll()  // Socket Handshake 개방
                 .anyRequest().authenticated())  // 이 외에는 인증 필요
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
