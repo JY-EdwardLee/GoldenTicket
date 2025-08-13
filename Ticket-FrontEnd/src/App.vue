@@ -66,7 +66,7 @@ const { isDeleteUserModalVisible, closeDeleteUserModal, handleDeleteUser } =
   <DefaultLayout>
 
 
-    <router-view />
+    <router-view :key="$route.fullPath" />
 
     <!-- 전역 회원탈퇴 모달 -->
     <DeleteUserModal

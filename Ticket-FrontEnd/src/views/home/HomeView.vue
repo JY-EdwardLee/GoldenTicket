@@ -2,14 +2,20 @@
   <v-app>
     <v-main>
       <!-- 히어로 섹션 -->
-      <v-container fluid class="hero-section pa-4">
+      <v-container fluid class="hero-section pa-4" style="min-height: 85vh; height: auto;">
         <v-container class="pa-0" :class="{ 'hovered': isTransferCardHovered || isEnterCardHovered }">
           <!-- 데스크톱 레이아웃 -->
           <v-row no-gutters class="fill-height d-none d-md-flex">
             <!-- 왼쪽 영역 - 두 개의 메인 카드 -->
-            <v-col cols="12" md="9" class="d-flex pa-0">
+            <v-col cols="12" md="12" class="d-flex pa-0">
               <v-row no-gutters class="flex-nowrap" style="width: 100%;">
                 <!-- 양도 카드 -->
+                <!-- <v-col 
+                  cols="12"
+                  :md="isTransferCardHovered ? 8 : (isEnterCardHovered ? 4 : 6)" 
+                  class="pa-4 card-col flex-column"
+                  :class="{ 'card-col-hover': isTransferCardHovered }"
+                > -->
                 <v-col 
                   cols="12"
                   :md="isTransferCardHovered ? 8 : (isEnterCardHovered ? 4 : 6)" 
@@ -26,11 +32,11 @@
                     @mouseleave="isTransferCardHovered = false"
                     @click="goToTransfer"
                   />
-                  <div class="text-white text-h6 mt-3 px-2" v-if="isTransferCardHovered">
+                  <!-- <div class="text-black text-h6 mt-3 px-2" v-if="isTransferCardHovered">
                     <p class="mb-1">
                       티켓을 안전하게 양도하고 필요한 사람에게 전달하세요.
                     </p>
-                  </div>  
+                  </div>   -->
                 </v-col>
                 
                 <!-- 응모 카드 -->
@@ -51,25 +57,26 @@
                     @mouseleave="isEnterCardHovered = false"
                     @click="goToApply"
                   />
-                  <div class="text-white text-h6 mt-3 px-2" v-if="isEnterCardHovered">
+                  <!-- <div class="text-white text-h6 mt-3 px-2" v-if="isEnterCardHovered">
                     <p class="mb-1">
                       원하는 경기를 응모하고 티켓을 양도받아 보세요.
                     </p>
-                  </div>  
+                  </div>  -->
                 </v-col>
               </v-row>
             </v-col>
             
-            <!-- 오른쪽 영역 - 세로 카드들 -->
-            <v-col cols="12" md="3" class="pl-2 d-flex flex-column card-col">
+            <!-- 아래 영역 - 세장 -->
+            <v-row cos="12" md="12" class="pl-2 d-flex card-col" style="min-height: 30vh; height: auto;">
               <!-- 첫 번째 작은 카드 -->
+              <v-col md="3"> 
               <v-card
-               class="card-col mb-2 flex-grow-1 d-flex flex-column pt-4 pa-3" 
+               class="card-col flex-grow-1 d-flex flex-column pt-4 pa-3" 
                :class="{ 'card-col-hover': isApplyCardHovered }"
                :elevation="0" 
                rounded="lg">
               <HeroCard
-                :height="180"
+                :height="270"
                 title="응모 내역"
                 :description="['나의 응모 내역을 확인하세요']"
                 button-text="응모 내역 확인"
@@ -77,15 +84,17 @@
                 @mouseover="isApplyCardHovered = true"
                 @mouseleave="isApplyCardHovered = false"
               />
-              </v-card>              
+              </v-card>
+              </v-col>
               <!-- 두 번째 작은 카드 -->
+            <v-col md="3"> 
               <v-card
                class="card-col flex-grow-1 d-flex flex-column pt-4 pa-3" 
                :class="{ 'card-col-hover': isTicketCardHovered }"
                :elevation="0" 
                rounded="lg">
               <HeroCard
-                :height="180"
+                :height="270"
                 title="나의 티켓"
                 :description="['내 티켓을 확인하세요']"
                 button-text="내 티켓 확인"
@@ -93,8 +102,25 @@
                 @mouseover="isTicketCardHovered = true"
                 @mouseleave="isTicketCardHovered = false"
               />
-              </v-card>            
+              </v-card>
             </v-col>
+            <v-col md="6"> 
+              <v-card
+              :height="270"
+               class="card-col flex-grow-1 d-flex flex-column pt-4 pa-3" 
+               :class="{ 'card-col-hover': isTicketCardHovered }"
+               :elevation="0" 
+               rounded="lg">
+              <v-card-text>
+                <div class="d-flex align-center">
+                <icon color="primary" style="font-size: 30px">🎫</icon>
+                <span class="font-weight-bold text-black ml-2" style="font-size: 1.1rem">다가오는 경기</span>
+                </div>
+                <div class="text-caption text-medium-emphasis mt-1">지금 가장 임박한 경기를 확인하세요</div>
+              </v-card-text>
+              </v-card>
+            </v-col>
+            </v-row>
           </v-row>
           
           <!-- 모바일 레이아웃 -->
@@ -319,6 +345,9 @@ const { showTutorialModal, openTutorialModal, closeTutorialModal, startTutorial 
 
 // 로그인 성공 후 처리를 위한 플래그
 const isProcessingLogin = ref(false);
+
+// 티켓 데이터
+const tickets = ref([]);
 
 // 로그인 상태 변화 감지하여 리다이렉트 처리
 watch(() => authStore.isAuthenticated, async (newValue, oldValue) => {
@@ -785,6 +814,15 @@ onUnmounted(() => {
   if (autoScrollTimer.value) {
     clearInterval(autoScrollTimer.value);
   }
+  // 티켓 정보 가져오기
+  const response = http.get(API_CONFIG.USER.TICKETS);
+  const now = new Date(); // 오늘 날짜짜
+  // 가장 가까운 날짜의 티켓 고르기기
+  const closestTicket = response.data
+    .filter(ticket => new Date(ticket.date) >= now) // 미래 티켓만
+    .sort((a, b) => new Date(a.date) - new Date(b.date))[0]; // 날짜순 정렬 후 가장 가까운 티켓 선택
+
+  tickets.value = closestTicket ? [closestTicket] : [];
 });
 
 </script>
@@ -796,7 +834,7 @@ onUnmounted(() => {
 .hero-section .v-container {
   padding: 0 !important;
   transition: height 0.3s ease;
-  height: 60vh;
+  height: 100%;
 }
 
 /* .hero-section .v-container.hovered {
@@ -839,7 +877,7 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-.card-col::before {
+/* .card-col::before {
   content: '';
   position: absolute;
   top: 50%;
@@ -860,7 +898,7 @@ onUnmounted(() => {
   height: 300%;
   opacity: 1;
   border-radius: 0;
-}
+} */
 
 .card-col-hover {
   z-index: 2;
@@ -871,7 +909,7 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-.hero-card::before {
+/* .hero-card::before {
   content: '';
   position: absolute;
   top: 50%;
@@ -892,7 +930,7 @@ onUnmounted(() => {
   height: 300%;
   opacity: 1;
   border-radius: 0;
-}
+} */
 
 .sub-card {
   height: 45%;
