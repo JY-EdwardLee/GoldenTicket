@@ -303,7 +303,7 @@ const handleLogout = async () => {
 
 .nav-links {
   display: flex;
-  gap: 24px;
+  gap: 32px;
   list-style: none;
   padding: 0;
   margin: 0;
