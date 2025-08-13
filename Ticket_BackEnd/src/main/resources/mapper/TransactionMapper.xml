@@ -195,7 +195,7 @@
     resultType="com.ssafy.ticket_backend.model.Transaction">
     SELECT *
     FROM transaction_states
-    WHERE ticket_id = #{ticketId} and buyer_id = #{userId}
+    WHERE ticket_id = #{ticketId} and buyer_id = #{userId} and transaction_status = 'WAITING_PAYING'
   </select>
 
   <update id="updateTransaction" parameterType="com.ssafy.ticket_backend.model.Transaction">

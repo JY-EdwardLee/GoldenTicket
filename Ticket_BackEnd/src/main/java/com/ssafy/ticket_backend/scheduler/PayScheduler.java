@@ -1,7 +1,5 @@
 package com.ssafy.ticket_backend.scheduler;
 
-import com.ssafy.ticket_backend.mapper.TicketMapper;
-import com.ssafy.ticket_backend.mapper.TransactionMapper;
 import com.ssafy.ticket_backend.service.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -11,8 +9,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PayScheduler {
 
-    private final TransactionMapper transactionMapper;
-    private final TicketMapper ticketMapper;
     private final TicketService ticketService;
 
     /**
