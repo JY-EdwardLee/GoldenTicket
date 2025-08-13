@@ -39,33 +39,38 @@ public class RankingServiceImpl implements RankingService {
             // 레디스에서 유저 랭킹 가져오기
             String cached = redisTemplate.opsForValue().get(USER_RANKING_KEY);
 
-            // 캐시에 데이터가 있으면 -> JSON -> List 변환
+            List<UserRankingResponse> userRankingList;
+
             if (cached != null) {
-                return objectMapper.readValue(cached, new TypeReference<>() {
-                });
+                // 캐시에 데이터가 있으면 -> JSON -> List 변환
+                userRankingList = objectMapper.readValue(cached, new TypeReference<>() {});
+            } else {
+                // 레디스에 없으면 DB에서 랭킹 조회
+                userRankingList = rankingMapper.selectUserRanking();
+
+                int rank = 1;
+                for (UserRankingResponse userRankingResponse : userRankingList) {
+                    userRankingResponse.setRank(rank++);
+                }
+
+                // 조회한 랭킹 리스트(이미지 URL 제외)를 JSON 문자열로 변환해서 레디스에 저장
+                redisTemplate.opsForValue().set(
+                    USER_RANKING_KEY,
+                    objectMapper.writeValueAsString(userRankingList),
+                    userTTL
+                );
             }
 
-            // 레디스에 없으면 DB에서 랭킹 조회
-            List<UserRankingResponse> userRankingList = rankingMapper.selectUserRanking();
-            userRankingList.forEach(r -> {
-            });
-            int rank = 1;
-
+            //  프로필 이미지는 캐시에서 꺼낸 뒤에도 항상 최신 값으로 세팅
             for (UserRankingResponse userRankingResponse : userRankingList) {
-                userRankingResponse.setRank(rank++);
-
-                // 유저 프로필 이미지 URL 세팅
                 S3DownloadResponse userProfileUrl = s3UserService.getImageUrlsByTypeAndRefId(
-                    new S3DownloadRequest(S3Type.UserProfile, userRankingResponse.getUserId()));
+                    new S3DownloadRequest(S3Type.UserProfile, userRankingResponse.getUserId())
+                );
                 userRankingResponse.setImageUrl(userProfileUrl.getDownloadUrl());
             }
 
-            // 조회한 랭킹 리스트를 JSON 문자열로 변환해서 레디스에 저장
-            redisTemplate.opsForValue().set(USER_RANKING_KEY, // 저정할 키
-                objectMapper.writeValueAsString(userRankingList), // 저정할 제이슨
-                userTTL);
-
             return userRankingList;
+
         } catch (Exception e) {
             throw new RuntimeException("팀 랭킹 캐시 처리 실패", e);
         }
