@@ -32,6 +32,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // access 토큰 재생성 안될 때, 여기 수정하면 됨
         http.csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -59,8 +60,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // 허용할 도메인 설정
-        config.setAllowedOrigins(Arrays.asList(FE_BASE_URL, BE_BASE_URL, "http://localhost:8080/",
-            "http://localhost:5173/"));
+        config.setAllowedOrigins(Arrays.asList(FE_BASE_URL, BE_BASE_URL, "http://localhost:8080",
+            "http://localhost:5173"));
 
         // 허용할 HTTP 메서드 설정
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
