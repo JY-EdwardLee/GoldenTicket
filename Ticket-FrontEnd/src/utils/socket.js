@@ -54,7 +54,7 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
       if (import.meta?.env?.DEV) console.log("[WebSocket] 연결 성공");
 
       //  특정 유저의 알림을 받아오기 위한 구독
-      stompClient.subscribe(`/user/${userEmail}/queue/notify`, (message) => {
+      stompClient.subscribe(`/user/queue/notify`, (message) => {
         let payload;
         try {
           payload = JSON.parse(message.body);
