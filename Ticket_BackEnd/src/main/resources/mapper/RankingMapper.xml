@@ -9,7 +9,7 @@
     resultType="com.ssafy.ticket_backend.dto.response.UserRankingResponse">
     SELECT
     user_id AS userId,
-    user_name AS userName,
+    nick_name AS userName,
     transfer_number AS transferAllCount
     FROM users
     ORDER BY transferAllCount DESC
