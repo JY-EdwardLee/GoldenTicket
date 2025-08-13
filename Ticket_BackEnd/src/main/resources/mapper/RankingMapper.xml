@@ -29,11 +29,4 @@
     LIMIT 3
   </select>
 
-  <!-- 유저 랭킹 응답 시에 userId로 프로필 url도 응답하기 위함-->
-  <select id="selectUserId" resultType="Long">
-    SELECT user_id
-    FROM users
-    WHERE user_name = #{userName}
-  </select>
-
 </mapper>

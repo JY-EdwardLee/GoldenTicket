@@ -41,40 +41,13 @@ public class RankingServiceImpl implements RankingService {
 
             // 캐시에 데이터가 있으면 -> JSON -> List 변환
             if (cached != null) {
-                List<UserRankingResponse> cachedList = objectMapper.readValue(cached,
-                    new TypeReference<>() {
-                    });
-                // 캐시에도 프로필 이미지가 없을 경우, 이미지 URL 세팅 (필요시)
-                for (UserRankingResponse userRanking : cachedList) {
-//                    System.out.println("1.userId: " + userRanking.getUserId());
-//                    System.out.println("2.userName: " + userRanking.getUserName());
-
-                    // 만약 userId가 없으면 DB에서 조회하여 userId 설정
-                    if (userRanking.getUserId() == null) {
-                        // DB에서 해당 유저 정보 조회
-                        Long userId = rankingMapper.selectUserId(
-                            userRanking.getUserName()); // 예시로 userName으로 조회
-
-                        userRanking.setUserId(userId);
-                    }
-
-                    if (userRanking.getImageUrl() == null || userRanking.getImageUrl().isEmpty()) {
-//                        System.out.println("3.userId: " + userRanking.getUserId());
-
-                        S3DownloadResponse userProfileUrl = s3UserService.getImageUrlsByTypeAndRefId(
-                            new S3DownloadRequest(S3Type.UserProfile, userRanking.getUserId()));
-                        userRanking.setImageUrl(userProfileUrl.getDownloadUrl());
-                    }
-                }
-                
-                return cachedList;
+                return objectMapper.readValue(cached, new TypeReference<>() {
+                });
             }
 
             // 레디스에 없으면 DB에서 랭킹 조회
             List<UserRankingResponse> userRankingList = rankingMapper.selectUserRanking();
             userRankingList.forEach(r -> {
-//                System.out.println("3.userId: " + r.getUserId());
-//                System.out.println("4.userName: " + r.getUserName());
             });
             int rank = 1;
 
