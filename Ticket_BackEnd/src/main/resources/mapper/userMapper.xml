@@ -96,14 +96,25 @@
   </select>
 
   <!-- 유저 정보 수정 -->
-  <update id="updateUser" parameterType="com.ssafy.ticket_backend.dto.request.UserPatchRequest">
+  <update id="updateUser"
+    parameterType="com.ssafy.ticket_backend.dto.request.UserPatchRequest">
     UPDATE users
-    SET
-    nick_name = #{userPatchRequest.nickName},
-    profile_photo_url = #{userPatchRequest.profileImageUrl},
-    my_team =
-    #{userPatchRequest.myTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler},
-    gender = #{userPatchRequest.gender}
+    <set>
+      <if test="userPatchRequest.nickName != null and userPatchRequest.nickName != ''">
+        nick_name = #{userPatchRequest.nickName},
+      </if>
+      <if
+        test="userPatchRequest.profileImageUrl != null and userPatchRequest.profileImageUrl != ''">
+        profile_photo_url = #{userPatchRequest.profileImageUrl},
+      </if>
+      <if test="userPatchRequest.myTeam != null">
+        my_team =
+        #{userPatchRequest.myTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler},
+      </if>
+      <if test="userPatchRequest.gender != null and userPatchRequest.gender != ''">
+        gender = #{userPatchRequest.gender},
+      </if>
+    </set>
     WHERE email = #{email}
   </update>
 
