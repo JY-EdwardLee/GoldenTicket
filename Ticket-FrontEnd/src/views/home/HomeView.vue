@@ -103,7 +103,6 @@
               <v-card
               :height="270"
                class="card-col flex-grow-1 d-flex flex-column pt-4 pa-3" 
-               :class="{ 'card-col-hover': isTicketCardHovered }"
                :elevation="0" 
                rounded="lg">
               <v-card-text class="d-flex flex-column" style="height: 100%;">
@@ -937,28 +936,28 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-/* .card-col::before {
+.card-col::before {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
   width: 0;
   height: 0;
-  background: #B29735;
+  background: var(--theme-gradient);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: -1;
-  opacity: 0;
+  opacity: 0.7;
   pointer-events: none;
 }
 
 .card-col-hover::before {
   width: 300%;
   height: 300%;
-  opacity: 1;
+  opacity: 0.7;
   border-radius: 0;
-} */
+}
 
 .card-col-hover {
   z-index: 2;
@@ -969,28 +968,28 @@ onUnmounted(() => {
   overflow: hidden;
 }
 
-/* .hero-card::before {
+.hero-card::before {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
   width: 0;
   height: 0;
-  background: #B29735;
+  background: var(--theme-gradient);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
-  opacity: 0;
+  opacity: 0.7;
   pointer-events: none;
 }
 
 .hero-card:hover::before {
   width: 300%;
   height: 300%;
-  opacity: 1;
+  opacity: 0.7;
   border-radius: 0;
-} */
+}
 
 .ticket-btn {
   background: rgba(255, 255, 255, 0.1) !important;
@@ -1005,20 +1004,38 @@ onUnmounted(() => {
 .ticket-btn::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-  z-index: -1;
-  border-radius: 15px;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: var(--theme-gradient);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+  opacity: 0.7;
+  pointer-events: none;
 }
 
+.ticket-btn-hover::before {
+  width: 300%;
+  height: 300%;
+  opacity: 0.7;
+  border-radius: 0;
+}
+/* 
 .ticket-btn-hover {
   transform: translateY(-4px) scale(1.01);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: var(--theme-gradient) !important;
+} */
+
+.ticket-btn-hover .ticket-text {
+  transform: translateY(-4px) scale(1.01);
+  color: #ffffff;
+  transition: all 0.3s ease;
 }
+
 
 .ticket-text {
   color: var(--theme-primary);
