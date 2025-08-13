@@ -15,8 +15,8 @@ public class CrawlerScheduler {
     private final RestTemplate restTemplate;
 
     /**
-     * 매월 1일 자정에 KBO 경기 일정 크롤링 실행 cron = "초 분 시 일 월 요일" "0 0 0 1 * *" = 매월 1일 00:00:00
-     * other_platform, groups 매달 새로운 정보 insert
+     * 매월 1일 자정에 KBO 경기 일정 크롤링 실행 cron = "초 분 시 일 월 요일" "0 0 0 1 * *" = 매월 1일 00:00:00 테이블 최신화
+     * [games, other_platform, groups] 매달 새로운 정보 insert
      */
 
     @Value("${BE_BASE_URL}")

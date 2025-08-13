@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 /**
- * 월별 경기일정 크롤링 (매월 1일 00시)
+ * 경기 크롤링
  */
 @RequiredArgsConstructor
 @RestController
@@ -105,11 +105,11 @@ public class CrawlerController {
         }
     }
 
+
     /**
      * 날짜와 시간을 LocalDateTime으로 변환
      *
-     * @param dateInfo
-     * @param timeInfo
+     * @param dateInfo, timeInfo
      * @return
      */
     private LocalDateTime parseDateTime(String dateInfo, String timeInfo) {
@@ -134,7 +134,119 @@ public class CrawlerController {
     }
 
     /**
-     * @return
+     * 일별 크롤링 (우천취소 정보 업데이트) 오후 11시 스케즐링
+     */
+    @GetMapping("/today-schedule")
+    public String crawlTodaySchedule() {
+        StringBuilder result = new StringBuilder();
+        result.append("=== 오늘(").append(LocalDate.now()).append(") KBO 경기 일정 ===\n\n");
+
+        // ChromeDriver 경로 설정
+        System.setProperty("webdriver.chrome.driver", "C:/SSAFY/chromedriver.exe");
+
+        WebDriver driver = new ChromeDriver();
+
+        try {
+            String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String url = "https://m.sports.naver.com/kbaseball/schedule/index?category=kbo&date=" + today;
+            driver.get(url);
+
+            // 페이지 전체 로딩 대기
+            Thread.sleep(2000);
+
+            // 오늘 경기 정보만 찾기
+            List<WebElement> matchItems = driver.findElements(
+                By.cssSelector("li[class*='MatchBox_match_item']"));
+
+            if (matchItems.isEmpty()) {
+                result.append("오늘 경기가 없습니다.\n");
+            } else {
+                result.append("총 ").append(matchItems.size()).append("경기\n\n");
+
+                for (WebElement matchItem : matchItems) {
+                    try {
+                        // 경기 시간 추출
+                        String time = "";
+                        try {
+                            WebElement timeElement = matchItem.findElement(
+                                By.cssSelector("div[class*='MatchBox_time']"));
+                            time = timeElement.getText().replace("경기 시간", "").trim();
+                        } catch (Exception e) {
+                            time = "시간 정보 없음";
+                        }
+
+                        // 경기장 추출
+                        String stadium = "";
+                        try {
+                            WebElement stadiumElement = matchItem.findElement(
+                                By.cssSelector("div[class*='MatchBox_stadium']"));
+                            stadium = stadiumElement.getText().replace("경기장", "").trim();
+                        } catch (Exception e) {
+                            stadium = "경기장 정보 없음";
+                        }
+
+                        // 팀 정보 추출
+                        List<WebElement> teamItems = matchItem.findElements(
+                            By.cssSelector("div[class*='MatchBoxHeadToHeadArea_team_item']"));
+                        String awayTeam = "";
+                        String homeTeam = "";
+
+                        if (teamItems.size() >= 2) {
+                            // 첫 번째 팀 (원정팀)
+                            try {
+                                WebElement awayTeamElement = teamItems.get(0).findElement(
+                                    By.cssSelector("strong[class*='MatchBoxHeadToHeadArea_team']"));
+                                awayTeam = awayTeamElement.getText().trim();
+                            } catch (Exception e) {
+                                awayTeam = "원정팀 정보 없음";
+                            }
+
+                            // 두 번째 팀 (홈팀)
+                            try {
+                                WebElement homeTeamElement = teamItems.get(1).findElement(
+                                    By.cssSelector("strong[class*='MatchBoxHeadToHeadArea_team']"));
+                                homeTeam = homeTeamElement.getText().trim();
+                            } catch (Exception e) {
+                                homeTeam = "홈팀 정보 없음";
+                            }
+                        }
+
+                        // 경기 상태 추출
+                        String status = "";
+                        try {
+                            WebElement statusElement = matchItem.findElement(
+                                By.cssSelector("em[class*='MatchBox_status']"));
+                            status = statusElement.getText().trim();
+                        } catch (Exception e) {
+                            status = "상태 정보 없음";
+                        }
+
+                        // 결과 출력
+                        String matchInfo = String.format("⏰ %s | 🏟️ %s | %s vs %s | %s\n", 
+                            time, stadium, awayTeam, homeTeam, status);
+                        
+                        result.append(matchInfo);
+                        
+                        // 콘솔에도 출력
+                        System.out.println(matchInfo);
+
+                    } catch (Exception e) {
+                        result.append("⚠️ 경기 정보 파싱 실패 : ").append(e.getMessage()).append("\n");
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            result.append("실행 중 오류 : ").append(e.getMessage()).append("\n");
+        } finally {
+            driver.quit();  // 브라우저 종료
+        }
+
+        return result.toString();
+    }
+
+    /**
+     * 월별 크롤링
      */
     @GetMapping("/kbo-schedule")
     public String crawlKboSchedule() {
