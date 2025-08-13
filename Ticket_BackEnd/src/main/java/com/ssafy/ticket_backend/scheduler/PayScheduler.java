@@ -16,6 +16,6 @@ public class PayScheduler {
      */
     @Scheduled(fixedRate = 1000 * 60)
     public void checkGameEnded() {
-        ticketService.CancelTicket();
+//        ticketService.CancelTicket();
     }
 }

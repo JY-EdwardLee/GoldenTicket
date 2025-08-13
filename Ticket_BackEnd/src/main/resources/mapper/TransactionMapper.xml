@@ -221,7 +221,7 @@
   <select id="selectWaitlistByTransactionId"
     resultType="com.ssafy.ticket_backend.model.Waitlist">
     SELECT
-    waitlist_id AS waitlistId,
+    waitlist_id AS id,
     ticket_id AS ticketId,
     user_id AS userId,
     game_id AS gameId,
