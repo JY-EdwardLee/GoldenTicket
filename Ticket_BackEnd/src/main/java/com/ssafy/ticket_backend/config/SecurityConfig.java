@@ -59,8 +59,8 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // 허용할 도메인 설정
-        config.setAllowedOrigins(Arrays.asList(FE_BASE_URL, BE_BASE_URL, "http://localhost:8080/",
-            "http://localhost:5173/"));
+        config.setAllowedOrigins(Arrays.asList(FE_BASE_URL, BE_BASE_URL, "http://localhost:8080",
+            "http://localhost:5173"));
 
         // 허용할 HTTP 메서드 설정
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
