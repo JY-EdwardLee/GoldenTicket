@@ -27,7 +27,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         // 웹소켓 연결 엔드포인트 (SockJS 포함)
-        registry.addEndpoint("api/ws-notify")
+        registry.addEndpoint("/ws-notify")
             .setAllowedOriginPatterns(FE_BASE_URL, BE_BASE_URL, "http://localhost:8080/",
                 "http://localhost:5173/")  // CORS 허용
             .setHandshakeHandler(new CustomHandshakeHandler()) //
