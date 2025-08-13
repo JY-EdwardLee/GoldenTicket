@@ -141,4 +141,4 @@ const createTeamThemeStore = () => {
 }
 
 // 싱글톤 인스턴스 생성
-export const useTeamThemeStore = createTeamThemeStore() 
+export const useTeamThemeStore = createTeamThemeStore();

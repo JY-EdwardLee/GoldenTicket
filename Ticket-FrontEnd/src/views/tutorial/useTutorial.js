@@ -1,11 +1,33 @@
 import { ref, watch } from 'vue';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
+import { useTeamThemeStore } from '@/stores/teamTheme';
+
+const teamThemeStore = useTeamThemeStore;
+const teamGradient = teamThemeStore.teamColors[teamThemeStore.selectedTeam]?.gradient;
+const teamPrimary = teamThemeStore.teamColors[teamThemeStore.selectedTeam]?.primary;
+document.documentElement.style.setProperty('--theme-gradient', teamGradient);
+document.documentElement.style.setProperty('--theme-primary', teamPrimary);
+
+// 팀 변경 감지
+watch(() => teamThemeStore.selectedTeam, (newTeam) => {
+  if (newTeam) {
+    const gradient = teamThemeStore.teamColors[newTeam]?.gradient;
+    const primary = teamThemeStore.teamColors[newTeam]?.primary;
+    document.documentElement.style.setProperty('--theme-gradient', gradient);
+    document.documentElement.style.setProperty('--theme-primary', primary);
+  }
+});
+
+
 
 // driver.js 닫기 버튼의 포커스 아웃라인 제거 및 팝오버 크기 조정
 const style = document.createElement('style');
 style.textContent = `
   .driver-popover-close-btn:focus {
+    background: var(--theme-gradient);
+    width: 20px !important;
+    height: 20px !important;
     outline: none !important;
     box-shadow: none !important;
     border: none !important;
@@ -16,6 +38,11 @@ style.textContent = `
     box-shadow: none !important;
     border: none !important;
   }
+  .driver-popover-close-btn:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
   
   /* 팝오버 크기 조정 */
   .driver-popover:not(.transfer-tutorial-popover){
