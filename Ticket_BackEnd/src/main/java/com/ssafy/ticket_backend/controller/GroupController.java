@@ -32,6 +32,7 @@ public class GroupController {
         groupService.getGames();
         return null;
     }
+    
 
     /**
      * 그룹 조회하기(팀별조회 Home or Away) 최신순

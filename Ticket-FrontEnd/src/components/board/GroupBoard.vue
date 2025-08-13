@@ -120,7 +120,25 @@
 
           <!-- 카드 내용 영역 -->
           <div class="card-content">
-          <h3 class="post-title">{{ post.title }}</h3>
+          <div class="title-row">
+            <h3 class="post-title">{{ post.title }}</h3>
+            <div class="action-buttons-title">
+              <button
+                class="apply-btn"
+                @click.stop="handleApplyClick('apply', post)"
+              >
+                <span class="apply-icon">👤</span>
+                관람 신청
+              </button>
+              <button
+                class="apply-btn"
+                @click.stop="handleApplyClick('cancel', post)"
+              >
+                <span class="apply-icon">✖</span>
+                응모 취소
+              </button>
+            </div>
+          </div>
           
           <div class="post-info">
             <div class="info-item">
@@ -164,12 +182,7 @@
               <span class="reg-date">{{ formatDate(post.createdAt) }} 등록</span>
               <span class="conditions">{{ post.conditions }}</span>
             </div>
-            <div class="action-buttons">
-              <button class="apply-btn" @click.stop="handleApplyClick(post)" :disabled="!post.isApplied && isDateLocked(post.gameDate)">
-                <span class="apply-icon">👤</span>
-                {{ post.isApplied ? '신청 취소' : (isDateLocked(post.gameDate) ? '동일 날짜 신청 불가' : '참가 신청') }}
-              </button>
-            </div>
+            
           </div>
         </div>
          
@@ -225,6 +238,28 @@ const selectTeam = (teamKey) => { selectedTeam.value = teamKey; closeMobileMenu(
 const allPosts = ref([]);
 const displayedPosts = ref([]);
 
+// 내 응모 상태를 로컬에 저장해 UI를 제어한다 (동일 날짜 제한 제거)
+const APPLIED_STORAGE_KEY = 'my-group-applications-v2'; // [groupId,...]
+const appliedGroupIds = ref(new Set());
+
+const loadAppliedSet = () => {
+  try {
+    const raw = localStorage.getItem(APPLIED_STORAGE_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    appliedGroupIds.value = new Set(Array.isArray(arr) ? arr : []);
+  } catch (e) {
+    appliedGroupIds.value = new Set();
+  }
+};
+
+const persistAppliedSet = () => {
+  try {
+    localStorage.setItem(APPLIED_STORAGE_KEY, JSON.stringify(Array.from(appliedGroupIds.value)));
+  } catch (e) {
+    // ignore
+  }
+};
+
 // 선택된 팀의 제목
 const selectedTeamTitle = computed(() => {
   const teamNames = {
@@ -249,21 +284,35 @@ const filteredPosts = computed(() => {
   if (selectedTeam.value !== 'all') {
     filtered = filtered.filter(post => post.team === selectedTeam.value);
   }
-  filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const now = new Date();
+  const getGameDateTime = (post) => {
+    const datePart = post?.gameDate || '';
+    const timePart = post?.gameTime || '00:00';
+    const dtStr = datePart ? `${datePart}T${timePart}:00` : '';
+    const dt = dtStr ? new Date(dtStr) : null;
+    if (dt && !isNaN(dt.getTime())) return dt;
+    const created = post?.createdAt ? new Date(post.createdAt) : null;
+    return created && !isNaN(created.getTime()) ? created : new Date(0);
+  };
+  filtered.sort((a, b) => {
+    const da = getGameDateTime(a);
+    const db = getGameDateTime(b);
+    const aFuture = da >= now;
+    const bFuture = db >= now;
+    if (aFuture !== bFuture) return aFuture ? -1 : 1; // 미래 일정 우선
+    if (aFuture && bFuture) return da - db;            // 미래: 가까운 순 (오름차순)
+    return db - da;                                    // 과거: 가까운 순 (내림차순)
+  });
   return filtered;
 });
 
 const totalPages = computed(() => Math.ceil(filteredPosts.value.length / itemsPerPage));
 
-// 이미 신청한 날짜 집합 (YYYY-MM-DD)
-const appliedDateSet = computed(() => {
-  const set = new Set();
-  for (const p of allPosts.value) {
-    if (p.isApplied && p.gameDate) set.add(p.gameDate);
-  }
-  return set;
-});
-const isDateLocked = (dateStr) => { return !!dateStr && appliedDateSet.value.has(dateStr); };
+// 내 응모 여부만 판단 (동일 날짜 제한 제거)
+const isMyApplied = (post) => {
+  if (!post) return false;
+  return post.groupId != null && appliedGroupIds.value.has(post.groupId);
+};
 
 // 게시글 목록 로드 (API 사용)
 const loadPosts = async () => {
@@ -336,19 +385,32 @@ const handlePostClick = (post) => {
   });
 };
 
-const handleApplyClick = async (post) => {
+const handleApplyClick = async (action, post) => {
   try {
-    if (!post.isApplied && isDateLocked(post.gameDate)) {
-      alert('해당 날짜에 이미 다른 경기에 신청하셨습니다. 하루에 한 경기만 신청 가능합니다.');
-      return;
+    // 클릭 시점에 상태 검증 및 가드 처리
+    if (action === 'apply') {
+      if (isMyApplied(post)) {
+        alert('이미 이 경기에 관람 신청하셨습니다. 관람 취소 버튼을 이용해주세요.');
+        return;
+      }
     }
-
-    if (post.isApplied) {
+    if (action === 'cancel') {
+      if (!isMyApplied(post)) {
+        alert('이 경기는 아직 관람 신청되지 않았습니다. 먼저 관람 신청을 진행해주세요.');
+        return;
+      }
+    }
+    console.log(post)
+    if (action === 'cancel') {
       const res = await boardAPI.cancelGroup(post.groupId);
-      alert(res?.message || '신청이 취소되었습니다.');
+      alert(res?.message || '응모취소 성공');
+      appliedGroupIds.value.delete(post.groupId);
+      persistAppliedSet();
     } else {
       const res = await boardAPI.applyGroup(post.groupId);
-      alert(res?.message || '신청 성공');
+      alert(res?.message || '응모 성공');
+      appliedGroupIds.value.add(post.groupId);
+      persistAppliedSet();
     }
     await loadPosts();
   } catch (err) {
@@ -372,6 +434,7 @@ const onTeamChange = async () => {
 watch(selectedTeam, onTeamChange);
 
 onMounted(async () => {
+  loadAppliedSet();
   await loadPosts();
 });
 </script>
@@ -622,11 +685,23 @@ onMounted(async () => {
 }
 
 .post-title {
-  font-size: 20px; /* 제목 크기 증가 */
+  font-size: 22px; /* 제목 크기 증가 */
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 12px 0;
   line-height: 1.4;
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.action-buttons-title {
+  display: flex;
+  gap: 10px;
 }
 
 .post-info {
@@ -774,16 +849,20 @@ onMounted(async () => {
 }
 
 .interest-btn, .apply-btn {
-  padding: 6px 12px;
+  padding: 14px 22px; /* 버튼 크기 추가 확대 */
   border: none;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
+  border-radius: 10px;
+  font-size: 18px; /* 글자 크기 추가 확대 */
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   transition: all 0.2s;
+}
+
+.apply-icon {
+  font-size: 18px;
 }
 
 .interest-btn {
@@ -804,6 +883,8 @@ onMounted(async () => {
 .apply-btn:hover {
   background: var(--theme-gradient);
 }
+
+/* 취소 버튼은 동일한 스타일을 사용하도록 제거 (요청사항: 버튼 색상 유지) */
 
 /* 비활성화 상태 명시 (모바일/데스크톱 공통) */
 .apply-btn:disabled {
@@ -963,8 +1044,8 @@ onMounted(async () => {
   }
   .apply-btn {
     width: 100%;
-    min-height: 40px;
-    font-size: 14px;
+    min-height: 48px;
+    font-size: 16px;
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
