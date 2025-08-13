@@ -546,7 +546,6 @@ const getTeamLogo = (teamName) => {
   }
   
   const logoPath = teamLogoMap[normalizedTeam]
-  console.log(logoPath);
   return logoPath || null
 }
 
@@ -632,7 +631,6 @@ async function fetchTickets(platform) {
   ticketError.value = '';
   try {
     const res = await http.get(`tickets/platform/${platform}`);
-    console.log(` 받은 티켓 개수: ${res.data.length}개`);
     
     tickets.value = res.data.map(ticket => {
       const homeKor = Object.keys(teamNameToEnum).find(
@@ -646,9 +644,6 @@ async function fetchTickets(platform) {
       const normalizedHome = normalizeTeamName(homeKor);
       const teamColor = teamColortoEnum[normalizedHome];
       
-      console.log(` 홈팀: ${homeKor} -> 정규화: ${normalizedHome} -> 색상: ${teamColor}`);
-      console.log(` 어웨이팀: ${awayKor}`);
-      
       const processedTicket = {
         ...ticket,
         homeKor,
@@ -657,25 +652,16 @@ async function fetchTickets(platform) {
         header: `${awayKor} vs ${homeKor}`,
         statusText: ticket.status === 'BEING_ASSIGNMENT' ? '응모 진행중' : ticket.status === 'TRANSACTION_COMPLETE' ? '응모 완료' : ticket.status === 'BEING_PAYING' ? '결제중' : '',
       };
-      
-      console.log(` 처리된 티켓:`, {
-        id: processedTicket.ticketId,
-        header: processedTicket.header,
-        color: processedTicket.color,
-        status: processedTicket.statusText
-      });
-      
+            
       return processedTicket;
     });
     
-    console.log(` 최종 티켓 배열:`, tickets.value);
   } catch (e) {
     console.error(` 티켓 불러오기 실패:`, e);
     ticketError.value = '티켓 불러오기에 실패했습니다.';
     tickets.value = [];
   } finally {
     ticketLoading.value = false;
-    console.log(` 티켓 로딩 완료`);
     
     // 메인 튜토리얼에서 진입했을 때에만 티켓 선택 하위 튜토리얼 자동 시작
     if (allowTransferTutorial.value && tickets.value.length > 0) {
@@ -690,7 +676,6 @@ async function fetchTickets(platform) {
 
 // 탭 전환 시 해당 플랫폼의 티켓을 가져오는 함수
 async function switchTab(platform) {
-  console.log(`탭 전환: ${platform}`);
   activeTab.value = platform;
   
   // 플랫폼에 맞는 API 엔드포인트 결정
@@ -701,9 +686,7 @@ async function switchTab(platform) {
   ticketError.value = '';
   
   try {
-    console.log(`탭 전환 API 요청: tickets/platform/${apiPlatform}`);
     const res = await http.get(`tickets/platform/${apiPlatform}`);
-    console.log(`탭 전환 API 응답:`, res.data);
     
     tickets.value = res.data.map(ticket => {
       const homeKor = Object.keys(teamNameToEnum).find(
@@ -729,7 +712,6 @@ async function switchTab(platform) {
       return processedTicket;
     });
     
-    console.log(`탭 전환 완료 - ${platform} 티켓 ${tickets.value.length}개 로드됨`);
   } catch (e) {
     console.error(`탭 전환 중 티켓 불러오기 실패:`, e);
     ticketError.value = '티켓 불러오기에 실패했습니다.';
@@ -782,13 +764,10 @@ async function handleApplyComplete() {
     // 양도 API 호출
     const response = await http.get(`tickets/transfer/${selectedTicket.value.ticketId}`);
     
-    console.log('양도 API 응답:', response.data);
-    
     if (response.data.success) {
       // 성공 시 완료 페이지로 전환
       isApplying.value = false;
       showCompletePage.value = true;
-      console.log('양도 성공:', response.data.message);
     } else {
       // 실패 시 에러 메시지 표시
       isApplying.value = false;
@@ -852,7 +831,6 @@ onMounted(() => {
   allowConfirmTutorial.value = allowTransferTutorial.value;
 
   if (allowTransferTutorial.value) {
-    console.log('양도 페이지 튜토리얼 조건 충족:', { isTutorialMode, showTransferTutorialFlag });
     // 양도 튜토리얼 플래그 제거 (한 번만 실행되도록)
     if (showTransferTutorialFlag) {
       localStorage.removeItem('showTransferTutorial');

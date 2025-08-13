@@ -173,7 +173,6 @@ const updateUserFromStorage = () => {
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
       user.value = parsedUser;
-      console.log('User data updated from storage:', parsedUser);
     }
   } catch (e) {
     console.error('Error parsing user from localStorage:', e);
@@ -193,12 +192,10 @@ window.addEventListener('storage', (e) => {
 // Watch for changes in user data
 watch(() => user.value, (newUser) => {
   if (newUser?.myTeam) {
-    console.log('User data changed - myTeam:', newUser.myTeam);
     isUserLoaded.value = true;
     // Update theme with the team
     try {
       themeStore.setSelectedTeam(newUser.myTeam);
-      console.log('Theme updated for team:', newUser.myTeam);
     } catch (error) {
       console.error('Error updating theme:', error);
     }
@@ -235,9 +232,6 @@ const myTeamName = computed(() => {
 const selectedTeam = ref(myTeamName.value);
 
 watch(() => user.value, (newUser) => {
-  if(newUser?.myTeam){
-    console.log('사용자 정보가 로드되었습니다:', newUser);
-  }
 }, { immediate: true });
 
 // 만약 user가 비동기로 세팅되어 나중에 myTeamName이 생긴다면, 비어있을 때 한 번 동기화
@@ -266,44 +260,6 @@ const gamesOnDate = ref([]);
 const selectedGame = ref(null);
 // 중복 실행 방지 플래그
 const hasStartedApplyTutorial = ref(false);
-
-// 마이팀 색상 가져오기
-// const myTeamColor = computed(() => {
-//   // user 객체가 아직 로드되지 않았거나 myTeam이 없을 때
-//   if (!user.value || !user.value.myTeam) {
-//     console.log('사용자 정보가 아직 로드되지 않았거나 myTeam이 설정되어 있지 않습니다.');
-//     return '#1a1a2e'; // 기본 색상
-//   }
-
-//   const teamKey = user.value.myTeam;
-//   console.log('현재 myTeam:', teamKey);
-  
-//   try {
-//     // themeStore에서 팀 정보 가져오기
-//     const team = themeStore.teamColors[teamKey];
-    
-//     if (!team) {
-//       console.error('팀 정보를 찾을 수 없습니다:', teamKey);
-//       return '#1a1a2e'; // 기본 색상
-//     }
-
-//     console.log('팀 정보:', team);
-//     console.log('적용될 색상:', team.primary);
-//     return team.primary;
-//   } catch (error) {
-//     console.error('팀 색상을 가져오는 중 오류 발생:', error);
-//     return '#1a1a2e'; // 오류 발생 시 기본 색상
-//   }
-// });
-
-// 팀 카드 스타일 가져오기
-// const getTeamCardStyle = (teamName) => {
-//   const theme = teamColors[teamName]; // 예: teamColors['SAMSUNG_LIONS']
-//   return {
-//     '--team-primary': theme?.primary || '#333',
-//     '--team-gradient': theme?.gradient || 'linear-gradient(135deg, #333 0%, #666 100%)',
-//   };
-// };
 
 // 캘린더 영역에 적용할 스타일
 const calendarAreaStyle = computed(() => {
@@ -858,7 +814,6 @@ async function selectDate(date) {
       team: teamEnum
     });
     gamesOnDate.value = data;
-    console.log('gamesOnDate.value : ', gamesOnDate.value);
     // 날짜 선택 후: 캘린더 튜토리얼이 있으면 종료하고, 게임 유무에 따라 분기
     if (driverObj.value) {
       try { driverObj.value.destroy(); } catch (_) {}
@@ -892,7 +847,6 @@ async function selectDate(date) {
 // 응모하기 눌렀을 때, 튜토리얼 제거 & 응모 여부 경고창
 async function handleApplyClick(game) {
   selectedGame.value = game;
-  console.log('응모 클릭됨')
   
   // 전역 튜토리얼 팝오버 종료 (useTutorial의 tutorialDriver 정리)
   try { closeTutorial(); } catch (_) {}
@@ -912,9 +866,7 @@ async function handleApplyClick(game) {
   const isConfirmed = confirm('응모하시겠습니까?');
   if (isConfirmed) {
       try {
-      console.log('응모 클릭됨', game)
       const { data } = await http.post(`/games/${game.gameId}/applications`);
-      console.log('응모 결과:', data);
       // 성공 시에만 3단계로 이동
       step.value = 3;
     } catch (error) {
