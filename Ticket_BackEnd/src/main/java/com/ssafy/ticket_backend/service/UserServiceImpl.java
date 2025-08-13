@@ -65,8 +65,6 @@ public class UserServiceImpl implements UserService {
     private final RedisTemplate<String, String> redisTemplate;
     private static final String TEMP_USER_KEY_PREFIX = "tempUser:";
 
-    private final NotificationService notificationService;
-
     // 카카오 api 키
     @Value("${kakao.rest.api.key}")
     private String kakaoApiKey;
@@ -76,13 +74,9 @@ public class UserServiceImpl implements UserService {
     private String naverClientId;
     @Value("${naver.client.secret}")
     private String naverClientSecret;
-//
-//    @Value("${BE_BASE_URL}")
-//    private String BE_BASE_URL;
 
-    private String FE_BASE_URL = "http://localhost:5173";
-    private String BE_BASE_URL = "http://localhost:8080";
-
+    @Value("${BE_BASE_URL}")
+    private String BE_BASE_URL;
 
     /**
      * 이메일로 사용자 정보 조회
