@@ -30,6 +30,7 @@ import com.ssafy.ticket_backend.util.JwtUtil;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -75,9 +76,12 @@ public class UserServiceImpl implements UserService {
     private String naverClientId;
     @Value("${naver.client.secret}")
     private String naverClientSecret;
+//
+//    @Value("${BE_BASE_URL}")
+//    private String BE_BASE_URL;
 
-    @Value("${BE_BASE_URL}")
-    private String BE_BASE_URL;
+    private String FE_BASE_URL = "http://localhost:5173";
+    private String BE_BASE_URL = "http://localhost:8080";
 
 
     /**
@@ -503,16 +507,21 @@ public class UserServiceImpl implements UserService {
         List<TicketResponse> ticketResponses = new ArrayList<>();
 
         for (Ticket ticket : ticketMapper.selectTicketsByBuyerId(user.getUserId())) {
-            TicketResponse ticketResponse = new TicketResponse(ticket);
-
             Game game = gameMapper.selectGameByGameId(ticket.getGameId());
+
+            if (game.isEnded() || game.isCanceled()) {  // 이미 종료된 경기라면 생략
+                continue;
+            }
+
+            TicketResponse ticketResponse = new TicketResponse(ticket);
 
             ticketResponse.setGame(game.toGameResponse());
 
             ticketResponses.add(ticketResponse);
         }
 
-        return ticketResponses;
+        return ticketResponses.stream().sorted(Comparator.comparing(tr -> tr.getGame().getDate()))
+            .toList();
     }
 
     @Override

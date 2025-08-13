@@ -47,10 +47,13 @@ public class UserController {
     @Value("${naver.client.id}")
     private String NaverClientId;
 
-    @Value("${FE_BASE_URL}")
-    private String FE_BASE_URL;
-    @Value("${BE_BASE_URL}")
-    private String BE_BASE_URL;
+//    @Value("${FE_BASE_URL}")
+//    private String FE_BASE_URL;
+//    @Value("${BE_BASE_URL}")
+//    private String BE_BASE_URL;
+
+    private String FE_BASE_URL = "http://localhost:5173";
+    private String BE_BASE_URL = "http://localhost:8080";
 
     /**
      * 카카오 로그인 페이지로 리다이렉트
@@ -316,6 +319,7 @@ public class UserController {
     @PatchMapping("/me")
     public ResponseEntity<Void> updateMyPage(@AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody UserPatchRequest userPatchRequest) {
+        System.out.println(userPatchRequest);
         userService.patchMyPage(userDetails.getUsername(), userPatchRequest);
 
         return ResponseEntity.accepted().build();
