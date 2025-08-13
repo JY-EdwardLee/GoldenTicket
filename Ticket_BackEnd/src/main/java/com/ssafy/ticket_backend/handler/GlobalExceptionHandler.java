@@ -1,6 +1,7 @@
 package com.ssafy.ticket_backend.handler;
 
 import com.ssafy.ticket_backend.dto.response.ErrorResponse;
+import com.ssafy.ticket_backend.exception.ApplicationNotFoundException;
 import com.ssafy.ticket_backend.exception.BoardException;
 import com.ssafy.ticket_backend.exception.CommentException;
 import com.ssafy.ticket_backend.exception.DatabaseException;
@@ -11,6 +12,7 @@ import com.ssafy.ticket_backend.exception.GroupCapacityExceededException;
 import com.ssafy.ticket_backend.exception.GroupJoinCountException;
 import com.ssafy.ticket_backend.exception.GroupParticipationException;
 import com.ssafy.ticket_backend.exception.ImageDownloadUrlGenerationException;
+import com.ssafy.ticket_backend.exception.MailSendException;
 import com.ssafy.ticket_backend.exception.PostCreateFailException;
 import com.ssafy.ticket_backend.exception.PostDeleteFailException;
 import com.ssafy.ticket_backend.exception.PostNotFoundException;
@@ -215,5 +217,23 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse("DUPLICATE_APPLICATION_ERROR", e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+
+    @ExceptionHandler(ApplicationNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleApplicationNotFound(ApplicationNotFoundException e) {
+        ErrorResponse response = new ErrorResponse(
+            "APPLICATION_NOT_FOUND_ERROR", e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    // mail
+    @ExceptionHandler(MailSendException.class)
+    public ResponseEntity<ErrorResponse> handleMailSendException(MailSendException e) {
+        ErrorResponse response = new ErrorResponse(
+            "MAIL_SEND_ERROR", e.getMessage()
+        );
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
 
 }

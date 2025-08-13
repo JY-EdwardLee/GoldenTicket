@@ -268,45 +268,42 @@ const handleLogout = async () => {
 </script>
 
 <style scoped>
+
 .navbar {
   width: 100%;
-  height: 56px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: #fff;
   border-bottom: 1px solid #eee;
   padding: 0 32px;
+}
 
-  .navbar-logo {
-    font-weight: bold;
-    font-size: 2rem;
-    font-family: "Bagel Fat One", system-ui;
-    font-style: normal;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .navbar-logo span {
-    color: #d79508;
-  }
-
-  .navbar-logo img {
-    height: 32px;
-    width: auto;
-    display: block;
-  }
-
-  .nav-links {
-    display: flex;
-    gap: 16px;
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
+.navbar-logo {
+  font-weight: bold;
+  font-size: 2rem;
+  font-family: "Bagel Fat One", system-ui;
+  font-style: normal;
   display: flex;
-  gap: 16px;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar-logo span {
+  color: #d79508;
+}
+
+.navbar-logo img {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+
+
+.nav-links {
+  display: flex;
+  gap: 24px;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -314,7 +311,7 @@ const handleLogout = async () => {
 
 .nav-links li {
   font-weight: 500;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
 }
 
 .nav-links a {
@@ -357,7 +354,7 @@ const handleLogout = async () => {
 .auth-links a {
   color: #888;
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   margin-top: 12px;
 }
 
@@ -527,7 +524,6 @@ const handleLogout = async () => {
   
 
 }
-
 
 @media (min-width: 769px) {
   .mobile-menu,

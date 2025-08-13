@@ -30,6 +30,7 @@ import com.ssafy.ticket_backend.util.JwtUtil;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -503,16 +504,21 @@ public class UserServiceImpl implements UserService {
         List<TicketResponse> ticketResponses = new ArrayList<>();
 
         for (Ticket ticket : ticketMapper.selectTicketsByBuyerId(user.getUserId())) {
-            TicketResponse ticketResponse = new TicketResponse(ticket);
-
             Game game = gameMapper.selectGameByGameId(ticket.getGameId());
+
+            if (game.isEnded() || game.isCanceled()) {  // 이미 종료된 경기라면 생략
+                continue;
+            }
+
+            TicketResponse ticketResponse = new TicketResponse(ticket);
 
             ticketResponse.setGame(game.toGameResponse());
 
             ticketResponses.add(ticketResponse);
         }
 
-        return ticketResponses;
+        return ticketResponses.stream().sorted(Comparator.comparing(tr -> tr.getGame().getDate()))
+            .toList();
     }
 
     @Override
@@ -552,35 +558,9 @@ public class UserServiceImpl implements UserService {
         return new JwtTokenResponse(accessToken, refreshToken);
     }
 
-
     /**
-     * 공개용 관리자
-     *
-     * @return
+     * 공개용 관리자 (LoginUserResponse 반환) - user_id = 28
      */
-    @Override
-    public JwtTokenResponse adminUser() {
-        String accessToken = jwtUtil.generateAccessToken("SSAFYADMIN@example.com");
-        String refreshToken = jwtUtil.generateRefreshToken("SSAFYADMIN@example.com");
-
-        return new JwtTokenResponse(accessToken, refreshToken);
-    }
-
-
-    /**
-     * 공개용 사용자
-     *
-     * @return
-     */
-    @Override
-    public JwtTokenResponse generalUser() {
-        String accessToken = jwtUtil.generateAccessToken("SAAFYUSER@example.com");
-        String refreshToken = jwtUtil.generateRefreshToken("SAAFYUSER@example.com");
-
-        return new JwtTokenResponse(accessToken, refreshToken);
-    }
-
-    // 공개용 관리자 (LoginUserResponse 반환) - user_id = 28
     @Override
     public LoginUserResponse adminUserWithInfo() {
         // 하드코딩된 관리자 이메일로 사용자 정보 조회
@@ -600,7 +580,9 @@ public class UserServiceImpl implements UserService {
         return userResponse;
     }
 
-    // 공개용 일반 사용자 (LoginUserResponse 반환) - user_id = 29
+    /**
+     * 공개용 일반 사용자 (LoginUserResponse 반환) - user_id = 29
+     */
     @Override
     public LoginUserResponse generalUserWithInfo() {
         // 하드코딩된 일반 사용자 이메일로 사용자 정보 조회

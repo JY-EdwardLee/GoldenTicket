@@ -105,7 +105,7 @@ public class TicketServiceImpl implements TicketService {
 
                 User buyUser = userMapper.selectUserByUserId(buyer);
 
-                smsService.sendWinSMS(buyUser, waitlist);
+                smsService.sendWinSMS(buyUser);
 
                 // **실시간 알림 전송**
                 String realTimeMessage =
@@ -209,10 +209,7 @@ public class TicketServiceImpl implements TicketService {
 
                 User buyUser = userMapper.selectUserByUserId(buyer);
 
-                String text = "[골든티켓]" + "\n" + groupWaitlist.getCreatedAt().getMonthValue() + "월 "
-                    + groupWaitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다." + "\n"
-                    + "30분 이내 결제해주시기 바랍니다." + "\n";
-                smsService.sendSMS(buyUser.getPhoneNumber(), text);
+                smsService.sendWinSMS(buyUser);
 
                 // **실시간 알림 전송**
                 String realTimeMessage =
@@ -247,10 +244,6 @@ public class TicketServiceImpl implements TicketService {
     public void reTransferTicket(Ticket ticket) {
         try {
             Game game = gameMapper.selectGameByGameId(ticket.getGameId());
-
-            if (game.isEnded()) {  // 이미 끝난 경기라면
-
-            }
 
             List<Waitlist> waitlists = ticketMapper.selectWaitingWaitListByGameId(game.getGameId());
             // 대기열이 있다면
@@ -294,7 +287,7 @@ public class TicketServiceImpl implements TicketService {
 
                 User buyUser = userMapper.selectUserByUserId(buyer);
 
-                smsService.sendWinSMS(buyUser, waitlist);
+                smsService.sendWinSMS(buyUser);
 
                 // **실시간 알림 전송**
                 String realTimeMessage =
@@ -310,7 +303,7 @@ public class TicketServiceImpl implements TicketService {
 
                 smsService.sendSMS(
                     userMapper.selectUserByUserId(ticket.getSellerId()).getPhoneNumber(),
-                    "양도자가 없어 양도 취소!");
+                    "양도자가 없어 양도가 취소되었습니다.");
             }
 
             ticketMapper.updateTicket(ticket);
@@ -425,5 +418,29 @@ public class TicketServiceImpl implements TicketService {
         ticketResponse.setGame(game.toGameResponse());
 
         return ticketResponse;
+    }
+
+    @Transactional
+    @Override
+    public void CancelTicket() {
+        List<Ticket> tickets = ticketMapper.checkPayingOver30Minutes();
+
+        for (Ticket ticket : tickets) {
+            Transaction transaction = transactionMapper.selectTransactionByTicketIdAndUserId(
+                ticket.getTicketId(), ticket.getBuyerId());
+
+            transaction.setTransactionStatus(String.valueOf(WaitlistStatus.CANCEL_WAITING));
+            transactionMapper.updateTransaction(transaction);
+
+            Waitlist waitlist = transactionMapper.selectWaitlistByTransactionId(
+                transaction.getTransactionId());
+
+            if (waitlist != null) {
+                waitlist.setStatus(WaitlistStatus.CANCEL_WAITING);
+                transactionMapper.updateWaitlist(waitlist);
+            }
+
+            this.reTransferTicket(ticket);
+        }
     }
 }

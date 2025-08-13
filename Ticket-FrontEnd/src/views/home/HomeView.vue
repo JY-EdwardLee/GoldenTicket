@@ -2,45 +2,200 @@
   <v-app>
     <v-main>
       <!-- 히어로 섹션 -->
-      <v-container fluid class="hero-section pa-8">
-        <v-container>
-          <v-row justify="center" align="center" class="fill-height">
-            <!-- 양도 카드 -->
-            <v-col 
-              cols="12" 
-              :md="isTransferCardHovered ? 8 : (isEnterCardHovered ? 4 : 6)" 
-              class="pa-4 card-col"
-              @mouseover="isTransferCardHovered = true"
-              @mouseleave="isTransferCardHovered = false"
-            >
-                <HeroCard
-                class="enter-card"
-                  title="양도"
-                  :description="['티켓을 안전하게 양도하고', '필요한 사람에게 전달하세요']"
-                  button-text="양도하기"
-                  type="primary"
-                  @click="goToTransfer"
-                />
+      <v-container fluid class="hero-section pa-4" style="min-height: 85vh; height: auto;">
+        <v-container class="pa-0" :class="{ 'hovered': isTransferCardHovered || isEnterCardHovered }">
+          <!-- 데스크톱 레이아웃 -->
+          <v-row no-gutters class="fill-height d-none d-md-flex">
+            <!-- 왼쪽 영역 - 두 개의 메인 카드 -->
+            <v-col cols="12" md="12" class="d-flex pa-0">
+              <v-row no-gutters class="flex-nowrap" style="width: 100%;">
+                <!-- 양도 카드 -->
+                <!-- <v-col 
+                  cols="12"
+                  :md="isTransferCardHovered ? 8 : (isEnterCardHovered ? 4 : 6)" 
+                  class="pa-4 card-col flex-column"
+                  :class="{ 'card-col-hover': isTransferCardHovered }"
+                > -->
+                <v-col 
+                  cols="12"
+                  :md="isTransferCardHovered ? 8 : (isEnterCardHovered ? 4 : 6)" 
+                  class="pa-4 card-col flex-column"
+                  :class="{ 'card-col-hover': isTransferCardHovered }"
+                >
+                  <HeroCard
+                    class="transfer-card h-100"
+                    title="양도하기"
+                    :description="'티켓이 필요한사람에게 안전하게 양도하세요'"
+                    button-text="양도하기"
+                    type="primary"
+                    @mouseover="isTransferCardHovered = true"
+                    @mouseleave="isTransferCardHovered = false"
+                    @click="goToTransfer"
+                  />
+                </v-col>
+                
+                <!-- 응모 카드 -->
+                <v-col 
+                  cols="12"
+                  :md="isEnterCardHovered ? 8 : (isTransferCardHovered ? 4 : 6)"
+                  class="pa-4 card-col flex-column"
+                  :class="{ 'card-col-hover': isEnterCardHovered }"
+                >
+                  <HeroCard
+                    class="enter-card h-100"
+                    title="응모하기"
+                    :description="'원하는 경기를 응모하고 티켓을 양도받아 보세요'"
+                    button-text="응모하기"
+                    type="secondary"
+                    @mouseover="isEnterCardHovered = true"
+                    @mouseleave="isEnterCardHovered = false"
+                    @click="goToApply"
+                  />
+                  <!-- <div class="text-white text-h6 mt-3 px-2" v-if="isEnterCardHovered">
+                    <p class="mb-1">
+                      원하는 경기를 응모하고 티켓을 양도받아 보세요.
+                    </p>
+                  </div>  -->
+                </v-col>
+              </v-row>
             </v-col>
             
-            <!-- 응모 카드 -->
-            <v-col 
-              cols="12" 
-              :md="isEnterCardHovered ? 8 : (isTransferCardHovered ? 4 : 6)"
-              @mouseover="isEnterCardHovered = true"
-              @mouseleave="isEnterCardHovered = false"
-              class="pa-4 card-col"
-            >
-                <HeroCard
-                  class="transfer-card"
-                  title="응모"
-                  :description="['원하는 경기를 응모하고', '티켓을 양도받아 보세요.']"
-                  button-text="응모하기"
-                  type="secondary"
-                  @click="goToApply"
-                />
+            <!-- 아래 영역 - 세장 -->
+            <v-row cos="12" md="12" class="pl-2 d-flex card-col" style="min-height: 30vh; height: auto;">
+              <!-- 첫 번째 작은 카드 -->
+              <v-col md="3"> 
+              <v-card
+               class="card-col flex-grow-1 d-flex flex-column pt-4 pa-3" 
+               :class="{ 'card-col-hover': isApplyCardHovered }"
+               :elevation="0" 
+               rounded="lg">
+              <HeroCard
+                :height="270"
+                title="응모 내역"
+                button-text="응모 내역 확인"
+                type="sub"
+                @mouseover="isApplyCardHovered = true"
+                @mouseleave="isApplyCardHovered = false"
+                @click="goToApplications"
+              />
+              </v-card>
+              </v-col>
+              <!-- 두 번째 작은 카드 -->
+            <v-col md="3"> 
+              <v-card
+               class="card-col flex-grow-1 d-flex flex-column pt-4 pa-3" 
+               :class="{ 'card-col-hover': isTicketCardHovered }"
+               :elevation="0" 
+               rounded="lg">
+              <HeroCard
+                :height="270"
+                title="나의 티켓"
+                button-text="내 티켓 확인"
+                type="sub"
+                @mouseover="isTicketCardHovered = true"
+                @mouseleave="isTicketCardHovered = false"
+                @click="goToTickets"
+              />
+              </v-card>
             </v-col>
+            <!-- 세 번째 작은 카드 -->
+            <v-col md="6"> 
+              <v-card
+              :height="270"
+               class="card-col flex-grow-1 d-flex flex-column pt-4 pa-3" 
+               :class="{ 'card-col-hover': isTicketCardHovered }"
+               :elevation="0" 
+               rounded="lg">
+              <v-card-text class="d-flex flex-column" style="height: 100%;">
+                <div>
+                  <div class="d-flex align-center">
+                    <icon color="primary" style="font-size: 30px">🎫</icon>
+                    <span class="font-weight-bold text-black ml-2" style="font-size: 1.1rem">다가오는 경기</span>
+                  </div>
+                  <div class="text-medium-emphasis mt-1 font-weight-bold">예정된 가장 가까운 직관 경기를 확인하세요</div>
+                </div>
+                <v-btn
+                v-if="tickets.length > 0"
+                  color="transparent"
+                  variant="flat"
+                  class="ticket-btn mt-auto h-50 glass-effect"
+                  style="min-height: 120px; border-radius: 15px;"
+                  @click="goToTicket(tickets[0]?.ticketId)"
+                  @mouseover="hovered = true"
+                  @mouseleave="hovered = false"
+                  :class="{ 'ticket-btn-hover': hovered }"
+                >
+                <img :src="`/org/logo/${tickets[0]?.game?.home}`" alt="">
+                  <div class="ticket-text d-flex flex-column align-center justify-center w-100 h-100">
+                    <div class="font-weight-bold text-h6">{{ enumToTeamName[tickets[0]?.game?.away] }} vs {{ enumToTeamName[tickets[0]?.game?.home] }}</div>
+                    <div class="mt-1 text-body-2">{{ formatDate(tickets[0]?.game?.date) }}</div>
+                    <div class="mt-1 text-body-2">{{ stadiumOfTeam[tickets[0]?.game?.stadium] }}</div>
+                  </div>
+                </v-btn>
+                <v-btn
+                v-else
+                class="mt-auto h-50 d-flex align-center justify-center"
+                style="min-height: 100px; border-radius: 15px; border-color: var(--theme-primary); border-width: 1px;"
+                >
+                  <div class="text-medium-emphasis mt-1 font-weight-bold">보유한 티켓이 없습니다.</div>
+                </v-btn>
+              </v-card-text>
+              </v-card>
+            </v-col>
+            </v-row>
           </v-row>
+          
+          <!-- 모바일 레이아웃 -->
+          <div class="d-flex d-md-none flex-column">
+            <!-- 양도 카드 -->
+            <div class="pa-4 card-col mb-4">
+              <HeroCard
+                class="enter-card h-100"
+                title="양도하기"
+                :description="['티켓을 안전하게 양도하고', '필요한 사람에게 전달하세요']"
+                button-text="양도하기"
+                type="primary"
+                @mouseover="isTransferCardHovered = true"
+                @mouseleave="isTransferCardHovered = false"
+                @click="goToTransfer"
+              />
+            </div>
+            
+            <!-- 응모 카드 -->
+            <div class="pa-4 card-col mb-4">
+              <HeroCard
+                class="transfer-card h-100"
+                title="응모하기"
+                :description="['원하는 경기를 응모하고', '티켓을 양도받아 보세요.']"
+                button-text="응모하기"
+                type="secondary"
+                @mouseover="isEnterCardHovered = true"
+                @mouseleave="isEnterCardHovered = false"
+                @click="goToApply"
+              />
+            </div>
+            
+            <!-- 모바일용 작은 카드들 -->
+            <div class="d-flex flex-column">
+              <!-- 첫 번째 작은 카드 -->
+              <v-card class="mb-2 flex-grow-1 d-flex flex-column" :elevation="0" rounded="lg" style="background-color: #f8f9fa;">
+                <v-card-text class="text-center pa-4 d-flex flex-column align-center justify-center">
+                  <v-icon size="40" color="primary" class="mb-2">mdi-ticket-confirmation</v-icon>
+                  <div class="text-subtitle-1 font-weight-medium">실시간 인기 경기</div>
+                  <div class="text-caption text-medium-emphasis mt-1">지금 가장 인기있는 경기를 확인하세요</div>
+                </v-card-text>
+              </v-card>
+              
+              <!-- 두 번째 작은 카드 -->
+              <v-card class="flex-grow-1 d-flex flex-column" :elevation="0" rounded="lg" style="background-color: #f8f9fa;">
+                <v-card-text class="text-center pa-4 d-flex flex-column align-center justify-center">
+                  <v-icon size="40" color="secondary" class="mb-2">mdi-star-shooting</v-icon>
+                  <div class="text-subtitle-1 font-weight-medium">이벤트 안내</div>
+                  <div class="text-caption text-medium-emphasis mt-1">특별한 혜택을 놓치지 마세요</div>
+                </v-card-text>
+              </v-card>
+            </div>
+          </div>
         </v-container>
       </v-container>
 
@@ -52,7 +207,7 @@
             <v-col cols="12" lg="6" class="pa-4">
               <RankingCard
                 title="이달의 양도자"
-                title-icon="mdi-star"
+                title-icon="star"
                 :items="userRankingData"
                 type="user"
               />
@@ -62,7 +217,7 @@
             <v-col cols="12" lg="6" class="pa-4">
               <RankingCard
                 title="팀별 양도랭킹"
-                title-icon="mdi-trophy"
+                title-icon="trophy"
                 :items="teamRankingData"
                 type="team"
               />
@@ -177,13 +332,19 @@
 import { ref, watch, onMounted, onUnmounted, computed, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 
+const isApplyCardHovered = ref(false);
+const isTicketCardHovered = ref(false);
 const isEnterCardHovered = ref(false);
 const isTransferCardHovered = ref(false);
+const hovered = ref(false);
 import { useAuthStore } from '@/stores/auth';
 import { useTutorial } from '@/views/tutorial/useTutorial';
 import { driver } from 'driver.js';
 import axios from 'axios';
 import { API_CONFIG } from '@/config/api.config';
+import { enumToTeamName } from '@/utils/teamNameMap';
+import { stadiumOfTeam } from '@/utils/teamStadium';
+import { formatDate } from '@/utils/dateUtils'
 import 'driver.js/dist/driver.css';
 // 공통 컴포넌트 import
 import HeroCard from '../../components/ui/HeroCard.vue';
@@ -193,7 +354,19 @@ import ServiceCard from '../../components/ui/ServiceCard.vue';
 import SectionHeader from '../../components/ui/SectionHeader.vue';
 import LoginModal from '../../components/common/LoginModal.vue';
 import { useTeamThemeStore } from '@/stores/teamTheme.js'
+import http from '@/utils/http';
 
+// 1. 로컬 스토리지에서 사용자 정보를 가져옵니다.
+const user = JSON.parse(localStorage.getItem('user'))
+
+// 2. 팀 테마 스토어를 가져옵니다.
+const themeStore = useTeamThemeStore
+
+// 3. 사용자 정보에 myTeam 값이 있으면 해당 팀으로 테마를 설정합니다.
+// 이 코드는 컴포넌트가 생성될 때마다 실행되어 현재 사용자의 팀 테마를 적용합니다.
+if (user?.myTeam) {
+  themeStore.setSelectedTeam(user.myTeam)
+}
 
 // 라우터 설정
 const router = useRouter();
@@ -210,6 +383,9 @@ const { showTutorialModal, openTutorialModal, closeTutorialModal, startTutorial 
 
 // 로그인 성공 후 처리를 위한 플래그
 const isProcessingLogin = ref(false);
+
+// 티켓 데이터
+const tickets = ref([]);
 
 // 로그인 상태 변화 감지하여 리다이렉트 처리
 watch(() => authStore.isAuthenticated, async (newValue, oldValue) => {
@@ -423,7 +599,7 @@ const fetchUserRanking = async () => {
       name: item.userName,
       subtitle: `${item.rank}위`,
       score: item.transferAllCount,
-      avatar: item.profileImage
+      avatar: item.imageUrl?item.imageUrl:'avatar/pitcher2.png'
     }));
   } catch (error) {
     console.error('사용자 랭킹 데이터 가져오기 실패:', error);
@@ -434,6 +610,20 @@ const fetchUserRanking = async () => {
       { name: '잠시만 기다려주세요', subtitle: '3위', score: 0, avatar: '/default-avatar.png' }
     ];
   }
+};
+
+// 티켓 이동
+const goToTicket = (ticketId) => {
+  router.push(`/mypage/tickets/${ticketId}`);
+};
+
+// 응모 이동
+const goToApplications = () => {
+  router.push('/mypage/applications');
+};
+
+const goToTickets = () => {
+  router.push('/mypage/tickets');
 };
 
 // 팀 랭킹 데이터
@@ -669,6 +859,23 @@ onMounted(async () => {
   } catch (e) {
     console.warn('firstSignup 확인 중 오류:', e);
   }
+  try {
+  const response = await http.get(API_CONFIG.USER.TICKETS);
+  
+  if (response.data) {
+    const now = new Date(); // 오늘 날짜
+    // 가장 가까운 날짜의 티켓 고르기
+    const closestTicket = response.data
+      .filter(ticket => ticket.game && ticket.game.date && new Date(ticket.game.date) >= now) // 미래 티켓만
+      .sort((a, b) => new Date(a.game.date) - new Date(b.game.date))[0]; // 날짜순 정렬 후 가장 가까운 티켓 선택
+
+    tickets.value = closestTicket ? [closestTicket] : [];
+    console.log("tickets.value : ", tickets.value);
+    }
+  } catch (error) {
+    console.error('티켓 정보를 불러오는 중 오류 발생:', error);
+    tickets.value = []; // 오류 발생 시 빈 배열로 초기화
+  }
 });
 
 // 컴포넌트 언마운트 시 타이머 정리
@@ -681,30 +888,158 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+
 /* Vuetify 커스텀 스타일 */
-.hero-section {
-  min-height: 500px;
+
+.hero-section .v-container {
+  padding: 0 !important;
+  transition: height 0.3s ease;
+  height: 100%;
+}
+
+/* .hero-section .v-container.hovered {
+  height: 65vh;
+} */
+
+.hero-section .v-row {
+  height: 100%;
+  align-items: stretch;
+}
+
+.hero-section .v-col {
+  height: 100%;
+}
+
+.hero-section .v-row.flex-nowrap {
+  height: 100%;
 }
 
 .card-col {
   transition: all 0.4s ease-in-out;
+  height: 100%;
+  display: flex;
 }
 
-.enter-card {
-  background: linear-gradient(135deg, #FFB22C 0%, #FF9A1A 100%) !important;
-}
-
-.transfer-card {
-  background: linear-gradient(135deg, #854836 0%, #6B3A2E 100%) !important;
+.card-col .hero-card {
+  height: 100%;
+  width: 100%;
 }
 
 .hero-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+/* Card hover effects */
+.card-col {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+  border-radius: 16px;
+  overflow: hidden;
+}
 
-.hero-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+/* .card-col::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: #B29735;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.card-col-hover::before {
+  width: 300%;
+  height: 300%;
+  opacity: 1;
+  border-radius: 0;
+} */
+
+.card-col-hover {
+  z-index: 2;
+}
+
+.hero-card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* .hero-card::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: #B29735;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero-card:hover::before {
+  width: 300%;
+  height: 300%;
+  opacity: 1;
+  border-radius: 0;
+} */
+
+.ticket-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.ticket-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  z-index: -1;
+  border-radius: 15px;
+}
+
+.ticket-btn-hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.ticket-text {
+  color: var(--theme-primary);
+}
+
+.glass-effect {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.glass-effect:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+}
+
+.sub-card {
+  height: 45%;
 }
 
 .ranking-section {
@@ -797,7 +1132,7 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   overflow: hidden;
-  min-height: 400px;
+  /* min-height: 400px; */
   background: #f8f9fa;
   border-radius: 16px;
   padding: 24px 0;
@@ -856,6 +1191,19 @@ onUnmounted(() => {
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
+  .hero-section {
+    height: auto;
+    min-height: 400px;
+  }
+  
+  .hero-section .card-col {
+    margin-bottom: 16px;
+  }
+  
+  .hero-section .card-col:last-child {
+    margin-bottom: 0;
+  }
+  
   .auto-review-slide {
     width: 280px;
     margin: 0 -16px;

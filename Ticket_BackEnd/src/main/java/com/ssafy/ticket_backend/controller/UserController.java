@@ -46,6 +46,7 @@ public class UserController {
     private String KakaoRestApiKey;
     @Value("${naver.client.id}")
     private String NaverClientId;
+
     @Value("${FE_BASE_URL}")
     private String FE_BASE_URL;
     @Value("${BE_BASE_URL}")
