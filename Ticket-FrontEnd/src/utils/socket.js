@@ -38,7 +38,7 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
 
   // 로컬 테스트 시
   // const socketFactory = () => new SockJS("http://localhost:8080/ws-notify");
-  const socketFactory = () => new SockJS(`${API_BASE_URL}/ws-notify`);
+  const socketFactory = () => new SockJS(`/ws-notify`);
 
   // Pinia store 인스턴스 가져오기
   const notificationStore = useNotificationStore();
