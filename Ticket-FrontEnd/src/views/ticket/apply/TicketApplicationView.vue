@@ -11,9 +11,9 @@
 </div>
     <div v-if="step === 1" class="main-area">
       <h2 class="title">{{ pageText.selectTeamTitle }}</h2>
-      <div class="team-bg-container" :class="{ 'active': selectedTeam === myTeamName }">
+      <div class="team-bg-container" :class="{ 'active': user?.myTeam === teamNameToEnum[selectedTeam] }">
         <div class="team-bg-image"
-          :class="{ 'active': selectedTeam === myTeamName }"
+          :class="{ 'active': user?.myTeam === teamNameToEnum[selectedTeam] }"
           :style="user?.myTeam ? { background: `url('/catchphrase/${user.myTeam}_CP.svg') center no-repeat`, backgroundSize: 'cover' } : {}"
           @click="myTeamName && selectTeam(myTeamName)"
           style="cursor:pointer;"
@@ -53,7 +53,7 @@
       </button>
     </div>
     <div v-else-if="step === 2" class="game-select-main">
-      <div class="calendar-area">
+      <div class="calendar-area" :style="calendarAreaStyle">
         <div class="calendar-header-section">
           <button class="month-nav-btn" @click="previousMonth">‹</button>
           <div class="calendar-title">{{ currentYear }}년 {{ currentMonth }}월</div>
@@ -76,7 +76,7 @@
             :class="{ 
               selected: selectedDate === date,
               past: isPastDate(date),
-              today: isToday(date)
+              today: isToday(date),
             }"
             @click="selectDate(date, $event)"
           >
@@ -89,37 +89,26 @@
       </div>
       <div class="info-area">
         <div class="selected-date-box">
-          <b>{{ pageText.selectedDateTitle }}</b>
-          <div class="selected-info" style="margin-top: 16px; font-size: 30px; display: flex; align-items: center; gap: 8px;">
-            <template v-if="selectedDate">
+          <div class="selected-date-title">
+            <span class="selected-date-title-text" style="font-size: 20px;">{{ pageText.selectedDateTitle }} </span>
+            <span><img class="selected_team-logo" :src="`/small_logo/${getEnumTeamName(selectedTeam)}.svg`" alt="team logo" style="width: 30px; height: 30px;"/></span>
+          </div>
+          <div class="selected-info">
               <span class="selected-date">{{ getFormattedDate() }}</span>
               <span v-if="selectedTime" class="selected-time">{{ selectedTime }}</span>
-              <span class="divider">|</span>
-            </template>
-            <span v-else class="select-date-guide">{{ pageText.selectDateGuide }}</span>
-            <div class="team-name-container" style="display: flex; align-items: center; gap: 6px;">
-              <span class="selected-team-name">{{ selectedTeam || '팀을 선택해주세요' }}</span>
-              <img
-                v-if="selectedTeam"
-                class="selected-team-logo"
-                :src="`/small_logo/${getEnumTeamName(selectedTeam)}.svg`"
-                alt="team logo"
-                style="width: 24px; height: 24px;"
-              />
-            </div>
+              <!-- <span class="divider">|</span> -->
+              <!-- <span class="selected-team-name">{{ selectedTeam }}</span> -->
           </div>
         </div>
         <div class="game-list-box">
-          <b style="font-size: 30px;">{{ pageText.gameListTitle }}</b>
+          <b style="font-size: 20px;">{{ pageText.gameListTitle }}</b>
           <div v-if="selectedDate">
             <template v-if="gamesOnDate.length > 0">
               <div v-for="game in filteredGamesOnDate" :key="game.gameId" class="game-card">
                 <div class="game-title">{{ getTeamDisplayName(game.homeTeam) }} vs {{ getTeamDisplayName(game.awayTeam) }}</div>
-                <div class="game-datetime" style="font-weight: normal; color: inherit;">
-                  {{ formatGameDateTime(game.gameDateTime) }}
-                </div>
-                <div class="game-stadium">
-                  {{ stadiumNameToEnum[getTeamDisplayName(game.homeTeam)] }}
+                <div class="game-info">
+                  <span class="game-stadium">{{ stadiumNameToEnum[getTeamDisplayName(game.homeTeam)] }}</span>
+                  <span class="game-time" >{{ formatGameTime(game.gameDateTime) }}</span>
                 </div>
                 <button class="apply-btn" @click="() => handleApplyClick(game)">{{ pageText.applyBtn }}</button>
               </div>
@@ -143,7 +132,7 @@
           <div class="step"><span>4</span><div>결제</div></div>
         </div>
         <div class="apply-icon-box">
-          <div class="apply-icon-circle"><span>🔨</span></div>
+          <div class="apply-icon-circle"></div>
         </div>
         <div class="apply-title">응모 완료!</div>
         <div class="apply-desc">경기 응모가 성공적으로 완료되었습니다.</div>
@@ -153,7 +142,7 @@
           <div class="apply-info-row"><span>일시:</span> <span class="right">{{ selectedGame ? formatGameDateTime(selectedGame.gameDateTime) : '' }}</span></div>
           <div class="apply-info-row"><span>장소:</span> <span class="right">{{ stadiumNameToEnum[selectedTeam] }}</span></div>
         </div>
-        <button class="apply-confirm-btn" @click="goToMainPage">확인</button>
+        <button class="apply-confirm-btn" @click="goToApplicationHistory">확인</button>
       </div>
     </div>
   </div>
@@ -169,17 +158,56 @@ import http from '@/utils/http'
 import { useRouter, useRoute } from 'vue-router';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
-import { useTeamThemeStore } from '@/stores/teamTheme.js'
+import { useTeamThemeStore } from '@/stores/teamTheme'
 import { watch, onUnmounted } from 'vue';
 import { getEnumTeamName } from '@/utils/teamNameMap';
 
-const user = JSON.parse(localStorage.getItem('user'))
-import {useTutorial} from '@/views/tutorial/useTutorial.js'
+// Initialize user with proper default value
+const user = ref(JSON.parse(localStorage.getItem('user') || '{}'));
+const isUserLoaded = ref(false);
+
+// Watch for changes in localStorage
+const updateUserFromStorage = () => {
+  try {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      user.value = parsedUser;
+    }
+  } catch (e) {
+    console.error('Error parsing user from localStorage:', e);
+  }
+};
+
+// Initial load
+updateUserFromStorage();
+
+// Listen for storage events to update user when changed in other tabs
+window.addEventListener('storage', (e) => {
+  if (e.key === 'user') {
+    updateUserFromStorage();
+  }
+});
+
+// Watch for changes in user data
+watch(() => user.value, (newUser) => {
+  if (newUser?.myTeam) {
+    isUserLoaded.value = true;
+    // Update theme with the team
+    try {
+      themeStore.setSelectedTeam(newUser.myTeam);
+    } catch (error) {
+      console.error('Error updating theme:', error);
+    }
+  } else {
+    console.log('User data changed but no myTeam found');
+  }
+}, { immediate: true, deep: true });
 
 // 팀 테마 스토어를 가져옵니다. (싱글톤 인스턴스, 호출하지 않음)
-const themeStore = useTeamThemeStore
+const {teamColors} = useTeamThemeStore;
 
-// small_logo 사용 고정 (옵션 A)
+import {useTutorial} from '@/views/tutorial/useTutorial.js'
 
 // 사용자 정보에 myTeam 값이 있으면 해당 팀으로 테마를 설정합니다.
 // 이 코드는 컴포넌트가 생성될 때마다 실행되어 현재 사용자의 팀 테마를 적용합니다.
@@ -202,6 +230,9 @@ const myTeamName = computed(() => {
 
 // 첫 렌더에서 바로 활성화되도록 선언 시점에 초기화
 const selectedTeam = ref(myTeamName.value);
+
+watch(() => user.value, (newUser) => {
+}, { immediate: true });
 
 // 만약 user가 비동기로 세팅되어 나중에 myTeamName이 생긴다면, 비어있을 때 한 번 동기화
 watch(myTeamName, (v) => {
@@ -230,7 +261,27 @@ const selectedGame = ref(null);
 // 중복 실행 방지 플래그
 const hasStartedApplyTutorial = ref(false);
 
- 
+// 캘린더 영역에 적용할 스타일
+const calendarAreaStyle = computed(() => {
+  if (!selectedTeam.value) return {};
+  
+  // 한글 팀명을 ENUM 형식으로 변환 (예: "삼성 라이온즈" -> "SAMSUNG_LIONS")
+  const teamKey = getEnumTeamName(selectedTeam.value);
+  
+  const theme = teamColors[teamKey];
+  if (!theme) {
+    console.error('팀을 찾을 수 없습니다:', selectedTeam.value, '->', teamKey);
+    return {};
+  }
+  
+  const primary = theme.primary;
+  // const gradient = theme.gradient;
+  
+  return {
+    '--team-primary': primary,
+    'background-color': primary,
+  };
+});
 
 // 페이지 진입 시 튜토리얼 자동 실행 (URL 파라미터 또는 플래그 기반)
 onMounted(() => {
@@ -333,11 +384,8 @@ function getTeamId(teamName) {
   return teamMap[teamName] || teamName;
 }
 
-function selectTeam(team) {
-  // 이미 ENUM 값인 경우와 한글 팀명인 경우 모두 처리
-  // const teamEnum = teamNameToEnum[team] || (Object.values(teamNameToEnum).includes(team) ? team : null);
-  // selectedTeam.value = teamEnum ? enumToTeamName[teamEnum] : team;
-  
+// 팀 선택 기능
+function selectTeam(team) {  
   let teamEnum;
   if(teamNameToEnum[team]) {
     teamEnum = teamNameToEnum[team];
@@ -376,12 +424,9 @@ function selectTeam(team) {
     }
   }
 
-
-
   // 팀 선택 팝오버의 설명문 업데이트
   updateTeamSelectionPopup();
   
-  console.log('팀 선택됨:', team); // 디버깅용 로그
 }
 
 // 팀 선택 팝오버 설명문
@@ -470,14 +515,11 @@ function initializeTodaySelection() {
   const todayDate = today.getDate();
   const todayMonth = today.getMonth() + 1;
   const todayYear = today.getFullYear();
-  
-  // 현재 달력이 오늘이 속한 달인지 확인
-  if (currentYear === todayYear && currentMonth.value === todayMonth) {
-    // 초기 진입 시 자동 날짜 선택을 중지하여
-    // 캘린더 튜토리얼이 먼저 안정적으로 표시되도록 합니다.
-    // 사용자가 날짜를 직접 선택하면 그때 경기 유무에 따라 분기합니다.
-    // selectDate(todayDate);
-  }
+}
+
+// 마지막에 확인 버튼 눌렀을 때 나의 응모 페이지로 리다이렉트
+function goToApplicationHistory() {
+  router.push('/mypage/applications');
 }
 
 
@@ -772,7 +814,6 @@ async function selectDate(date) {
       team: teamEnum
     });
     gamesOnDate.value = data;
-    console.log('gamesOnDate.value : ', gamesOnDate.value);
     // 날짜 선택 후: 캘린더 튜토리얼이 있으면 종료하고, 게임 유무에 따라 분기
     if (driverObj.value) {
       try { driverObj.value.destroy(); } catch (_) {}
@@ -803,10 +844,9 @@ async function selectDate(date) {
   loadGamesForDate(date);
 }
 
-// 응모하기 눌렀을 때, 튜토리얼 제거
+// 응모하기 눌렀을 때, 튜토리얼 제거 & 응모 여부 경고창
 async function handleApplyClick(game) {
   selectedGame.value = game;
-  console.log('응모 클릭됨')
   
   // 전역 튜토리얼 팝오버 종료 (useTutorial의 tutorialDriver 정리)
   try { closeTutorial(); } catch (_) {}
@@ -823,16 +863,17 @@ async function handleApplyClick(game) {
     element.removeEventListener('click', () => {});
   });
   
-  try {
-    console.log('응모 클릭됨', game)
-    const { data } = await http.post(`/games/${game.gameId}/applications`);
-    console.log('응모 결과:', data);
-    // 성공 시에만 3단계로 이동
-    step.value = 3;
-  } catch (error) {
-    console.error('응모 요청 실패:', error);
-    // 에러 발생 시 중복 응모 경고창 표시
-    alert('이미 진행한 응모입니다.');
+  const isConfirmed = confirm('응모하시겠습니까?');
+  if (isConfirmed) {
+      try {
+      const { data } = await http.post(`/games/${game.gameId}/applications`);
+      // 성공 시에만 3단계로 이동
+      step.value = 3;
+    } catch (error) {
+      console.error('응모 요청 실패:', error);
+      // 에러 발생 시 중복 응모 경고창 표시
+      alert('이미 진행한 응모입니다.');
+    }
   }
 }
 
@@ -842,10 +883,10 @@ function getTeamDisplayName(enumName) {
 }
 
 // 메인 페이지로 이동
-function goToMainPage() {
-  // 메인 페이지로 이동
-  router.push('/');
-}
+// function goToMainPage() {
+//   // 메인 페이지로 이동
+//   router.push('/');
+// }
 
 // 경기 날짜와 시간을 'YYYY-MM-DD HH:mm' 형식으로 변환
 function formatGameDateTime(dateTimeStr) {
@@ -859,6 +900,15 @@ function formatGameDateTime(dateTimeStr) {
   return `${yyyy}-${mm}-${dd} ${hh}:${min}`;
 }
 
+// 경기 날짜와 시간을 'YYYY-MM-DD HH:mm' 형식으로 변환
+function formatGameTime(dateTimeStr) {
+  // ISO 8601 문자열을 'YYYY-MM-DD HH:mm' 형식으로 변환
+  const date = new Date(dateTimeStr);
+  const hh = String(date.getHours()).padStart(2, '0');
+  const min = String(date.getMinutes()).padStart(2, '0');
+  return `${hh}시 ${min}분`;
+}
+
 </script>
 
 <style>
@@ -870,7 +920,7 @@ function formatGameDateTime(dateTimeStr) {
   color: white;
   background: var(--theme-gradient, linear-gradient(90deg, #ff4d4d, #f9cb28));
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
@@ -931,7 +981,7 @@ function formatGameDateTime(dateTimeStr) {
 
 /* Global tutorial styles */
 :global(.driver-popover.tutorial-popover) {
-  border-radius: 10px;
+  border-radius: 12px;
   max-width: 220px;
   width: 220px;
   z-index: 10001;
@@ -1212,7 +1262,6 @@ function formatGameDateTime(dateTimeStr) {
   background-position: center !important;
   background-repeat: no-repeat !important;
   background-size: cover !important;
-  border-radius: 0;
   outline: none !important;
   box-shadow: none !important;
 }
@@ -1283,7 +1332,7 @@ function formatGameDateTime(dateTimeStr) {
 .team-card:hover ~ .team-bg-image {
   opacity: 1 !important;
 }
-.next-btn {
+.apply-wrapper .next-btn {
   padding: 12px 40px;
   font-size: 20px;
   font-weight: 500;
@@ -1307,7 +1356,7 @@ function formatGameDateTime(dateTimeStr) {
   justify-content: center;
   gap: 8px;
 }
-.next-btn:disabled {
+.apply-wrapper .next-btn:disabled {
   background: #e0e0e0;
   cursor: not-allowed;
 }
@@ -1493,10 +1542,13 @@ function formatGameDateTime(dateTimeStr) {
 }
 
 .selected-info {
+  width: 450px;
+  margin-top: 10px;
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   line-height: 1.4;
 }
 
@@ -1509,22 +1561,22 @@ function formatGameDateTime(dateTimeStr) {
 
 .selected-date,
 .selected-time,
-.selected-team-name,
 .select-date-guide {
-  font-size: 30px;
+  font-size: 55px;
   font-weight: 500;
-  color: #333;
+  color: #ffffff !important;
 }
 
 .divider {
-  color: #ddd;
+  font-size: 30px;
+  color: #ffffff !important;
   margin: 0 4px;
   opacity: 0.7;
 }
 
-.selected-team-name {
-  color: var(--theme-primary, #ff6b35);
-  font-weight: 600;
+.selected-team-name{
+  font-size: 40px;
+  color: #ffffff !important;
 }
 
 .team-name-container {
@@ -1570,19 +1622,23 @@ function formatGameDateTime(dateTimeStr) {
   gap: 5px;
 }
 .game-title {
-  font-size: 19px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--theme-primary, #e57373);
 }
-.game-datetime {
-  font-size: 18px;
+.game-info {
+  font-size: 20px;
+  font-weight: bold;
   margin-top: 10px;
-  color: #888;
+  display: flex;
+  gap: 30px;
 }
 .game-stadium {
-  font-size: 16px;
+  font-size: 20px;
   margin-bottom: 8px;
-  color: #888;
+}
+.game-time {
+  font-size: 20px;
 }
 .game-buttons {
   display: flex;
@@ -1590,13 +1646,14 @@ function formatGameDateTime(dateTimeStr) {
   margin-top: 10px;
 }
 .apply-btn {
+  height: 100px;
   padding: 7px 20px;
   background: var(--theme-gradient, #e57373);
   color: #fff;
   border: none;
   border-radius: 6px;
-  font-size: 20px;
-  font-weight: 500;
+  font-size: 30px;
+  font-weight: bold;
   cursor: pointer;
   background-image: linear-gradient(
     90deg,
@@ -1670,7 +1727,8 @@ function formatGameDateTime(dateTimeStr) {
   font-weight: 500;
 }
 .apply-complete-stepper .step.active {
-  color: var(--theme-gradient, #e57373);
+  color: var(--theme-primary);
+  /* color: var(--theme-gradient, #e57373); */
 }
 .apply-complete-stepper .step span {
   display: inline-flex;
@@ -1679,14 +1737,13 @@ function formatGameDateTime(dateTimeStr) {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: var(--theme-gradient, #e57373);
+
+  background: var(--theme-secondary);
+  /* background: var(--theme-gradient, #e57373); */
   color: #fff;
   font-weight: bold;
   margin-bottom: 4px;
   font-size: 15px;
-}
-.apply-complete-stepper .step.active span {
-  background: var(--theme-gradient, #e57373);
 }
 .apply-complete-stepper .bar {
   width: 36px;
@@ -1701,34 +1758,47 @@ function formatGameDateTime(dateTimeStr) {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: var(--theme-gradient, #e57373);
+  background: var(--theme-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  color: #fff;
   margin: 0 auto;
+  position: relative;
+}
+.apply-icon-circle::before {
+  content: '';
+  width: 30px;
+  height: 30px;
+  background: url('/icon/check.svg') center no-repeat;
+  background-size: contain;
+  filter: brightness(0) invert(1); /* Makes the icon white */
+  display: block;
+}
+.apply-btn{
+  margin: 0;
+  font-size: 35px;
 }
 .apply-title {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 40px;
+  font-weight: bold;
   color: #222;
-  margin: 22px 0 4px 0;
   text-align: center;
 }
 .apply-desc {
   color: #888;
-  font-size: 14px;
-  margin-bottom: 22px;
+  font-size: 20px;
+  margin: 20px 0;
   text-align: center;
 }
 .apply-info-card {
-  background: var(--theme-gradient, #e57373);
+  background: var(--theme-primary);
+  /* background: var(--theme-gradient, #e57373); */
   border-radius: 10px;
   padding: 18px 18px 10px 18px;
   margin-bottom: 18px;
   width: 80%;
   height: 200px;
+  font-size: 20px;
 }
 .apply-info-title {
   color: #fff;
@@ -1738,10 +1808,10 @@ function formatGameDateTime(dateTimeStr) {
 }
 .apply-info-row {
   display: flex;
+  margin: 10px 0;
   justify-content: space-between;
   color: #fff;
   font-size: 20px;
-  margin-bottom: 4px;
 }
 .apply-info-row .right {
   font-weight: 500;
@@ -1765,29 +1835,29 @@ function formatGameDateTime(dateTimeStr) {
   justify-content: space-between;
   color: #222;
   font-size: 20px;
-  margin-bottom: 4px;
 }
 .apply-confirm-btn {
-  width: 20%;
-  padding: 11px 0;
-  background: var(--theme-gradient, #e57373);
+  width: 150px;
+  font-size: 24px;
+  padding: 10px 0;
+  background-color: var(--theme-primary);
   color: #fff;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 4px;
+  font-weight: bold;
   cursor: pointer;
   margin-top: 8px;
   transition: background 0.2s;
 }
 .apply-confirm-btn:hover {
-  background: var(--theme-gradient, #e57373);
+  background-color: var(--theme-primary) !important;
+  opacity: 0.9;
 }
 .no-game-centered {
+  height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 120px;
   font-size: 22px;
   color: #b9b8b8;
 }
@@ -1891,7 +1961,11 @@ function formatGameDateTime(dateTimeStr) {
     height: auto;
     min-height: 450px;
     padding: 20px 16px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    position: relative;
+    overflow: hidden;
   }
+  
   
   .calendar-header-section {
     gap: 16px;
@@ -1973,7 +2047,7 @@ function formatGameDateTime(dateTimeStr) {
   }
   
   .game-title {
-    font-size: 16px;
+    font-size: 20px;
   }
   
   .game-desc {
@@ -2162,7 +2236,7 @@ function formatGameDateTime(dateTimeStr) {
   }
   
   .game-title {
-    font-size: 15px;
+    font-size: 20px;
   }
   
   .game-desc {
@@ -2240,6 +2314,9 @@ function formatGameDateTime(dateTimeStr) {
   align-items: center;
   justify-content: center;
 }
+.step.active span{
+  background: var(--theme-primary);
+}
 .step span {
   display: inline-flex;
   align-items: center;
@@ -2247,7 +2324,8 @@ function formatGameDateTime(dateTimeStr) {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--theme-gradient, #e57373);
+  background: var(--theme-secondary);
+  /* background: var(--theme-gradient, #e57373); */
   opacity: 0.25;
   color: #fff;
   font-weight: bold;
@@ -2256,7 +2334,7 @@ function formatGameDateTime(dateTimeStr) {
 }
 .bar {
   flex: 1 1 auto;
-  height: 4px;
+  height: 3px;
   background: var(--theme-gradient, #e57373);
   border-radius: 2px;
   margin-bottom: 35px;
@@ -2307,17 +2385,54 @@ function formatGameDateTime(dateTimeStr) {
 .calendar-area {
   width: 650px;
   height: 500px;
-  background: var(--theme-primary, #ff6b35);
+  /* 배경색은 calendarAreaStyle 에서 적용함 */
   color: #fff;
   border-radius: 14px;
+  position: relative;   /* 자식 요소의 position: absolute를 위한 기준점 */
   box-shadow: 0 2px 16px 0 #f8bbd04d;
   padding: 24px 18px 24px 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative; /* for logo positioning */
-  overflow: hidden;   /* hide overflow of large logos */
+  /* 자식 요소들이 부모의 border-radius를 따르도록 설정 */
+  transform: translateZ(0); /* 하드웨어 가속 활성화 */
+  will-change: border-radius; /* 성능 최적화 */
+  contain: layout style; /* 성능 최적화 */
 }
+/* 흐름 효과 */
+.calendar-area::before {
+  content: "";
+  position: absolute;
+  border-radius: inherit; /* 부모의 border-radius 상속 */
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in oklab, var(--theme-primary) 15%, white 85%) 25%,
+    transparent 50%,
+    color-mix(in oklab, var(--theme-primary) 15%, white 85%) 75%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-position: 0% 50%;
+  opacity: 0.18;
+  animation: cardGradientFlow 3s linear infinite;
+}
+
+@keyframes cardGradientFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+.calendar-header-section,
+.calendar-grid,
+.calendar-logo {
+  position: relative;
+  z-index: 2;
+}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -2328,6 +2443,8 @@ function formatGameDateTime(dateTimeStr) {
   font-style: normal;
   position: relative; /* keep above bg logo */
   z-index: 1;
+  border-radius: inherit;
+  overflow: hidden;
 }
 /* 요일 헤더 */
 .calendar-header {
@@ -2344,7 +2461,7 @@ function formatGameDateTime(dateTimeStr) {
   height: 40px;
   margin: auto 16px;
   font-size: 26px;
-  border-radius: 50%;
+  border-radius: 10%;
   background: transparent;
   color: #fff;
   cursor: pointer;
@@ -2433,6 +2550,16 @@ function formatGameDateTime(dateTimeStr) {
 .selected-date-box .selected-team-name {
   color: #fff;
 }
+
+.selected-date-title{
+  width: 450px;
+  display: flex;
+  justify-content: space-between;
+}
+.selected-date-title-text{
+  font-weight: bold;
+}
+
 /* Primary + Secondary subtle layered overlay */
 .selected-date-box::before {
   content: '';
@@ -2460,15 +2587,6 @@ function formatGameDateTime(dateTimeStr) {
   backdrop-filter: saturate(140%) blur(2px);
 }
 
-/* 게임 리스트 텍스트 가독성 보강 */
-.game-list-box b,
-.game-list-box .no-game,
-.game-list-box .game-title,
-.game-list-box .game-datetime,
-.game-list-box .game-stadium {
-  color: #fff;
-}
-
 /* 1) 카드 배경 위로 은은한 하이라이트가 좌→우 흐르는 애니메이션 */
 @keyframes cardGradientFlow {
   0%   { background-position: 0% 50%; }
@@ -2476,17 +2594,17 @@ function formatGameDateTime(dateTimeStr) {
 }
 /* 경기 목록 박스: Option A - 세컨더리 글래스 카드 (은은함 + 가독성) */
 .game-card {
-  height: 180px;
+  height: 200px;
   position: relative;
   margin: 14px 0;
   padding: 14px 18px;
   border-radius: 12px;
-  background: color-mix(in oklab, var(--theme-primary, #2a2a2a) 75%, white);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: color-mix(in oklab, var(--theme-primary, #2a2a2a) 15%, white 85%);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(4px) saturate(120%);
   -webkit-backdrop-filter: blur(4px) saturate(120%);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-  color: #fff;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  color: var(--theme-primary);
 }
 /* 3) 흐르는 하이라이트 오버레이 */
 .game-card::before {
@@ -2496,7 +2614,28 @@ function formatGameDateTime(dateTimeStr) {
   pointer-events: none;
   z-index: 1;
 
-  /* 팀 컬러톤을 아주 약하게 섞은 하이라이트 + 투명 그라데이션 */
+}
+  /* 그라데이션 효과를 가진 요소들의 공통 스타일 */
+.calendar-area,
+.selected-date-box,
+.game-list-box,
+.game-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* 그라데이션 효과 */
+.calendar-area::after,
+.selected-date-box::after,
+.game-list-box::after,
+.game-card::after,
+.apply-info-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
   background-image: linear-gradient(
     90deg,
     transparent 0%,
@@ -2507,13 +2646,9 @@ function formatGameDateTime(dateTimeStr) {
   );
   background-size: 200% 100%;
   background-position: 0% 50%;
-
-  /* 너무 과하지 않게 전체 투명도 조절 */
   opacity: 0.18;
-
-  /* 자동으로 계속 흐르게 */
   animation: cardGradientFlow 3s linear infinite;
+  border-radius: inherit;
 }
-
 
 </style>

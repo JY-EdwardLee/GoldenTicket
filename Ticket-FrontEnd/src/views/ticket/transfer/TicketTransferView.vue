@@ -18,7 +18,6 @@
                 <span :class="getTeamClass(selectedTicket)">{{ selectedTicket.homeKor || selectedTicket.game?.home }}</span> vs <span :class="getTeamClass({homeKor: selectedTicket.awayKor || selectedTicket.game?.away})">{{ selectedTicket.awayKor || selectedTicket.game?.away }}</span>
               </div>
               <div class="match-detail">
-                <span class="series">{{ pageText.seriesTitle }}</span>
                 <span class="time">{{ selectedTicket.date }}</span>
               </div>
             </div>
@@ -61,7 +60,7 @@
                  zIndex: 1
                }">
           </div> -->
-          <div class="detail-header" :style="getTicketDetailStyle(selectedTicket)" style="position: relative; z-index: 3;">
+          <div class="detail-header" :style="getTicketDetailStyle(selectedTicket)">
             <div class="detail-header-logo" style="font-size: 26px; font-weight: 900; letter-spacing: 1px;">{{ getTeamLogoName(selectedTicket.homeKor || selectedTicket.game?.home) }}</div>
             <div class="detail-header-ticketid">TICKET ID<br /><span class="ticketid-value">#{{ selectedTicket.ticketId }}</span></div>
             <div class="detail-match-title">
@@ -103,12 +102,12 @@
               </div>
             </div>
           </div>
-          <div class="detail-price-row" style="position: relative; z-index: 3; display: flex; align-items: center; gap: 8px; justify-content: center;">
-            <img src="/icon/credit_card.svg" alt="가격" class="price-icon" style="width: 1em; height: 1em;" />
-            <span class="detail-price">₩{{ selectedTicket.price?.toLocaleString() }}</span>
+          <div class="detail-price-row">
+            <img src="/icon/credit_card.svg" alt="가격" class="price-icon" style="width: 25px; height: 25px;" />
+            <span class="detail-price">{{ selectedTicket.price?.toLocaleString() }}</span>
           </div>
 
-          <div class="detail-seat-row" style="position: relative; z-index: 3; background-color: rgba(255, 255, 255, 0.95); margin: 10px 20px; border-radius: 8px; padding: 15px;">
+          <div class="detail-seat-row" style="position: relative; z-index: 3; background-color: rgba(255, 255, 255, 0.95); margin: 0px 20px; border-radius: 8px; padding: 10px;">
             <div class="detail-seat-block">
               <div class="seat-title">구역</div>
               <div class="seat-value">{{ truncateText(parseSeatInfo(selectedTicket.seat).section, 8) }}</div>
@@ -202,7 +201,9 @@
                      class="ticket-detail ticket-detail-horizontal ticket-detail-being-assignment" 
                      :style="getTicketDetailStyle(ticket)">
                   <div class="ticket-detail-being-assignment-content">
-                    <div class="being-assignment-icon">⏳</div>
+                    <div class="being-assignment-icon">
+                      <img src="/icon/hourglass.svg" alt="응모 진행중" style="width: 24px; height: 24px;" />
+                    </div>
                     <div class="being-assignment-text">응모 진행중입니다</div>
                   </div>
                 </div>
@@ -222,7 +223,9 @@
                      class="ticket-detail ticket-detail-horizontal ticket-detail-being-assignment" 
                      :style="getTicketDetailStyle(ticket)">
                   <div class="ticket-detail-being-assignment-content">
-                    <div class="being-assignment-icon">✅</div>
+                    <div class="being-assignment-icon">
+                      <img src="/icon/check.svg" alt="거래 완료" style="width: 24px; height: 24px;" />
+                    </div>
                     <div class="being-assignment-text">거래 완료</div>
                   </div>
                 </div>
@@ -294,7 +297,9 @@
     <div v-if="showWarningModal" class="warning-modal-overlay" @click="closeWarningModal">
       <div class="warning-modal-container" @click.stop>
         <div class="warning-modal-content">
-          <div class="warning-modal-icon">⚠️</div>
+          <div class="warning-modal-icon">
+            <img src="/icon/warning.svg" alt="경고" style="width: 48px; height: 48px;">
+          </div>
           <div class="warning-modal-title">양도 신청 불가</div>
           <div class="warning-modal-message">
             현재 응모 인원이 0명이라<br>
@@ -324,7 +329,6 @@ const selectedTicket = ref(null);
 const showDetailPage = ref(false);
 const showCompletePage = ref(false);
 const pageText = {
-  seriesTitle: '⚾ 오늘 한국시리즈',
   completeMainMessage: '양도 신청 되었습니다.',
   completeSubMessage: '양도가 완료되면 알려드리겠습니다.',
   confirmButtonText: '확인',
@@ -542,7 +546,6 @@ const getTeamLogo = (teamName) => {
   }
   
   const logoPath = teamLogoMap[normalizedTeam]
-  console.log(logoPath);
   return logoPath || null
 }
 
@@ -628,7 +631,6 @@ async function fetchTickets(platform) {
   ticketError.value = '';
   try {
     const res = await http.get(`tickets/platform/${platform}`);
-    console.log(` 받은 티켓 개수: ${res.data.length}개`);
     
     tickets.value = res.data.map(ticket => {
       const homeKor = Object.keys(teamNameToEnum).find(
@@ -642,9 +644,6 @@ async function fetchTickets(platform) {
       const normalizedHome = normalizeTeamName(homeKor);
       const teamColor = teamColortoEnum[normalizedHome];
       
-      console.log(` 홈팀: ${homeKor} -> 정규화: ${normalizedHome} -> 색상: ${teamColor}`);
-      console.log(` 어웨이팀: ${awayKor}`);
-      
       const processedTicket = {
         ...ticket,
         homeKor,
@@ -653,25 +652,16 @@ async function fetchTickets(platform) {
         header: `${awayKor} vs ${homeKor}`,
         statusText: ticket.status === 'BEING_ASSIGNMENT' ? '응모 진행중' : ticket.status === 'TRANSACTION_COMPLETE' ? '응모 완료' : ticket.status === 'BEING_PAYING' ? '결제중' : '',
       };
-      
-      console.log(` 처리된 티켓:`, {
-        id: processedTicket.ticketId,
-        header: processedTicket.header,
-        color: processedTicket.color,
-        status: processedTicket.statusText
-      });
-      
+            
       return processedTicket;
     });
     
-    console.log(` 최종 티켓 배열:`, tickets.value);
   } catch (e) {
     console.error(` 티켓 불러오기 실패:`, e);
     ticketError.value = '티켓 불러오기에 실패했습니다.';
     tickets.value = [];
   } finally {
     ticketLoading.value = false;
-    console.log(` 티켓 로딩 완료`);
     
     // 메인 튜토리얼에서 진입했을 때에만 티켓 선택 하위 튜토리얼 자동 시작
     if (allowTransferTutorial.value && tickets.value.length > 0) {
@@ -686,7 +676,6 @@ async function fetchTickets(platform) {
 
 // 탭 전환 시 해당 플랫폼의 티켓을 가져오는 함수
 async function switchTab(platform) {
-  console.log(`탭 전환: ${platform}`);
   activeTab.value = platform;
   
   // 플랫폼에 맞는 API 엔드포인트 결정
@@ -697,9 +686,7 @@ async function switchTab(platform) {
   ticketError.value = '';
   
   try {
-    console.log(`탭 전환 API 요청: tickets/platform/${apiPlatform}`);
     const res = await http.get(`tickets/platform/${apiPlatform}`);
-    console.log(`탭 전환 API 응답:`, res.data);
     
     tickets.value = res.data.map(ticket => {
       const homeKor = Object.keys(teamNameToEnum).find(
@@ -725,7 +712,6 @@ async function switchTab(platform) {
       return processedTicket;
     });
     
-    console.log(`탭 전환 완료 - ${platform} 티켓 ${tickets.value.length}개 로드됨`);
   } catch (e) {
     console.error(`탭 전환 중 티켓 불러오기 실패:`, e);
     ticketError.value = '티켓 불러오기에 실패했습니다.';
@@ -778,13 +764,10 @@ async function handleApplyComplete() {
     // 양도 API 호출
     const response = await http.get(`tickets/transfer/${selectedTicket.value.ticketId}`);
     
-    console.log('양도 API 응답:', response.data);
-    
     if (response.data.success) {
       // 성공 시 완료 페이지로 전환
       isApplying.value = false;
       showCompletePage.value = true;
-      console.log('양도 성공:', response.data.message);
     } else {
       // 실패 시 에러 메시지 표시
       isApplying.value = false;
@@ -848,7 +831,6 @@ onMounted(() => {
   allowConfirmTutorial.value = allowTransferTutorial.value;
 
   if (allowTransferTutorial.value) {
-    console.log('양도 페이지 튜토리얼 조건 충족:', { isTutorialMode, showTransferTutorialFlag });
     // 양도 튜토리얼 플래그 제거 (한 번만 실행되도록)
     if (showTransferTutorialFlag) {
       localStorage.removeItem('showTransferTutorial');
@@ -923,9 +905,8 @@ onMounted(() => {
   background: #fafbfc;
   border-radius: 18px;
   border: 1.5px solid #e5e7eb;
-  width: 1100px; /* 스크롤바까지 포함하여 너비 확장 */
+  width: 1000px; /* 스크롤바까지 포함하여 너비 확장 */
   max-width: 95vw;
-  margin: 48px 0 64px 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1073,8 +1054,12 @@ onMounted(() => {
   color: #fff;
   box-shadow: 0 2px 8px 0 #ce0e2d22;
 }
+.ticket-tab:focus{
+  outline: none;
+  box-shadow: none;
+}
 .ticket-list {
-  width: 1100px;
+  width: 1000px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -1511,39 +1496,31 @@ onMounted(() => {
 }
 .detail-header {
   color: #fff;
-  padding: 32px 32px 54px 32px;
+  padding: 32px 32px 32px 32px;
   position: relative;
   min-height: 320px;
-} 
+}
 .detail-header-info-row {
   display: flex;
   flex-direction: column;
-  margin-top: 8px;
-  gap: 8px;
-  position: absolute;
-  left: 32px;
-  bottom: 28px;
+  margin-top: 30px;
+  margin-bottom: 0px;
   z-index: 3;
   color: #fff;
-  font-size: 18px;
   font-weight: 500;
 }
 .detail-header-info-line {
   display: flex;
   justify-content: center;
-  gap: 100px;
-  width: 500px;
+  gap: 50px;
 }
 
 .detail-header-info-col {
-  font-size: 16px;
   display: flex;
   align-items: center;
-  width: auto;
-  min-width: 200px;
-  margin-left: 50px;
-  gap: 6px;
+  gap: 10px;
   flex: 1;
+  font-size: 20px;
 }
 .info-icon {
   font-size: 18px;
@@ -1581,7 +1558,7 @@ onMounted(() => {
 .main-title {
   font-size: 32px;
   font-weight: 900;
-  line-height: 1.4;
+  line-height: 1.6;
   letter-spacing: 1px;
   color: #fff;
   text-shadow: 0 2px 16px #b1002b55;
@@ -1589,7 +1566,7 @@ onMounted(() => {
 .detail-header-bg {
   position: absolute;
   left: 0; right: 0; top: 0; bottom: 0;
-  opacity: 0.13;
+  opacity: 0.1;
   z-index: 1;
   display: flex;
   align-items: center;
@@ -1601,29 +1578,22 @@ onMounted(() => {
   object-fit: contain;
   filter: brightness(1.2) drop-shadow(0 0 8px #fff8);
 }
-.detail-info-row {
-  display: flex;
-  gap: 18px;
-  padding: 18px 32px 0 32px;
-  color: #ce0e2d;
-  font-size: 15px;
-  font-weight: 600;
-  align-items: center;
-}
 .detail-price-row {
   display: flex;
   justify-content: flex-end;
   align-items: center;
   padding: 0 32px 0 32px;
-  margin-top: 6px;
-  margin-bottom: 6px;
+  margin: 6px 0;
+  width: auto;
+  margin-left: auto;
+  gap: 8px;
+  z-index: 3;
 }
 .detail-price {
   margin-top: 10px;
   margin-bottom: 10px;
   font-size: 22px;
   font-weight: 800;
-  color: var(--theme-primary);
 }
 .detail-gate {
   font-size: 14px;
@@ -1687,9 +1657,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  padding: 0 32px 0 32px;
-  margin-bottom: 18px;
+  /* gap: 12px; */
+  /* margin-bottom: 18px; */
 }
 .detail-seat-block {
   flex: 1 1 0;
@@ -1708,7 +1677,6 @@ onMounted(() => {
 .seat-title {
   font-size: 13px;
   font-weight: 700;
-  color: var(--theme-primary);
   margin-bottom: 4px;
 }
 .seat-value {
@@ -1839,7 +1807,7 @@ onMounted(() => {
   margin-bottom: 18px;
 }
 .confirm-btn {
-  background: var(--theme-gradient);
+  background: var(--theme-primary);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -1847,7 +1815,6 @@ onMounted(() => {
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 10px;
 }
 .process-info {
   width: 570px;
@@ -1940,17 +1907,16 @@ onMounted(() => {
   padding: 40px 30px 30px 30px;
 }
 
-.warning-modal-icon {
+/* .warning-modal-icon {
   font-size: 40px;
   margin-bottom: 10px;
-}
+} */
 
 /* Icon styles */
 .info-icon-img,
 .ticket-info-row img,
 .block-title img,
 .being-assignment-icon img,
-.warning-modal-icon img,
 .detail-header-info-col img,
 .detail-header-info-line .info-icon img,
 .detail-header-info-line img[src*='.svg'],
@@ -1964,26 +1930,26 @@ onMounted(() => {
 /* Ensure all icons in detail header are white */
 .detail-header img[src*='.svg'],
 .detail-header .info-icon img,
-.ticket-detail-info-row img {
+/* .ticket-detail-info-row img { 
   filter: brightness(0) invert(1) !important;
-}
+} */
 
 .warning-modal-title {
-  font-size: 20px;
+  font-size: 30px;
   font-weight: 700;
   color: #ce0e2d;
-  margin-bottom: 15px;
+  margin: 15px auto;
 }
 
 .warning-modal-message {
   font-size: 16px;
-  color: #333;
+  color: #898888;
   line-height: 1.6;
   margin-bottom: 30px;
 }
 
 .warning-modal-confirm-btn {
-  background-color: #ce0e2d;
+  background: var(--theme-primary);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -2027,7 +1993,7 @@ onMounted(() => {
 
 /* 호버 시 나타나는 양도하기 버튼 스타일 */
 .ticket-detail-transfer-btn-row {
-  margin-top: 12px;
+  margin-top: 5px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -2036,12 +2002,11 @@ onMounted(() => {
 }
 
 .ticket-detail-transfer-btn {
-  color: white;
-  border: 2px solid #ce0e2d;
+  border: 2px solid var(--theme-gradient);
   border-radius: 8px;
-  font-size: 20px;
-  font-weight: 600;
-  width: 200px;
+  font-size: 25px;
+  font-weight: bold;
+  width: 180px;
   height: 80px;
   cursor: pointer;
   transition: all 0.2s ease;

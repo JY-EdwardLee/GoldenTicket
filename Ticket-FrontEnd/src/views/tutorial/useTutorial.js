@@ -1,11 +1,33 @@
 import { ref, watch } from 'vue';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
+import { useTeamThemeStore } from '@/stores/teamTheme';
+
+const teamThemeStore = useTeamThemeStore;
+const teamGradient = teamThemeStore.teamColors[teamThemeStore.selectedTeam]?.gradient;
+const teamPrimary = teamThemeStore.teamColors[teamThemeStore.selectedTeam]?.primary;
+document.documentElement.style.setProperty('--theme-gradient', teamGradient);
+document.documentElement.style.setProperty('--theme-primary', teamPrimary);
+
+// 팀 변경 감지
+watch(() => teamThemeStore.selectedTeam, (newTeam) => {
+  if (newTeam) {
+    const gradient = teamThemeStore.teamColors[newTeam]?.gradient;
+    const primary = teamThemeStore.teamColors[newTeam]?.primary;
+    document.documentElement.style.setProperty('--theme-gradient', gradient);
+    document.documentElement.style.setProperty('--theme-primary', primary);
+  }
+});
+
+
 
 // driver.js 닫기 버튼의 포커스 아웃라인 제거 및 팝오버 크기 조정
 const style = document.createElement('style');
 style.textContent = `
   .driver-popover-close-btn:focus {
+    background: var(--theme-gradient);
+    width: 20px !important;
+    height: 20px !important;
     outline: none !important;
     box-shadow: none !important;
     border: none !important;
@@ -16,6 +38,11 @@ style.textContent = `
     box-shadow: none !important;
     border: none !important;
   }
+  .driver-popover-close-btn:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
   
   /* 팝오버 크기 조정 */
   .driver-popover:not(.transfer-tutorial-popover){
@@ -206,14 +233,10 @@ export function useTutorial() {
 
   // 튜토리얼 닫기 함수 추가
   const closeTutorial = () => {
-    console.log('closeTutorial 호출됨');
     if (tutorialDriver) {
-      console.log('closeTutorial - if문 진입');
       try {
-        console.log('closeTutorial - if문 - try')
         tutorialDriver.destroy();
         tutorialDriver = null;
-        console.log('튜토리얼이 성공적으로 닫혔습니다.');
       } catch (e) {
         console.error('튜토리얼 닫기 중 오류 발생:', e);
       }
@@ -232,7 +255,6 @@ export function useTutorial() {
   const startTutorial = (authStore = null, showLoginModal = null, lockY = undefined) => {
     // 로그인 상태 확인 (매개변수로 전달된 경우)
     if (authStore && showLoginModal && !authStore.isAuthenticated) {
-      console.log('비로그인 상태에서 튜토리얼 시도 - 로그인 모달 표시');
       showTutorialModal.value = false; // 튜토리얼 모달 닫기
       showLoginModal.value = true; // 로그인 모달 표시
       return;
@@ -288,7 +310,6 @@ export function useTutorial() {
           // 모든 기능의 튜토리얼 플래그 설정 (완료 후 각 기능 사용 시 튜토리얼 표시)
           localStorage.setItem('showApplyTutorial', 'true');
           localStorage.setItem('showTransferTutorial', 'true');
-          console.log('메인 튜토리얼 종료: firstSignup=1 및 기능별 튜토리얼 플래그 설정');
         },
         
         steps: [
@@ -310,7 +331,6 @@ export function useTutorial() {
               onNext: () => {
                 // 응모하기 버튼 클릭 시 응모 튜토리얼 플래그 설정
                 localStorage.setItem('showApplyTutorial', 'true');
-                console.log('응모 튜토리얼 플래그 설정됨');
                 return true; // 다음 단계로 진행 허용
               }
             }
@@ -325,7 +345,6 @@ export function useTutorial() {
               onNext: () => {
                 // 양도하기 버튼 클릭 시 양도 튜토리얼 플래그 설정
                 localStorage.setItem('showTransferTutorial', 'true');
-                console.log('양도 튜토리얼 플래그 설정됨');
                 return true; // 다음 단계로 진행 허용
               }
             }
@@ -444,7 +463,6 @@ export function useTutorial() {
   // 날짜 클릭 리스너: 날짜 클릭 시 경기 목록 튜토리얼 또는 '경기 없음' 안내로 분기
   // options: { onHasGames: () => void, onNoGames: () => void, delayMs?: number }
   const setupApplyDateClickListener = (options = {}) => {
-    console.log('setupApplyDateClickListener 진입');
     const { onHasGames, onNoGames, delayMs = 100 } = options;
 
     const handleDateClick = (event) => {
@@ -509,7 +527,6 @@ export function useTutorial() {
           }
         ],
         onDestroyed: () => {
-          console.log('응모 튜토리얼 완료');
           // 스크롤 복구
           unlockScroll();
           tutorialDriver = null;
@@ -523,7 +540,6 @@ export function useTutorial() {
 
   // 양도 페이지 전용 튜토리얼
   const startTransferTutorial = (lockY = undefined) => {
-    console.log('양도 튜토리얼 시작');
     
     // Store the driver instance in the module-level variable
     // 튜토리얼 시작 시 스크롤 잠금 (원하는 위치로)
@@ -591,7 +607,6 @@ export function useTutorial() {
         
         // 튜토리얼 완료 시 실행
         onDestroyed: () => {
-          console.log('양도 튜토리얼 완료');
           // 스크롤 복구
           unlockScroll();
           tutorialDriver = null;
@@ -602,8 +617,6 @@ export function useTutorial() {
 
   // [양도] 티켓 선택 튜토리얼
   const selectTicketTutorial = (startStep=0) => {
-    console.log('티켓 선택 튜토리얼 시작');
-    
     // 페이지를 맨 위로 스크롤
     window.scrollTo({
       top: 0,
@@ -655,7 +668,6 @@ export function useTutorial() {
         
         // 튜토리얼 완료 시 실행
         onDestroyed: () => {
-          console.log('티켓 선택 튜토리얼 완료');
           // main-center-card 위치 복원
           const mainCenterCard = document.querySelector('.main-center-card');
           if (mainCenterCard) {
@@ -708,7 +720,6 @@ export function useTutorial() {
 
   // [양도] 양도 확인 튜토리얼 (상세 페이지에서 호출)
   const transferConfirmTutorial = () => {
-    console.log('양도 확인 튜토리얼 시작');
     
     window.scrollTo(0, 10);
     lockScroll(10);
@@ -761,7 +772,6 @@ export function useTutorial() {
       
       // 튜토리얼 완료 시 실행
       onDestroyed: () => {
-        console.log('양도 튜토리얼 완료');
         // 스크롤 복구
         unlockScroll();
         tutorialDriver = null;
