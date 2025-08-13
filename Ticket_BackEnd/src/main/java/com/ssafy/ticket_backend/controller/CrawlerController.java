@@ -4,6 +4,7 @@ import com.ssafy.ticket_backend.mapper.CrawlMapper;
 import com.ssafy.ticket_backend.model.BaseballTeams;
 import com.ssafy.ticket_backend.model.Game;
 import com.ssafy.ticket_backend.model.Stadium;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 /**
- * 월별 경기일정 크롤링
+ * 월별 경기일정 크롤링 (매월 1일 00시)
  */
 @RequiredArgsConstructor
 @RestController
@@ -67,7 +68,7 @@ public class CrawlerController {
     }
 
     /**
-     * // 경기장 이름을 Stadium enum으로 매핑하는 메서드
+     * 경기장 이름을 Stadium enum으로 매핑
      *
      * @param stadiumName
      * @return
@@ -105,7 +106,7 @@ public class CrawlerController {
     }
 
     /**
-     * 날짜와 시간을 LocalDateTime으로 변환하는 메서드
+     * 날짜와 시간을 LocalDateTime으로 변환
      *
      * @param dateInfo
      * @param timeInfo
@@ -145,13 +146,15 @@ public class CrawlerController {
         WebDriver driver = new ChromeDriver();
 
         try {
-            String url = "https://m.sports.naver.com/kbaseball/schedule/index?category=kbo&date=2025-08-08";
+            String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            String url =
+                "https://m.sports.naver.com/kbaseball/schedule/index?category=kbo&date=" + today;
             driver.get(url);
 
-            // 페이지 전체 로딩 대기 (필요시 Thread.sleep 추가)
+            // 페이지 전체 로딩 대기
             Thread.sleep(2000);
 
-            // 페이지 소스 확인 (디버깅용)
+            // (디버깅용)
             String pageSource = driver.getPageSource();
 
             // 새로운 네이버 스포츠 구조에 맞는 선택자 사용
@@ -263,9 +266,9 @@ public class CrawlerController {
                         if (game.getHomeTeam() != null && game.getAwayTeam() != null
                             && game.getStadium() != null && game.getGameDateTime() != null) {
 
-                            crawlMapper.insertGame(game);
-                        } else {
-                            // 경기 정보 누락
+                            System.out.println(game);
+                            // 임시 수정
+                            // crawlMapper.insertGame(game);
                         }
 
                     } catch (Exception e) {

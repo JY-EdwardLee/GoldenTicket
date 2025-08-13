@@ -8,7 +8,9 @@
     <![CDATA[
     SELECT *
     FROM games
-    WHERE game_datetime > NOW();
+    WHERE is_cancelled = FALSE
+    AND is_ended = FALSE
+    AND game_datetime > NOW();
     ]]>
   </select>
 

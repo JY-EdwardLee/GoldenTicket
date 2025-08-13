@@ -49,6 +49,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/boards/*").permitAll()  // 게시판 별 게시글 조회
                 .requestMatchers(HttpMethod.GET, "/posts/*").permitAll()  // 게시글 상세보기
                 .requestMatchers(HttpMethod.GET, "/rank/**").permitAll()  // 양도 순위
+                .requestMatchers(HttpMethod.GET, "/crawler/**").permitAll() // 크롤링
                 .anyRequest().authenticated())  // 이 외에는 인증 필요
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
