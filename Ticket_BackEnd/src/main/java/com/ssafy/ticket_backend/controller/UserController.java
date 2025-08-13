@@ -319,6 +319,7 @@ public class UserController {
     @PatchMapping("/me")
     public ResponseEntity<Void> updateMyPage(@AuthenticationPrincipal CustomUserDetails userDetails,
         @RequestBody UserPatchRequest userPatchRequest) {
+        System.out.println(userPatchRequest);
         userService.patchMyPage(userDetails.getUsername(), userPatchRequest);
 
         return ResponseEntity.accepted().build();
