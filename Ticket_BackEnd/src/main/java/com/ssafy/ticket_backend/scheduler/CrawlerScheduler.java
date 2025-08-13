@@ -14,7 +14,6 @@ public class CrawlerScheduler {
 
     private final RestTemplate restTemplate;
 
-
     @Value("${BE_BASE_URL}")
     private String BE_BASE_URL;
 
@@ -23,20 +22,20 @@ public class CrawlerScheduler {
      */
     @Scheduled(cron = "0 0 23 * * *")
     public void crawlTodaySchedule() {
-        try {
-            log.info("매일 오후 11시 오늘 경기 일정 크롤링 시작");
-
-            // 일별 크롤러 컨트롤러의 엔드포인트 호출
-            String crawlResult = restTemplate.getForObject(
-                BE_BASE_URL + "/crawler/today-schedule",
-                String.class
-            );
-
-            log.info("일별 크롤링 완료: {}", crawlResult);
-
-        } catch (Exception e) {
-            log.error("일별 크롤링 스케줄러 실행 중 오류 발생: {}", e.getMessage(), e);
-        }
+//        try {
+//            log.info("매일 오후 11시 오늘 경기 일정 크롤링 시작");
+//
+//            // 일별 크롤러 컨트롤러의 엔드포인트 호출
+//            String crawlResult = restTemplate.getForObject(
+//                BE_BASE_URL + "/crawler/today-schedule",
+//                String.class
+//            );
+//
+//            log.info("일별 크롤링 완료: {}", crawlResult);
+//
+//        } catch (Exception e) {
+//            log.error("일별 크롤링 스케줄러 실행 중 오류 발생: {}", e.getMessage(), e);
+//        }
     }
 
 
@@ -49,10 +48,8 @@ public class CrawlerScheduler {
             log.info("매월 1일 KBO 경기 일정 크롤링 시작");
 
             // 1단계: 크롤러 컨트롤러의 엔드포인트 호출
-            String crawlResult = restTemplate.getForObject(
-                BE_BASE_URL + "/crawler/kbo-schedule",
-                String.class
-            );
+            String crawlResult = restTemplate.getForObject(BE_BASE_URL + "/crawler/kbo-schedule",
+                String.class);
 
             log.info("크롤링 완료: {}", crawlResult);
 
@@ -61,9 +58,7 @@ public class CrawlerScheduler {
                 log.info("other_platform 데이터 생성 시작");
 
                 String dummyResult = restTemplate.getForObject(
-                    BE_BASE_URL + "/other-platform/generate-dummy",
-                    String.class
-                );
+                    BE_BASE_URL + "/other-platform/generate-dummy", String.class);
 
                 log.info("더미 데이터 생성 완료: {}", dummyResult);
 
@@ -71,10 +66,8 @@ public class CrawlerScheduler {
                 if (dummyResult != null && !dummyResult.contains("실패")) {
                     log.info("그룹 데이터 생성 시작");
 
-                    String groupResult = restTemplate.getForObject(
-                        BE_BASE_URL + "/group/generator",
-                        String.class
-                    );
+                    String groupResult = restTemplate.getForObject(BE_BASE_URL + "/group/generator",
+                        String.class);
 
                     log.info("그룹 데이터 생성 완료: {}", groupResult);
                 } else {
