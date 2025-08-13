@@ -228,23 +228,22 @@ const handleClick = () => {
 .title-text {
   display: inline-block;
   font-size: 1.5rem;
-  transition: color 0.3s ease;
 }
 
-/* .hero-card:hover .title-text {
+.hero-card:hover .title-text {
   color: #ffffff !important;
-} */
+}
 
 /* Sub title text styles with enhanced hover effect */
 .title-sub-text {
   display: inline-block;
-  font-size: 1.1rem;
-  transition: color 0.3s ease;
+  font-size: 1.3rem;
 }
 
-/* .hero-card:hover .title-sub-text {
+.hero-card:hover .title-sub-text {
   color: #ffffff !important;
-} */
+}
+
 .orange-dot {
   display: inline-block;
   width: 12px;
@@ -256,10 +255,10 @@ const handleClick = () => {
   position: relative;
   top: -2px;
 }
-/* 
+
 .hero-card:hover .orange-dot {
   background-color: #ffffff !important;
-} */
+}
 
 .hero-card:hover {
   /* transform: translateY(-8px); */
