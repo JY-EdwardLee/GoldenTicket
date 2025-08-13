@@ -1,8 +1,7 @@
 <template>
-  <v-card elevation="4" rounded="lg" class="h-100">
+  <v-card elevation="4" rounded="xl" class="h-100">
     <v-card-title class="d-flex align-center pa-4">
-      <v-icon :color="iconColor" size="large" class="mr-3">{{ titleIcon }}</v-icon>
-      <span class="text-h5 font-weight-bold">{{ title }}</span>
+      <span class="text-h5 font-weight-bold">{{ icon[titleIcon] }} {{ title }}</span>
     </v-card-title>
     <v-card-text class="pa-4">
       <v-list class="transparent">
@@ -12,10 +11,10 @@
           class="px-0 py-4"
         >
           <template v-slot:prepend>
-            <div v-if="type === 'team'" class="team-image">
-            <img :src="item.avatar" class="avatar-image">
+            <div v-if="type === 'team'" class="team-image-container">
+            <img :src="item.avatar" class="team-image">
             </div>
-            <v-avatar v-else :color="getAvatarColor(index)" class="mr-4" size="large">
+            <v-avatar v-if="type === 'user'" class="avatar-image-container mr-4" size="large">
               <img :src="item.avatar" class="avatar-image">
             </v-avatar>
           </template>
@@ -50,7 +49,9 @@ import { ref } from 'vue';
 const icon = ref({
   1: '🥇',
   2: '🥈',
-  3: '🥉'
+  3: '🥉',
+  'star': '⭐',
+  'trophy': '🏆'
 });
 
 const props = defineProps({
@@ -118,16 +119,27 @@ const formatNumber = (number) => {
 </script>
 
 <style scoped>
-.avatar-image {
+.team-image {
   width: px;
   height: 40px;
   object-fit: cover;
 }
-.team-image {
+.team-image-container {
   width: 68px;
   text-align: center;
   object-fit: cover;
   margin-right: 16px;
+}
+.avatar-image-container {
+  width: 68px;
+  text-align: center;
+  object-fit: cover;
+  margin-right: 16px;
+}
+.avatar-image {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
 }
 .v-card:hover {
   transform: translateY(-2px);

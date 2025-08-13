@@ -53,7 +53,7 @@
             </div>
             <div class="team-info">
               <p class="team">{{ enumToTeamName[themeStore.selectedTeam.value] || '관심 야구팀' }}</p>
-              <span class="tag">NO LIMITS</span>
+              <span class="tag">{{ user?.userRole|| 'NO LIMITS' }}</span>
             </div>
           </div>
         </div>

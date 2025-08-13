@@ -40,7 +40,7 @@
 
     <!-- 페이지네이션 위 글쓰기 버튼 -->
     <div class="actions-row">
-      <button v-if="authStore.isAuthenticated" class="write-btn" @click="handleWriteClick">글쓰기</button>
+      <button v-if="authStore.isAuthenticated || authStore.isAdmin" class="write-btn" @click="handleWriteClick">글쓰기</button>
     </div>
 
     <!-- 페이지네이션 -->

@@ -124,15 +124,15 @@
           <div class="action-buttons">
             <button class="edit-btn" @click="editPost">
               <span class="btn-icon">✏️</span>
-              <span class="btn-text">글 수정</span>
+              <span class="btn-text">{{ authStore.isAdmin ? '글 수정 (관리자)' : '글 수정' }}</span>
             </button>
             <button class="delete-btn" @click="deletePost">
               <span class="btn-icon">🗑️</span>
-              <span class="btn-text">글 삭제</span>
+              <span class="btn-text">{{ authStore.isAdmin ? '글 삭제 (관리자)' : '글 삭제' }}</span>
             </button>
           </div>
           <div class="action-info">
-            <span class="info-text">작성자만 볼 수 있는 메뉴입니다</span>
+            <span class="info-text">{{ authStore.isAdmin ? '관리자는 모든 게시글을 수정/삭제할 수 있습니다' : '작성자만 볼 수 있는 메뉴입니다' }}</span>
           </div>
         </div>
       </div>
@@ -221,13 +221,16 @@ const loadPostDetail = async (showLoading = true) => {
       
       // 작성자 판별 (로그인된 사용자와 비교)
       if (authStore.isAuthenticated && authStore.user) {
-        // userId 또는 nickName으로 작성자 판별
-        const isUserIdMatch = post.value.postUser?.userId === authStore.user.userId;
-        const isNicknameMatch = post.value.postUser?.nickname === authStore.user.nickName;
-        
-        isAuthor.value = isUserIdMatch || isNicknameMatch;
-        
-        
+        // ADMIN은 모든 게시글 수정/삭제 가능
+        if (authStore.isAdmin) {
+          isAuthor.value = true;
+        } else {
+          // userId 또는 nickName으로 작성자 판별
+          const isUserIdMatch = post.value.postUser?.userId === authStore.user.userId;
+          const isNicknameMatch = post.value.postUser?.nickname === authStore.user.nickName;
+          
+          isAuthor.value = isUserIdMatch || isNicknameMatch;
+        }
       }
       
       // 서버에서 받아온 좋아요 상태 설정

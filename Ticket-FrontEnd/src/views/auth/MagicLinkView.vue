@@ -82,6 +82,11 @@ const handleMagicLink = async () => {
     const response = await http.post(endpoint);
     
     if (response.data && response.data.accessToken) {
+      // userRole이 서버 응답에 포함되어 있다면 저장
+      if (response.data.userRole) {
+        authStore.setUserRole(response.data.userRole);
+      }
+      
       authStore.getUserInfo();
       authStore.setUser(response.data);
       authStore.setToken(response.data.accessToken);

@@ -95,8 +95,12 @@ public class CommentServiceImpl implements CommentService {
 
         if (result == null) {
             throw new CommentException("존재하지 않는 댓글입니다.");
-        } else if (user.getUserId() != commentMapper.selectUserIdByCommentId(commentId)) {
-            throw new CommentException("권한이 없습니다.");
+        }
+        
+        if (!user.getUserRole().equals(UserRole.ADMIN)) {
+            if (user.getUserId() != commentMapper.selectUserIdByCommentId(commentId)) {
+                throw new CommentException("권한이 없습니다.");
+            }
         }
 
         int updateResult = commentMapper.updateComment(commentId, commentUpdateRequest);

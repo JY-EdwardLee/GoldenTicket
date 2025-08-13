@@ -90,17 +90,7 @@ const allPosts = ref([]); // 전체 게시글 저장
 
 // 관리자 여부 판별
 const isAdmin = computed(() => {
-  const u = authStore.user || JSON.parse(localStorage.getItem('user') || 'null');
-  if (!u) return false;
-  if (u.role && (u.role === 'ADMIN' || u.role === 'ROLE_ADMIN')) return true;
-  if (Array.isArray(u.roles) && (u.roles.includes('ADMIN') || u.roles.includes('ROLE_ADMIN'))) return true;
-  if (Array.isArray(u.authorities)) {
-    return u.authorities.some(a => {
-      const v = a?.authority ?? a;
-      return v === 'ADMIN' || v === 'ROLE_ADMIN';
-    });
-  }
-  return false;
+  return authStore.isAdmin;
 });
 
 // 글쓰기 이동

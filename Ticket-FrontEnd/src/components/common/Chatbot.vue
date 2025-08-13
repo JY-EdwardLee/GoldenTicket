@@ -75,7 +75,7 @@
         <v-text-field
           v-model="newMessage"
           @keypress.enter.prevent="sendMessage"
-          placeholder="AI 에이전트에게 질문해 주세요."
+          placeholder="골티봇에게 물어보세요요"
           filled
           rounded
           dense
@@ -274,6 +274,39 @@ const scrollToBottom = async (directly = false) => {
 </script>
 
 <style scoped>
+.message-text {
+  word-wrap: break-word;
+  word-break: break-word;
+  white-space: pre-wrap;
+  max-width: 100%;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.message {
+  max-width: 75%;
+  padding: 8px 12px;
+  border-radius: 15px;
+  margin: 4px 0;
+  position: relative;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.message.user {
+  background-color: #e3f2fd;
+  margin-left: auto;
+  margin-right: 12px;
+  border-bottom-right-radius: 4px;
+}
+
+.message.bot {
+  background-color: #f5f5f5;
+  margin-right: auto;
+  margin-left: 12px;
+  border-bottom-left-radius: 4px;
+}
+
 .chat-button {
   position: fixed;
   border: 1px var(--theme-primary);
@@ -350,6 +383,7 @@ const scrollToBottom = async (directly = false) => {
 .message.user {
   background-color: var(--theme-primary);
   color: #ffffff;
+  max-width: 100%;
   border-bottom-right-radius: 4px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }

@@ -23,6 +23,7 @@
             <option value="">게시판을 선택하세요</option>
             <option :value="BOARD_TYPES.FREE">자유게시판</option>
             <option :value="BOARD_TYPES.GROUP">단체 관련 게시판</option>
+            <option v-if="authStore.isAdmin" :value="BOARD_TYPES.NOTICE">공지사항</option>
           </select>
         </div>
 
@@ -204,12 +205,14 @@ onMounted(() => {
   }
   
   const boardType = route.query.type;
-  if (boardType && ['free', 'group'].includes(boardType)) {
+  if (boardType && ['free', 'group', 'notice'].includes(boardType)) {
     // 쿼리 파라미터의 타입을 BOARD_TYPES 상수에 맞게 변환
     if (boardType === 'free') {
       formData.value.boardType = BOARD_TYPES.FREE;
     } else if (boardType === 'group') {
       formData.value.boardType = BOARD_TYPES.GROUP;
+    } else if (boardType === 'notice') {
+      formData.value.boardType = BOARD_TYPES.NOTICE;
     }
   }
 });

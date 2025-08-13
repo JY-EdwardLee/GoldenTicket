@@ -54,28 +54,29 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
       if (import.meta?.env?.DEV) console.log("[WebSocket] 연결 성공");
 
       //  특정 유저의 알림을 받아오기 위한 구독
+      // 표준 사용자 큐 구독: 서버에서 convertAndSendToUser(user, '/queue/notify', ...) 사용 시 클라이언트는 이메일을 경로에 포함하지 않습니다.
       stompClient.subscribe(`/user/queue/notify`, (message) => {
         let payload;
         try {
           payload = JSON.parse(message.body);
         } catch (e) {
-          // JSON 파싱 실패 시, 문자열을 message 필드에 넣어서 넘김
           payload = { message: message.body };
         }
 
-        // 알림을 Pinia store에 추가
         notificationStore.addNotification(payload);
 
         if (import.meta?.env?.DEV)
           console.log("[WebSocket] message received", payload);
 
-        // callback으로 받은 메시지 처리 (선택적)
         if (typeof onMessageCallback === "function") {
           onMessageCallback(payload);
         }
       });
 
-      // console.log("[WebSocket] user/queue/notify 구독 시작");
+      // 하위 호환/디버그: 이전 경로가 서버에 남아있는 경우 로그만 남김
+      if (import.meta?.env?.DEV) {
+        console.log("[WebSocket] Subscribed to /user/queue/notify for:", userEmail);
+      }
     },
     (error) => {
       console.error("[WebSocket] 연결 실패:", error);

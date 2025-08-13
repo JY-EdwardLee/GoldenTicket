@@ -64,7 +64,7 @@ import { useNotificationStore } from '@/stores/notification'
 import { storeToRefs } from 'pinia'
 
 // notification store 사용
-const notificationStore = useNotificationStore()
+const notificationStore = useNotificationStore()                                                          
 const { notifications, unreadCount, sortedNotifications } = storeToRefs(notificationStore)
 
 // 로컬 상태
