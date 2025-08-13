@@ -89,7 +89,9 @@
     is_ended,
     stadium
     FROM games
-    WHERE is_cancelled = FALSE AND is_ended = FALSE
+    WHERE is_cancelled = FALSE 
+      AND is_ended = FALSE
+      AND game_datetime > NOW()
   </select>
 
   <update id="cancelWaiting" parameterType="map">

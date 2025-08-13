@@ -7,4 +7,6 @@ import org.apache.ibatis.annotations.Mapper;
 public interface CrawlMapper {
 
     void insertGame(Game game);
+
+    void updateGame(Game game);
 }
