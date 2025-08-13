@@ -88,12 +88,12 @@
               <span class="service-name">인터파크 티켓</span>
               <span class="service-description">티켓 정보 연동하기</span>
             </div>
-            <div class="service-status connected">
-              <span class="status-dot"></span>
-              연결됨
+            <div class="service-status disconnected">
+              <span class="status-dot disconnected"></span>
+              미연결
             </div>
           </div>
-          <button class="connect-btn">연결 관리</button>
+          <button class="connect-btn">연결 하기</button>
         </div>
       </div>
     </div>
@@ -531,6 +531,14 @@ onMounted(async () => {
   height: 8px;
   background: #22c55e;
   border-radius: 50%;
+}
+
+.service-status.disconnected {
+  background: #c1c1c1;
+}
+
+.status-dot.disconnected {
+  background: #000000;
 }
 
 .disconnect-btn, .connect-btn {

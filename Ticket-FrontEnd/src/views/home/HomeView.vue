@@ -2,7 +2,7 @@
   <v-app>
     <v-main>
       <!-- 히어로 섹션 -->
-      <v-container fluid class="hero-section pa-4" style="min-height: 85vh; height: auto;">
+      <v-container fluid class="hero-section pa-4" style="min-height: 25%; height: auto;">
         <v-container class="pa-0" :class="{ 'hovered': isTransferCardHovered || isEnterCardHovered }">
           <!-- 데스크톱 레이아웃 -->
           <v-row no-gutters class="fill-height d-none d-md-flex">
@@ -109,7 +109,7 @@
                 <div>
                   <div class="d-flex align-center">
                     <icon color="primary" style="font-size: 30px">🎫</icon>
-                    <span class="font-weight-bold text-black ml-2" style="font-size: 1.1rem">다가오는 경기</span>
+                    <span class="font-weight-bold text-black ml-2" style="font-size: 1.3rem">다가오는 경기</span>
                   </div>
                   <div class="text-medium-emphasis mt-1 font-weight-bold">예정된 가장 가까운 직관 경기를 확인하세요</div>
                 </div>
