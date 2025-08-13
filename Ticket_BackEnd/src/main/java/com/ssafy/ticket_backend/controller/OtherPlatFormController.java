@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/other-platform")
 public class OtherPlatFormController {
+
     /*
     id            SERIAL PRIMARY KEY,
     platform      VARCHAR(30)  NOT NULL,                    -- NOL", TICKETLINK
@@ -28,16 +29,10 @@ public class OtherPlatFormController {
     game_dateTime TIMESTAMP WITHOUT TIME ZONE NOT NULL,     -- game 정보와 일치
     home_team     VARCHAR(50)  NOT NULL,                    -- game 정보와 일치
     away_team     VARCHAR(50)  NOT NULL,                    -- game 정보와 일치
-	  stadium 	  VARCHAR(50)  NOT NULL,					            -- stadium 추가
-    user_email character varying(255) COLLATE pg_catalog."default" NOT NULL,    --
-   */
+	stadium 	  VARCHAR(50)  NOT NULL,					-- stadium 추가
+    user_email character varying(255) COLLATE pg_catalog."default" NOT NULL,
 
-    static final String[] PLATFORMS = {"NOL", "TICKETLINK"};   // 2중 랜덤 택1
-
-    // (현재시간과 비교)
-
-  /*
-  <위치, 가격>
+    <위치, 가격>
     내야			    15000~25000
     외야			    7000~15000
     내야통로석		18000~25000
@@ -50,7 +45,11 @@ public class OtherPlatFormController {
     1~40
 
     ex. (내야 or 외야 or 내야통로석) 00구역 0열 0번
-  */
+    */
+
+    static final String[] PLATFORMS = {"NOL", "TICKETLINK"};   // 2중 랜덤 택1
+
+    // (현재시간과 비교)
 
     private final UserMapper userMapper;
     private final GameMapper gameMapper;
