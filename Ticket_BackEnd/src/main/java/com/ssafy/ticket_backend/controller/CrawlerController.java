@@ -7,6 +7,7 @@ import com.ssafy.ticket_backend.model.Stadium;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.openqa.selenium.By;
@@ -148,15 +149,41 @@ public class CrawlerController {
 
         try {
             String today = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            String url = "https://m.sports.naver.com/kbaseball/schedule/index?category=kbo&date=" + today;
+            String url =
+                "https://m.sports.naver.com/kbaseball/schedule/index?category=kbo&date=" + today;
             driver.get(url);
 
             // 페이지 전체 로딩 대기
             Thread.sleep(2000);
 
-            // 오늘 경기 정보만 찾기
-            List<WebElement> matchItems = driver.findElements(
-                By.cssSelector("li[class*='MatchBox_match_item']"));
+            // 오늘 날짜의 경기 그룹만 찾기
+            List<WebElement> matchGroups = driver.findElements(
+                By.cssSelector("div[class*='ScheduleLeagueType_match_list_group']"));
+
+            List<WebElement> todayMatchItems = new ArrayList<>();
+
+            // 오늘 날짜의 경기 그룹 찾기
+            for (WebElement matchGroup : matchGroups) {
+                try {
+                    WebElement dateElement = matchGroup.findElement(
+                        By.cssSelector("em[class*='ScheduleLeagueType_title']"));
+                    String dateInfo = dateElement.getText().trim();
+
+                    // 오늘 날짜인지 확인 (예: "8월 5일 (화)" 형식)
+                    String todayFormatted = LocalDate.now()
+                        .format(DateTimeFormatter.ofPattern("M월 d일"));
+                    if (dateInfo.contains(todayFormatted)) {
+                        // 오늘 날짜의 경기들만 가져오기
+                        todayMatchItems = matchGroup.findElements(
+                            By.cssSelector("li[class*='MatchBox_match_item']"));
+                        break;
+                    }
+                } catch (Exception e) {
+                    continue;
+                }
+            }
+
+            List<WebElement> matchItems = todayMatchItems;
 
             if (matchItems.isEmpty()) {
                 result.append("오늘 경기가 없습니다.\n");
@@ -221,14 +248,30 @@ public class CrawlerController {
                             status = "상태 정보 없음";
                         }
 
-                        // 결과 출력
-                        String matchInfo = String.format("⏰ %s | 🏟️ %s | %s vs %s | %s\n", 
-                            time, stadium, awayTeam, homeTeam, status);
-                        
-                        result.append(matchInfo);
-                        
-                        // 콘솔에도 출력
-                        System.out.println(matchInfo);
+                        // Game 객체 생성
+                        Game game = new Game();
+                        game.setGameDateTime(parseDateTime(
+                            LocalDate.now().format(DateTimeFormatter.ofPattern("M월 d일")), time));
+                        game.setHomeTeam(mapTeamName(homeTeam));
+                        game.setAwayTeam(mapTeamName(awayTeam));
+                        game.setCanceled("취소".equals(status));
+                        game.setEnded("종료".equals(status));
+                        game.setStadium(mapStadiumName(stadium));
+
+                        // null 체크 후 Game 객체 출력
+                        if (game.getHomeTeam() != null && game.getAwayTeam() != null
+                            && game.getStadium() != null && game.getGameDateTime() != null) {
+
+                            // game 정보 업데이트
+                            crawlMapper.updateGame(game);
+
+                            // 결과 출력
+                            String matchInfo = String.format("⏰ %s | 🏟️ %s | %s vs %s | %s\n",
+                                time, stadium, awayTeam, homeTeam, status);
+                            result.append(matchInfo);
+                        } else {
+                            result.append("⚠️ Game 객체 생성 실패: 필수 정보 누락\n");
+                        }
 
                     } catch (Exception e) {
                         result.append("⚠️ 경기 정보 파싱 실패 : ").append(e.getMessage()).append("\n");
@@ -244,6 +287,7 @@ public class CrawlerController {
 
         return result.toString();
     }
+
 
     /**
      * 월별 크롤링
@@ -378,9 +422,7 @@ public class CrawlerController {
                         if (game.getHomeTeam() != null && game.getAwayTeam() != null
                             && game.getStadium() != null && game.getGameDateTime() != null) {
 
-                            System.out.println(game);
-                            // 임시 수정
-                            // crawlMapper.insertGame(game);
+                            crawlMapper.insertGame(game);
                         }
 
                     } catch (Exception e) {

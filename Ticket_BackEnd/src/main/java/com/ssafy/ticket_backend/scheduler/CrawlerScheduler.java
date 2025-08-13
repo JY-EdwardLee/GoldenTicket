@@ -14,15 +14,35 @@ public class CrawlerScheduler {
 
     private final RestTemplate restTemplate;
 
-    /**
-     * 매월 1일 자정에 KBO 경기 일정 크롤링 실행 cron = "초 분 시 일 월 요일" "0 0 0 1 * *" = 매월 1일 00:00:00 테이블 최신화
-     * [games, other_platform, groups] 매달 새로운 정보 insert
-     */
 
     @Value("${BE_BASE_URL}")
     private String BE_BASE_URL;
 
+    /**
+     * 매일 오후 11시에 오늘 경기 일정 크롤링 실행 (우천취소 정보 업데이트) cron = "초 분 시 일 월 요일" "0 0 23 * * *" = 매일 23:00:00
+     */
+    @Scheduled(cron = "0 0 23 * * *")
+    public void crawlTodaySchedule() {
+        try {
+            log.info("매일 오후 11시 오늘 경기 일정 크롤링 시작");
 
+            // 일별 크롤러 컨트롤러의 엔드포인트 호출
+            String crawlResult = restTemplate.getForObject(
+                BE_BASE_URL + "/crawler/today-schedule",
+                String.class
+            );
+
+            log.info("일별 크롤링 완료: {}", crawlResult);
+
+        } catch (Exception e) {
+            log.error("일별 크롤링 스케줄러 실행 중 오류 발생: {}", e.getMessage(), e);
+        }
+    }
+
+
+    /**
+     * 매월 1일 자정에 KBO 경기 일정 크롤링 실행 [games, other_platform, groups] 매달 새로운 정보 insert
+     */
     @Scheduled(cron = "0 0 0 1 * *")
     public void crawlKboSchedule() {
         try {

@@ -6,7 +6,21 @@
 
   <insert id="insertGame" parameterType="com.ssafy.ticket_backend.model.Game">
     INSERT INTO games (game_datetime, home_team, away_team, is_cancelled, is_ended, stadium)
-    VALUES (#{gameDateTime}, #{homeTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler}, #{awayTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler}, #{isCanceled}, #{isEnded}, #{stadium, typeHandler=com.ssafy.ticket_backend.handler.StadiumTypeHandler})
+    VALUES (#{gameDateTime},
+            #{homeTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler},
+            #{awayTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler},
+            #{isCanceled}, #{isEnded},
+            #{stadium, typeHandler=com.ssafy.ticket_backend.handler.StadiumTypeHandler})
   </insert>
+
+  <update id="updateGame" parameterType="com.ssafy.ticket_backend.model.Game">
+    UPDATE games 
+    SET is_cancelled = #{isCanceled},
+        is_ended = #{isEnded}
+    WHERE stadium = #{stadium, typeHandler=com.ssafy.ticket_backend.handler.StadiumTypeHandler}
+      AND DATE(game_datetime) = DATE(#{gameDateTime})
+      AND home_team = #{homeTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler}
+      AND away_team = #{awayTeam, typeHandler=com.ssafy.ticket_backend.handler.BaseballTeamsTypeHandler}
+  </update>
 
 </mapper>
