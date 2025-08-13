@@ -657,7 +657,7 @@ const fetchTeamRanking = async () => {
       subtitle: `${item.rank}위`,
       score: item.transferAllCount,
       ...(item.growthRate !== null && { change: `+${item.growthRate}%` }),
-      avatar: `/team-logos/${item.teamName.toLowerCase()}.png`
+      avatar: `/orglogo/${item.teamName}.svg`
     }));
   } catch (error) {
     console.error('팀 랭킹 데이터 가져오기 실패:', error);
