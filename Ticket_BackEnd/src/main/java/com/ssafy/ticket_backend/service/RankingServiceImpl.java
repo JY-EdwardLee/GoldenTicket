@@ -30,11 +30,11 @@ public class RankingServiceImpl implements RankingService {
     private static final String TEAM_RANKING_TODAY_KEY = "ranking:team_today";
     private static final String TEAM_RANKING_YESTERDAY_KEY = "ranking:team_yesterday";
     private static final Duration TTL = Duration.ofDays(1); // 팀 랭킹 TTL 1일 캐시
-    private  static final Duration userTTL = Duration.ofHours(1); // 유저 랭킹 TTL 1시간
+    private static final Duration userTTL = Duration.ofHours(1); // 유저 랭킹 TTL 1시간
+
     // 유저 양도 랭킹 조회
     @Override
-    public List<UserRankingResponse> getUserRanking()
-    {
+    public List<UserRankingResponse> getUserRanking() {
         try {
             // 레디스에서 유저 랭킹 가져오기
             String cached = redisTemplate.opsForValue().get(USER_RANKING_KEY);
@@ -52,10 +52,10 @@ public class RankingServiceImpl implements RankingService {
                     // 만약 userId가 없으면 DB에서 조회하여 userId 설정
                     if (userRanking.getUserId() == null) {
                         // DB에서 해당 유저 정보 조회
-                        Long userId = rankingMapper.selectUserId(userRanking.getUserName()); // 예시로 userName으로 조회
+                        Long userId = rankingMapper.selectUserId(
+                            userRanking.getUserName()); // 예시로 userName으로 조회
 
                         userRanking.setUserId(userId);
-
                     }
 
                     if (userRanking.getImageUrl() == null || userRanking.getImageUrl().isEmpty()) {
@@ -66,6 +66,7 @@ public class RankingServiceImpl implements RankingService {
                         userRanking.setImageUrl(userProfileUrl.getDownloadUrl());
                     }
                 }
+                
                 return cachedList;
             }
 
@@ -122,19 +123,15 @@ public class RankingServiceImpl implements RankingService {
                 }
 
                 // Redis에 저장 (JSON 직렬화)
-                redisTemplate.opsForValue().set(
-                    TEAM_RANKING_TODAY_KEY,
-                    objectMapper.writeValueAsString(todayList),
-                    TTL
-                );
+                redisTemplate.opsForValue()
+                    .set(TEAM_RANKING_TODAY_KEY, objectMapper.writeValueAsString(todayList), TTL);
             }
 
             // 어제 데이터가 있으면 → 증가율 계산
             if (yesterdayCached != null) {
-                List<TeamRankingResponse> yesterdayList = objectMapper.readValue(
-                    yesterdayCached, new TypeReference<>() {
-                    }
-                );
+                List<TeamRankingResponse> yesterdayList = objectMapper.readValue(yesterdayCached,
+                    new TypeReference<>() {
+                    });
 
                 // Map으로 변환, teamName 기준
                 Map<String, Integer> yesterdayMap = new HashMap<>();
