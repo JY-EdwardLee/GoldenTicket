@@ -1,4 +1,4 @@
-package com.ssafy.ticket_backend.util;
+package com.ssafy.ticket_backend.handler;
 
 import java.security.Principal;
 import java.util.Map;
@@ -15,7 +15,7 @@ public class CustomHandshakeHandler extends DefaultHandshakeHandler {
         Map<String, Object> attributes) {
 
         String email = (String) attributes.get("userEmail"); // Interceptor에서 넣은 값
-        
+
         if (email != null) {
             return () -> email;  // Principal.getName() 으로 사용됨
         }

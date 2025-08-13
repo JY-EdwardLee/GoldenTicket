@@ -1,10 +1,12 @@
 package com.ssafy.ticket_backend.service;
 
 import com.ssafy.ticket_backend.dto.response.GroupDetailResponse;
+import com.ssafy.ticket_backend.exception.ApplicationNotFoundException;
 import com.ssafy.ticket_backend.exception.DuplicateApplicationException;
 import com.ssafy.ticket_backend.exception.GameAlreadyEndedException;
 import com.ssafy.ticket_backend.exception.GroupCapacityExceededException;
 import com.ssafy.ticket_backend.exception.GroupJoinCountException;
+import com.ssafy.ticket_backend.exception.GroupParticipationException;
 import com.ssafy.ticket_backend.mapper.GameMapper;
 import com.ssafy.ticket_backend.mapper.GroupMapper;
 import com.ssafy.ticket_backend.mapper.UserMapper;
@@ -20,13 +22,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j
+
 @Service
 @RequiredArgsConstructor
 public class GroupServiceImpl implements GroupService {
@@ -44,7 +45,7 @@ public class GroupServiceImpl implements GroupService {
 
 
     /**
-     * 그룹 생성
+     * 그룹 생성기
      */
     @Transactional
     @Override
@@ -57,6 +58,9 @@ public class GroupServiceImpl implements GroupService {
 
     /**
      * 그룹 조회 (팀별)
+     *
+     * @param baseballTeams
+     * @return List<GroupDetailResponse>
      */
     @Transactional
     @Override
@@ -66,6 +70,9 @@ public class GroupServiceImpl implements GroupService {
 
     /**
      * 단체관람 신청
+     *
+     * @param email, groupId
+     * @return
      */
     @Transactional
     @Override
@@ -73,7 +80,6 @@ public class GroupServiceImpl implements GroupService {
 
         User user = userMapper.selectUserByEmail(email);
 
-        // Lock으로 그룹 정보 조회
         Group group = groupMapper.selectOneGroupForUpdate(groupId);
 
         if (!group.getIsActive()) {
@@ -94,9 +100,7 @@ public class GroupServiceImpl implements GroupService {
             throw new GroupJoinCountException("그룹 집계 중 오류가 발생하였습니다.");
         }
 
-        // 그룹 정원이 다 찼을 때 메일 전송
         int cnt = groupMapper.selectCountByGroupId(groupId);
-
         if (cnt == 20) {
             try {
                 String htmlContent = generateGroupApplicationHtml(groupId, user, group);
@@ -105,18 +109,18 @@ public class GroupServiceImpl implements GroupService {
                 if (emailService != null && mailUsername != null && !mailUsername.isEmpty()) {
                     emailService.sendEmailWithHtmlAttachment(mailUsername, subject, htmlContent,
                         "");
-//                    log.info("단체 관람 신청서 HTML 본문 메일 전송 완료: 그룹 ID {}", groupId);
-                } else {
-//                    log.warn("이메일 서비스가 구성되지 않아 메일을 전송할 수 없습니다. 그룹 ID: {}", groupId);
                 }
             } catch (IOException e) {
-//                log.error("HTML 신청서 생성 중 오류 발생: {}", e.getMessage(), e);
+                throw new GroupParticipationException("단체관람 신청오류가 발생하였습니다.");
             }
         }
     }
 
     /**
      * 단체 관람 신청서 HTML 생성
+     *
+     * @param groupId, user, group
+     * @return HTML_String
      */
     private String generateGroupApplicationHtml(long groupId, User user, Group group)
         throws IOException {
@@ -164,29 +168,47 @@ public class GroupServiceImpl implements GroupService {
 
         data.put("emailList", "참가자 이메일 목록:\n" + emailInfo.toString());
 
-//        log.info("HTML 생성 데이터 - 팀명: {}, 게임날짜: {}, 신청자: {}, 전화번호: {}", teamName, gameDate, applicantName, data.get("phoneNumber"));
-
         String htmlContent = htmlTemplateUtil.generateGroupApplicationHtml(data);
 
         return htmlContent;
     }
+
+
+    /**
+     * 단체지원 취소하기
+     *
+     * @param email, groupId
+     * @return
+     */
+    @Transactional
+    @Override
+    public void deleteApplication(String email, long groupId) {
+
+        User user = userMapper.selectUserByEmail(email);
+        Group group = groupMapper.selectOneGroupForUpdate(groupId);
+
+        if (group.getIsEnded()) {
+            throw new GameAlreadyEndedException("종료된 경기입니다.");
+        }
+
+        int result1 = groupMapper.deleteApplication(new Application(groupId, user.getUserId()));
+        if (result1 == 0) {
+            throw new ApplicationNotFoundException("신청 이력이 없습니다.");
+        }
+
+        int result2 = groupMapper.updateGroupCountForDelete(groupId);
+        if (result2 != 1) {
+            throw new GroupJoinCountException("그룹 집계 중 오류가 발생하였습니다.");
+        }
+    }
+
 
     /**
      * 스케줄러: 종료된 그룹 업데이트
      */
     @Override
     public void updateEndedGroups() {
-        try {
-            int updatedGroupsCount = groupMapper.updateEndedGroups();
-            if (updatedGroupsCount > 0) {
-//                log.info("스케줄러: {}개의 그룹이 종료 처리되었습니다.", updatedGroupsCount);
-            } else {
-//                log.info("스케줄러: 종료할 그룹이 없습니다.");
-            }
-        } catch (Exception e) {
-//            log.error("스케줄러 실행 중 오류 발생: {}", e.getMessage(), e);
-            throw e;
-        }
+        int updatedGroupsCount = groupMapper.updateEndedGroups();
     }
 
 }

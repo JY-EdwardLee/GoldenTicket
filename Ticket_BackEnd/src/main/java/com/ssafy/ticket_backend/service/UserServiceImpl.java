@@ -552,35 +552,9 @@ public class UserServiceImpl implements UserService {
         return new JwtTokenResponse(accessToken, refreshToken);
     }
 
-
     /**
-     * 공개용 관리자
-     *
-     * @return
+     * 공개용 관리자 (LoginUserResponse 반환) - user_id = 28
      */
-    @Override
-    public JwtTokenResponse adminUser() {
-        String accessToken = jwtUtil.generateAccessToken("SSAFYADMIN@example.com");
-        String refreshToken = jwtUtil.generateRefreshToken("SSAFYADMIN@example.com");
-
-        return new JwtTokenResponse(accessToken, refreshToken);
-    }
-
-
-    /**
-     * 공개용 사용자
-     *
-     * @return
-     */
-    @Override
-    public JwtTokenResponse generalUser() {
-        String accessToken = jwtUtil.generateAccessToken("SAAFYUSER@example.com");
-        String refreshToken = jwtUtil.generateRefreshToken("SAAFYUSER@example.com");
-
-        return new JwtTokenResponse(accessToken, refreshToken);
-    }
-
-    // 공개용 관리자 (LoginUserResponse 반환) - user_id = 28
     @Override
     public LoginUserResponse adminUserWithInfo() {
         // 하드코딩된 관리자 이메일로 사용자 정보 조회
@@ -600,7 +574,9 @@ public class UserServiceImpl implements UserService {
         return userResponse;
     }
 
-    // 공개용 일반 사용자 (LoginUserResponse 반환) - user_id = 29
+    /**
+     * 공개용 일반 사용자 (LoginUserResponse 반환) - user_id = 29
+     */
     @Override
     public LoginUserResponse generalUserWithInfo() {
         // 하드코딩된 일반 사용자 이메일로 사용자 정보 조회

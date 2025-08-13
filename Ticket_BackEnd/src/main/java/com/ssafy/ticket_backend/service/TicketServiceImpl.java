@@ -248,10 +248,6 @@ public class TicketServiceImpl implements TicketService {
         try {
             Game game = gameMapper.selectGameByGameId(ticket.getGameId());
 
-            if (game.isEnded()) {  // 이미 끝난 경기라면
-
-            }
-
             List<Waitlist> waitlists = ticketMapper.selectWaitingWaitListByGameId(game.getGameId());
             // 대기열이 있다면
             if (!waitlists.isEmpty()) {
@@ -425,5 +421,29 @@ public class TicketServiceImpl implements TicketService {
         ticketResponse.setGame(game.toGameResponse());
 
         return ticketResponse;
+    }
+
+    @Transactional
+    @Override
+    public void CancelTicket() {
+        List<Ticket> tickets = ticketMapper.checkPayingOver30Minutes();
+
+        for (Ticket ticket : tickets) {
+            Transaction transaction = transactionMapper.selectTransactionByTicketIdAndUserId(
+                ticket.getTicketId(), ticket.getBuyerId());
+
+            transaction.setTransactionStatus(String.valueOf(WaitlistStatus.CANCEL_WAITING));
+            transactionMapper.updateTransaction(transaction);
+
+            Waitlist waitlist = transactionMapper.selectWaitlistByTransactionId(
+                transaction.getTransactionId());
+
+            if (waitlist != null) {
+                waitlist.setStatus(WaitlistStatus.CANCEL_WAITING);
+                transactionMapper.updateWaitlist(waitlist);
+            }
+
+            this.reTransferTicket(ticket);
+        }
     }
 }
