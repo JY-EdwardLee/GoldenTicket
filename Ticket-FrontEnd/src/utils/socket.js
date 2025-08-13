@@ -28,6 +28,7 @@ function parseJwt(token) {
 }
 
 export function connectWebSocket(jwtToken, onMessageCallback) {
+  console.log('jwt토큰 들어감? ', jwtToken)
   const decoded = parseJwt(jwtToken);
   const userEmail = decoded?.sub;
 
