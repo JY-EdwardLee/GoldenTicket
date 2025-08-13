@@ -3,7 +3,6 @@ package com.ssafy.ticket_backend.service;
 import com.ssafy.ticket_backend.dto.request.SMSVerificationCheckRequest;
 import com.ssafy.ticket_backend.exception.UserSignupException;
 import com.ssafy.ticket_backend.model.User;
-import com.ssafy.ticket_backend.model.Waitlist;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
@@ -49,10 +48,9 @@ public class SMSService {
         }
     }
 
-    public void sendWinSMS(User user, Waitlist waitlist) {
-        String text = "[테스트 골든티켓]" + "\n" + waitlist.getCreatedAt().getMonthValue() + "월 "
-            + waitlist.getCreatedAt().getDayOfMonth() + "일 응모하신 티켓이 당첨되었습니다." + "\n"
-            + "30분 이내 결제해주시기 바랍니다." + "\n";
+    public void sendWinSMS(User user) {
+        String text =
+            "[테스트 골든티켓]" + "\n" + "응모하신 티켓이 당첨되었습니다." + "\n" + "30분 이내 결제해주시기 바랍니다." + "\n";
 
         this.sendSMS(user.getPhoneNumber(), text);
     }
