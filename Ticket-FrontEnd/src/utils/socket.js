@@ -36,21 +36,9 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
     return;
   }
 
-  // SockJS URL 확인
-  const wsUrl = `${API_BASE_URL}/ws-notify`;
-  console.log("[WebSocket] resolved ws url", wsUrl);
-
   // 로컬 테스트 시
   // const socketFactory = () => new SockJS("http://localhost:8080/ws-notify");
-  const socketFactory = () => {
-    const sock = new SockJS(wsUrl);
-    try {
-      sock.onopen = () => console.log("[SockJS] onopen");
-      sock.onclose = (e) => console.error("[SockJS] onclose", e);
-      sock.onerror = (e) => console.error("[SockJS] onerror", e);
-    } catch (_) {}
-    return sock;
-  };
+  const socketFactory = () => new SockJS(`${API_BASE_URL}/ws-notify`);
 
   // Pinia store 인스턴스 가져오기
   const notificationStore = useNotificationStore();
@@ -58,44 +46,15 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
   // StompClient 생성 시 factory 함수 넘기기 (자동 재연결 지원)
   stompClient = Stomp.over(socketFactory);
 
-  // STOMP 내부 디버그 출력 활성화
-  try {
-    stompClient.debug = (msg) => console.log("[STOMP]", msg);
-  } catch (_) {}
-
-  // STOMP 에러 프레임 로깅
-  try {
-    stompClient.onStompError = (frame) => {
-      console.error("[STOMP][ERROR]", {
-        headers: frame.headers,
-        body: frame.body,
-      });
-    };
-  } catch (_) {}
-
-  // 일부 구현체에서 제공하는 웹소켓 close 콜백
-  try {
-    if ("onWebSocketClose" in stompClient) {
-      stompClient.onWebSocketClose = (evt) => console.error("[STOMP] onWebSocketClose", evt);
-    }
-  } catch (_) {}
-
-  const connectHeaders = { Authorization: `Bearer ${jwtToken}` };
-  console.log("[WebSocket] connect headers keys", Object.keys(connectHeaders));
+  if (import.meta?.env?.DEV) console.log("[WebSocket] creating STOMP client");
 
   stompClient.connect(
-    connectHeaders,
+    { Authorization: `Bearer ${jwtToken}` },
     () => {
-      console.log("[WebSocket] 연결 성공", { userEmail });
+      if (import.meta?.env?.DEV) console.log("[WebSocket] 연결 성공");
 
-      //  특정 유저의 알림을 받아오기 위한 구독 (Spring user-destination 표준)
-      const subscribePath = `/user/queue/notify`;
-      console.log("[WebSocket] subscribe path", subscribePath);
-      stompClient.subscribe(subscribePath, (message) => {
-        try {
-          console.log("[WebSocket] message headers", message.headers);
-        } catch (_) {}
-
+      //  특정 유저의 알림을 받아오기 위한 구독
+      stompClient.subscribe(`/user/queue/notify`, (message) => {
         let payload;
         try {
           payload = JSON.parse(message.body);
@@ -105,25 +64,14 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
         }
 
         // 알림을 Pinia store에 추가
-        try {
-          notificationStore.addNotification(payload);
-          console.log("[WebSocket] notification added to store", {
-            preview: String(payload?.message || "").slice(0, 60),
-            unreadCount: notificationStore.unreadCount,
-            total: notificationStore.notifications.length,
-          });
-        } catch (storeErr) {
-          console.error("[WebSocket] store update error", storeErr);
-        }
+        notificationStore.addNotification(payload);
+
+        if (import.meta?.env?.DEV)
+          console.log("[WebSocket] message received", payload);
 
         // callback으로 받은 메시지 처리 (선택적)
-        try {
-          if (typeof onMessageCallback === "function") {
-            onMessageCallback(payload);
-            console.log("[WebSocket] onMessageCallback executed");
-          }
-        } catch (cbErr) {
-          console.error("[WebSocket] onMessageCallback error", cbErr);
+        if (typeof onMessageCallback === "function") {
+          onMessageCallback(payload);
         }
       });
 
@@ -131,20 +79,12 @@ export function connectWebSocket(jwtToken, onMessageCallback) {
     },
     (error) => {
       console.error("[WebSocket] 연결 실패:", error);
-      try {
-        console.error("[WebSocket] connect error details", {
-          message: error?.message,
-          headers: error?.headers,
-          body: error?.body,
-        });
-      } catch (_) {}
     }
   );
 }
 
 export function disconnectWebSocket() {
   if (stompClient && stompClient.connected) {
-    console.log("[WebSocket] disconnect called");
     stompClient.disconnect(() => {
       console.log("[WebSocket] 연결 해제됨");
     });
