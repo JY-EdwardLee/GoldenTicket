@@ -214,6 +214,20 @@ export const boardAPI = {
     }
   },
 
+  // 내 응모 목록 조회 (인증 필요)
+  getMyApplications: async () => {
+    try {
+      const response = await authApiClient.get('/users/me/applications');
+      return response.data;
+    } catch (error) {
+      // 비로그인(401) 등은 빈 배열로 처리하여 화면에서 자연스럽게 동작
+      if (error?.response?.status === 401) {
+        return [];
+      }
+      throw apiErrorHandler(error);
+    }
+  },
+
   // 단체관람 신청
   applyGroup: async (groupId) => {
     try {
@@ -228,7 +242,11 @@ export const boardAPI = {
   cancelGroup: async (groupId) => {
     try {
       const response = await authApiClient.delete(`/group/${groupId}`);
-      return response.data;
+      // 스펙: 성공 시 { success: true, message: "응모취소 성공" }
+      return {
+        success: response.data?.success ?? true,
+        message: response.data?.message || '응모취소 성공'
+      };
     } catch (error) {
       throw apiErrorHandler(error);
     }
@@ -326,6 +344,7 @@ export const transformGroupData = (apiData) => {
 
     return {
       postId: group.groupId,
+      gameId: game.id,
       title: `${awayKo || '원정팀'} vs ${homeKo || '홈팀'}`,
       gameDate: d || '',
       gameTime: (t || '').substring(0,5),
@@ -344,7 +363,9 @@ export const transformGroupData = (apiData) => {
       team: group.team || inferDisplayTeamFromApiTeam(game.home || game.away),
       groupId: group.groupId,
       organizerId: group.organizerId,
-      isApplied: group.isApplied || false
+      // 서버가 isApplied를 주지 않으므로 기본값은 false.
+      // 실제 적용 여부는 화면에서 사용자 응모 목록으로 판별함
+      isApplied: false
     };
   });
 };
