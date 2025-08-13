@@ -67,7 +67,8 @@ const { isDeleteUserModalVisible, closeDeleteUserModal, handleDeleteUser } =
 
 
     <router-view :key="$route.fullPath" />
-
+    <!-- <router-view /> -->
+  
     <!-- 전역 회원탈퇴 모달 -->
     <DeleteUserModal
       :isVisible="isDeleteUserModalVisible"

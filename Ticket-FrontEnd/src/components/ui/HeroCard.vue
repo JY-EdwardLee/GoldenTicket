@@ -4,8 +4,8 @@
     :height="height"
     :elevation="0"
     :rounded="rounded"
-    @mouseover="isHovered = true"
-    @mouseleave="isHovered = false"
+    @mouseover="handleMouseOver"
+    @mouseleave="handleMouseLeave"
     @click="handleClick"
   >
     <!-- <div v-if="type === 'sub'" class="hero-card-sub-bg" :style="{ backgroundImage: `url('/components/default_card_sub.svg')` }"></div> -->
@@ -23,9 +23,11 @@
           {{ title }}
         </span>
       </div>
-      <div v-if="type === 'primary' || type === 'secondary'" class="d-flex justify-space-between">
-        <span>아아아아아아</span>
-      </div>
+      <transition name="fade" mode="out-in">
+        <div v-if="showDescription && (type === 'primary' || type === 'secondary')" class="d-flex justify-space-between">
+          <!-- <span class="text-emphasis font-weight-bold mt-2 description-text" style="text-align: center; font-size:1.0rem">{{ description }}</span> -->
+        </div>
+      </transition>
       </div>
       <div v-if="type === 'primary' || type === 'secondary'" class="ticket-image-container justify-center pt-10">
         <img
@@ -63,10 +65,11 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const isHovered = ref(false);
-
+const showDescription = ref(false);
+let hoverTimer = null;
 const props = defineProps({
   title: {
     type: String,
@@ -116,6 +119,20 @@ const cardClass = computed(() => {
 const buttonClass = computed(() => {
   return props.type === 'primary' ? 'text-primary font-weight-bold' : 'text-secondary font-weight-bold';
 });
+
+const handleMouseOver = () => {
+  isHovered.value = true;
+  clearTimeout(hoverTimer);
+  hoverTimer = setTimeout(() => {
+    showDescription.value = true;
+  }, 140); // 0.4초 딜레이
+};
+
+const handleMouseLeave = () => {
+  isHovered.value = false;
+  clearTimeout(hoverTimer);
+  showDescription.value = false;
+};
 
 const handleClick = () => {
   emit('click');
@@ -210,7 +227,7 @@ const handleClick = () => {
 /* Title text styles with enhanced hover effect */
 .title-text {
   display: inline-block;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   transition: color 0.3s ease;
 }
 

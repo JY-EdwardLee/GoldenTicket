@@ -11,10 +11,10 @@
           class="px-0 py-4"
         >
           <template v-slot:prepend>
-            <div v-if="type === 'team'" class="team-image">
-            <img :src="item.avatar" class="avatar-image">
+            <div v-if="type === 'team'" class="team-image-container">
+            <img :src="item.avatar" class="team-image">
             </div>
-            <v-avatar v-else :color="getAvatarColor(index)" class="mr-4" size="large">
+            <v-avatar v-if="type === 'user'" class="avatar-image-container mr-4" size="large">
               <img :src="item.avatar" class="avatar-image">
             </v-avatar>
           </template>
@@ -119,16 +119,27 @@ const formatNumber = (number) => {
 </script>
 
 <style scoped>
-.avatar-image {
+.team-image {
   width: px;
   height: 40px;
   object-fit: cover;
 }
-.team-image {
+.team-image-container {
   width: 68px;
   text-align: center;
   object-fit: cover;
   margin-right: 16px;
+}
+.avatar-image-container {
+  width: 68px;
+  text-align: center;
+  object-fit: cover;
+  margin-right: 16px;
+}
+.avatar-image {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
 }
 .v-card:hover {
   transform: translateY(-2px);

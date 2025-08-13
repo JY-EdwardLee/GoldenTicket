@@ -12,7 +12,6 @@
           :key="ticket.id"
           :to="`/mypage/tickets/${ticket.ticketId}`"
           class="ticket-card"
-          :style="{ backgroundImage: `url(${generateTicketBackground(ticket.ticketId)})` }"
         >
           <div class="ticket-header">
             <div class="ticket-info">
@@ -110,19 +109,6 @@ const getStatusText = (status) => {
   return statusMap[status]
 }
 
-// 티켓 배경 이미지 생성 함수
-const generateTicketBackground = (ticketId) => {
-  const patterns = [
-    'geometric', 'abstract', 'minimal', 'texture', 'gradient',
-    'pattern', 'design', 'modern', 'clean', 'elegant'
-  ]
-  
-  const patternIndex = ticketId % patterns.length
-  const pattern = patterns[patternIndex]
-  
-  // 매우 흐린 배경 이미지로 텍스트 가독성 보장
-  return `https://picsum.photos/seed/ticket-${ticketId}-${pattern}/400/200?blur=8`
-}
 
 const fetchTickets = async () => {
   try {
