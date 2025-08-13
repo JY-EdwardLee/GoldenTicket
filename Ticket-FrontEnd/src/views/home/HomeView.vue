@@ -64,7 +64,7 @@
             <v-col cols="12" md="3" class="pl-2 d-flex flex-column card-col">
               <!-- 첫 번째 작은 카드 -->
               <v-card
-               class="card-col mb-2 flex-grow-1 d-flex flex-column pa-4" 
+               class="card-col mb-2 flex-grow-1 d-flex flex-column pt-4 pa-3" 
                :class="{ 'card-col-hover': isApplyCardHovered }"
                :elevation="0" 
                rounded="lg">
@@ -80,7 +80,7 @@
               </v-card>              
               <!-- 두 번째 작은 카드 -->
               <v-card
-               class="card-col mb-2 flex-grow-1 d-flex flex-column pa-4" 
+               class="card-col flex-grow-1 d-flex flex-column pt-4 pa-3" 
                :class="{ 'card-col-hover': isTicketCardHovered }"
                :elevation="0" 
                rounded="lg">

@@ -125,7 +125,7 @@ const handleClick = () => {
 <style scoped>
 .ticket-image-container {
   width: 200px;
-  height: 300px;
+  height: 320px;
   display: flex;
   justify-content: center;
   align-items: center;
