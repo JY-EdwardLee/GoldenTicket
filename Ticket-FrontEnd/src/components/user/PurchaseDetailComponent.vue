@@ -34,7 +34,7 @@
           </div>
           <div class="info-item">
             <span class="label">경기장</span>
-            <span class="value">{{ ticketDetail?.game?.stadium }}</span>
+            <span class="value">{{ stadiumOfTeam[ticketDetail?.game?.stadium] }}</span>
           </div>
         </div>
       </div>
@@ -73,11 +73,11 @@
           <div class="payment-details">
             <div class="payment-method">
               <span class="label">결제 방법</span>
-              <span class="value">{{ ticketDetail?.paymentMethod? ticketDetail?.paymentMethod : '결제 방법 없음' }}</span>
+              <span class="value">{{ ticketDetail?.paymentMethod? ticketDetail?.paymentMethod : '간편결제(카카오)' }}</span>
             </div>
             <div class="payment-date">
               <span class="label">결제 일시</span>
-              <span class="value">{{ ticketDetail?.transactionDate? ticketDetail?.transactionDate : '결제 일시 없음' }}</span>
+              <span class="value">{{ ticketDetail?.transactionDate? formatDate(ticketDetail?.transactionDate) : '결제 일시 없음' }}</span>
             </div>
           </div>
         </div>
@@ -92,6 +92,7 @@ import { useRoute, useRouter } from 'vue-router'
 import http from '@/utils/http'
 import { API_CONFIG } from '@/config/api.config'
 import { enumToTeamName, teamNameToLogo } from '@/utils/teamNameMap'
+import { stadiumOfTeam } from '@/utils/teamStadium';
 import { formatDate } from '@/utils/dateUtils'
 
 const route = useRoute()
@@ -210,7 +211,7 @@ onMounted(() => {
 
 .team-logo {
   width: 80px;
-  height: 50px;
+  height: auto;
   border-radius: 8px;
   overflow: hidden;
 }

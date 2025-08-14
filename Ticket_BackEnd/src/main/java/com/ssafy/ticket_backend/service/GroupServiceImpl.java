@@ -104,7 +104,7 @@ public class GroupServiceImpl implements GroupService {
         if (cnt == 20) {
             try {
                 String htmlContent = generateGroupApplicationHtml(groupId, user, group);
-                String subject = "[Golden Ticket] 단체 관람 신청서";
+                String subject = "[골든티켓] 단체 관람 신청서";
 
                 if (emailService != null && mailUsername != null && !mailUsername.isEmpty()) {
                     emailService.sendEmailWithHtmlAttachment(mailUsername, subject, htmlContent,
