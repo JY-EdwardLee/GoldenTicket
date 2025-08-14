@@ -625,7 +625,9 @@ const startGameListTutorial = () => {
 // 이후 날짜 선택 튜토리얼 실행
 const goToNextStep = () => {
   
+
   if (step.value === 1 && selectedTeam.value) {
+    try { closeTutorial(); } catch (_) {}
     // 현재 튜토리얼이 있다면 종료
     if (driverObj.value) {
       driverObj.value.destroy();
@@ -640,8 +642,9 @@ const goToNextStep = () => {
       // URL에 튜토리얼 파라미터가 있으면 캘린더 튜토리얼 시작
       const urlParams = new URLSearchParams(window.location.search);
       const tutorialParam = urlParams.get('tutorial');
+      const isTutorial = tutorialParam === 'true' || localStorage.getItem('showApplyTutorial') === 'true';
       
-      if (tutorialParam === 'true') {
+      if (isTutorial) {
         startCalendarTutorial();
       }
     });
@@ -810,14 +813,7 @@ async function selectDate(date) {
     setTimeout(() => {
       if (data && data.length > 0) {
         // 경기가 있으면: 튜토리얼 모드일 때만 경기 선택 모달(step=1) 오픈
-        try {
-          const isTutorialMode = localStorage.getItem('showApplyTutorial') === 'true';
-          if (isTutorialMode) {
-            startGameListTutorial();
-          }
-        } catch (_) {
-          // 로컬스토리지 접근 불가 시 조용히 패스
-        }
+        try { startGameListTutorial(); } catch (_) {}
       } else {
         // 경기가 없으면 경기 없음 모달 표시
         showNoGameModal(date);
