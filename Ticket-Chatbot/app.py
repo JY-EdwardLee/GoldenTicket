@@ -27,7 +27,7 @@ if not os.getenv("PINECONE_ENVIRONMENT"):
 
 # --- GMS LLM(ChatUpstage) 객체 생성 ---
 chat_upstage = ChatUpstage(
-    model_name="claude-3-7-sonnet-latest",
+    model_name="gpt-4o",
     temperature=0.3,
     max_tokens=4096,
     base_url="https://gms.ssafy.io/gmsapi/api.openai.com/v1",
