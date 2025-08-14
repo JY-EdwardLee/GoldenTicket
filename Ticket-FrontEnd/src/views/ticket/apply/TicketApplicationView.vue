@@ -91,7 +91,7 @@
         <div class="selected-date-box">
           <div class="selected-date-title">
             <span class="selected-date-title-text" style="font-size: 20px;">{{ pageText.selectedDateTitle }} </span>
-            <span><img class="selected_team-logo" :src="`/small_logo/${getEnumTeamName(selectedTeam)}.svg`" alt="team logo" style="width: 30px; height: 30px;"/></span>
+            <span><img class="selected_team-logo" :src="`/small_logo/${getEnumTeamName(selectedTeam)}.svg`" alt="team logo" style="width: 35px; height: 35px;"/></span>
           </div>
           <div class="selected-info">
               <span class="selected-date">{{ getFormattedDate() }}</span>
@@ -206,6 +206,7 @@ watch(() => user.value, (newUser) => {
 
 // 팀 테마 스토어를 가져옵니다. (싱글톤 인스턴스, 호출하지 않음)
 const {teamColors} = useTeamThemeStore;
+const themeStore = useTeamThemeStore;
 
 import {useTutorial} from '@/views/tutorial/useTutorial.js'
 
@@ -224,7 +225,7 @@ const teamRows = [
 ];
 // 내 관심팀 한글명을 계산 (user.myTeam가 enum 키일 때만 유효)
 const myTeamName = computed(() => {
-  const key = user?.myTeam;
+  const key = user.value?.myTeam;
   return key && enumToTeamName[key] ? enumToTeamName[key] : '';
 });
 
@@ -260,28 +261,6 @@ const gamesOnDate = ref([]);
 const selectedGame = ref(null);
 // 중복 실행 방지 플래그
 const hasStartedApplyTutorial = ref(false);
-
-// 캘린더 영역에 적용할 스타일
-const calendarAreaStyle = computed(() => {
-  if (!selectedTeam.value) return {};
-  
-  // 한글 팀명을 ENUM 형식으로 변환 (예: "삼성 라이온즈" -> "SAMSUNG_LIONS")
-  const teamKey = getEnumTeamName(selectedTeam.value);
-  
-  const theme = teamColors[teamKey];
-  if (!theme) {
-    console.error('팀을 찾을 수 없습니다:', selectedTeam.value, '->', teamKey);
-    return {};
-  }
-  
-  const primary = theme.primary;
-  // const gradient = theme.gradient;
-  
-  return {
-    '--team-primary': primary,
-    'background-color': primary,
-  };
-});
 
 // 페이지 진입 시 튜토리얼 자동 실행 (URL 파라미터 또는 플래그 기반)
 onMounted(() => {
@@ -402,10 +381,8 @@ function selectTeam(team) {
     // 테마는 사용자 myTeam 기준으로 고정하므로 변경하지 않습니다.
   }
 
-  // 다른 팀을 클릭하면 초기 활성 상태를 해제합니다.
   bgHover.value = false;
 
-  // 선택된 팀 강조 표시 업데이트
   document.querySelectorAll('.team-card').forEach(card => {
     if (card.textContent === enumToTeamName[teamEnum] || card.textContent === team) {
       card.classList.add('selected');
@@ -414,10 +391,9 @@ function selectTeam(team) {
     }
   });
   
-  // 팀 배경 이미지 업데이트 - 사용자의 관심팀일 때만 active 클래스 추가
   const teamBg = document.querySelector('.team-bg-image');
   if (teamBg) {
-    if (teamEnum === user?.myTeam) {
+    if (teamEnum === user.value?.myTeam) {
       teamBg.classList.add('active');
     } else {
       teamBg.classList.remove('active');
@@ -703,14 +679,25 @@ const goToPreviousStep = () => {
 // 마운트
 onMounted(async () => {
   // 이전에 선택한 팀이 있으면 복원
-  const savedTeam = localStorage.getItem('selectedTeam');
-  if (savedTeam) {
-    // savedTeam은 ENUM일 가능성이 높음. 한국어 팀명으로 변환하여 선택 상태와 로직 일관성 유지
-    const savedTeamKorean = enumToTeamName[savedTeam] || savedTeam;
-    selectedTeam.value = savedTeamKorean;
-    // 테마는 사용자 myTeam 기준으로 고정하므로 변경하지 않습니다.
-  }
+  // const savedTeam = localStorage.getItem('selectedTeam');
+  // if (savedTeam) {
+  //   // savedTeam은 ENUM일 가능성이 높음. 한국어 팀명으로 변환하여 선택 상태와 로직 일관성 유지
+  //   const savedTeamKorean = enumToTeamName[savedTeam] || savedTeam;
+  //   selectedTeam.value = savedTeamKorean;
+  //   // 테마는 사용자 myTeam 기준으로 고정하므로 변경하지 않습니다.
+  // }
   
+  const savedTeam = localStorage.getItem('selectedTeam');
+  let initialTeam = myTeamName?.value || '';
+  if (savedTeam) {
+    initialTeam = enumToTeamName[savedTeam] || savedTeam;
+  }
+  if (initialTeam) {
+    selectedTeam.value = initialTeam;
+    // UI 클래스/배경 상태 일치화를 위해 한 번 호출
+    try { selectTeam(initialTeam); } catch (_) {}
+  }
+
   // 현재 날짜 가져오기 (동적)
   const now = new Date();
   const currentDay = now.getDate();
@@ -1631,6 +1618,7 @@ function formatGameTime(dateTimeStr) {
   font-weight: bold;
   margin-top: 10px;
   display: flex;
+  justify-content: space-between;
   gap: 30px;
 }
 .game-stadium {
@@ -2309,7 +2297,7 @@ function formatGameTime(dateTimeStr) {
 .stepper {
   width: 100%;
   max-width: 1200px;
-  margin: 10px auto; /* 상단 마진 10px 유지, 좌우 자동 마진으로 중앙 정렬 */
+  margin: 25px auto; /* 상단 마진 10px 유지, 좌우 자동 마진으로 중앙 정렬 */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2385,7 +2373,6 @@ function formatGameTime(dateTimeStr) {
 .calendar-area {
   width: 650px;
   height: 500px;
-  /* 배경색은 calendarAreaStyle 에서 적용함 */
   color: #fff;
   border-radius: 14px;
   position: relative;   /* 자식 요소의 position: absolute를 위한 기준점 */
@@ -2493,6 +2480,7 @@ function formatGameTime(dateTimeStr) {
   border: 1px solid rgba(255, 255, 255, 0.25);
   /* overflow: hidden; */
   margin-bottom: 8px;
+  background: var(--theme-primary);
 }
 .calendar-logo {
   position: absolute;
