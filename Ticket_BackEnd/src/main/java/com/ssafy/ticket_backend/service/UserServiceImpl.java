@@ -543,19 +543,6 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 테스트 용도. 실제 서비스에서 사용 금지
-     *
-     * @return
-     */
-    @Override
-    public JwtTokenResponse testUser() {
-        String accessToken = jwtUtil.generateAccessToken("honggildong@example.com");
-        String refreshToken = jwtUtil.generateRefreshToken("honggildong@example.com");
-
-        return new JwtTokenResponse(accessToken, refreshToken);
-    }
-
-    /**
      * 공개용 관리자 (LoginUserResponse 반환) - user_id = 28
      */
     @Override
