@@ -2,8 +2,8 @@
 
 /* 팝오버 박스 크기 및 기본 스타일 */
 .driver-popover {
-  min-width: 600px !important;
-  max-width: 700px !important;
+  min-width: 500px !important;
+  max-width: 600px !important;
   min-height: 280px !important;
   padding: 40px 50px !important;
   border-radius: 20px !important;
@@ -97,7 +97,8 @@
   min-width: 30px !important;
   text-transform: none !important;
   letter-spacing: -0.2px !important;
-  background: var(--theme-gradient) !important;
+  background: var(--theme-primary) !important;
+  /* background: var(--theme-gradient) !important; */
 }
 
 .driver-popover-close-btn{
