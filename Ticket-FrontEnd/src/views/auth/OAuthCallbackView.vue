@@ -44,10 +44,10 @@ const handleOAuthCallback = async () => {
 
       if (response.data || response.data.accessToken) {
         // 사용자 정보를 store에 저장
-        authStore.getUserInfo();
+        console.log("00000000000000000000000000000000000000000", response.data)
+        authStore.getUserInfo(response.data);
         authStore.setUser(response.data);
         authStore.setToken(response.data.accessToken);
-        authStore.setSelectedTeam(response.data.myTeam || "");
 
         // 저장된 리다이렉트 경로 가져오기 (없으면 '/'로 기본값)
         const redirectTo = authStore.getAndClearRedirectPath();
