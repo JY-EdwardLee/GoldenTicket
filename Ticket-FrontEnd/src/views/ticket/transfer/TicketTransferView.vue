@@ -161,7 +161,7 @@
             </div>
           </div>
         </div>
-        <div v-else>
+        <div v-else class="ticket-list-page">
           <div class="ticket-tab-row">
             <button :class="['ticket-tab', activeTab === 'NOL' ? 'active' : '']" @click="switchTab('NOL')">NOL</button>
             <button :class="['ticket-tab', activeTab === '티켓링크' ? 'active' : '']" @click="switchTab('티켓링크')">티켓링크</button>
@@ -1031,12 +1031,19 @@ onMounted(() => {
   font-size: 16px;
   color: #6b7280;
 }
+.ticket-list-page{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 .ticket-tab-row {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 16px;
   margin-top: 24px;
   margin-bottom: 24px;
+  width: 900px;
 }
 .ticket-tab {
   background: #f3f3f3;

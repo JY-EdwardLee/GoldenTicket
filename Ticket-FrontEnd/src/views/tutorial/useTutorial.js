@@ -709,7 +709,15 @@ export function useTutorial() {
               side: 'left',
               align: 'center',
               nextBtnText: '확인',
-              showButtons: ['next']
+              showButtons: ['next'],
+              onHighlighted: () => {
+                try { unlockScroll(); } catch (e) { /* 로그 */ }
+              },
+              // 확인(Next) 버튼 누르면 즉시 스크롤 해제
+              onNext: () => {
+                try { unlockScroll(); } catch (_) {}
+                return true; // 다음(종료) 진행 허용
+              }
             }
           }
         ]

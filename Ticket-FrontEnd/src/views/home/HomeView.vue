@@ -468,16 +468,13 @@ const waitForPopoverClose = () => {
 
 // 응모 페이지로 이동
 const goToApply = async () => {
-  console.log('응모하기 클릭 - 현재 인증 상태:', authStore.isAuthenticated);
   const isInTutorial = !!document.querySelector('.driver-popover');
-  console.log('튜토리얼 상태:', isInTutorial);
   
   // 응모 튜토리얼 플래그 확인
   const showApplyTutorial = localStorage.getItem('showApplyTutorial') === 'true';
   
   // 튜토리얼이 활성화된 상태면 먼저 닫기
   if (isInTutorial) {
-    console.log('튜토리얼 오버레이 닫기');
     try {
       const driverObj = driver();
       driverObj.destroy();
@@ -492,21 +489,18 @@ const goToApply = async () => {
   if (!authStore.isAuthenticated) {
     // 로그인 후 이동할 경로 저장 (튜토리얼 플래그 유지)
     const redirectPath = isInTutorial || showApplyTutorial ? '/application?tutorial=true' : '/application';
-    console.log('로그인 필요, 리다이렉트 경로 저장:', redirectPath);
     
     // 대기 중인 리다이렉트 설정 및 로그인 모달 표시
     pendingRedirect.value = redirectPath;
     localStorage.setItem('pendingRedirect', redirectPath);
     await nextTick(); // DOM 업데이트 대기
     showLoginModal.value = true;
-    console.log('로그인 모달 표시');
     return;
   }
   
   // 이미 로그인된 상태면 바로 이동
   try {
     const path = isInTutorial || showApplyTutorial ? '/application?tutorial=true' : '/application';
-    console.log('바로 이동:', path);
     
     // 응모 튜토리얼 플래그가 있으면 제거 (한 번만 보여주기 위함)
     if (showApplyTutorial) {
