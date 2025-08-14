@@ -28,7 +28,7 @@ const CHAT = {
 const AUTH = {
   KAKAO: `${API_BASE_URL}/users/auth/kakao`,
   NAVER: `${API_BASE_URL}/users/auth/naver`,
-  SIGNUP: `/users/signup`,
+  SIGNUP: `${API_BASE_URL}/users/signup`,
   REFRESH: `/users/auth/refresh`,
   SMS: `/users/signup/verification`,
   SMS_VERIFY: `/users/signup/verification/check`,
