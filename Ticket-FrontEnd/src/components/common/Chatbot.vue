@@ -227,10 +227,8 @@ const sendMessage = async () => {
       params.team = teamNameToEnum[params.team];
       if (confirmation) {
         const response = await http.post(API_CONFIG.TICKET.GAMES, params)
-        console.log(response.data);
         try {
           const res = await http.post(API_CONFIG.TICKET.APPLY(response.data[0].gameId));
-          console.log(res.data);
           router.push(`/mypage/applications`);
         } catch (error) {
           alert('이미 예매된 티켓 입니다.');

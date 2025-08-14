@@ -99,7 +99,6 @@ export const boardAPI = {
   getComments: async (postId) => {
     try {
       const response = await publicApiClient.get(`/boards/${postId}/comments`);
-      console.log(response.data);
       return response.data;
     } catch (error) {
       throw apiErrorHandler(error);
@@ -472,8 +471,6 @@ export const validateCommentData = (commentData) => {
 // S3 업로드 관련 함수들
 export const getS3UploadUrl = async (type, refId, fileName) => {
   try {
-    console.log('S3 업로드 URL 요청 시작:', { type, refId, fileName });
-    
     const response = await authApiClient.get('/s3/upload-url', {
       params: {
         type,
@@ -482,7 +479,6 @@ export const getS3UploadUrl = async (type, refId, fileName) => {
       }
     });
     
-    console.log('S3 업로드 URL 요청 성공:', response.data);
     return response.data;
   } catch (error) {
     console.error('S3 업로드 URL 요청 실패:', error);
@@ -539,8 +535,6 @@ export const uploadImageToS3 = async (file, postId) => {
     // 1. S3 업로드 URL 요청
     const uploadUrlResponse = await getS3UploadUrl('PostImage', postId, file.name);
     
-    console.log('S3 업로드 URL 응답:', uploadUrlResponse);
-    
     // 2. S3에 직접 업로드 (presignedUrl 사용)
     const uploadResponse = await fetch(uploadUrlResponse.presignedUrl, {
       method: 'PUT',
@@ -553,8 +547,6 @@ export const uploadImageToS3 = async (file, postId) => {
     if (!uploadResponse.ok) {
       throw new Error('S3 업로드에 실패했습니다.');
     }
-    
-    console.log('S3 업로드 성공, key:', uploadUrlResponse.key);
     
     return {
       success: true,

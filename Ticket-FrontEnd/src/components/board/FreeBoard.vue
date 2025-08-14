@@ -96,9 +96,7 @@ const loadPosts = async () => {
   searchResultMessage.value = '';
   
   try {
-    console.log("BOARD_TYPES.FREE url : ", BOARD_TYPES.FREE);
     const result = await boardAPI.getPostsByCategory(BOARD_TYPES.FREE);
-    console.log("result : ", result);
     // 서버가 배열을 직접 반환하므로 result 자체가 배열
     if (Array.isArray(result)) {
       allPosts.value = result;
@@ -152,7 +150,6 @@ onMounted(() => {
 // 검색 타입 변경
 const handleSearchTypeChange = (type) => {
   searchType.value = type;
-  console.log('검색 타입 변경:', type);
 };
 
 // 검색 실행
@@ -189,7 +186,6 @@ const handleSearch = async (searchTypeParam, searchValueParam) => {
 };
 
 const handlePostClick = (post) => {
-  console.log('게시글 클릭:', post);
   // TODO: 게시글 상세 페이지로 이동
 };
 
@@ -204,7 +200,6 @@ const handleClearSearch = () => {
   searchValue.value = '';
   searchResultMessage.value = '';
   loadPosts(); // 전체 게시글 다시 로드
-  console.log('검색 초기화');
 };
 
 const handleWriteClick = () => {

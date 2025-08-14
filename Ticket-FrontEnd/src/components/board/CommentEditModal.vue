@@ -149,7 +149,6 @@ const handleSubmit = async () => {
         commentId: props.comment.id,
         content: editContent.value.trim()
       });
-      console.log('댓글 수정 성공:', result.message);
     } else {
       alert(result.message || '댓글 수정에 실패했습니다.');
     }

@@ -24,7 +24,6 @@ onMounted(() => {
   http.get(API_CONFIG.CHAT.HISTORY)
     .then((response) => {
       chatHistory.value = response.data;
-      console.log('chatHistory.value', chatHistory.value);
     })
     .catch((error) => {
       console.error('Error fetching chat history:', error);
