@@ -120,6 +120,7 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
       localStorage.removeItem('userRole');
+      localStorage.removeItem('selectedTeam');
       // Always redirect to home after logout
       router.push('/');
     }
@@ -141,6 +142,7 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
       localStorage.removeItem('userRole');
+      localStorage.removeItem('selectedTeam');
     }
     // 여기서는 간단히 토큰 존재 여부만 확인
     // 실제로는 API 호출을 통해 토큰 검증이 필요할 수 있음
