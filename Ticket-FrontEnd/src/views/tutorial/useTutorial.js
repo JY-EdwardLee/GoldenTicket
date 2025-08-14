@@ -478,6 +478,7 @@ export function useTutorial() {
         }
         document.removeEventListener('click', handleDateClick);
         setTimeout(() => {
+          
           const gameCards = document.querySelectorAll('.game-list-box .game-card');
           if (gameCards && gameCards.length > 0) {
             // 외부 콜백 유지

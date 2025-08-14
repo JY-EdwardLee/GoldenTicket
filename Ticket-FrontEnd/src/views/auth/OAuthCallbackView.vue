@@ -48,6 +48,7 @@ const handleOAuthCallback = async () => {
         authStore.getUserInfo();
         authStore.setUser(response.data);
         authStore.setToken(response.data.accessToken);
+        authStore.setSelectedTeam(response.data.myTeam || "");
 
         // 저장된 리다이렉트 경로 가져오기 (없으면 '/'로 기본값)
         const redirectTo = authStore.getAndClearRedirectPath();

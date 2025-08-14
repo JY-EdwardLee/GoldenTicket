@@ -20,7 +20,6 @@
           <button class="drawer-close" @click="closeMobileMenu" aria-label="닫기">✕</button>
         </div>
         <div class="drawer-team-list">
-          <div class="drawer-team-item" :class="{ active: selectedTeam === 'all' }" @click="selectTeam('all')">전체</div>
           <div class="drawer-team-item" :class="{ active: selectedTeam === 'SSG' }" @click="selectTeam('SSG')">SSG 랜더스</div>
           <div class="drawer-team-item" :class="{ active: selectedTeam === 'KIA' }" @click="selectTeam('KIA')">KIA 타이거즈</div>
           <div class="drawer-team-item" :class="{ active: selectedTeam === 'LG' }" @click="selectTeam('LG')">LG 트윈스</div>
@@ -38,9 +37,6 @@
     <!-- 야구 팀 리스트 (데스크톱/태블릿 표시) -->
     <div class="team-list-container">
       <div class="team-list">
-        <div class="team-item" :class="{ 'active': selectedTeam === 'all' }" @click="selectedTeam = 'all'">
-          <span class="team-name">전체</span>
-        </div>
         <div class="team-item" :class="{ 'active': selectedTeam === 'SSG' }" @click="selectedTeam = 'SSG'">
           <span class="team-name">SSG 랜더스</span>
         </div>
@@ -122,22 +118,6 @@
           <div class="card-content">
           <div class="title-row">
             <h3 class="post-title">{{ post.title }}</h3>
-            <div class="action-buttons-title">
-              <button
-                class="apply-btn"
-                @click.stop="handleApplyClick('apply', post)"
-              >
-                <span class="apply-icon">👤</span>
-                관람 신청
-              </button>
-              <button
-                class="apply-btn"
-                @click.stop="handleApplyClick('cancel', post)"
-              >
-                <span class="apply-icon">✖</span>
-                응모 취소
-              </button>
-            </div>
           </div>
           
           <div class="post-info">
@@ -157,32 +137,38 @@
 
           <p class="post-description">{{ post.description }}</p>
 
-          <div class="hashtags">
-            <span 
-              v-for="tag in post.hashtags" 
-              :key="tag" 
-              class="hashtag"
-            >
-              #{{ tag }}
-            </span>
-          </div>
           </div>
         </div>
-        <!-- 카드 하단 풋터 (이미지 아래 전체 폭) -->
+        <!-- 카드 하단 풋터: 상단 참여율, 하단 좌우 대칭(좌: 등록정보 / 우: 버튼) -->
         <div class="card-footer">
-          <div class="footer-top participation-rate">
+          <div class="participation-rate">
             <span class="rate-label">참가율</span>
             <div class="progress-bar">
               <div class="progress-fill" :style="{ width: getParticipationRate(post) + '%' }"></div>
             </div>
             <span class="rate-percentage">{{ getParticipationRate(post) }}%</span>
           </div>
-          <div class="footer-bottom">
+          <div class="footer-row">
             <div class="registration-info">
               <span class="reg-date">{{ formatDate(post.createdAt) }} 등록</span>
               <span class="conditions">{{ post.conditions }}</span>
             </div>
-            
+            <div class="action-buttons">
+              <button
+                class="apply-btn"
+                @click.stop="handleApplyClick('apply', post)"
+              >
+                <span class="apply-icon">👤</span>
+                관람 신청
+              </button>
+              <button
+                class="apply-btn"
+                @click.stop="handleApplyClick('cancel', post)"
+              >
+                <span class="apply-icon">✖</span>
+                신청 취소
+              </button>
+            </div>
           </div>
         </div>
          
@@ -219,7 +205,7 @@ import { useAuthStore } from '@/stores/auth';
 import { boardAPI, transformGroupData } from '@/api/board';
 
 const props = defineProps({
-  initialTeam: { type: String, default: 'all' }
+  initialTeam: { type: String, default: 'SSG' }
 });
 
 const router = useRouter();
@@ -228,7 +214,7 @@ const currentPage = ref(1);
 const itemsPerPage = 6; // 페이지당 카드 수
 const isLoading = ref(false);
 const error = ref('');
-const selectedTeam = ref(props.initialTeam || 'all');
+const selectedTeam = ref(props.initialTeam || 'SSG');
 
 const isMobileMenuOpen = ref(false);
 const toggleMobileMenu = () => { isMobileMenuOpen.value = !isMobileMenuOpen.value; };
@@ -263,7 +249,6 @@ const persistAppliedSet = () => {
 // 선택된 팀의 제목
 const selectedTeamTitle = computed(() => {
   const teamNames = {
-    'all': '단체 관람 게시판',
     'SSG': 'SSG 랜더스 단체 관람 모집',
     'KIA': 'KIA 타이거즈 단체 관람 모집',
     'LG': 'LG 트윈스 단체 관람 모집',
@@ -280,10 +265,7 @@ const selectedTeamTitle = computed(() => {
 
 // 총 페이지 수
 const filteredPosts = computed(() => {
-  let filtered = [...allPosts.value];
-  if (selectedTeam.value !== 'all') {
-    filtered = filtered.filter(post => post.team === selectedTeam.value);
-  }
+  let filtered = allPosts.value.filter(post => post.team === selectedTeam.value);
   const now = new Date();
   const getGameDateTime = (post) => {
     const datePart = post?.gameDate || '';
@@ -400,15 +382,15 @@ const handleApplyClick = async (action, post) => {
         return;
       }
     }
-    console.log(post)
+
     if (action === 'cancel') {
       const res = await boardAPI.cancelGroup(post.groupId);
-      alert(res?.message || '응모취소 성공');
+      alert( '단체 관람 취소에 성공하셨습니다.');
       appliedGroupIds.value.delete(post.groupId);
       persistAppliedSet();
     } else {
       const res = await boardAPI.applyGroup(post.groupId);
-      alert(res?.message || '응모 성공');
+      alert( '단체 관람 신청에 성공하셨습니다.');
       appliedGroupIds.value.add(post.groupId);
       persistAppliedSet();
     }
@@ -446,6 +428,7 @@ onMounted(async () => {
   padding: 20px;
   background: #f8f9fa;
   min-height: 100vh;
+  font-size: 16px;
 }
 
 /* 탭 네비게이션 */
@@ -496,7 +479,7 @@ onMounted(async () => {
 }
 
 .main-title {
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0;
@@ -533,7 +516,7 @@ onMounted(async () => {
 
 .team-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   background: white;
   border-radius: 12px;
@@ -570,7 +553,7 @@ onMounted(async () => {
 }
 
 .team-name {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -641,7 +624,7 @@ onMounted(async () => {
 .status-badge {
   padding: 4px 8px;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
   color: white;
 }
@@ -668,7 +651,7 @@ onMounted(async () => {
   color: white;
   padding: 6px 12px;
   border-radius: 16px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -681,11 +664,11 @@ onMounted(async () => {
   flex-direction: column;
   justify-content: space-between;
   min-height: 280px;
-  font-size: 15px; /* 기본 본문 글씨 크기 증가 */
+  font-size: 17px; /* 기본 본문 글씨 크기 증가 */
 }
 
 .post-title {
-  font-size: 22px; /* 제목 크기 증가 */
+  font-size: 26px; /* 제목 크기 증가 */
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 12px 0;
@@ -699,10 +682,7 @@ onMounted(async () => {
   gap: 12px;
 }
 
-.action-buttons-title {
-  display: flex;
-  gap: 10px;
-}
+/* 상단 제목 우측 버튼 영역 제거됨 */
 
 .post-info {
   display: flex;
@@ -715,17 +695,17 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 15px; /* 정보 항목 크기 증가 */
+  font-size: 17px; /* 정보 항목 크기 증가 */
   color: #6b7280;
 }
 
 .info-icon {
-  font-size: 15px;
+  font-size: 17px;
   padding: 5px;
 }
 
 .post-description {
-  font-size: 15px; /* 본문 설명 크기 증가 */
+  font-size: 17px; /* 본문 설명 크기 증가 */
   color: #374151;
   line-height: 1.6;
   margin-bottom: 12px;
@@ -751,39 +731,21 @@ onMounted(async () => {
   font-weight: 500;
 }
 
-.hashtags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 12px;
-}
-
-.hashtag {
-  background: #f3f4f6;
-  color: #6b7280;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 13px; /* 해시태그 크기 증가 */
-  font-weight: 500;
-}
+/* 해시태그 관련 스타일 제거 */
 
 /* 카드 하단 풋터 */
 .card-footer {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 12px 20px;
+  gap: 14px;
+  padding: 16px 20px;
   border-top: 1px solid #f1f5f9;
 }
-.card-footer .footer-top {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.card-footer .footer-bottom {
+.footer-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
 }
 
 /* participation-rate 내부 공용 스타일 재사용 */
@@ -791,18 +753,18 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
 }
 
 .rate-label {
-  font-size: 15px; /* 라벨 크기 증가 */
+  font-size: 17px; /* 라벨 크기 증가 */
   color: #6b7280;
   font-weight: 500;
 }
 
 .progress-bar {
   flex: 1;
-  height: 8px;
+  height: 12px; /* 바 높이 확장 */
   background: #e5e7eb;
   border-radius: 4px;
   overflow: hidden;
@@ -815,7 +777,7 @@ onMounted(async () => {
 }
 
 .rate-percentage {
-  font-size: 14px; /* 퍼센트 크기 증가 */
+  font-size: 16px; /* 퍼센트 크기 증가 */
   font-weight: 600;
   color: #1a1a1a;
   min-width: 35px;
@@ -834,25 +796,26 @@ onMounted(async () => {
 }
 
 .reg-date {
-  font-size: 12px; /* 등록일 크기 증가 */
+  font-size: 14px; /* 등록일 크기 증가 */
   color: #6b7280;
 }
 
 .conditions {
-  font-size: 12px; /* 조건 크기 증가 */
+  font-size: 14px; /* 조건 크기 증가 */
   color: #6b7280;
 }
 
 .action-buttons {
   display: flex;
-  gap: 8px;
+  gap: 10px;
+  align-items: center;
 }
 
 .interest-btn, .apply-btn {
   padding: 14px 22px; /* 버튼 크기 추가 확대 */
   border: none;
   border-radius: 10px;
-  font-size: 18px; /* 글자 크기 추가 확대 */
+  font-size: 20px; /* 글자 크기 추가 확대 */
   font-weight: 700;
   cursor: pointer;
   display: flex;
@@ -862,7 +825,7 @@ onMounted(async () => {
 }
 
 .apply-icon {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .interest-btn {
@@ -923,7 +886,7 @@ onMounted(async () => {
 }
 
 .page-info {
-  font-size: 14px;
+  font-size: 16px;
   color: #6b7280;
 }
 
@@ -980,11 +943,11 @@ onMounted(async () => {
   }
   
   .main-title {
-    font-size: 24px;
+    font-size: 28px;
   }
   
   .team-list {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: repeat(2, 1fr); /* 모바일에선 2열씩 */
     gap: 8px;
     padding: 16px;
   }
@@ -995,7 +958,7 @@ onMounted(async () => {
   }
   
   .team-name {
-    font-size: 13px;
+    font-size: 15px;
   }
   
   .posts-grid {
@@ -1033,19 +996,17 @@ onMounted(async () => {
     align-self: flex-end;
   }
 
-  /* 모바일에서 푸터/버튼 정렬 개선 */
-  .post-footer {
+  /* 모바일에선 하단 행도 세로 스택 */
+  .footer-row {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
   }
-  .action-buttons {
-    flex-direction: column;
-  }
+  .action-buttons { flex-direction: column; }
   .apply-btn {
     width: 100%;
     min-height: 48px;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
