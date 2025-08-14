@@ -24,10 +24,12 @@ watch(() => teamThemeStore.selectedTeam, (newTeam) => {
 // driver.js 닫기 버튼의 포커스 아웃라인 제거 및 팝오버 크기 조정
 const style = document.createElement('style');
 style.textContent = `
+  .driver-popover-close-btn{
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
   .driver-popover-close-btn:focus {
-    background: var(--theme-gradient);
-    width: 10px !important;
-    height: 20px !important;
     outline: none !important;
     box-shadow: none !important;
     border: none !important;
@@ -46,8 +48,8 @@ style.textContent = `
   
   /* 팝오버 크기 조정 */
   .driver-popover:not(.transfer-tutorial-popover){
-    max-width: 500px !important;
-    width: 500px !important;
+    max-width: 400px !important;
+    width: 400px !important;
     max-height: 200px !important;
     height: 200px !important;
     padding: 20px !important;
@@ -322,6 +324,7 @@ export function useTutorial() {
             }
           },
           {
+            // element: '.v-card-text.pt-2.px-5.pb-8.d-flex.flex-column.fill-height',
             element: '.enter-card',
             popover: {
               title: '티켓 응모',
@@ -336,7 +339,7 @@ export function useTutorial() {
             }
           },
           {
-            element: '.transfer-card',
+            element: '#transfer-card',
             popover: {
               title: '티켓 양도',
               description: '보유하고 있는 티켓을 다른 사람에게 양도하고 싶다면 여기를 클릭하세요. 안전한 거래를 보장합니다!',

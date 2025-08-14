@@ -164,12 +164,20 @@ const closeMobileMenu = () => {
 
 // Mobile navigation handlers
 const handleMobileNav = (route) => {
-  closeMobileMenu();
-  if (route === 'application') {
-    goToApplication();
-  } else if (route === 'transfer') {
-    goToTransfer();
-  }
+  const urlParams = new URLSearchParams(window.location.search);
+  const inTutorial =
+    urlParams.get('tutorial') === 'true' ||
+    localStorage.getItem('showApplyTutorial') === 'true' ||
+    !!document.querySelector('.driver-popover');
+  
+    try { closeTutorial(); } catch (_) {}
+    closeMobileMenu?.();
+
+    if (route === 'application') {
+      router.push({ name: 'TicketApply', query: inTutorial ? { tutorial: 'true' } : {} });
+    } else if (route === 'transfer') {
+      router.push({ name: 'TicketTransfer', query: inTutorial ? { tutorial: 'true' } : {} });
+    }
 };
 
 const handleMobileLogin = () => {
