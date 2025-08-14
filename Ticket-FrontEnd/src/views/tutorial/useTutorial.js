@@ -26,7 +26,7 @@ const style = document.createElement('style');
 style.textContent = `
   .driver-popover-close-btn:focus {
     background: var(--theme-gradient);
-    width: 20px !important;
+    width: 10px !important;
     height: 20px !important;
     outline: none !important;
     box-shadow: none !important;
