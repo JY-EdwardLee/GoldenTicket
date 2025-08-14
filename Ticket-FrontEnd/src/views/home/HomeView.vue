@@ -9,31 +9,6 @@
             <!-- 왼쪽 영역 - 두 개의 메인 카드 -->
             <v-col cols="12" md="12" class="d-flex pa-0">
               <v-row no-gutters class="flex-nowrap" style="width: 100%;">
-                <!-- 양도 카드 -->
-                <!-- <v-col 
-                  cols="12"
-                  :md="isTransferCardHovered ? 8 : (isEnterCardHovered ? 4 : 6)" 
-                  class="pa-4 card-col flex-column"
-                  :class="{ 'card-col-hover': isTransferCardHovered }"
-                > -->
-                <v-col 
-                  cols="12"
-                  :md="isTransferCardHovered ? 8 : (isEnterCardHovered ? 4 : 6)" 
-                  class="pa-4 card-col flex-column"
-                  :class="{ 'card-col-hover': isTransferCardHovered }"
-                >
-                  <HeroCard
-                    class="transfer-card h-100"
-                    title="양도하기"
-                    :description="'티켓이 필요한사람에게 안전하게 양도하세요'"
-                    button-text="양도하기"
-                    type="primary"
-                    @mouseover="isTransferCardHovered = true"
-                    @mouseleave="isTransferCardHovered = false"
-                    @click="goToTransfer"
-                  />
-                </v-col>
-                
                 <!-- 응모 카드 -->
                 <v-col 
                   cols="12"
@@ -51,11 +26,24 @@
                     @mouseleave="isEnterCardHovered = false"
                     @click="goToApply"
                   />
-                  <!-- <div class="text-white text-h6 mt-3 px-2" v-if="isEnterCardHovered">
-                    <p class="mb-1">
-                      원하는 경기를 응모하고 티켓을 양도받아 보세요.
-                    </p>
-                  </div>  -->
+                </v-col>
+                <!-- 양도 카드 -->
+                <v-col 
+                  cols="12"
+                  :md="isTransferCardHovered ? 8 : (isEnterCardHovered ? 4 : 6)" 
+                  class="pa-4 card-col flex-column"
+                  :class="{ 'card-col-hover': isTransferCardHovered }"
+                >
+                  <HeroCard
+                    class="transfer-card h-100"
+                    title="양도하기"
+                    :description="'티켓이 필요한사람에게 안전하게 양도하세요'"
+                    button-text="양도하기"
+                    type="primary"
+                    @mouseover="isTransferCardHovered = true"
+                    @mouseleave="isTransferCardHovered = false"
+                    @click="goToTransfer"
+                  />
                 </v-col>
               </v-row>
             </v-col>
