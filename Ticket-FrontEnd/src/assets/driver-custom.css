@@ -97,8 +97,7 @@
   min-width: 30px !important;
   text-transform: none !important;
   letter-spacing: -0.2px !important;
-  background: var(--theme-primary) !important;
-  /* background: var(--theme-gradient) !important; */
+  background: var(--theme-gradient) !important;
 }
 
 .driver-popover-close-btn{
