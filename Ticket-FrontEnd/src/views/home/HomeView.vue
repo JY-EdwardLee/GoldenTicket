@@ -35,6 +35,7 @@
                   :class="{ 'card-col-hover': isTransferCardHovered }"
                 >
                   <HeroCard
+                    id="transfer-card"
                     class="transfer-card h-100"
                     title="양도하기"
                     :description="'티켓이 필요한사람에게 안전하게 양도하세요'"

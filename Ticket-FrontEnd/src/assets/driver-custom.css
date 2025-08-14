@@ -97,6 +97,16 @@
   min-width: 30px !important;
   text-transform: none !important;
   letter-spacing: -0.2px !important;
+  background: var(--theme-gradient) !important;
+}
+
+.driver-popover-close-btn{
+  font-size: 24px !important;
+  margin: 10px !important;
+  padding: 10px 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* 다음 버튼 (금색 테마) */
