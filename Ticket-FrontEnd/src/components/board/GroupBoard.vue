@@ -158,7 +158,7 @@
                 class="apply-btn"
                 @click.stop="handleApplyClick('apply', post)"
               >
-                <span class="apply-icon">👤</span>
+                <span class="apply-icon"><i class="fa-regular fa-user"></i></span>
                 관람 신청
               </button>
               <button
