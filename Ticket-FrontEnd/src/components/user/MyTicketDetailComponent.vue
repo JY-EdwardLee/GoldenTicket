@@ -67,7 +67,7 @@
               <img :src="qrCodeImageSrc" alt="QR Code" class="qr-image">
             </div>
             <p class="qr-notice">입장 시 QR 코드 제시</p>
-            <p class="mobile-ticket">모바일 티켓</p>
+            <p class="mobile-ticket">클릭 시 확대</p>
           </div>
 
           <div class="notice-section">
@@ -93,9 +93,6 @@
       </div>
     </div>
 
-    <div v-else class="loading-container">
-      <p>티켓 정보를 불러오는 중입니다...</p>
-    </div>
   </div>
 </template>
 
@@ -105,7 +102,7 @@ import { useRoute } from 'vue-router';
 import http from '@/utils/http';
 import { API_CONFIG } from '@/config/api.config';
 import { enumToTeamName, teamNameToLogo } from '@/utils/teamNameMap';
-import {stadiumOfTeam} from '@/utils/teamStadium';
+import { stadiumOfTeam } from '@/utils/teamStadium';
 import { formatDate } from '@/utils/dateUtils';
 
 const route = useRoute();

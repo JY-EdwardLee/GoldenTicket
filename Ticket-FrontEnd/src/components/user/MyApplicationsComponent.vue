@@ -57,7 +57,7 @@
             </div>
             <div v-if="application.status === 'CANCEL_WAITING'" class="info-item">
               <span class="label">취소일 : </span>
-              <span class="value">{{ formatCancelDate(application.cancellationDate) }}</span>
+              <span class="value">{{ application.cancellationDate? formatCancelDate(application.cancellationDate):'-' }}</span>
             </div>
           </div>
         </div>
@@ -66,14 +66,14 @@
           <button 
             v-if="application.status === 'BEING_WAITING'" 
             class="cancel-btn"
-            @click="cancelPayment(application.game.id)"
+            @click="cancelPayment(application.game.id, application.status)"
           >
             응모 취소
           </button>
           <button 
             v-if="application.status === 'WAITING_PAYING'" 
             class="cancel-btn"
-            @click="cancelPayment(application.game.id)"
+            @click="cancelPayment(application.game.id, application.status)"
           >
             결제 취소
           </button>
@@ -141,11 +141,11 @@ const getStatusText = (status) => {
 }
 
 // 결제/응모 취소
-const cancelPayment = async (id) => {
+const cancelPayment = async (id, status) => {
   try {
     await http.delete(API_CONFIG.TICKET.CANCEL(id));
     await fetchApplications();  // 취소 후 응모 내역 다시 불러오기
-    activeTab.value = 'CANCEL_WAITING'
+    activeTab.value = status === 'BEING_WAITING' ? 'BEING_WAITING' : 'WAITING_PAYING'
   } catch (error) {
     console.error('결제 취소 중 오류 발생:', error);
   }
