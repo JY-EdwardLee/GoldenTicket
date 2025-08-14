@@ -2,7 +2,7 @@
   <v-app>
     <v-main>
       <!-- 히어로 섹션 -->
-      <v-container fluid class="hero-section pa-4" style="min-height: 25%; height: auto;">
+      <v-container fluid class="hero-section mt-5 pa-4" style="min-height: 25%; height: auto;">
         <v-container class="pa-0" :class="{ 'hovered': isTransferCardHovered || isEnterCardHovered }">
           <!-- 데스크톱 레이아웃 -->
           <v-row no-gutters class="fill-height d-none d-md-flex">
@@ -975,10 +975,11 @@ onUnmounted(() => {
 }
 
 .ticket-btn {
-  background: rgba(255, 255, 255, 0.1) !important;
+  /* background: rgba(255, 255, 255, 0.1) !important; */
+  background: linear-gradient(180deg, #ffffff 50%, #f8f8f8 100%) !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border: 0.05px solid var(--theme-primary) !important;
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -1006,12 +1007,10 @@ onUnmounted(() => {
   opacity: 0.7;
   border-radius: 0;
 }
-/* 
+
 .ticket-btn-hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-  background: var(--theme-gradient) !important;
-} */
+  border: 0px solid #ffffff !important;
+}
 
 .ticket-btn-hover .ticket-text {
   transform: translateY(-4px) scale(1.01);
@@ -1043,7 +1042,7 @@ onUnmounted(() => {
 }
 
 .ranking-section {
-  background: #fafafa;
+  /* background: #fafafa; */
 }
 
 .review-section {
