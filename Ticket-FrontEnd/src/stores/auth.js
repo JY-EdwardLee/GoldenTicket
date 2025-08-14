@@ -117,10 +117,10 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = null;
       user.value = null;
       userRole.value = null;
+      localStorage.removeItem('selectedTeam');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
       localStorage.removeItem('userRole');
-      localStorage.removeItem('selectedTeam');
       // Always redirect to home after logout
       router.push('/');
     }
