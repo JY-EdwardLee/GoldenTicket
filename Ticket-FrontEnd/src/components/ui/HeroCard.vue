@@ -24,7 +24,7 @@
         </span>
       </div>
       <transition name="fade" mode="out-in">
-        <div v-if="showDescription && (type === 'primary' || type === 'secondary')" class="d-flex justify-space-between">
+        <div v-if="type === 'primary' || type === 'secondary'" class="d-flex justify-space-between">
           <!-- <span class="text-emphasis font-weight-bold mt-2 description-text" style="text-align: center; font-size:1.0rem">{{ description }}</span> -->
         </div>
       </transition>

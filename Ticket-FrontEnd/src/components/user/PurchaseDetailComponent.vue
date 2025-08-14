@@ -121,11 +121,8 @@ const goBack = () => {
 
 const fetchTicketDetail = async () => {
   try {
-    console.log(ticketId.value)
     const response = await http.get(API_CONFIG.TICKET.DETAIL(ticketId.value))
-    console.log("티켓 상세 정보 응답 : ",response.data)
     ticketDetail.value = response.data
-    console.log("티켓 상세 정보 : ",ticketDetail.value)
   } catch (error) {
     console.error('Failed to fetch ticket detail:', error)
   }
@@ -137,7 +134,6 @@ onMounted(() => {
       const storedPurchase = sessionStorage.getItem('selectedPurchase')
       if (storedPurchase) {
         purchaseData.value = JSON.parse(storedPurchase)
-        console.log('세션스토리지:', purchaseData.value)
         // 사용 후 sessionStorage 정리
         sessionStorage.removeItem('selectedPurchase')
       }

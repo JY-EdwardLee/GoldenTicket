@@ -532,8 +532,6 @@ export const uploadImageToS3 = async (file, postId) => {
     // 1. S3 업로드 URL 요청
     const uploadUrlResponse = await getS3UploadUrl('PostImage', postId, file.name);
     
-    console.log('S3 업로드 URL 응답:', uploadUrlResponse);
-    
     // 2. S3에 직접 업로드 (presignedUrl 사용)
     const uploadResponse = await fetch(uploadUrlResponse.presignedUrl, {
       method: 'PUT',
@@ -546,8 +544,6 @@ export const uploadImageToS3 = async (file, postId) => {
     if (!uploadResponse.ok) {
       throw new Error('S3 업로드에 실패했습니다.');
     }
-    
-    console.log('S3 업로드 성공, key:', uploadUrlResponse.key);
     
     return {
       success: true,

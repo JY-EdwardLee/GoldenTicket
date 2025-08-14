@@ -117,10 +117,10 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = null;
       user.value = null;
       userRole.value = null;
+      localStorage.removeItem('selectedTeam');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
       localStorage.removeItem('userRole');
-      localStorage.removeItem('selectedTeam');
       // Always redirect to home after logout
       router.push('/');
     }
@@ -132,7 +132,6 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await http.get(API_CONFIG.USER.PROFILE);
       setUser(response.data);
-      console.log(user.value);
       return true;
     } catch (error) {
       console.error('Failed to fetch user info:', error);

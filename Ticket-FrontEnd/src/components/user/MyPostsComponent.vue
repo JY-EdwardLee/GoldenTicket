@@ -182,7 +182,6 @@ const fetchDeletePost = async (postId) => {
 const deletePosts = async () => {
   // Proxy 객체에서 실제 배열을 추출
   const selectedPostIds = [...selectedPosts.value];
-  console.log('선택된 게시글 ID들:', selectedPostIds);
   
   if (selectedPostIds.length === 0) return;
   
@@ -232,7 +231,6 @@ const fetchPosts = async () => {
     isLoading.value = true
     const response = await http.get(API_CONFIG.USER.POSTS)
     posts.value = response.data
-    console.log(posts.value)
   } catch (error) {
     console.error('게시글 조회 중 오류 발생:', error)
   } finally {

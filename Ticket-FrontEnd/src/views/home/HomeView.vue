@@ -2,7 +2,7 @@
   <v-app>
     <v-main>
       <!-- 히어로 섹션 -->
-      <v-container fluid class="hero-section pa-4" style="min-height: 25%; height: auto;">
+      <v-container fluid class="hero-section mt-5 pa-4" style="min-height: 25%; height: auto;">
         <v-container class="pa-0" :class="{ 'hovered': isTransferCardHovered || isEnterCardHovered }">
           <!-- 데스크톱 레이아웃 -->
           <v-row no-gutters class="fill-height d-none d-md-flex">
@@ -19,7 +19,6 @@
                   <HeroCard
                     class="enter-card h-100"
                     title="응모하기"
-                    :description="'원하는 경기를 응모하고 티켓을 양도받아 보세요'"
                     button-text="응모하기"
                     type="secondary"
                     @mouseover="isEnterCardHovered = true"
@@ -38,7 +37,6 @@
                     id="transfer-card"
                     class="transfer-card h-100"
                     title="양도하기"
-                    :description="'티켓이 필요한사람에게 안전하게 양도하세요'"
                     button-text="양도하기"
                     type="primary"
                     @mouseover="isTransferCardHovered = true"
@@ -395,7 +393,6 @@ watch(() => authStore.isAuthenticated, async (newValue, oldValue) => {
       
       // 로그인 모달이 열려있다면 닫기
       if (showLoginModal.value) {
-        console.log('로그인 모달 닫기');
         showLoginModal.value = false;
         // 모달 닫힘 애니메이션 대기
         await new Promise(resolve => setTimeout(resolve, 300));
@@ -406,17 +403,14 @@ watch(() => authStore.isAuthenticated, async (newValue, oldValue) => {
       pendingRedirect.value = null;
       localStorage.removeItem('pendingRedirect');
       
-      console.log('리다이렉트 시도:', redirectPath);
       
       // 리다이렉트 실행
       await router.push(redirectPath);
-      console.log('리다이렉트 성공');
       
     } catch (error) {
       console.error('리다이렉트 실패:', error);
       // 실패 시 메인 페이지로 이동
       await router.push('/');
-      console.log('메인 페이지로 이동');
     } finally {
       isProcessingLogin.value = false;
     }
@@ -426,7 +420,6 @@ watch(() => authStore.isAuthenticated, async (newValue, oldValue) => {
 
 // 로그인 모달 닫기
 function closeLoginModal() {
-  console.log('로그인 모달 닫기 요청');
   showLoginModal.value = false;
   
   // 모달이 수동으로 닫힌 경우 대기 중인 리다이렉트 초기화
@@ -439,10 +432,8 @@ function closeLoginModal() {
 
 // 로그인 성공 후 처리를 위한 메서드
 const handleLoginSuccess = async () => {
-  console.log('로그인 성공 처리 시작');
   
   if (pendingRedirect.value) {
-    console.log('대기 중인 리다이렉트 있음:', pendingRedirect.value);
     
     // 잠시 대기 후 리다이렉트 처리는 watch에서 자동으로 처리됨
     // 여기서는 추가 로직이 필요한 경우에만 사용
@@ -455,10 +446,8 @@ const waitForPopoverClose = () => {
     const checkPopover = () => {
       const popover = document.querySelector('.driver-popover');
       if (!popover) {
-        console.log('팝오버가 완전히 닫혔습니다');
         resolve();
       } else {
-        console.log('팝오버가 아직 존재합니다, 다시 확인...');
         setTimeout(checkPopover, 10); // 10ms 후 다시 확인 (응답성 향상)
       }
     };
@@ -508,7 +497,6 @@ const goToApply = async () => {
     }
     
     await router.push(path);
-    console.log('이동 완료');
   } catch (err) {
     console.error('이동 실패:', err);
   }
@@ -516,16 +504,13 @@ const goToApply = async () => {
 
 // 양도 페이지로 이동 (개선된 버전)
 const goToTransfer = async () => {
-  console.log('양도하기 클릭 - 현재 인증 상태:', authStore.isAuthenticated);
   const isInTutorial = !!document.querySelector('.driver-popover');
-  console.log('튜토리얼 상태:', isInTutorial);
   
   // 양도 튜토리얼 플래그 확인
   const showTransferTutorial = localStorage.getItem('showTransferTutorial') === 'true';
   
   // 튜토리얼이 활성화된 상태면 먼저 닫기
   if (isInTutorial) {
-    console.log('튜토리얼 오버레이 닫기');
     try {
       const driverObj = driver();
       driverObj.destroy();
@@ -540,21 +525,18 @@ const goToTransfer = async () => {
   if (!authStore.isAuthenticated) {
     // 로그인 후 이동할 경로 저장 (튜토리얼 플래그 유지)
     const redirectPath = isInTutorial || showTransferTutorial ? '/transfer?tutorial=true' : '/transfer';
-    console.log('로그인 필요, 리다이렉트 경로 저장:', redirectPath);
     
     // 대기 중인 리다이렉트 설정 및 로그인 모달 표시
     pendingRedirect.value = redirectPath;
     localStorage.setItem('pendingRedirect', redirectPath);
     await nextTick(); // DOM 업데이트 대기
     showLoginModal.value = true;
-    console.log('로그인 모달 표시');
     return;
   }
   
   // 이미 로그인된 상태면 바로 이동
   try {
     const path = isInTutorial || showTransferTutorial ? '/transfer?tutorial=true' : '/transfer';
-    console.log('바로 이동:', path);
     
     // 양도 튜토리얼 플래그가 있으면 제거 (한 번만 보여주기 위함)
     if (showTransferTutorial) {
@@ -562,7 +544,6 @@ const goToTransfer = async () => {
     }
     
     await router.push(path);
-    console.log('이동 완료');
   } catch (err) {
     console.error('이동 실패:', err);
   }
@@ -575,7 +556,6 @@ const userRankingData = ref([]);
 const fetchUserRanking = async () => {
   try {
     const response = await axios.get(API_CONFIG.MAIN_PAGE.USER);
-    console.log(response);
     // API 응답 데이터를 RankingCard 컴포넌트에 맞는 형태로 변환
     userRankingData.value = response.data.map(item => ({
       name: item.userName,
@@ -632,7 +612,6 @@ const getTeamKoreanName = (teamName) => {
 const fetchTeamRanking = async () => {
   try {
     const response = await axios.get(API_CONFIG.MAIN_PAGE.TEAM);
-    console.log(response.data);
     // API 응답 데이터를 RankingCard 컴포넌트에 맞는 형태로 변환
     teamRankingData.value = response.data.map(item => ({
       name: getTeamKoreanName(item.teamName),
@@ -794,19 +773,14 @@ const services = ref([
 
 // 컴포넌트 마운트 시 초기화
 onMounted(async () => {
-  console.log('HomeView 마운트됨');
-
   // 로그인 후 리다이렉트 처리 (watch가 동작하지 않을 경우 대비)
   if (authStore.isAuthenticated && pendingRedirect.value) {
-    console.log('마운트 시 로그인된 상태에서 대기 중인 리다이렉트 발견:', pendingRedirect.value);
     const redirectPath = pendingRedirect.value;
     pendingRedirect.value = null;
     localStorage.removeItem('pendingRedirect');
     
     try {
-      console.log('마운트 시 리다이렉트 실행:', redirectPath);
       await router.push(redirectPath);
-      console.log('마운트 시 리다이렉트 성공');
       return; // 리다이렉트 성공 시 나머지 초기화 건너뛰기
     } catch (error) {
       console.error('마운트 시 리다이렉트 실패:', error);
@@ -852,7 +826,6 @@ onMounted(async () => {
       .sort((a, b) => new Date(a.game.date) - new Date(b.game.date))[0]; // 날짜순 정렬 후 가장 가까운 티켓 선택
 
     tickets.value = closestTicket ? [closestTicket] : [];
-    console.log("tickets.value : ", tickets.value);
     }
   } catch (error) {
     console.error('티켓 정보를 불러오는 중 오류 발생:', error);
@@ -975,10 +948,11 @@ onUnmounted(() => {
 }
 
 .ticket-btn {
-  background: rgba(255, 255, 255, 0.1) !important;
+  /* background: rgba(255, 255, 255, 0.1) !important; */
+  background: linear-gradient(180deg, #ffffff 50%, #f8f8f8 100%) !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border: 0.05px solid var(--theme-primary) !important;
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -1006,12 +980,10 @@ onUnmounted(() => {
   opacity: 0.7;
   border-radius: 0;
 }
-/* 
+
 .ticket-btn-hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-  background: var(--theme-gradient) !important;
-} */
+  border: 0px solid #ffffff !important;
+}
 
 .ticket-btn-hover .ticket-text {
   transform: translateY(-4px) scale(1.01);
@@ -1043,7 +1015,7 @@ onUnmounted(() => {
 }
 
 .ranking-section {
-  background: #fafafa;
+  /* background: #fafafa; */
 }
 
 .review-section {
