@@ -26,7 +26,8 @@
       <div class="logo-section">
         <div class="logo-container">
           <div class="logo-icon">
-            <h4 class="logo-text">logo</h4>
+            <img src="/service_logo/logo_character.png" alt="골든티켓" style="width: auto; height: 86px;">
+            <!-- <h4 class="logo-text">logo</h4> -->
           </div>
         </div>
       </div>
@@ -191,7 +192,7 @@ const handleNaverLogin = (e) => {
 .logo-container {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+  align-items: center;
   padding: 0px 160px 16px;
   width: 384px;
   height: 80px;
@@ -206,9 +207,8 @@ const handleNaverLogin = (e) => {
   justify-content: center;
   align-items: center;
   padding: 0px;
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(90deg, #3b82f6 0%, #9333ea 100%);
+  width: 86px;
+  height: 86px;
   mix-blend-mode: normal;
   border-radius: 16px;
   flex: none;

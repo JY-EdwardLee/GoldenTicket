@@ -2,7 +2,8 @@
   <footer class="footer-bar">
     <div class="footer-content">
       <div class="footer-logo" aria-label="Golden Ticket">
-          <text x="0" y="20" font-family="Arial" font-size="20" font-weight="bold" fill="#333">Golden Ticket</text>
+        <img src="/service_logo/logo_full.png" alt="골든티켓" style="width: auto; height: 86px;">
+          <!-- <text x="0" y="20" font-family="Arial" font-size="20" font-weight="bold" fill="#333">Golden Ticket</text> -->
       </div>
       <div class="footer-desc">모두에게 직관의 기회가 될 수 있도록. <br>골든티켓</div>
       <div class="footer-social">
