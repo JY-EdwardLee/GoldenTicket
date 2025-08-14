@@ -380,19 +380,6 @@ public class UserController {
         return ResponseEntity.ok(postAllResponses);
     }
 
-    /**
-     * 테스트용 로그인 실제 서비스에서 삭제할 것
-     * TODO 삭제하기
-     *
-     * @return 5번 사용자
-     */
-    @PostMapping("/testlogin")
-    public ResponseEntity<JwtTokenResponse> testLogin() {
-        JwtTokenResponse tokens = userService.testUser();
-
-        return ResponseEntity.ok(tokens);
-    }
-
     /*
         공개용 관리자
      */

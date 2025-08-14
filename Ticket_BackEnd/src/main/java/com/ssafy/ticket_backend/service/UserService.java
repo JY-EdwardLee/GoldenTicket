@@ -64,12 +64,8 @@ public interface UserService {
     // 나의 게시글
     List<PostAllResponse> selectPostsByUser(String email);
 
-    // 테스트 용도
-    JwtTokenResponse testUser();
-    
     LoginUserResponse adminUserWithInfo();
 
     // 공개용 일반 사용자 (LoginUserResponse 반환)
     LoginUserResponse generalUserWithInfo();
-
 }
