@@ -811,9 +811,15 @@ async function selectDate(date) {
     }
     // 경기 데이터가 로드된 후 튜토리얼/모달 처리 (항상 실행)
     setTimeout(() => {
+      const isTutorial = (route?.query?.tutorial==='true')
+      || (localStorage.getItem('showApplyTutorial') === 'true')
+      || !!document.querySelector('.driver-popover');
+
       if (data && data.length > 0) {
-        // 경기가 있으면: 튜토리얼 모드일 때만 경기 선택 모달(step=1) 오픈
-        try { startGameListTutorial(); } catch (_) {}
+        if (isTutorial) {
+          // 튜토리얼 모드일 때만 경기 선택 모달(step=1) 오픈
+          try { startGameListTutorial(); } catch (_) {}
+        }
       } else {
         // 경기가 없으면 경기 없음 모달 표시
         showNoGameModal(date);
