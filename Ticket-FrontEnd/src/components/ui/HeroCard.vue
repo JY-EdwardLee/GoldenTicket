@@ -32,13 +32,13 @@
       <div v-if="type === 'primary' || type === 'secondary'" class="ticket-image-container justify-center pt-10">
         <img
           v-if="type === 'primary'"
-           src="/avatar/ticket_transfer.png"
+           src="/avatar/ticket_transfer.avif"
            alt="ticket"
            class="ticket-image"
-           />
+           /> 
           <img
           v-if="type === 'secondary'"
-           src="/avatar/stadium_apply.png"
+           src="/avatar/stadium_apply.avif"
            alt="apply"
            class="ticket-image"
            />
@@ -46,13 +46,13 @@
       <div v-if="type === 'sub'" class="ticket-sub-image-container justify-center pt-10">
         <img 
            v-if="title === '응모 내역'"
-           src="/avatar/my_application.png"
+           src="/avatar/my_application.avif"
            alt="응모 내역"
            class="ticket-sub-image"
            />
            <img 
            v-if="title === '나의 티켓'"
-           src="/avatar/my_ticket.png"
+           src="/avatar/my_ticket.avif"
            alt="나의 티켓"
            class="ticket-sub-image"
            />
