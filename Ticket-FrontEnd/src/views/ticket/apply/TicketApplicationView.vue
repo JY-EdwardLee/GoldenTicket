@@ -91,7 +91,7 @@
         <div class="selected-date-box">
           <div class="selected-date-title">
             <span class="selected-date-title-text" style="font-size: 20px;">{{ pageText.selectedDateTitle }} </span>
-            <span><img class="selected_team-logo" :src="`/small_logo/${getEnumTeamName(selectedTeam)}.svg`" alt="team logo" style="width: 35px; height: 35px;"/></span>
+            <span><img class="selected_team-logo" :src="`/small_logo/${user.myTeam}.svg`" alt="team logo" style="width: 35px; height: 35px;"/></span>
           </div>
           <div class="selected-info">
               <span class="selected-date">{{ getFormattedDate() }}</span>
