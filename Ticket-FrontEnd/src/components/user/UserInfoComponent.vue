@@ -237,7 +237,6 @@ const formData = reactive({
 const changeFavoriteTeam = async () => {
   if (selectedTeam.value) {
     const teamName = currentTeam.value.name
-    console.log('관심 팀이 변경되었습니다:', teamName)
     const requestForm = {
       "nickName": user.value.nickName,
       "profilePhotoUrl": user.value.profilePhotoUrl,
@@ -263,7 +262,6 @@ const changeUserInfo = () => {
     "gender": user.value.gender
   }
   const ans = http.patch(API_CONFIG.USER.PROFILE, requestForm)
-  console.log(ans)
 }
 
 

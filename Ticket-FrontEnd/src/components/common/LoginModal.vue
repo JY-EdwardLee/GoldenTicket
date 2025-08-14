@@ -96,7 +96,6 @@ const closeModal = () => {
 const handleKakaoLogin = (e) => {
   e.preventDefault();
   const url = new URL(API_CONFIG.AUTH.KAKAO, window.location.origin); // ← base 지정
-  console.log(url.href);
   window.location.assign(url.href); // 페이지 이동(네비게이션)
 };
 

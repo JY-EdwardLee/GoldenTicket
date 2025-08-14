@@ -248,7 +248,6 @@ const loadPostDetail = async (showLoading = true) => {
         if (authStore.isAuthenticated) {
           try {
             const likeStatus = await boardAPI.checkPostLikeStatus(postId);
-            console.log('좋아요 상태 확인 결과:', likeStatus);
             
             if (likeStatus.isLiked !== undefined) {
               serverLiked = likeStatus.isLiked;

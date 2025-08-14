@@ -153,7 +153,6 @@ const cancelPayment = async (id, status) => {
 
 // 결제 처리
 const processPayment = (id) => {
-  console.log(id)
   // 결제 페이지로 이동
   router.push(`/payment/${id}`)
 }
@@ -178,7 +177,6 @@ const fetchApplications = async () => {
     isLoading.value = true
     const response = await http.get(API_CONFIG.USER.APPLICANTS)
     applications.value = response.data
-    console.log(applications.value)
   } catch (error) {
     console.error('응모 내역 조회 중 오류 발생:', error)
   } finally {

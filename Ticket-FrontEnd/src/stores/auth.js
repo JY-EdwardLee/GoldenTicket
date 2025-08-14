@@ -132,7 +132,6 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await http.get(API_CONFIG.USER.PROFILE);
       setUser(response.data);
-      console.log(user.value);
       return true;
     } catch (error) {
       console.error('Failed to fetch user info:', error);

@@ -37,16 +37,13 @@ watch(
     token.value = newToken; // token ref도 같이 업데이트
     if (oldToken) {
       disconnectWebSocket();
-      if (import.meta?.env?.DEV) console.log('WebSocket disconnected due to token change');
     }
     if (newToken) {
       // 웹소켓 연결 (실시간 알림)
-      if (import.meta?.env?.DEV) console.log('WebSocket connecting with new token');
       connectWebSocket(newToken);
     } else {
       // 로그아웃 등 토큰이 사라진 경우 알림 초기화
       notificationStore.clearAllNotifications();
-      if (import.meta?.env?.DEV) console.log('Cleared notifications after logout/no token');
     }
   },
   { immediate: true }

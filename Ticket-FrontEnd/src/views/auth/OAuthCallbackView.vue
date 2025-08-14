@@ -42,7 +42,6 @@ const handleOAuthCallback = async () => {
         withCredentials: true,
       });
 
-      console.log(response.data);
       if (response.data || response.data.accessToken) {
         // 사용자 정보를 store에 저장
         authStore.getUserInfo();
