@@ -81,6 +81,15 @@ export const useAuthStore = defineStore('auth', () => {
     return path;
   }
 
+  function setSelectedTeam(teamId) {
+    localStorage.removeItem('selectedTeam')
+    localStorage.setItem('selectedTeam', teamId);
+  }
+
+  function getSelectedTeam() {
+    return localStorage.getItem('selectedTeam');
+  }
+
   async function getUserInfo() {
     try {
       const response = await http.get(API_CONFIG.USER.PROFILE);
@@ -88,6 +97,7 @@ export const useAuthStore = defineStore('auth', () => {
       // 기존 사용자 정보에서 userId 보존
       const currentUser = user.value;
       const serverUserData = response.data;
+      setSelectedTeam(serverUserData.teamId);
       
       // 서버 응답에 userId가 없고 기존에 userId가 있었다면 보존
       if (!serverUserData.userId && currentUser && currentUser.userId) {
@@ -164,6 +174,8 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     verifyToken,
     getUserInfo,
+    setSelectedTeam,
+    getSelectedTeam,
     checkTokenValidity,
   };
 });
