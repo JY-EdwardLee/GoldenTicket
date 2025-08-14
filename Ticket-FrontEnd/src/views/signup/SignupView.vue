@@ -141,7 +141,7 @@ const handleSubmit = async () => {
       userName: formData.userName,
       nickName: formData.nickName,
       birthDate: formData.birthdate, // YYYY-MM-DD 형식이어야 함
-      phoneNumber: formData.phone,
+      phoneNumber: formData.phoneNumber,
       myTeam: formData.favoriteTeam,
       gender: formData.gender || "MALE", // 임시값 또는 선택 옵션으로 구현 필요
       socialProvider: socialProvider.value,
@@ -181,11 +181,12 @@ const handleSubmit = async () => {
       console.warn('firstSignup 플래그 저장 실패:', e);
     }
     if (socialProvider.value === "KAKAO") {
-      const url = new URL(KAKAO_AUTH_URL.value);
-      window.location.href = url.toString();
+      const url = new URL(API_CONFIG.AUTH.KAKAO, window.location.origin); // ← base 지정
+      console.log(url.href);
+      window.location.assign(url.href); // 페이지 이동(네비게이션)
     } else if (socialProvider.value === "NAVER") {
-      const url = new URL(NAVER_AUTH_URL.value);
-      window.location.href = url.toString();
+      const url = new URL(API_CONFIG.AUTH.NAVER, window.location.origin); // ← base 지정
+      window.location.assign(url.href); // 페이지 이동(네비게이션)
     }
   } catch (error) {
     console.error("회원가입 오류:", error);
