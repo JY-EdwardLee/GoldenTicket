@@ -44,7 +44,6 @@ const handleOAuthCallback = async () => {
 
       if (response.data || response.data.accessToken) {
         // 사용자 정보를 store에 저장
-        console.log("00000000000000000000000000000000000000000", response.data)
         authStore.getUserInfo(response.data);
         authStore.setUser(response.data);
         authStore.setToken(response.data.accessToken);
