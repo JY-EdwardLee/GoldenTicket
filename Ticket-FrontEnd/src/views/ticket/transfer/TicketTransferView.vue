@@ -171,7 +171,7 @@
           <div v-else-if="tickets.length === 0" class="ticket-list" style="justify-content:center;align-items:center;height:350px;">
             <div style="font-size:32px;font-weight:700;color:#969696;text-align:center;">현재 보유하고 있는 티켓이 없습니다.</div>
           </div>
-          <div v-else class="ticket-list" style="max-height:600px;overflow-y:auto;padding:0 50px;">
+          <div v-else class="ticket-list" style="max-height:600px;overflow-y:auto;padding:0 40px;">
             <div
               v-for="(ticket, idx) in tickets"
               :key="ticket.ticketId"

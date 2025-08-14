@@ -2,7 +2,8 @@
   <nav class="navbar">
     <div class="navbar-logo">
       <router-link to="/">
-        <span>골든 티켓</span>
+        <img src="/service_logo/logo_character.png" alt="골든티켓" style="width: auto; height: 56px;">
+        <!-- <span>골든 티켓</span> -->
       </router-link>
     </div>
     
