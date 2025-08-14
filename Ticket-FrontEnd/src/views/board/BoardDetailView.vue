@@ -279,7 +279,6 @@ const loadPostDetail = async (showLoading = true) => {
         isLiked.value = serverLiked;
         // localStorage에 저장
         localStorage.setItem(storageKey, serverLiked.toString());
-        console.log('서버 상태를 localStorage에 저장:', serverLiked);
       }
       
       
@@ -315,15 +314,7 @@ const formatDate = (dateString) => {
 };
 
 // 이미지 로드 성공 핸들러
-const handleImageLoad = (event) => {
-  console.log('이미지 로드 성공:', {
-    src: event.target.src,
-    alt: event.target.alt,
-    naturalWidth: event.target.naturalWidth,
-    naturalHeight: event.target.naturalHeight,
-    currentSrc: event.target.currentSrc
-  });
-};
+const handleImageLoad = (event) => {};
 
 // 이미지 에러 핸들러
 const handleImageError = (event) => {
@@ -428,7 +419,6 @@ const toggleLike = async () => {
 };
 
 const editPost = () => {
-  console.log('글 수정');
   // 게시글 수정 페이지로 이동 (게시판 타입은 변경하지 않으므로 전달하지 않음)
   router.push(`/bulletin/edit/${route.params.id}`);
 };
@@ -442,8 +432,6 @@ const handleDeleteConfirm = async () => {
   
   try {
     const result = await boardAPI.deletePost(route.params.id);
-    
-    console.log('게시글 삭제 결과:', result);
     
     // 백엔드에서 PostResponse 객체를 직접 반환
     if (result && result.success) {
@@ -468,7 +456,6 @@ const handleDeleteCancel = () => {
 
 const handleCommentSubmit = async (newCommentData) => {
   // 댓글 작성 완료 후 즉시 화면에 추가
-  console.log('댓글 작성 완료:', newCommentData);
   
   // 새 댓글을 목록 맨 위에 추가
   if (post.value.commentList) {
@@ -493,7 +480,6 @@ const handleCommentSubmit = async (newCommentData) => {
   // 백그라운드에서 서버 데이터와 동기화 (실제 댓글 ID 획득)
   try {
     await loadPostDetail(false); // 로딩 상태 없이 백그라운드에서만 실행
-    console.log('댓글 작성 후 서버 데이터 동기화 완료');
   } catch (error) {
     console.error('댓글 작성 후 서버 동기화 실패:', error);
   }
@@ -501,7 +487,6 @@ const handleCommentSubmit = async (newCommentData) => {
 
 const handleCommentEdit = async (editData) => {
   // 댓글 수정 완료 후 즉시 화면에 반영
-  console.log('댓글 수정 완료:', editData);
   
   // 해당 댓글 찾아서 내용 업데이트
   if (post.value.commentList) {
@@ -518,7 +503,6 @@ const handleCommentEdit = async (editData) => {
   // 백그라운드에서 서버 데이터와 동기화
   try {
     await loadPostDetail(false); // 로딩 상태 없이 백그라운드에서만 실행
-    console.log('댓글 수정 후 서버 데이터 동기화 완료');
   } catch (error) {
     console.error('댓글 수정 후 서버 동기화 실패:', error);
   }
@@ -526,7 +510,6 @@ const handleCommentEdit = async (editData) => {
 
 const handleCommentDelete = async (deleteData) => {
   // 댓글 삭제 완료 후 즉시 화면에서 제거
-  console.log('댓글 삭제 완료:', deleteData);
   
   // 해당 댓글을 목록에서 제거
   if (post.value.commentList) {
@@ -542,7 +525,6 @@ const handleCommentDelete = async (deleteData) => {
   // 백그라운드에서 서버 데이터와 동기화
   try {
     await loadPostDetail(false); // 로딩 상태 없이 백그라운드에서만 실행
-    console.log('댓글 삭제 후 서버 데이터 동기화 완료');
   } catch (error) {
     console.error('댓글 삭제 후 서버 동기화 실패:', error);
   }

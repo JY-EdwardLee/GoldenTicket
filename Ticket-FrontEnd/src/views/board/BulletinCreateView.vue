@@ -219,8 +219,6 @@ onMounted(() => {
 
 // 에디터 준비 완료
 const onEditorReady = (quill) => {
-  console.log('에디터 준비 완료:', quill);
-  
   // 브라우저 경고 억제 (선택사항)
   const originalWarn = console.warn;
   console.warn = (...args) => {
@@ -381,16 +379,13 @@ const handleSubmit = async () => {
   try {
     // 임시 postId 생성
     const tempPostId = generateRandomLong();
-    console.log('임시 postId 생성:', tempPostId);
     
     // 이미지 업로드 처리
     let imageUrl = null;
     if (selectedImage.value) {
       try {
-        console.log('이미지 업로드 시작:', selectedImage.value.name);
         const uploadResult = await uploadImageToS3(selectedImage.value, tempPostId);
         imageUrl = uploadResult.imageUrl;
-        console.log('이미지 업로드 완료:', imageUrl);
       } catch (uploadError) {
         console.error('이미지 업로드 실패:', uploadError);
         

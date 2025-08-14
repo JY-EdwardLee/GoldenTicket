@@ -134,16 +134,6 @@ const updateDisplayedPosts = () => {
 
 // 컴포넌트 마운트 시 게시글 목록 로드
 onMounted(() => {
-  // 브라우저 경고 억제 (Quill 에디터 관련)
-  const originalWarn = console.warn;
-  console.warn = (...args) => {
-    if (args[0] && typeof args[0] === 'string' && 
-        args[0].includes('DOMNodeInserted')) {
-      return; // 이 경고는 무시
-    }
-    originalWarn.apply(console, args);
-  };
-  
   loadPosts();
 });
 
@@ -192,7 +182,6 @@ const handlePostClick = (post) => {
 const handlePageChange = (page) => {
   currentPage.value = page;
   updateDisplayedPosts();
-  console.log('페이지 변경:', page);
 };
 
 // 검색 초기화

@@ -266,10 +266,6 @@ const restoreCommentLikeStates = () => {
 const isCommentAuthor = (comment) => {
   // 로그인하지 않은 경우
   if (!authStore.isAuthenticated || !authStore.user) {
-    console.log('로그인 상태 확인 실패:', {
-      isAuthenticated: authStore.isAuthenticated,
-      user: authStore.user
-    });
     return false;
   }
   
@@ -409,8 +405,7 @@ const submitComment = async () => {
       newComment.value = '';
       isInputActive.value = false;
       
-      // 성공 메시지 (선택사항)
-      console.log('댓글 작성 성공:', result.message);
+      // 성공 메시지는 UI로 대체
     } else {
       alert(result.message || '댓글 작성에 실패했습니다.');
     }
@@ -496,13 +491,12 @@ const handleDeleteConfirm = async () => {
       return;
     }
     
-    console.log('삭제할 댓글 ID:', commentId);
     const result = await boardAPI.deleteComment(commentId);
     
     if (result.success) {
       // 부모 컴포넌트에 댓글 삭제 완료 알림
       emit('commentDelete', { commentId: commentId });
-      console.log('댓글 삭제 성공:', result.message);
+      // 성공 메시지는 UI로 대체
     } else {
       alert(result.message || '댓글 삭제에 실패했습니다.');
     }
@@ -569,14 +563,7 @@ const toggleCommentLike = async (comment) => {
       // localStorage에 저장
       const storageKey = `comment_like_${commentId}_${authStore.user?.userId || 'guest'}`;
       localStorage.setItem(storageKey, newLikedState.toString());
-      
-      console.log('댓글 좋아요 토글 성공:', {
-        commentId: commentId,
-        isLiked: newLikedState,
-        likeCount: comment.likeCount,
-        serverResponse: result,
-        localStorageKey: storageKey
-      });
+      // 성공 시 상태만 갱신
     } else {
       console.error('댓글 좋아요 토글 실패: 응답이 없습니다.');
     }
@@ -609,7 +596,6 @@ onMounted(async () => {
   if (authStore.isAuthenticated && (!authStore.user || !authStore.user.userId)) {
     try {
       await authStore.getUserInfo();
-      console.log('사용자 정보 재조회 완료:', authStore.user);
     } catch (error) {
       console.error('사용자 정보 재조회 실패:', error);
     }

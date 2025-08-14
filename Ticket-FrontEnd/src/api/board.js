@@ -482,9 +482,6 @@ export const getS3UploadUrl = async (type, refId, fileName) => {
     return response.data;
   } catch (error) {
     console.error('S3 업로드 URL 요청 실패:', error);
-    console.error('에러 응답:', error.response);
-    console.error('에러 상태:', error.response?.status);
-    console.error('에러 데이터:', error.response?.data);
     
     // 403 Forbidden 오류인 경우 인증 문제로 처리
     if (error.response?.status === 403) {
