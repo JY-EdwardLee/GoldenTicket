@@ -633,12 +633,23 @@ const fetchTeamRanking = async () => {
   try {
     const response = await axios.get(API_CONFIG.MAIN_PAGE.TEAM);
     console.log(response.data);
+    // 상승률 표기 규칙: 음수 -> '-<값>%', null/0 -> '+0%', 양수 -> '+<값>%'
+    const formatChange = (v) => {
+      if (v === null || v === 0) return '+0%';
+      if (typeof v === 'number') {
+        if (v < 0) return `-${Math.abs(v)}%`;
+        if (v > 0) return `+${v}%`;
+      }
+      const n = parseFloat(v);
+      if (isNaN(n) || n === 0) return '+0%';
+      return n < 0 ? `-${Math.abs(n)}%` : `+${n}%`;
+    };
     // API 응답 데이터를 RankingCard 컴포넌트에 맞는 형태로 변환
     teamRankingData.value = response.data.map(item => ({
       name: getTeamKoreanName(item.teamName),
       subtitle: `${item.rank}위`,
       score: item.transferAllCount,
-      ...(item.growthRate !== null && { change: `+${item.growthRate}%` }),
+      change: formatChange(item.growthRate),
       avatar: `/orglogo/${item.teamName}.svg`
     }));
   } catch (error) {

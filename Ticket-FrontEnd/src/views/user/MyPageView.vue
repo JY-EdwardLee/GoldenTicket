@@ -53,7 +53,7 @@
             </div>
             <div class="team-info">
               <p class="team">{{ enumToTeamName[themeStore.selectedTeam.value] || '관심 야구팀' }}</p>
-              <span class="tag">{{ user?.userRole|| 'NO LIMITS' }}</span>
+              <span class="tag"><img src="/icon/milage.png" alt="마일리지" class="tag-icon"> 1,000 포인트</span>
             </div>
           </div>
         </div>
@@ -467,12 +467,24 @@ const handleLogoError = (event) => {
 }
 
 .tag {
-  background: var(--theme-primary, #ff6b35);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: bold;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  color: #666;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 110px;
+}
+
+.tag-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  margin-left: 3px;
 }
 
 .mypage-menu {

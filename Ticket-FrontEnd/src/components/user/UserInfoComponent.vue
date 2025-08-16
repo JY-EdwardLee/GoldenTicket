@@ -48,11 +48,18 @@
           </div>
         </div>
 
-        <div class="form-group full-width">
+        <div class="form-group">
           <label>생년월일</label>
           <div class="input-wrapper">
             <div class="input-icon">🎂</div>
             <input type="date" :value="user?.birthDate || ''" readonly>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>계좌</label>
+          <div class="input-wrapper">
+            <div class="input-icon">🪙</div>
+            <input type="text" value="싸피은행) 113-796-002591" readonly>
           </div>
         </div>
       </div>
@@ -367,10 +374,6 @@ onMounted(async () => {
   flex-direction: column;
 }
 
-.form-group.full-width {
-  grid-column: 1 / -1;
-}
-
 .form-group label {
   font-weight: 600;
   color: #374151;
@@ -378,7 +381,7 @@ onMounted(async () => {
   font-size: 14px;
 }
 
-.input-wrapper {
+.input-wrapper { 
   position: relative;
   display: flex;
   align-items: center;

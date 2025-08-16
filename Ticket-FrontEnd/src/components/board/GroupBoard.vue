@@ -367,10 +367,32 @@ const handlePostClick = (post) => {
   });
 };
 
+// 현재 사용자 시니어 여부 계산 (isSenior 플래그 우선, 없으면 생년월일로 50세 이상 판별)
+const isSeniorUser = computed(() => {
+  const u = authStore.user?.value ?? authStore.user;
+  const userObj = u && typeof u === 'object' ? (u.value ?? u) : null;
+  if (!userObj) return false;
+  if (typeof userObj.isSenior === 'boolean') return userObj.isSenior;
+  const birth = userObj.birthDate;
+  if (!birth) return false;
+  const today = new Date();
+  const b = new Date(birth);
+  if (isNaN(b.getTime())) return false;
+  let age = today.getFullYear() - b.getFullYear();
+  const m = today.getMonth() - b.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < b.getDate())) age--;
+  return age >= 50;
+});
+
 const handleApplyClick = async (action, post) => {
   try {
     // 클릭 시점에 상태 검증 및 가드 처리
     if (action === 'apply') {
+      // 시니어 전용 가드
+      if (!isSeniorUser.value) {
+        alert('단체 관람 신청은 시니어만 이용할 수 있습니다.');
+        return;
+      }
       if (isMyApplied(post)) {
         alert('이미 이 경기에 관람 신청하셨습니다. 관람 취소 버튼을 이용해주세요.');
         return;
@@ -385,12 +407,12 @@ const handleApplyClick = async (action, post) => {
 
     if (action === 'cancel') {
       const res = await boardAPI.cancelGroup(post.groupId);
-      alert( '단체 관람 취소에 성공하셨습니다.');
+      alert('단체 관람 취소에 성공하셨습니다.');
       appliedGroupIds.value.delete(post.groupId);
       persistAppliedSet();
     } else {
       const res = await boardAPI.applyGroup(post.groupId);
-      alert( '단체 관람 신청에 성공하셨습니다.');
+      alert('단체 관람 신청에 성공하셨습니다.');
       appliedGroupIds.value.add(post.groupId);
       persistAppliedSet();
     }
@@ -398,7 +420,6 @@ const handleApplyClick = async (action, post) => {
   } catch (err) {
     const msg = err?.message || '요청 처리에 실패했습니다.';
     alert(msg);
-    console.error('단체관람 신청/취소 실패:', err);
   }
 };
 
