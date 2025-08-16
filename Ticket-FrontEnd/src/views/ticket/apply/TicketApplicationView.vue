@@ -2612,7 +2612,7 @@ function formatGameTime(dateTimeStr) {
 .game-card {
   position: relative;
   overflow: hidden;
-  border-radius: inherit;
+  border-radius: 10px;
 }
 
 /* 그라데이션 효과 */

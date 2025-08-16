@@ -189,7 +189,7 @@
                 <span class="ticket-people">현재 응모 인원 : {{ ticket.waitNumber }}명</span>
               </div>
               <div class="ticket-info-row" style="justify-content:space-between;">
-                <span> <img src="/icon/calendar.svg" alt="날짜" style="width: 25px; height: 25px;" />{{ ticket.game.date.split('T')[0] }}</span>
+                <span> <img src="/icon/calendar.svg" alt="날짜" style="width: 25px; height: 25px;" />{{ ticket.game.date.split('T')[0] }} ({{ ['일','월','화','수','목','금','토'][new Date(ticket.game.date).getDay()] }}) </span>
                 <span> <img src="/icon/chair.svg" alt="좌석" style="width: 25px; height: 25px;" />{{ ticket.seat }}</span>
                 <span> <img src="/icon/credit_card.svg" alt="가격" style="width: 25px; height: 25px;" />{{ ticket.price.toLocaleString() }}</span>
                 <span style="margin-left:auto;font-weight:600;">{{ ticket.statusText }}</span>
@@ -241,7 +241,7 @@
                   <div class="ticket-detail-info-row">
                     <span style="display: flex; align-items: center; gap: 4px;">
                       <img src="/icon/calendar.svg" alt="날짜"/>
-                      {{ ticket.game.date.split('T')[0] }}
+                      {{ ticket.game.date.split('T')[0] }} ({{ ['일','월','화','수','목','금','토'][new Date(ticket.game.date).getDay()] }})
                     </span>
                     <span style="display: flex; align-items: center; gap: 4px;">
                       <img src="/icon/clock.svg" alt="시간"/>
@@ -1746,10 +1746,10 @@ onMounted(() => {
   box-shadow: 0 2px 8px #ce0e2d11;
 }
 .notice-title {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--theme-primary);
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 .notice-list {
   padding-left: 18px;
@@ -2317,15 +2317,8 @@ onMounted(() => {
     font-size: 26px;
   }
   
-  .detail-header-info-row {
-    left: 20px;
-    bottom: 20px;
-    font-size: 16px;
-  }
-  
   .detail-header-info-line {
     gap: 60px;
-    width: 100%;
     max-width: 360px;
   }
   
@@ -2337,287 +2330,6 @@ onMounted(() => {
   
   .info-icon {
     font-size: 16px;
-  }
-  
-  .detail-price-row {
-    padding: 0 20px;
-  }
-  
-  .detail-price {
-    font-size: 20px;
-  }
-  
-  .detail-seat-row {
-    padding: 0 20px;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  
-  .detail-seat-block {
-    padding: 12px 8px 8px 8px;
-    max-width: 100px;
-  }
-  
-  .seat-title {
-    font-size: 12px;
-    margin-bottom: 3px;
-  }
-  
-  .seat-value {
-    font-size: 14px;
-  }
-  
-  .detail-apply-box {
-    margin: 0 20px 16px 20px;
-    padding: 18px 0 16px 0;
-  }
-  
-  .apply-title {
-    font-size: 16px;
-    margin-bottom: 12px;
-  }
-  
-  .apply-btns {
-    gap: 12px;
-  }
-  
-  .apply-yes,
-  .apply-no {
-    padding: 8px 24px;
-    font-size: 15px;
-  }
-  
-  .detail-notice-box {
-    margin: 0 20px 20px 20px;
-    padding: 16px;
-  }
-  
-  .notice-title {
-    font-size: 14px;
-    margin-bottom: 12px;
-  }
-  
-  .notice-content {
-    font-size: 13px;
-  }
-  
-  /* Complete page responsive */
-  .complete-root {
-    padding: 24px 0;
-    height: auto;
-    min-height: 600px;
-  }
-  
-  .complete-card {
-    width: 100%;
-    max-width: 400px;
-    padding: 24px 20px 20px 20px;
-    margin-bottom: 16px;
-  }
-  
-  .match-info {
-    padding: 16px 0 10px 0;
-    margin-bottom: 24px;
-  }
-  
-  .match-title {
-    font-size: 22px;
-  }
-  
-  .match-detail {
-    font-size: 14px;
-    margin-top: 4px;
-    gap: 12px;
-  }
-  
-  .complete-message {
-    margin: 28px 0 12px 0;
-  }
-  
-  .main-message {
-    font-size: 1.6rem;
-    margin-bottom: 8px;
-  }
-  
-  .sub-message {
-    font-size: 0.9rem;
-    margin-bottom: 16px;
-  }
-  
-  .confirm-btn {
-    padding: 8px 24px;
-    font-size: 1rem;
-    margin-top: 8px;
-  }
-  
-  /* Warning modal responsive */
-  .warning-modal-container {
-    max-width: 320px;
-    width: 95%;
-  }
-  
-  .warning-modal-content {
-    padding: 32px 24px 24px 24px;
-  }
-  
-  .warning-modal-icon {
-    font-size: 40px;
-    margin-bottom: 16px;
-  }
-  
-  .warning-modal-title {
-    font-size: 18px;
-    margin-bottom: 12px;
-  }
-  
-  .warning-modal-message {
-    font-size: 14px;
-    margin-bottom: 24px;
-  }
-  
-  .warning-modal-confirm-btn {
-    padding: 10px 32px;
-    font-size: 15px;
-  }
-  
-  /* Applying status responsive */
-  .applying-message {
-    font-size: 14px;
-  }
-}
-
-@media (max-width: 480px) {
-  .transfer-root {
-    padding: 0 12px;
-  }
-  
-  .transfer-main {
-    padding: 0 12px;
-  }
-  
-  .card-inner {
-    padding: 24px 16px;
-    min-height: 350px;
-  }
-  
-  .card-title {
-    font-size: 24px;
-  }
-  
-  .card-desc {
-    font-size: 15px;
-    margin-top: 12px;
-    margin-bottom: 20px;
-  }
-  
-  .provider-row {
-    gap: 20px;
-  }
-  
-  .nol-img,
-  .ticketlink-img {
-    height: 100px;
-  }
-  
-  .provider-btn {
-    height: 44px;
-    font-size: 16px;
-  }
-  
-  .ticket-tab {
-    padding: 5px 20px;
-    font-size: 13px;
-  }
-  
-  .ticket-list {
-    padding: 0 12px !important;
-  }
-  
-  .ticket-card {
-    padding: 16px 20px 14px 20px;
-    min-height: 110px;
-  }
-  
-  .ticket-card .ticket-title {
-    font-size: 18px;
-  }
-  
-  .ticket-card .ticket-info-row {
-    font-size: 14px;
-    margin-top: 12px;
-    gap: 8px;
-  }
-  
-  .ticket-card .ticket-people {
-    font-size: 14px;
-  }
-  
-  .ticket-card .ticket-detail {
-    padding: 16px 20px 14px 20px;
-    font-size: 14px;
-  }
-  
-  .ticket-detail-title {
-    font-size: 20px;
-  }
-  
-  .ticket-detail-info-row {
-    font-size: 14px;
-    gap: 8px;
-  }
-  
-  .ticket-detail-block.block-horizontal {
-    padding: 10px 8px 8px 10px;
-    min-width: 100px;
-  }
-  
-  .ticket-detail-block.block-horizontal .block-title {
-    font-size: 13px;
-  }
-  
-  .ticket-detail-block.block-horizontal .block-content {
-    font-size: 12px;
-  }
-  
-  .ticket-detail-transfer-btn {
-    max-width: 160px;
-    height: 50px;
-    font-size: 16px;
-  }
-  
-  .detail-card {
-    max-width: 320px;
-  }
-  
-  .detail-header {
-    padding: 20px 16px 32px 16px;
-    min-height: 240px;
-  }
-  
-  .detail-header-logo {
-    font-size: 20px;
-    left: 16px;
-    top: 12px;
-  }
-  
-  .detail-header-ticketid {
-    right: 16px;
-    top: 12px;
-    font-size: 11px;
-  }
-  
-  .main-title {
-    font-size: 22px;
-  }
-  
-  .detail-header-info-line {
-    gap: 40px;
-    max-width: 280px;
-  }
-  
-  .detail-header-info-col {
-    font-size: 13px;
-    min-width: 120px;
   }
   
   .detail-seat-block {
@@ -2634,8 +2346,8 @@ onMounted(() => {
   }
   
   .detail-apply-box {
-    margin: 0 16px 12px 16px;
-    padding: 16px 0 14px 0;
+    margin: 0 20px 12px 20px;
+    padding: 18px 0 16px 0;
   }
   
   .apply-title {
@@ -2649,7 +2361,7 @@ onMounted(() => {
   }
   
   .detail-notice-box {
-    margin: 0 16px 16px 16px;
+    margin: 0 20px 16px 20px;
     padding: 12px;
   }
   
