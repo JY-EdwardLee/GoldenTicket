@@ -99,7 +99,6 @@ export const boardAPI = {
   getComments: async (postId) => {
     try {
       const response = await publicApiClient.get(`/boards/${postId}/comments`);
-      console.log(response.data);
       return response.data;
     } catch (error) {
       throw apiErrorHandler(error);
@@ -472,8 +471,6 @@ export const validateCommentData = (commentData) => {
 // S3 업로드 관련 함수들
 export const getS3UploadUrl = async (type, refId, fileName) => {
   try {
-    console.log('S3 업로드 URL 요청 시작:', { type, refId, fileName });
-    
     const response = await authApiClient.get('/s3/upload-url', {
       params: {
         type,
@@ -482,13 +479,9 @@ export const getS3UploadUrl = async (type, refId, fileName) => {
       }
     });
     
-    console.log('S3 업로드 URL 요청 성공:', response.data);
     return response.data;
   } catch (error) {
     console.error('S3 업로드 URL 요청 실패:', error);
-    console.error('에러 응답:', error.response);
-    console.error('에러 상태:', error.response?.status);
-    console.error('에러 데이터:', error.response?.data);
     
     // 403 Forbidden 오류인 경우 인증 문제로 처리
     if (error.response?.status === 403) {

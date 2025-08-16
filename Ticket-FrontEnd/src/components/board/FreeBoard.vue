@@ -96,9 +96,7 @@ const loadPosts = async () => {
   searchResultMessage.value = '';
   
   try {
-    console.log("BOARD_TYPES.FREE url : ", BOARD_TYPES.FREE);
     const result = await boardAPI.getPostsByCategory(BOARD_TYPES.FREE);
-    console.log("result : ", result);
     // 서버가 배열을 직접 반환하므로 result 자체가 배열
     if (Array.isArray(result)) {
       allPosts.value = result;
@@ -136,23 +134,12 @@ const updateDisplayedPosts = () => {
 
 // 컴포넌트 마운트 시 게시글 목록 로드
 onMounted(() => {
-  // 브라우저 경고 억제 (Quill 에디터 관련)
-  const originalWarn = console.warn;
-  console.warn = (...args) => {
-    if (args[0] && typeof args[0] === 'string' && 
-        args[0].includes('DOMNodeInserted')) {
-      return; // 이 경고는 무시
-    }
-    originalWarn.apply(console, args);
-  };
-  
   loadPosts();
 });
 
 // 검색 타입 변경
 const handleSearchTypeChange = (type) => {
   searchType.value = type;
-  console.log('검색 타입 변경:', type);
 };
 
 // 검색 실행
@@ -189,14 +176,12 @@ const handleSearch = async (searchTypeParam, searchValueParam) => {
 };
 
 const handlePostClick = (post) => {
-  console.log('게시글 클릭:', post);
   // TODO: 게시글 상세 페이지로 이동
 };
 
 const handlePageChange = (page) => {
   currentPage.value = page;
   updateDisplayedPosts();
-  console.log('페이지 변경:', page);
 };
 
 // 검색 초기화
@@ -204,7 +189,6 @@ const handleClearSearch = () => {
   searchValue.value = '';
   searchResultMessage.value = '';
   loadPosts(); // 전체 게시글 다시 로드
-  console.log('검색 초기화');
 };
 
 const handleWriteClick = () => {
