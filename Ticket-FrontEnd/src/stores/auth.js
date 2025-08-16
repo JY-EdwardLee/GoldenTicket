@@ -81,6 +81,15 @@ export const useAuthStore = defineStore('auth', () => {
     return path;
   }
 
+  function setSelectedTeam(teamId) {
+    localStorage.removeItem('selectedTeam')
+    localStorage.setItem('selectedTeam', teamId);
+  }
+
+  function getSelectedTeam() {
+    return localStorage.getItem('selectedTeam');
+  }
+
   async function getUserInfo() {
     try {
       const response = await http.get(API_CONFIG.USER.PROFILE);
@@ -88,6 +97,7 @@ export const useAuthStore = defineStore('auth', () => {
       // 기존 사용자 정보에서 userId 보존
       const currentUser = user.value;
       const serverUserData = response.data;
+      setSelectedTeam(serverUserData.teamId);
       
       // 서버 응답에 userId가 없고 기존에 userId가 있었다면 보존
       if (!serverUserData.userId && currentUser && currentUser.userId) {
@@ -117,10 +127,10 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = null;
       user.value = null;
       userRole.value = null;
+      localStorage.removeItem('selectedTeam');
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
       localStorage.removeItem('userRole');
-      localStorage.removeItem('selectedTeam');
       // Always redirect to home after logout
       router.push('/');
     }
@@ -132,7 +142,6 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await http.get(API_CONFIG.USER.PROFILE);
       setUser(response.data);
-      console.log(user.value);
       return true;
     } catch (error) {
       console.error('Failed to fetch user info:', error);
@@ -165,6 +174,8 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     verifyToken,
     getUserInfo,
+    setSelectedTeam,
+    getSelectedTeam,
     checkTokenValidity,
   };
 });

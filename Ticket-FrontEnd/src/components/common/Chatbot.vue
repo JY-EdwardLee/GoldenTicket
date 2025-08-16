@@ -23,8 +23,8 @@
         <v-btn icon @click="toggleChat">
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
-        <v-avatar :color="themeColors.primary" size="36" class="mr-3">
-          <v-icon dark>mdi-robot</v-icon>
+        <v-avatar size="48" class="mr-3">
+          <img src="/service_logo/logo_character.png" alt="Chatbot Icon" width="48" height="auto" />
         </v-avatar>
         <v-toolbar-title class="font-weight-bold">골티봇</v-toolbar-title>
         <v-spacer></v-spacer>
@@ -49,8 +49,8 @@
         </div>
         <div v-for="(message, index) in messages" :key="index" :class="['message-row', message.sender]">
           <div v-if="message.sender === 'bot'" class="bot-avatar">
-             <v-avatar :color="themeColors.primary" size="32">
-                <v-icon small dark>mdi-robot</v-icon>
+             <v-avatar size="48">
+                <img src="/service_logo/logo_character.png" alt="Chatbot Icon" width="48" height="auto" />
              </v-avatar>
           </div>
           <div :class="['message', message.sender]">
@@ -60,8 +60,8 @@
         </div>
         <div v-if="isTyping" class="message-row bot">
            <div class="bot-avatar">
-             <v-avatar :color="themeColors.primary" size="32">
-                <v-icon small dark>mdi-robot</v-icon>
+             <v-avatar size="48">
+                <img src="/service_logo/logo_character.png" alt="Chatbot Icon" width="48" height="auto" />
              </v-avatar>
            </div>
            <div class="message bot typing-indicator">
@@ -69,22 +69,20 @@
            </div>
         </div>
       </v-card-text>
-
+<!-- "filled" | "outlined" | "plain" | "underlined" | "solo" | "solo-inverted" | "solo-filled"; -->
       <!-- 입력 영역 -->
       <v-card-actions class="input-area">
         <v-text-field
           v-model="newMessage"
           @keypress.enter.prevent="sendMessage"
-          placeholder="골티봇에게 물어보세요요"
-          filled
+          placeholder="골티봇에게 물어보세요"
+          variant="solo-filled"
           rounded
           dense
           hide-details
           class="chat-input"
         >
           <template v-slot:append>
-            <v-icon>mdi-emoticon-happy-outline</v-icon>
-            <v-icon class="mx-1">mdi-paperclip</v-icon>
             <v-btn icon small :color="themeColors.primary" @click="sendMessage" :disabled="!newMessage.trim()">
               <v-icon>mdi-send</v-icon>
             </v-btn>
@@ -229,10 +227,8 @@ const sendMessage = async () => {
       params.team = teamNameToEnum[params.team];
       if (confirmation) {
         const response = await http.post(API_CONFIG.TICKET.GAMES, params)
-        console.log(response.data);
         try {
           const res = await http.post(API_CONFIG.TICKET.APPLY(response.data[0].gameId));
-          console.log(res.data);
           router.push(`/mypage/applications`);
         } catch (error) {
           alert('이미 예매된 티켓 입니다.');

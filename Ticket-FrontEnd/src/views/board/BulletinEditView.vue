@@ -358,8 +358,8 @@ const handleImageUpload = async (event) => {
     previewUrl.value = URL.createObjectURL(file);
     
     // 최초에 1번만 Presigned URL 요청
-    try {
-      const presignedResponse = await boardAPI.getPresignedUploadUrl(
+      try {
+        const presignedResponse = await boardAPI.getPresignedUploadUrl(
         'PostImage', 
         route.params.id, 
         file.name

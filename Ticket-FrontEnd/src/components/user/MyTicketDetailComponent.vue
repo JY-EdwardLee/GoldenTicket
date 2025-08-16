@@ -130,11 +130,6 @@ const fetchTicketDetail = async (ticketId) => {
   try {
     const response = await http.get(API_CONFIG.TICKET.DETAIL(ticketId));
     ticketDetail.value = response.data;
-    // Assuming stadium address is part of the response, otherwise it needs to be fetched or mapped.
-    // if (!ticketDetail.value.stadiumAddress) {
-    //     ticketDetail.value.stadiumAddress = '인천광역시 미추홀구'; // Placeholder
-    // }
-    console.log("ticketDetail.value", ticketDetail.value)
   } catch (error) {
     console.error('Failed to fetch ticket details:', error);
   }
@@ -144,7 +139,6 @@ const fetchQRCode = async (ticketId) => {
   try {
     const response = await http.post(API_CONFIG.TICKET.QR(ticketId));
     qrCodeBase64.value = response.data;
-    console.log("qrCodeBase64.value", qrCodeBase64.value)
   } catch (error) {
     console.error('Failed to fetch ticket details:', error);
   }

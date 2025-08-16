@@ -75,7 +75,7 @@ authApiClient.interceptors.request.use(
     if (token && tokenUtils.isTokenValid()) {
       config.headers.Authorization = `Bearer ${token}`;
     } else {
-      console.log('토큰이 없거나 유효하지 않음');
+      // 토큰 없음/무효 시 콘솔 출력 제거
     }
     return config;
   },

@@ -115,7 +115,6 @@ const fetchTickets = async () => {
     isLoading.value = true
     const response = await http.get(API_CONFIG.USER.TICKETS)
     tickets.value = response.data
-    console.log(tickets.value)
   } catch (error) {
     console.error('티켓 조회 중 오류 발생:', error)
   } finally {
