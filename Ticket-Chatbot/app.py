@@ -29,7 +29,7 @@ if not os.getenv("PINECONE_ENVIRONMENT"):
 chat_upstage = ChatUpstage(
     model_name="gpt-4o",
     temperature=0.3,
-    max_tokens=1096,
+    max_tokens=4096,
     base_url="https://gms.ssafy.io/gmsapi/api.openai.com/v1",
     api_key=os.getenv("OPENAI_API_KEY")
 )
