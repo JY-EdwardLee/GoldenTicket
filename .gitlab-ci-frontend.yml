@@ -24,8 +24,8 @@ frontend_build:
     - npm install @rollup/rollup-linux-x64-gnu --save-dev --force
     
     # 또는 전체 rollup 재설치
-    - npm uninstall rollup
-    - npm install rollup --force
+    # - npm uninstall rollup
+    # - npm install rollup --force
     
     - npm run build 
     
