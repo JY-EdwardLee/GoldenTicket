@@ -146,7 +146,6 @@ const handleSubmit = async () => {
       gender: formData.gender || "MALE", // 임시값 또는 선택 옵션으로 구현 필요
       socialProvider: socialProvider.value,
     };
-    console.log(userData);
     // 회원가입 API 호출
     const response = await fetch(`${API_CONFIG.AUTH.SIGNUP}`, {
       method: "POST",
@@ -173,7 +172,6 @@ const handleSubmit = async () => {
     // }
 
     // 리다이렉트 처리
-    console.log(userData);
     // 회원가입 성공 시 최초 튜토리얼 플래그 초기화 (0: 아직 미노출)
     try {
       localStorage.setItem('firstSignup', '0');
@@ -182,7 +180,6 @@ const handleSubmit = async () => {
     }
     if (socialProvider.value === "KAKAO") {
       const url = new URL(API_CONFIG.AUTH.KAKAO, window.location.origin); // ← base 지정
-      console.log(url.href);
       window.location.assign(url.href); // 페이지 이동(네비게이션)
     } else if (socialProvider.value === "NAVER") {
       const url = new URL(API_CONFIG.AUTH.NAVER, window.location.origin); // ← base 지정
@@ -199,7 +196,6 @@ const handlePhoneFormat = async () => {
   const response = await axios.post(`${API_CONFIG.AUTH.SMS}`, {
     phoneNumber: formData.phoneNumber,
   });
-  console.log(response);
   if (response.data === "발송 완료") {
     alert("인증번호가 발송되었습니다.");
     startCountdown();
@@ -237,7 +233,6 @@ const handlePhoneVerify = async () => {
       phoneNumber: formData.phoneNumber,
       verificationCode: formData.phoneCode,
     });
-    console.log(response);
   if (response.data === "인증 완료") {
     isVerified.value = true;
     alert("인증되었습니다.");

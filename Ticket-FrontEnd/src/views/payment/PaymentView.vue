@@ -195,11 +195,9 @@ onMounted(async () => {
     formData.phoneNumber = user.value.phoneNumber || ''
     formData.email = user.value.email || ''
   }
-  console.log('user : ', user.value)
   try {
     const response = await http.get(API_CONFIG.TICKET.DETAIL(route.params.id))
     ticket.value = response.data
-    console.log('ticket : ', ticket.value)
   } catch (error) {
     console.error('티켓 정보 요청 실패:', error)
   }
@@ -235,10 +233,8 @@ const handlePayment = async () => {
       quantity: 1,
       totalAmount: ticket.value.price
     };
-    console.log('결제 데이터:', paymentData);
     // 백엔드에 결제 준비 요청
     const response = await http.post(API_CONFIG.USER.PAYMENT.KAKAO.READY, paymentData);
-    console.log('결제 준비 응답:', response.data);
     // 결제 완료 페이지로 리디렉션
     window.location.href = response.data.next_redirect_pc_url;
     // 모바일: response.data.next_redirect_mobile_url

@@ -159,7 +159,6 @@ import { s3API } from '../../api/index.js'
 
 const user = ref(null)
 user.value = JSON.parse(localStorage.getItem('user'))
-console.log("user", user.value)
 
 // 프로필 이미지 관련 상태
 const profileImageUrl = ref('')
@@ -172,7 +171,6 @@ const themeStore = useTeamThemeStore
 // 사용자의 선택된 팀으로 테마 초기화
 if (user.value?.myTeam) {
   themeStore.setSelectedTeam(user.value.myTeam)
-  console.log('Selected team:', user.value.myTeam)
 }
 
 // 사이드바 열림/닫힘 상태

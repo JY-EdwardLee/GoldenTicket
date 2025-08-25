@@ -92,7 +92,7 @@
           <div class="service-header">
             <div class="service-icon">🎫</div>
             <div class="service-info">
-              <span class="service-name">인터파크 티켓</span>
+              <span class="service-name">NOL 티켓</span>
               <span class="service-description">티켓 정보 연동하기</span>
             </div>
             <div class="service-status disconnected">
@@ -244,7 +244,6 @@ const formData = reactive({
 const changeFavoriteTeam = async () => {
   if (selectedTeam.value) {
     const teamName = currentTeam.value.name
-    console.log('관심 팀이 변경되었습니다:', teamName)
     const requestForm = {
       "nickName": user.value.nickName,
       "profilePhotoUrl": user.value.profilePhotoUrl,
@@ -270,7 +269,6 @@ const changeUserInfo = () => {
     "gender": user.value.gender
   }
   const ans = http.patch(API_CONFIG.USER.PROFILE, requestForm)
-  console.log(ans)
 }
 
 
